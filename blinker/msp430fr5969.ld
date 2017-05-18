@@ -40,16 +40,15 @@ ENTRY(_start)
 MEMORY {
   SFR              : ORIGIN = 0x0000, LENGTH = 0x0010 /* END=0x0010, size 16 */
   BSL              : ORIGIN = 0x1000, LENGTH = 0x0800
-  RAM              : ORIGIN = 0x1C00, LENGTH = 0x0700 /* END=0x23FF, size 2048 */
-  RAM_VARS         : ORIGIN = 0x2300, LENGTH = 0x0100 /* END=0x23FF, size 2048 */
+  RAM              : ORIGIN = 0x1C00, LENGTH = 0x0600 /* END=0x23FF, size 2048 */
+  RAM_VARS         : ORIGIN = 0x2200, LENGTH = 0x0200 /* END=0x23FF, size 2048 */
   INFOMEM          : ORIGIN = 0x1800, LENGTH = 0x0200 /* END=0x19FF, size 512 as 4 128-byte segments */
   INFOA            : ORIGIN = 0x1980, LENGTH = 0x0080 /* END=0x19FF, size 128 */
   INFOB            : ORIGIN = 0x1900, LENGTH = 0x0080 /* END=0x197F, size 128 */
   INFOC            : ORIGIN = 0x1880, LENGTH = 0x0080 /* END=0x18FF, size 128 */
   INFOD            : ORIGIN = 0x1800, LENGTH = 0x0080 /* END=0x187F, size 128 */
-  ROM (rx)         : ORIGIN = 0x4400, LENGTH = 0xB980 /* END=0xFD7F, size 48000 */
-  ROM_VARS         : ORIGIN = 0xFE80, LENGTH = 0x0100 /* END=0xFF7f, size 256 */
-  ROM_VARS_2       : ORIGIN = 0xFD80, LENGTH = 0x0100 /* END=0xFF7f, size 256 */
+  ROM (rx)         : ORIGIN = 0x4400, LENGTH = 0xB780 /* END=0xFF7F, size 48000 */
+  ROM_VARS         : ORIGIN = 0xFB80, LENGTH = 0x0400
   HIFRAM (rxw)     : ORIGIN = 0x00010000, LENGTH = 0x00003FFF
   JTAGSIGNATURE    : ORIGIN = 0xFF80, LENGTH = 0x0004
   BSLSIGNATURE     : ORIGIN = 0xFF84, LENGTH = 0x0004
@@ -235,15 +234,6 @@ SECTIONS
     KEEP (*(.dtors))
   } > ROM
 
-  .rom_vars :
-  {
-    . = ALIGN(2);
-    PROVIDE (__rom_vars_start = .);
-    *(.rom_vars)
-    . = ALIGN(2);
-    PROVIDE (__rom_vars_end = .);
-  } > ROM_VARS
-
   .ram_vars :
   {
     . = ALIGN(2);
@@ -253,28 +243,15 @@ SECTIONS
     PROVIDE (__ram_vars_end = .);
   } > RAM_VARS
 
-
-  .nv :
+/* Maybe not needed it */
+  .rom_vars :
   {
     . = ALIGN(2);
-    PROVIDE (__fram_vars_start = .);
-    *(.ro_nv_vars)
-    *(.nv_vars)
-    *(.fram_vars) /* legacy naming */
+    PROVIDE (__ram_vars_start = .);
+    *(.ram_vars)
     . = ALIGN(2);
-    PROVIDE (__fram_vars_end = .);
-  } > ROM
-
-  .nv_vars :
-  {
-    . = ALIGN(2);
-    PROVIDE (__fram_vars_start = .);
-    *(.ro_nv_vars)
-    *(.nv_vars)
-    *(.fram_vars) /* legacy naming */
-    . = ALIGN(2);
-    PROVIDE (__fram_vars_end = .);
-  } > ROM
+    PROVIDE (__ram_vars_end = .);
+  } > ROM_VARS
 
 
 
