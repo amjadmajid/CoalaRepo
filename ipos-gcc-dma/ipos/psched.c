@@ -55,9 +55,11 @@ init_commit:
 void os_scheduler(){
     if (commit_flag == COMMITTING)
         goto commit;
-
-        repopulate();   // on any power interrupt, this function will re-populate the volatile variables
-
+    if(_locker == __KEY){
+            repopulate();   // if os_initTasks() is not called, repopulate() will not be called as well
+        }else{
+            _locker == __KEY;
+        }
     while(1)
     {
         _current_task = (uint16_t *) _task_address ;
