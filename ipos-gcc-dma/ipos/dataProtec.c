@@ -5,7 +5,12 @@
  *      Author: Amjad
  */
 
-#define BLOCKSIZE 0x64        // The block size of the transfered data
+
+ // THIS IS ALSO DEFINED IN THE LINKER FILE
+#define BLOCKSIZE 0x200           // The block size of the transfered data
+#define ROM_2   0xFF7F - BLOCKSIZE
+#define ROM_1   0xFF7F - BLOCKSIZE - BLOCKSIZE
+#define RAM_VARS_ADDR  0x2400 - BLOCKSIZE
 
 #include <msp430fr5969.h>
 /************************************
@@ -13,9 +18,9 @@
 ************************************/
 void repopulate(){
     // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) 0xFE80);
+    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) ROM_2);
                                             // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) 0x2300);
+    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) RAM_VARS_ADDR);
                                             // Destination single address
     DMA1SZ = BLOCKSIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
@@ -29,12 +34,10 @@ void repopulate(){
 ************************************/
 void wb_firstPhaseCommit(){
 
-    P3DIR |= BIT5;
-    P3OUT |= BIT5;
 
     // Configure DMA channel 0
-    __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) 0x2300);
-    __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) 0xFD80);
+    __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) RAM_VARS_ADDR);
+    __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) ROM_1);
     DMA0SZ = BLOCKSIZE;
     DMA0CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3;
     DMA0CTL |= DMAEN;
@@ -49,13 +52,11 @@ void wb_firstPhaseCommit(){
 void wb_secondPhaseCommit()
 {
     // Configure DMA channel 0
-    __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) 0xFD80);
-    __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) 0xFE80);
+    __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) ROM_1);
+    __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) ROM_2);
     DMA0SZ = BLOCKSIZE;
     DMA0CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3;
     DMA0CTL |= DMAEN;
 
     DMA0CTL |= DMAREQ;
-
-    P3OUT &= ~BIT5;
 }

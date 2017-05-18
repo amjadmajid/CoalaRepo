@@ -13,8 +13,8 @@
 #define BASE_ADDR       0x1980
 #define LIST_HEAD       (BASE_ADDR)           //2 bytes
 
-
-extern uint16_t *__head;
+extern volatile uint16_t  _task_address;
+//extern uint16_t *__head;
 
 // function pointer
 typedef void (* funcPt)(void);

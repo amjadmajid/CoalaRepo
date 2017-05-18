@@ -5,8 +5,8 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
-__nv volatile uint16_t   _locker          = 0;
-__nv volatile uint16_t   commit_flag      = 0;
+__nv volatile uint16_t   _locker         = 0;
+__nv volatile uint16_t   commit_flag     = 0;
 __nv volatile uint16_t  _task_address    = 0;
 __nv volatile uint16_t c_ref             = 1;
 __nv volatile uint16_t  c                = 0 ;
@@ -46,7 +46,6 @@ init_commit:
             i++;
         }while(i != numTasks);
 
-        _task_address    =  (uint16_t) __head ;
         _locker = __KEY;   // Lock this function
     }
 }
