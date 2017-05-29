@@ -10,6 +10,8 @@ __nv volatile uint16_t   commit_flag     = 0;
 __nv volatile uint16_t  _task_address    = 0;
 __nv volatile uint16_t c_ref             = 1;
 __nv volatile uint16_t  c                = 0 ;
+__nv volatile uint16_t jump              = 0 ;
+
 
 uint16_t * _current_task = NULL;
 
@@ -50,7 +52,10 @@ init_commit:
     }
 }
 
-
+void os_same()
+{
+    jump=1;
+}
 
 void os_scheduler(){
     if (commit_flag == COMMITTING)
@@ -63,10 +68,11 @@ void os_scheduler(){
     while(1)
     {
         _current_task = (uint16_t *) _task_address ;
-        c++;
 
         if( ( * (_current_task+BLOCK_OFFSET_PT )) == 0  )
         {
+            c++;
+
             ( (funcPt)( *_current_task ) ) ();    // access a task
             if( (c  >= c_ref) )
             {
@@ -78,7 +84,10 @@ commit:
                 c=0;
             }
         }
-        _task_address  =  (uint16_t) (*(_current_task + NEXT_OFFSET_PT)) ;
+        if(jump !=1)
+            _task_address  =  (uint16_t) (*(_current_task + NEXT_OFFSET_PT)) ;
+        else
+            jump = 0;
     }
 }
 

@@ -11,4 +11,6 @@ void os_scheduler();
 void os_exit_critical();
 void os_enter_critical();
 
+void os_same();
+
 #endif

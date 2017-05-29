@@ -7,7 +7,7 @@
 
 
  // THIS IS ALSO DEFINED IN THE LINKER FILE
-#define BLOCKSIZE 0x200           // The block size of the transfered data
+#define BLOCKSIZE 112           // The block size of the transfered data
 #define ROM_2   0xFF7F - BLOCKSIZE
 #define ROM_1   0xFF7F - BLOCKSIZE - BLOCKSIZE
 #define RAM_VARS_ADDR  0x2400 - BLOCKSIZE
@@ -34,7 +34,6 @@ void repopulate(){
 ************************************/
 void wb_firstPhaseCommit(){
 
-
     // Configure DMA channel 0
     __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) RAM_VARS_ADDR);
     __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) ROM_1);
@@ -59,4 +58,5 @@ void wb_secondPhaseCommit()
     DMA0CTL |= DMAEN;
 
     DMA0CTL |= DMAREQ;
+
 }

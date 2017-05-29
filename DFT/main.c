@@ -60,10 +60,10 @@ static void burn( uint32_t iters);
 #define SIZE 16
 #define PI2 6.2832
 
-__v  float x[SIZE];              // discrete-time signal, x
-__v  float Xre[SIZE], Xim[SIZE]; // DFT of x (real and imaginary parts)
-__v  float P[SIZE];              // power spectrum of x
-__v uint8_t n =0, k = 0;
+__v  float x[SIZE] ={0.0};              // discrete-time signal, x
+__v  float Xre[SIZE] ={0.0}, Xim[SIZE]={0.0}; // DFT of x (real and imaginary parts)
+__v  float P[SIZE] ={0.0};              // power spectrum of x
+__v uint16_t n =0, k = 0;
 
 
 
