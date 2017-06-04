@@ -1,0 +1,13 @@
+Discussion:
+
+1- Are the terms "two-phases commit" and "double buffering" are new ?
+	- No: proof, search google scholar for them and check when they are mentioned
+
+2- Is the term "Task" new?
+	- No: proof, almost all the RTOSs uses this term or similar concept
+
+
+
+Highlights:
+
+1- Does Compiler approach eliminate the need for programmer intervention?   

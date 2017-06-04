@@ -9,7 +9,7 @@
 #if 0
 
 #define SIZE 16
-#define PI2 6.2832
+#define PI2 6.28
 
   float x[SIZE];              // discrete-time signal, x
   float Xre[SIZE], Xim[SIZE]; // DFT of x (real and imaginary parts)
@@ -43,10 +43,28 @@
       // Power at kth frequency bin
       P[k] = Xre[k] * Xre[k] + Xim[k] * Xim[k];
     }
-
-
   }
-#endif
+
+void init()
+{
+  WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
+  // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
+  PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+  P3DIR |=BIT5;
+}
+
+
+int main(void){
+    init();
+    while(1)
+    {
+        dft_c() ;
+        P3OUT |= BIT5;
+        P3OUT &= ~BIT5;
+    }
+}
+
+#else
 
 void discTimeSign();
 void dft_outer_loop() ;
@@ -57,8 +75,8 @@ void dft_end() ;
 static void blinkLed(uint32_t wait );
 static void burn( uint32_t iters);
 
-#define SIZE 16
-#define PI2 6.2832
+#define SIZE 8
+#define PI2 6.28
 
 __v  float x[SIZE] ={0.0};              // discrete-time signal, x
 __v  float Xre[SIZE] ={0.0}, Xim[SIZE]={0.0}; // DFT of x (real and imaginary parts)
@@ -73,8 +91,10 @@ void discTimeSign()
     x[n] = ((2.0 * rand()) / RAND_MAX) - 1.0;
     n++;
 
-    if(n > SIZE){
-        os_unblock(dft_outer_loop);
+    if(n < SIZE){
+        os_same();
+    }else{
+        n = 0;
         os_block(discTimeSign);
     }
 }
@@ -82,56 +102,47 @@ void discTimeSign()
 // Calculate DFT of x using brute force
 
 void dft_outer_loop() {
-    if(k > SIZE)
+    if(k >= (SIZE-1) )
     {
         os_unblock(dft_end);
-        os_block(dft_outer_loop);
     }
-    Xre[k] = 0;
-    Xim[k] = 0;
-    n = 0;
-    os_unblock(dft_real);
-    os_block(dft_outer_loop);
 }
 
 void dft_real() {
-
-  Xre[k] += x[n] * cos(n * k * PI2 / SIZE);
+  Xre[k] += x[n] * cosf(n * k * PI2 / SIZE);
   n++;
-
-  if(n > SIZE){
-      os_unblock(dft_im);
-      os_block(dft_real);
-      n=0;
+  if(n < SIZE)
+  {
+      os_same();
+  }else{
+      n = 0;
   }
 }
 
 void dft_im() {
-    Xim[k] -= x[n] * sin(n * k * PI2 / SIZE);
+    Xim[k] -= x[n] * sinf(n * k * PI2 / SIZE);
     n++;
-    if(n > SIZE){
-        os_unblock(dft_power);
-        os_block(dft_im);
-        n=0;
+    if(n < SIZE)
+    {
+        os_same();
+    }else{
+        n = 0;
     }
 }
 
 void  dft_power(){
     P[k] = Xre[k] * Xre[k] + Xim[k] * Xim[k];
-    os_unblock(dft_outer_loop);
-    os_block(dft_power);
     k++;
-
 }
 
 void dft_end() {
     P3OUT |= BIT5;
     P3OUT &= ~BIT5;
+    k = 0;
 
-    blinkLed(2500);
-
-    os_unblock(discTimeSign);
+//    blinkLed(2500);
     os_block(dft_end);
+    os_unblock(discTimeSign);
 }
 
 void init()
@@ -139,6 +150,7 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+    P3OUT &= ~BIT5;
     P3DIR |=BIT5;
 }
 
@@ -168,10 +180,10 @@ int main(void) {
 
 
        taskId tasks[] = {  {discTimeSign,0},
-                           {dft_outer_loop,1},
-                           {dft_real,1 },
-                           {dft_im, 1},
-                           {dft_power, 1},
+                           {dft_outer_loop,0},
+                           {dft_real,0 },
+                           {dft_im, 0},
+                           {dft_power, 0},
                            {dft_end,1}
        };
        //This function should be called only once
@@ -180,3 +192,4 @@ int main(void) {
        os_scheduler();
        return 0;
 }
+#endif

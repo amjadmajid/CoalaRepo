@@ -1,5 +1,5 @@
 /*
- *  These functions are responsible for building the persistent circular list in FRAM
+ *  These functions are responsible for building the persistent circular list in non-volatile memory
  */
 
 #include <pTCB.h>
