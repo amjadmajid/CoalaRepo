@@ -1,5 +1,6 @@
 #include "pTCB.h"
 #include "dataProtec.h"
+#include "global.h"
 
 #ifndef PSECHED_H_
 #define PSECHED_H_

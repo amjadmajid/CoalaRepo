@@ -9,6 +9,8 @@ uint16_t *__head   =   (uint16_t *)    LIST_HEAD;
 #define UNBLOCK   0
 __nv uint8_t funcBlocker = 0;
 
+volatile uint16_t  __totNumTask =0;
+
 /*
  * memMapper create a node of linkedlist in persistent memory (FRAM)
  */
@@ -41,6 +43,7 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
     {
         unsigned char i = 0;
         unsigned int cnt=0;
+        __totNumTask = numTasks;
         while (i<numTasks)
         {
             os_memMapper(&cnt, tasks[i]);
@@ -48,7 +51,7 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
         }
         *(__head +(--cnt) ) =  (unsigned int)  LIST_HEAD;   // link the tail of the linkedlist with the head
 
-        _task_address    =  (uint16_t) __head ;
+        __task_address    =  (uint16_t) __head ;
         funcBlocker = 0xAD;
     }
 }
