@@ -8,10 +8,12 @@
 __nv volatile uint8_t __locker              = 0;
 __nv volatile uint8_t __commit_flag         = 0;
 __nv volatile uint16_t __task_address       = 0;    // Modified externally
+
 __nv volatile uint16_t __virtualTaskSize    = 2;
 __nv volatile uint16_t __maxVirtualTaskSize = 10000;
-     volatile uint16_t __TaskCounter        = 0;
+     volatile uint16_t __taskCounter        = 0;
 __nv volatile uint16_t __totalTaskCounter   = 0;
+
 __nv volatile uint16_t __jump               = 0;
 __nv volatile uint16_t __jump_to            = 0;
      volatile uint16_t __jump_cnt           = 0;
@@ -83,17 +85,12 @@ void os_scheduler(){
                     __virtualTaskSize--;               // Decrease the virtual task size
                     __maxVirtualTaskSize = __virtualTaskSize;
                 }
-                __reboot_state[1] = 0;
+                __reboot_state[1] = 0;                // reset the reboot state
             }
-        }else if(__reboot_state[0] == 0 )             // At the very beginning
-        {
-            __reboot_state[0] = __task_address;
-            __reboot_state[1] = 1;
-        }else{                                        // Died on another task
+        }else{                                        // At the very beginning  or  Dying on another task
             __reboot_state[0] = __task_address;
             __reboot_state[1] = 1;
         }
-
 
      __current_task_virtual = (uint16_t *) __task_address ;
 
@@ -103,28 +100,29 @@ void os_scheduler(){
         {
             ( (funcPt)( *__current_task_virtual ) ) ();                          // access a task
 
-            __TaskCounter++;
-            if( (__TaskCounter  >= __virtualTaskSize) )
+            __taskCounter++;
+            if( (__taskCounter  >= __virtualTaskSize) )
             {
                 __task_address  =  (uint16_t) (__current_task_virtual) ;       // firm transition
 
 
-                if( (__totalTaskCounter + __TaskCounter) > __totNumTask)   // TODO
+                if( (__totalTaskCounter + __taskCounter) > __totNumTask)
                 {
                     if(__maxVirtualTaskSize > __virtualTaskSize )
                     {
                         __virtualTaskSize++;
+                        _reboot_state[0] = 0;           // To distinguish between consecutive power interrupt
+                                                        // and power interrupt on the same task after a complete round
                     }
                 }
-
 
                 wb_firstPhaseCommit();                                  //  First stage, SRAM -> FRAM 
                 __commit_flag=COMMITTING;
 commit:
-                __totalTaskCounter += __TaskCounter;
+                __totalTaskCounter += __taskCounter;
                 wb_secondPhaseCommit();                                 //  Second stage, FRAM -> FRAM
                 __commit_flag=COMMIT_FINISH;
-                __TaskCounter=0;
+                __taskCounter=0;
 
             }
         }
