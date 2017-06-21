@@ -13,7 +13,7 @@ __nv volatile uint16_t  c                = 0 ;
 __nv volatile uint16_t jump              = 0 ;
 
 
-uint16_t * _current_task = NULL;
+//uint16_t * _current_task = NULL;
 uint16_t * _current_task_virtual = NULL;
 
 void os_enter_critical()
@@ -61,28 +61,28 @@ void os_same()
 void os_scheduler(){
     if (commit_flag == COMMITTING)
         goto commit;
-    if(_locker == __KEY){
 
+    if(_locker == __KEY){
             repopulate();                                               // if os_initTasks() is not called,
-                                                                        // repopulate() must not be called as well
+                                                                       // repopulate() must not be called as well
         }else{
-            _locker == __KEY;
+            _locker = __KEY;
         }
-        _current_task_virtual = (uint16_t *) _task_address ;
+
+     _current_task_virtual = (uint16_t *) _task_address ;
 
     while(1)
     {
-        _current_task =  _current_task_virtual ;
+//        _current_task =  _current_task_virtual ;
 
-        if( ( * (_current_task+BLOCK_OFFSET_PT )) == 0  )              // Skip block tasks
+        if( ( * (_current_task_virtual+BLOCK_OFFSET_PT )) == 0  )              // Skip block tasks
         {
+            ( (funcPt)( *_current_task_virtual ) ) ();                          // access a task
             c++;
-
-            ( (funcPt)( *_current_task ) ) ();                          // access a task
 
             if( (c  >= c_ref) )
             {
-                _task_address  =  (uint16_t) (*(_current_task)) ;       // firm transition 
+                _task_address  =  (uint16_t) (_current_task_virtual) ;       // firm transition
 
                 wb_firstPhaseCommit();                                  //  First stage, SRAM -> FRAM 
                 commit_flag=COMMITTING;
@@ -93,6 +93,7 @@ commit:
 
             }
         }
+
         if(jump !=1)
             _current_task_virtual  =  (uint16_t) (*(_current_task_virtual + NEXT_OFFSET_PT)) ;     // soft transition 
         else

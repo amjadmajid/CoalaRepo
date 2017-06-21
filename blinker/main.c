@@ -44,9 +44,9 @@ static void blinkLed(uint32_t wait )
 
 static void blinkLedJ(uint32_t wait )
 {
-    PJOUT |= 0x40; // lit the LED
+    P4OUT |= BIT6; // lit the LED
     burn(wait); // wait
-    PJOUT &= ~0x40; // dim the LED
+    P4OUT &= ~BIT6; // dim the LED
     burn(wait); // wait
 }
 
@@ -58,7 +58,7 @@ void init()
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
     P1DIR |= BIT0; // make Port 1 pin 0 an output
-    PJDIR |= 0x40; // make Port j pin 0 an output
+    P4DIR |= BIT6; // make Port j pin 0 an output
 }
 
 
@@ -68,7 +68,7 @@ void init()
 
 void task0()
 {
-   var1 = 1;
+   var1 = 0;
    var2 = 2;
    var3 = 3;
    var4 = 4;
@@ -81,14 +81,16 @@ void task1()
     if (var1 >= 10)
         var1 = 1;
 
+    blinkLedJ( 20000 );
+
 }
 
 void task2()
 {
     volatile int  x = var1;
     while(x--){
-        if( (var2==2) && (var3==3) && (var4==4) && (var5 == 5) )
-        blinkLed( 1000 );
+       if( (var2==2) && (var3==3) && (var4==4) && (var5 == 5) )
+        blinkLed( 20000 );
     }
 }
 
