@@ -5,11 +5,11 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
-__nv volatile uint8_t _locker         = 0;
-__nv volatile uint8_t commit_flag     = 0;
-__nv volatile uint16_t _task_address   = 0;
-__nv volatile uint16_t c_ref           = 1;
-__nv volatile uint16_t c               = 0;
+__nv volatile uint8_t _locker          = 0;
+__nv volatile uint8_t commit_flag      = 0;
+__nv volatile uint16_t _task_address   = 0;    // Modified externally
+__nv volatile uint16_t virtualTaskSize = 1;
+__nv volatile uint16_t TaskCounter     = 0;
 __nv volatile uint16_t jump            = 0;
 __nv volatile uint16_t jump_to         = 0;
 uint16_t volatile jump_cnt             = 0;
@@ -78,9 +78,9 @@ void os_scheduler(){
         if( ( * (_current_task_virtual+BLOCK_OFFSET_PT )) == 0  )              // Skip block tasks
         {
             ( (funcPt)( *_current_task_virtual ) ) ();                          // access a task
-            c++;
 
-            if( (c  >= c_ref) )
+            TaskCounter++;
+            if( (TaskCounter  >= virtualTaskSize) )
             {
                 _task_address  =  (uint16_t) (_current_task_virtual) ;       // firm transition
 
@@ -89,7 +89,7 @@ void os_scheduler(){
 commit:
                 wb_secondPhaseCommit();                                 //  Second stage, FRAM -> FRAM
                 commit_flag=COMMIT_FINISH;
-                c=0;
+                TaskCounter=0;
 
             }
         }
