@@ -92,7 +92,7 @@ void discTimeSign()
     n++;
 
     if(n < SIZE){
-        os_same();
+        os_jump(0);
     }else{
         n = 0;
         os_block(discTimeSign);
@@ -113,7 +113,7 @@ void dft_real() {
   n++;
   if(n < SIZE)
   {
-      os_same();
+      os_jump(0);
   }else{
       n = 0;
   }
@@ -124,7 +124,7 @@ void dft_im() {
     n++;
     if(n < SIZE)
     {
-        os_same();
+        os_jump(0);
     }else{
         n = 0;
     }

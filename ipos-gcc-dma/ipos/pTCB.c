@@ -7,6 +7,7 @@
 uint16_t *__head   =   (uint16_t *)    LIST_HEAD;
 #define BLOCK   1
 #define UNBLOCK   0
+__nv uint8_t funcBlocker = 0;
 
 /*
  * memMapper create a node of linkedlist in persistent memory (FRAM)
@@ -35,7 +36,6 @@ void os_memMapper(unsigned int *cnt, taskId _task)
  * building the persistent circular linked list
  */
 
-__nv uint8_t funcBlocker = 0;
 void os_addTasks(unsigned char numTasks, taskId tasks[]){
     if( funcBlocker != 0xAD)
     {

@@ -5,13 +5,14 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
-__nv volatile uint16_t   _locker         = 0;
-__nv volatile uint16_t   commit_flag     = 0;
-__nv volatile uint16_t  _task_address    = 0;
-__nv volatile uint16_t  c_ref            = 1;
-__nv volatile uint16_t  c                = 0 ;
-__nv volatile uint16_t jump              = 0 ;
-
+__nv volatile uint8_t _locker         = 0;
+__nv volatile uint8_t commit_flag     = 0;
+__nv volatile uint16_t _task_address   = 0;
+__nv volatile uint16_t c_ref           = 1;
+__nv volatile uint16_t c               = 0;
+__nv volatile uint16_t jump            = 0;
+__nv volatile uint16_t jump_to         = 0;
+uint16_t volatile jump_cnt             = 0;
 
 //uint16_t * _current_task = NULL;
 uint16_t * _current_task_virtual = NULL;
@@ -30,7 +31,6 @@ void os_exit_critical()
 // These tasks will be executed only once.
 void os_initTasks( const uint16_t numTasks, funcPt tasks[])
 {
-
     if(_locker != __KEY )
     {
         uint16_t i = 0;
@@ -41,11 +41,10 @@ void os_initTasks( const uint16_t numTasks, funcPt tasks[])
             tasks[i]();   // execute the init tasks
 
             wb_firstPhaseCommit();
-            commit_flag=1;
+            commit_flag=COMMITTING;
 init_commit:
             wb_secondPhaseCommit();
-            commit_flag=0;
-
+            commit_flag=COMMIT_FINISH;
             i++;
         }while(i != numTasks);
 
@@ -53,9 +52,10 @@ init_commit:
     }
 }
 
-void os_same()
+void os_jump(uint16_t j)
 {
     jump=1;
+    jump_to=j;
 }
 
 void os_scheduler(){
@@ -94,10 +94,16 @@ commit:
             }
         }
 
-        if(jump !=1)
+        if(jump !=1){
             _current_task_virtual  =  (uint16_t) (*(_current_task_virtual + NEXT_OFFSET_PT)) ;     // soft transition 
-        else
+        }else{
+            while(jump_cnt < jump_to)
+                {
+                    _current_task_virtual  =  (uint16_t) (*(_current_task_virtual + NEXT_OFFSET_PT)) ;  // soft transition
+                    jump_cnt++;
+                }
             jump = 0;
+        }
     }
 }
 

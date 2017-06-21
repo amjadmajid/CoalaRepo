@@ -11,6 +11,6 @@ void os_scheduler();
 void os_exit_critical();
 void os_enter_critical();
 
-void os_same();
+void os_jump(uint16_t j);
 
 #endif
