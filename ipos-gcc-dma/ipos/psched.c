@@ -10,7 +10,7 @@ __nv volatile uint8_t __commit_flag         = 0;
 __nv volatile uint16_t __task_address       = 0;    // Modified externally
 
 __nv volatile uint16_t __virtualTaskSize    = 2;
-__nv volatile uint16_t __maxVirtualTaskSize = 10000;
+__nv volatile uint16_t __maxVirtualTaskSize = 100;
      volatile uint16_t __taskCounter        = 0;
 __nv volatile uint16_t __totalTaskCounter   = 0;
 
