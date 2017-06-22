@@ -18,7 +18,7 @@ __nv volatile uint16_t __jump               = 0;
 __nv volatile uint16_t __jump_to            = 0;
      volatile uint16_t __jump_cnt           = 0;
 
-__nv uint16_t __reboot_state[2];    //virtual Task size control
+__nv uint16_t __reboot_state[2]={0};    //virtual Task size control
 
 //uint16_t * _current_task = NULL;
 uint16_t * __current_task_virtual = NULL;
@@ -111,7 +111,7 @@ void os_scheduler(){
                     if(__maxVirtualTaskSize > __virtualTaskSize )
                     {
                         __virtualTaskSize++;
-                        _reboot_state[0] = 0;           // To distinguish between consecutive power interrupt
+                        __reboot_state[0] = 0;           // To distinguish between consecutive power interrupt
                                                         // and power interrupt on the same task after a complete round
                     }
                 }
