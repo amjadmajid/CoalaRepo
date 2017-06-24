@@ -79,6 +79,7 @@ void task_finish()
 
     i =  0 ;
     j = 1;
+    os_block(task_finish);
 }
 
 void init()
