@@ -32,7 +32,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.782412746" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" useByScannerDiscovery="false" value="msp430fr5969" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.2116356433" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/ipos/ipos-gcc-wb/ipos-gcc-wb/include"/>
+									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/virtOperatBuffer/ipos-gcc-vob/include"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
 								</option>
@@ -46,7 +46,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG.317109794" name="Generate debug information (-g)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF.1812089247" name="Do not emit DWARF additions beyond selected version (-gstrict-dwarf)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION.1015315464" name="Generate debug information in DWARF version (-gdwarf-)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION.3" valueType="enumerated"/>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED.976693046" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED" value="true" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED.976693046" name="Optimize for speed disregarding exact standards compliance (-Ofast)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED" value="true" valueType="boolean"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__C_SRCS.627933420" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__CPP_SRCS.1437258209" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__CPP_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM_SRCS.261829199" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM_SRCS"/>
@@ -55,12 +55,12 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.687770364" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.1750588409" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;ipos-gcc-wb&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;ipos-gcc-vob&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.1185947550" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/ipos/ipos-gcc-wb/ipos-gcc-wb/Debug"/>
+									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/virtOperatBuffer/ipos-gcc-vob/Debug"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1213865390" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.out&quot;" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE.1624321304" name="Write a map file (-Map)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.map&quot;" valueType="string"/>
