@@ -136,6 +136,7 @@ commit:
                     __jump_cnt++;
                 }
             __jump = 0;
+            __jump_cnt = 0;
         }
     }
 }
