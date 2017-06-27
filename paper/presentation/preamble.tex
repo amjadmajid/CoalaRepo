@@ -1,0 +1,38 @@
+% Slide Preamble
+\documentclass[svgnames]{beamer}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{calc}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{standalone}
+\usepackage{comment}
+\usepackage{bbding}
+\usepackage[plain]{algorithm}
+\usepackage{caption}
+\usepackage[noend]{algpseudocode} % needed for: algorithm pseudocode
+\usepackage{MnSymbol,wasysym}
+
+\setbeamertemplate{navigation symbols}{} % remove navigation symbols
+\mode<presentation>{\usepackage{class/beamerthemetud}}
+
+% BIB SETTINGS
+\usepackage[backend=bibtex,firstinits=true,maxnames=30,maxcitenames=20,url=false,style=authoryear]{biblatex}
+\bibliography{references}
+\setlength\bibitemsep{0.3cm} % space between entries in the reference list
+\renewcommand{\bibfont}{\normalfont\scriptsize}
+\setbeamerfont{footnote}{size=\tiny}
+\renewcommand{\cite}[1]{\footnote<.->[frame]{\fullcite{#1}}}
+
+\usepackage{tikz,tcolorbox}
+\usetikzlibrary{decorations.pathreplacing} 
+\usetikzlibrary{arrows,decorations.pathreplacing,decorations.pathmorphing,decorations.footprints,
+	fadings,calc,trees,mindmap,shadows,decorations.text,patterns,positioning,shapes,matrix,fit}
+\usepackage{stmaryrd}
+\input{class/tikz_defs}

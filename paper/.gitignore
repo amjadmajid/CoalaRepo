@@ -1,0 +1,7 @@
+*.pdf
+*.aux
+*.log
+.DS_store
+*.bbl
+*.blg
+*.ipynb_checkpoints*
