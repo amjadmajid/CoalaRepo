@@ -1,6 +1,6 @@
 #include "global.h"
+#include "inputBuffer.h"
 #include "pTCB.h"
-#include "readBuffer.h"
 
 #ifndef PSECHED_H_
 #define PSECHED_H_
