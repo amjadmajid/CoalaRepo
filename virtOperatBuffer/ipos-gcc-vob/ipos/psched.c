@@ -68,13 +68,7 @@ void os_scheduler(){
     if (__commit_flag == COMMITTING)
         goto commit;
 
-    if(__locker == __KEY){
-            repopulate();                             // if os_initTasks() is not called,
-                                                      // repopulate() must not be called as well
-        }else{
-            __locker = __KEY;
-        }
-
+    wb_initTable(); // initialize the hashed table
 
         if(__reboot_state[0] == __task_address )      //Died on the same task
         {

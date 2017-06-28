@@ -16,7 +16,7 @@ void os_enter_critical();
 #define WVAR(name, value)   wb_insert( (uint16_t) &name, value)
 
 // If the return value of wb_get is not NULL then return it else return the value from FRAM
-#define RVAR(name)  ( (wb_get(  (uint16_t) &name)) ? __wb_get_val() : name )
+#define RVAR(name)   ( (wb_get(  (uint16_t) &name)) ? __wb_get_val() : name )
 
 
 

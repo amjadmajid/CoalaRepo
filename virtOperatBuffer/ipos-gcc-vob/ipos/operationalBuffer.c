@@ -45,6 +45,16 @@ wb_node * wb_search(uint16_t * addr )
   return NULL;
 }
 
+uint16_t __wb_returned_value = 0;
+/************************************
+        get the returned value
+************************************/
+uint16_t __wb_get_val(uint16_t * addr )
+{
+        return __wb_returned_value;
+}
+
+
 /************************************
         get function
 ************************************/
@@ -53,9 +63,10 @@ uint16_t wb_get(uint16_t * addr )
     wb_node * node = wb_search( addr );
     if(node != NULL)
     {
-        return node->value;
+        __wb_returned_value = node->value;
+        return 1;
     }
-    return NULL;   //TODO
+    return 0;
 }
 
 /************************************
