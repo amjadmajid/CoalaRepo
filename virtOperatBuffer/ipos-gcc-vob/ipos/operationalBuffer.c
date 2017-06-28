@@ -1,4 +1,4 @@
-#include "writeBuffer.h"
+#include <operationalBuffer.h>
 
 __nv volatile uint16_t __tbl_cntr =  0;
 __nv volatile uint16_t __vtbl_flag =  0;  // if this is set then the buffer is not empty

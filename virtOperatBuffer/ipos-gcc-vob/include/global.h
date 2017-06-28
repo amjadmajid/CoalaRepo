@@ -6,17 +6,16 @@
 #define INCLUDE_GLOBAL_H_
 
 #define __nv  __attribute__((section(".nv_vars")))
+//#define __p  __attribute__((section(".rom_vars")))
+//#define __v  __attribute__((section(".ram_vars")))
 
 // Special memory locaitons
 #define BASE_ADDR       0x1980
-//#define LOCKER          (BASE_ADDR)            //1 byte
-//#define COMMIT_FLAG     (BASE_ADDR+1)          //1 byte
-//#define TASK_ADDRESS    (BASE_ADDR+2)          //2 bytes
-//#define TABLE_CNTR      (BASE_ADDR+4)           //2 bytes
-#define LIST_HEAD       (BASE_ADDR+6)           //2 bytes
+#define LIST_HEAD       (BASE_ADDR)           //2 bytes
 
-
-extern uint16_t *__head;
+extern volatile uint16_t  __task_address;
+extern volatile uint16_t  __totNumTask;
+//extern uint16_t *__head;
 
 // function pointer
 typedef void (* funcPt)(void);

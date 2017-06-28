@@ -5,13 +5,23 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
-__nv volatile uint16_t   _locker          = 0;
-__nv volatile uint16_t   commit_flag      = 0;
-__nv volatile uint16_t  _task_address    = 0;
-__nv volatile uint16_t c_ref             = 1;
-__nv volatile uint16_t  c                = 0 ;
+__nv volatile uint8_t __locker              = 0;
+__nv volatile uint8_t __commit_flag         = 0;
+__nv volatile uint16_t __task_address       = 0;    // Modified externally
 
-uint16_t * _current_task = NULL;
+__nv volatile uint16_t __virtualTaskSize    = 2;
+__nv volatile uint16_t __maxVirtualTaskSize = 100;
+     volatile uint16_t __taskCounter        = 0;
+__nv volatile uint16_t __totalTaskCounter   = 0;
+
+__nv volatile uint16_t __jump               = 0;
+__nv volatile uint16_t __jump_to            = 0;
+     volatile uint16_t __jump_cnt           = 0;
+
+__nv uint16_t __reboot_state[2]={0};    //virtual Task size control
+
+//uint16_t * _current_task = NULL;
+uint16_t * __current_task_virtual = NULL;
 
 void os_enter_critical()
 {
@@ -27,58 +37,107 @@ void os_exit_critical()
 // These tasks will be executed only once.
 void os_initTasks( const uint16_t numTasks, funcPt tasks[])
 {
-    wb_initTable();
-    if(_locker != __KEY )
+    if(__locker != __KEY )
     {
         uint16_t i = 0;
         do{
-            if (commit_flag == 1)
+            if (__commit_flag == 1)
                 goto init_commit;
 
             tasks[i]();   // execute the init tasks
 
             wb_firstPhaseCommit();
-            commit_flag=1;
+            __commit_flag=COMMITTING;
 init_commit:
             wb_secondPhaseCommit();
-            commit_flag=0;
-
+            __commit_flag=COMMIT_FINISH;
             i++;
         }while(i != numTasks);
 
-        _task_address    =  (uint16_t) __head ;
-        _locker = __KEY;
+        __locker = __KEY;   // Lock this function
     }
 }
 
-
+void os_jump(uint16_t j)
+{
+    __jump=1;
+    __jump_to=j;
+}
 
 void os_scheduler(){
-    if (commit_flag == COMMITTING)
+    if (__commit_flag == COMMITTING)
         goto commit;
+
+    if(__locker == __KEY){
+            repopulate();                             // if os_initTasks() is not called,
+                                                      // repopulate() must not be called as well
+        }else{
+            __locker = __KEY;
+        }
+
+
+        if(__reboot_state[0] == __task_address )      //Died on the same task
+        {
+            if(__reboot_state[1] != 0)
+            {
+                if(__virtualTaskSize > 1)
+                {
+                    __virtualTaskSize--;               // Decrease the virtual task size
+                    __maxVirtualTaskSize = __virtualTaskSize;
+                }
+                __reboot_state[1] = 0;                // reset the reboot state
+            }
+        }else{                                        // At the very beginning  or  Dying on another task
+            __reboot_state[0] = __task_address;
+            __reboot_state[1] = 1;
+        }
+
+     __current_task_virtual = (uint16_t *) __task_address ;
 
     while(1)
     {
-        _current_task = (uint16_t *) _task_address ;
-        c++;
-
-        if( ( * (_current_task+BLOCK_OFFSET_PT )) == 0  )
+        if( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) == 0  )              // Skip block tasks
         {
-            ( (funcPt)( *_current_task ) ) ();    // access a task
-            if( (c  >= c_ref) )
+            ( (funcPt)( *__current_task_virtual ) ) ();                          // access a task
+
+            __taskCounter++;
+            if( (__taskCounter  >= __virtualTaskSize) )
             {
-                wb_firstPhaseCommit();              //  First stage, commit the virtual buffer to the first persistent buffer
-                commit_flag=COMMITTING;
+                __task_address  =  (uint16_t) (__current_task_virtual) ;       // firm transition
+
+
+                if( (__totalTaskCounter + __taskCounter) > __totNumTask)
+                {
+                    if(__maxVirtualTaskSize > __virtualTaskSize )
+                    {
+                        __virtualTaskSize++;
+                        __reboot_state[0] = 0;           // To distinguish between consecutive power interrupt
+                                                        // and power interrupt on the same task after a complete round
+                    }
+                }
+
+                wb_firstPhaseCommit();                                  //  First stage, SRAM -> FRAM 
+                __commit_flag=COMMITTING;
 commit:
-                wb_secondPhaseCommit();             //  Second stage, commit the persistent buffer to the variables final locations
-                commit_flag=COMMIT_FINISH;
-                c=0;
+                __totalTaskCounter += __taskCounter;
+                wb_secondPhaseCommit();                                 //  Second stage, FRAM -> FRAM
+                __commit_flag=COMMIT_FINISH;
+                __taskCounter=0;
+
             }
-
-
         }
 
-        _task_address  =  (uint16_t) (*(_current_task + NEXT_OFFSET_PT)) ;
+        if(__jump !=1){
+            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     // soft transition
+        }else{
+            while(__jump_cnt < __jump_to)
+                {
+                    __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  // soft transition
+                    __jump_cnt++;
+                }
+            __jump = 0;
+            __jump_cnt = 0;
+        }
     }
 }
 

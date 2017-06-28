@@ -1,5 +1,5 @@
 /*
- *  These functions are responsible for building the persistent circular list in FRAM
+ *  These functions are responsible for building the persistent circular list in non-volatile memory
  */
 
 #include <pTCB.h>
@@ -7,6 +7,9 @@
 uint16_t *__head   =   (uint16_t *)    LIST_HEAD;
 #define BLOCK   1
 #define UNBLOCK   0
+__nv uint8_t funcBlocker = 0;
+
+volatile uint16_t  __totNumTask =0;
 
 /*
  * memMapper create a node of linkedlist in persistent memory (FRAM)
@@ -34,15 +37,23 @@ void os_memMapper(unsigned int *cnt, taskId _task)
 /*
  * building the persistent circular linked list
  */
+
 void os_addTasks(unsigned char numTasks, taskId tasks[]){
-    unsigned char i = 0;
-    unsigned int cnt=0;
-    while (i<numTasks)
+    if( funcBlocker != 0xAD)
     {
-        os_memMapper(&cnt, tasks[i]);
-        i++;
+        unsigned char i = 0;
+        unsigned int cnt=0;
+        __totNumTask = numTasks;
+        while (i<numTasks)
+        {
+            os_memMapper(&cnt, tasks[i]);
+            i++;
+        }
+        *(__head +(--cnt) ) =  (unsigned int)  LIST_HEAD;   // link the tail of the linkedlist with the head
+
+        __task_address    =  (uint16_t) __head ;
+        funcBlocker = 0xAD;
     }
-    *(__head +(--cnt) ) =  (unsigned int)  LIST_HEAD;   // link the tail of the linkedlist with the head
 }
 
 uint16_t * os_search(funcPt func)

@@ -9,7 +9,7 @@
 #define INCLUDE_IPOS_H_
 
 #include "global.h"
-#include "writeBuffer.h"
+#include "operationalBuffer.h"
 #include "psched.h"
 #include "pTCB.h"
 
