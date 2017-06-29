@@ -1,48 +1,51 @@
 #include <operationalBuffer.h>
 
-__nv volatile uint16_t __tbl_cntr =  0;
-__nv volatile uint16_t __vtbl_flag =  0;  // if this is set then the buffer is not empty
+__nv uint16_t _persistBufCom = 0;
+     uint16_t _indexTableDynSize = 0;
+     uint16_t _indexTable[TEMPBUFSIZE_RAWS] = {0};   // _indexTable is used  to speedup the commit process
+     uint16_t tempVirtualBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
+__nv uint16_t tempPersistentBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
 
 /************************************
- a table of pointers to linkedlists
+    initialize the _indexTable
 ************************************/
-static wb_node * _table[TABLESIZE];
-
 void wb_initTable()
 {
+    // MAYBE NOT NEED IT
   uint16_t i ;
-  for(i = 0; i < TABLESIZE; i++ )
+  for(i = 0; i < TEMPBUFSIZE_RAWS; i++ )
   {
-    _table[i]=NULL;
+      _indexTable[i]=0;
+      if(_indexTable[i] == 0)
+      {
+          break;
+      }
   }
 }
 
 /************************************
           hash function
 ************************************/
-unsigned wb_hash(uint16_t * addr)
+uint16_t wb_hash(uint16_t * addr)
 {
-    return  (uint16_t) addr & TABLESIZE;
-//  return  (uint16_t) addr % TABLESIZE;
-//  return 0;
+    return  ((uint16_t) addr) & TEMPBUFSIZE_RAWS;
 }
 
 /************************************
-         wb_search function
+       search the _indexTable
 ************************************/
-wb_node * wb_search(uint16_t * addr )
+uint16_t wb_search(uint16_t * addr )
 {
-  wb_node * np = _table[wb_hash(addr) ];
-
-  while(np != NULL)
-  {
-    if (np->addr == addr)
+    uint16_t i ;
+    for(i = 0; i < _indexTableDynSize; i++ )
     {
-      return np;
+        if(_indexTable[i] == (uint16_t) addr)
+        {
+            return 1;
+        }
     }
-    np = np->next;
-  }
-  return NULL;
+    return 0;
+
 }
 
 uint16_t __wb_returned_value = 0;
@@ -60,69 +63,51 @@ uint16_t __wb_get_val(uint16_t * addr )
 ************************************/
 uint16_t wb_get(uint16_t * addr )
 {
-    wb_node * node = wb_search( addr );
-    if(node != NULL)
-    {
-        __wb_returned_value = node->value;
-        return 1;
-    }
-    return 0;
+    uint16_t hashVal = wb_hash((uint16_t *) addr);
+    __wb_returned_value = tempVirtualBuf[ hashVal ][1];
+    return tempVirtualBuf[ hashVal ][0] ; // either the address (True) or zero (False)
 }
+
 
 /************************************
         insert function
 ************************************/
 void wb_insert(uint16_t * addr, uint16_t val)
 {
-  __vtbl_flag = 1;
-  wb_node * np;
-  if( (np = wb_search(addr)) == NULL ) // Not Found
-  {
-    np = (wb_node *) malloc( sizeof( wb_node));
-    if(np == NULL)
-      {
-        return;
-      }
-      np->addr= addr;
-      np->value= val;
       uint16_t hashVal = wb_hash(addr);
-      np->next = _table[ hashVal ];
-    _table[hashVal] = np;
-  }else{
-    np->value = val;
-  }
+      tempVirtualBuf[ hashVal ][0] = (uint16_t) addr ;
+      tempVirtualBuf[ hashVal ][1] = val ;
+
+      if ( !wb_search(addr) )  // if it is not found inset it
+          {
+              _indexTable[_indexTableDynSize] = addr;
+          }
+      _indexTableDynSize++;
 }
 
 /************************************
         First phase commit
 ************************************/
-// This can be a single pointer
-__nv uint16_t tempPersistentBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
 
 void wb_firstPhaseCommit(){
-   __tbl_cntr = 0;    //initialize the counter for the next committing stage
-   if(__vtbl_flag == 0 )
+   if(_indexTableDynSize == 0 )
        {
            return;  // nothing to commit
        }
 
-  uint16_t i, j=0;
-  for( i=0; i < TABLESIZE; i++)
-  {
-    wb_node * np = _table[i];
-    wb_node * np2 =NULL;
-    while(np !=NULL)
-    {
-      tempPersistentBuf[j][0]= (uint16_t) np->addr;
-      tempPersistentBuf[j][1]= np->value;
-      j++;
-      np2 = np->next;
-      np = NULL;
-      free(np);
-      np =np2;
-    }
-  }
-  __vtbl_flag = 0;  // First committing is finished
+  uint16_t i, hashedVal;
+  for( i=0; i < _indexTableDynSize; i++)
+      {
+          hashedVal = wb_hash(_indexTable[i]);
+          tempPersistentBuf[i][0]= tempVirtualBuf[hashedVal][0];
+          tempPersistentBuf[i][1]= tempVirtualBuf[hashedVal][1];
+          //DMA might speedup the process of resetting
+          tempVirtualBuf[hashedVal][0] = 0 ; // Reset the cell
+          _indexTable[i] = 0; // Reset the cell
+        }
+
+    _persistBufCom = _indexTableDynSize;
+    _indexTableDynSize = 0;  // First committing is finished
 }
 
 /************************************
@@ -131,13 +116,10 @@ void wb_firstPhaseCommit(){
 
 void wb_secondPhaseCommit()
 {
-  while(__tbl_cntr < TEMPBUFSIZE_RAWS)
+    uint16_t i;
+  for(i = 0 ; i < _persistBufCom; i++)
   {
-      if((uint16_t *) tempPersistentBuf[ __tbl_cntr ][0]  == NULL)
-          return;
 
-    *((uint16_t *) tempPersistentBuf[ __tbl_cntr ][0] ) = tempPersistentBuf[ __tbl_cntr ][1] ;
-    tempPersistentBuf[ __tbl_cntr ][0] = 0;  // reset the address cell
-    __tbl_cntr++;
+    *((uint16_t *) tempPersistentBuf[ i ][0] ) = tempPersistentBuf[ i ][1] ;
   }
 }

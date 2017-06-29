@@ -1,0 +1,7 @@
+
+**** Build of configuration Debug for project ipos-gcc-vob ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+gmake: Nothing to be done for 'all'.
+
+**** Build Finished ****

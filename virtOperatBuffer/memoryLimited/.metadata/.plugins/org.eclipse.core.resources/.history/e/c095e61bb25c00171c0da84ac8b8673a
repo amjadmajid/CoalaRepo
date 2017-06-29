@@ -1,0 +1,127 @@
+#include <operationalBuffer.h>
+
+uint16_t _indexTableDynSize = 0;
+uint16_t _indexTable[TEMPBUFSIZE_RAWS] = {{0}};   // _indexTable is used  to speedup the commit process
+uint16_t tempVirtualBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
+__nv uint16_t tempPersistentBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
+
+/************************************
+    initialize the _indexTable
+************************************/
+void wb_initTable()
+{
+  uint16_t i ;
+  for(i = 0; i < TEMPBUFSIZE_RAWS; i++ )
+  {
+      _indexTable[i]=0;
+      if(_indexTable[i] == 0)
+      {
+          break;
+      }
+  }
+}
+
+/************************************
+          hash function
+************************************/
+unsigned wb_hash(uint16_t * addr)
+{
+    return  (uint16_t) addr & TEMPBUFSIZE_RAWS;
+}
+
+/************************************
+       search the _indexTable
+************************************/
+uint16_t wb_search(uint16_t * addr )
+{
+    // search the indexTable
+
+    uint16_t i ;
+    for(i = 0; i < TEMPBUFSIZE_RAWS; i++ )
+    {
+        if(_indexTable[i] == addr)
+        {
+            return i;
+            break;
+        }else if(_indexTable[i] == 0)
+        {
+            return i;
+            break;
+        }
+    }
+    return TEMPBUFSIZE_RAWS ; //the address is not found; return invalid value
+}
+
+uint16_t __wb_returned_value = 0;
+/************************************
+        get the returned value
+************************************/
+uint16_t __wb_get_val(uint16_t * addr )
+{
+    return __wb_returned_value;
+}
+
+
+/************************************
+        get function
+************************************/
+uint16_t wb_get(uint16_t * addr )
+{
+    return wb_hash(uint16_t * addr);
+}
+
+/************************************
+        insert function
+************************************/
+void wb_insert(uint16_t * addr, uint16_t val)
+{
+    _indexTableDynSize++;
+      uint16_t hashVal = wb_hash(addr);
+      tempVirtualBuf[ hashVal ][0] = addr ;
+      tempVirtualBuf[ hashVal ][1] = val ;
+
+      indx = wb_search(addr);
+      //TODO check if the indx == TEMPBUFSIZE_RAWS which means the buffer is full (runtime overhead)
+      // The applied method with include redundant write operations, by overwriting the address with same address.
+      // However, otherwise we need to check for the value (is it a new entry or is it an unnecessary update?)
+      _indexTable[indx] = addr;
+}
+
+/************************************
+        First phase commit
+************************************/
+
+void wb_firstPhaseCommit(){
+   if(_indexTableDynSize == 0 )
+       {
+           return;  // nothing to commit
+       }
+
+  uint16_t i;
+  for( i=0; i < _indexTableDynSize; i++)
+  {
+      hashedVal = wb_hash(indexTable[i][0]);
+      tempPersistentBuf[i][0]= tempVirtualBuf[hashVal][0];
+      tempPersistentBuf[i][1]= tempVirtualBuf[hashVal][1];
+
+    }
+  }
+_indexTableDynSize = 0;  // First committing is finished
+}
+
+/************************************
+        Second phase commit
+************************************/
+
+void wb_secondPhaseCommit()
+{
+  while(__tbl_cntr < TEMPBUFSIZE_RAWS)
+  {
+      if((uint16_t *) tempPersistentBuf[ __tbl_cntr ][0]  == NULL)
+          return;
+
+    *((uint16_t *) tempPersistentBuf[ __tbl_cntr ][0] ) = tempPersistentBuf[ __tbl_cntr ][1] ;
+    tempPersistentBuf[ __tbl_cntr ][0] = 0;  // reset the address cell
+    __tbl_cntr++;
+  }
+}
