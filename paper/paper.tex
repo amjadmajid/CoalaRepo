@@ -16,12 +16,12 @@
 
 \usepackage{graphicx}  
 \usepackage{subfigure}
-\newcommand{\TODO}[1]{\bf \em \textcolor{red}{TODO: #1}\xspace}
+\newcommand{\TODO}[1]{{\bf \em \textcolor{red}{TODO: #1}\xspace}}
+\newcommand{\sys}{NAME\xspace}
 
 \begin{document}
 
 \title{VIPOS: Virtualized Intermittently Powered Runtime Environment (``VIPRE''?)}
-
 % \author{
 % 	\IEEEauthorblockN{Amjad Yousef Majid, Przemys{\l}aw Pawe{\l}czak}
 % 	\IEEEauthorblockA{TU Delft, Mekelweg\,4, 2628\,CD Delft, NL\\
@@ -32,12 +32,15 @@
 \maketitle
 
 \section{abstract}
+\TODO{Need to re-write this to make it consistent with the story after we have the story in place}
 Enabling battery-free devices is a mandatory step towards the environment friendly IoT. However, removing these large energy reservoirs (the batteries) makes the devices operate on an intermittent power supply, which make sustaining any long computation very challenging. correspondingly, there are two proposed approaches to enable long-running computations on intermittenly powered devices (IPDs): (i) Checkpointing based approach, where the volatile state of a program is frequently saved to the non-volatile memory and; (ii)  Task based approach, where a programmer splits the code into small idempotent modules. The Task based approach shows a better performance than the checkpointing approach. However, the task based method requires that the energy to execute any task must not exceed the maximum limit of the energy buffer. This limitation makes this solution a customized one that suits a particular energy buffer size. 
 
 VIPOS enables code portability by means of virtualizing the task based model. If a code is written for a very small energy buffer, VIPOS is able to dynamically merge these tasks and constructs a bigger virtual task to improve the performance, reduce energy consumption and provides mean for code portability. 
 
 \section{Introduction}
 \label{sec:intro}
+\TODO{VIPER: Virtualized Intermittent Programming model, Execution model, and Runtime environment}
+\TODO{PREVIEW: Programming and Runtime Environment with Virtualized Intermittent Execution Windows}
 
 Advances in processor efficiency along with the development of
 energy-harvesting power systems has created a new category of devices that
@@ -68,9 +71,84 @@ and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help to preserve
 execution progress, failures can leave volatile and non-volatile state inconsistent,
 leading to unrecoverable failures~\cite{mspcdino,edb,edbtoppicks}.  
 
-\TODO{Don't forget all the references in this section!}
-New programming and execution models~\cite{dino,ratchet,chain,alpaca} and hardware
-mechanisms~\cite{clank, idetic} help avoid data inconsistency
+\TODO{Don't forget to include all the references in this section!}
+
+%FRAM costs more than FRAM -- need to figure out how to execute out of SRAM
+New programming and execution models~\cite{dino,ratchet,chain,alpaca} and
+architecture mechanisms~\cite{clank, idetic, nvp} help avoid data
+inconsistency.  New architectures require costly hardware changes and are
+inapplicable to today's systems.  New programming models and compilers force
+programmers to use new memory models~\cite{chain,ratchet}, which may inhibit
+adoption.  New memory models may also increase the amount of non-volatile
+memory accesses by requring non-volatile versioning~\cite{chain} or completely
+precluding the use of volatile memory~\cite{ratchet}.  Increasing pressure on
+non-volatile memory or precluding the use of volatile memory may degrade
+efficiency; e.g., FRAM has a higher access energy and latency than
+SRAM~\cite{alpaca,wisp}.  Commercially available devices are often provisioned
+with much less SRAM than FRAM~\cite{wolverine,wisp} and effectively leveraging
+the relatively high efficiency of SRAM is a key challenge for task-based
+intermittent systems.
+
+\TODO{concrete cost multiples here?}
+
+%Task sizing is hard -- how to chop without risking inefficiency or non-term
+Several recent programming efforts~\cite{alpaca,chain} proposed {\em
+task-based} programming models, that require the programmer to statically
+decompose their program into tasks.  A task is like a function with no callers
+that can include arbitrary computation and, upon completion, is guaranteed to
+have executed {\em atomically} and to have logically {\em committed} memory
+updates.  The programmer expresses the flow of control from one task to another
+and task control-flow may be input-dependent.  An important programming
+challenge in task-based models is that the length of execution of a task is
+limited by the total amount of energy that a device can buffer.  Assuming that
+input power is negligible compared to operating power, a task will never be
+able to complete if its execution consumes more energy than the system can
+buffer.  Transitioning from one task to the next imposes a cost and excessively
+small tasks may be inefficient.  Appropriately sizing tasks to ensure progress
+and high performance is a key challenge for task-based intermittent systems. 
+
+In this work, we develop \sys: a new programming and execution model that uses
+{\em volatile memory virtualization} to leverage efficient volatile memory and
+and {\em dynamic task coalescing} to efficiently execute tasks without
+exceeding available energy.  \sys's memory virtualization mechanism uses a
+device's SRAM as the working memory during a task's execution, populating the
+SRAM with a page of data from FRAM as necessary at the start of the task.  At
+the end of the task, the SRAM is committed back to FRAM using efficient DMA
+block copies.  \TODO{Brandon sez: Is the next sentence what the system does?
+Or are we doing paging?} When a task accesses data outside of a page in SRAM,
+the task must fetch data from FRAM.  We explore two strategies. The first
+strategy is {\em demand paging}, which swaps the SRAM page with a new page from
+FRAM, buffering the swapped-out page until commit.  The second strategy is {\em
+buffered direct access} \TODO{better name}, which directly reads and writes
+FRAM relying on dynamic double-buffering to ensure memory is consistent at
+commit.
+
+\sys's dynamic task coalescing mechanism allows the programmer or a compiler to
+intuitively decompose their program into small tasks that amortize fixed
+per-task overheads, yet present no risk of exceeding device energy capacity. As
+such a decomposition executes, \sys {\em coalesces} dynamically consecutive
+tasks. Coalescing elides the commits of coalesced tasks by buffering multiple
+tasks' updates in an FRAM commit buffer.  Periodically, as the span of the
+coalesced task grows, \sys ends coalescing and commits the state of the
+coalesced task.  If a power failure interrupts a sequence of coalesced tasks,
+\sys adaptively reduces the number of tasks in that sequence that it will
+coalesce, committing sooner in future executions.  Consequently, \sys's
+coalescing mechanism allows a program to execute efficiently across a range of
+energy buffer sizes, avoiding transition overheads in larger buffers, and
+ensuring progress in smaller buffers. \TODO{articulate this last point better}
+
+We evaluated our system on a collection of benchmark programs taken from the
+literature, and compare directly to prior work, showing that \sys has high
+performance and can flexible target a variety of platforms without recompiling
+the code.  We further demonstrate the efficiency and versatility of \sys with
+an end-to-end evaluation of a sensing and data processing application deployed
+in a lab environment \TODO{blah blah blah eval}.
+
+\TODO{Bullet contribs if there's space}
+
+
+
+
 
 \section{Old Introduction}
 	Intermittently powered devices (IPDs) are battery-less devices that utilize the ambient energy to sense, compute and, communicate. For example, Wireless Identification and Sensing platform WISP \cite{wisp} uses the RF signal power to drive its computation and communication. Because of the reliance of TPDs on intermittent power supply, the harvested energy when it is available, their programs are susceptible to a very frequent power interrupts, in the order of tens of millisconds~\cite{}. Therefore, these devices require a different software execution model that complies with the nature of a discontinuous power supply. 
