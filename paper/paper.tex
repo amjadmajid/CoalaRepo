@@ -10,13 +10,17 @@
 \usepackage[noend]{algpseudocode} % this is for the layout of the pseudo code
 \usepackage{tikz} % needed for: tikz pics
 % \usepackage[inline]{enumitem}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage{natbib}
 
 \usepackage{graphicx}  
 \usepackage{subfigure}
+\newcommand{\TODO}[1]{\bf \em \textcolor{red}{TODO: #1}\xspace}
 
 \begin{document}
 
-\title{VIPOS: Virtualized Intermittently Powered Runtime Environment}
+\title{VIPOS: Virtualized Intermittently Powered Runtime Environment (``VIPRE''?)}
 
 % \author{
 % 	\IEEEauthorblockN{Amjad Yousef Majid, Przemys{\l}aw Pawe{\l}czak}
@@ -34,14 +38,49 @@ VIPOS enables code portability by means of virtualizing the task based model. If
 
 \section{Introduction}
 \label{sec:intro}
-	Intermittently powered devices (IPDs) are battery-less devices that utilize the ambient energy to sense, compute and, communicate. For example, Wireless Identification and Sensing platform WISP \cite{WISP} uses the RF signal power to drive its computation and communication. Because of the reliance of TPDs on intermittent power supply, the harvested energy when it is available, their programs are susceptible to a very frequent power interrupts, in the order of tens of millisconds~\cite{}. Therefore, these devices require a different software execution model that complies with the nature of a discontinuous power supply. 
+
+Advances in processor efficiency along with the development of
+energy-harvesting power systems has created a new category of devices that
+require neither a battery nor a tethered power supply.  These devices operate
+entirely using energy extracted from their environment, such as RF energy,
+photovoltaics, and vibration.  Incorporating compute, storage, sensing, and
+communication hardware, such energy-independent devices are a promising
+candidate as the underlying technology for emerging internet of things (IoT)
+applications, in- and on-body medical applications, and emerging applications,
+like energy-harvesting nano-satellites.  
+
+While promising, energy-harvesting devices present a unique design challenge in
+that they operate only {\em intermittently} when energy is available.   An
+energy-harvesting device buffers energy from its environment, e.g., in a
+capacitor. When a threshold quantity of energy accumulates, the device begins
+operating.  Harvestable energy sources typically produce relatively very little
+power compared to a platform's operating power level.  A devices operates for a
+brief period of time and when buffered energy is depeleted, shuts down and
+begins recharging to later operate again.  Charge and discharge times vary by
+device and some devices~\cite{wisp} may fail 10 to 100 times per second.
+
+Software in an energy-harvesting system operates according to the {\em
+intermittent execution model}~\cite{dino}, with bursts of execution that are
+interrupted by failure periods. When power fails, a device loses its volatile
+state (i.e., registers, stack, SRAM) and retains its non-volatile state (i.e.,
+FRAM, Flash). While capturing periodic checkpoints~\cite{mementos,tictpl,quickrecall}
+and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help to preserve
+execution progress, failures can leave volatile and non-volatile state inconsistent,
+leading to unrecoverable failures~\cite{mspcdino,edb,edbtoppicks}.  
+
+\TODO{Don't forget all the references in this section!}
+New programming and execution models~\cite{dino,ratchet,chain,alpaca} and hardware
+mechanisms~\cite{clank, idetic} help avoid data inconsistency
+
+\section{Old Introduction}
+	Intermittently powered devices (IPDs) are battery-less devices that utilize the ambient energy to sense, compute and, communicate. For example, Wireless Identification and Sensing platform WISP \cite{wisp} uses the RF signal power to drive its computation and communication. Because of the reliance of TPDs on intermittent power supply, the harvested energy when it is available, their programs are susceptible to a very frequent power interrupts, in the order of tens of millisconds~\cite{}. Therefore, these devices require a different software execution model that complies with the nature of a discontinuous power supply. 
 
 	The intermittent (discontinuous) execution model defines a program execution as cumulative discrete process. The main difference between the intermittent and the conventional (or continuous) execution models is that, a power failure is seen by the continuous model as an \emph{exception} that may reset the progress of a program to its beginning. Whereas, in intermittent execution a power failure is regarded as a temporary \emph{pause} to the execution that may result in some progress degradation. Generally we can classify the intermittent execution model into: 
 	\begin{itemize}
 		\item \emph{Sequential Execution Model}:
-			Under this model a program is seen as one big idempotent operational region that has one common context. Generally, The progress of the program is saved and updated by means of checkpointing---where all the program context (e.g. CPU registers, the stack and the global variables) is saved to a non-volatile memory. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos, HarvOS, Hibernus}. The benefit of this model is that it does not require code modification by a programmer. However, it has a number of drawbacks: (i) It suffers from significant overhead \cite{chain}; (ii) the programmer should not access the non-volatile memory to guarantee the consistency of the memory~\cite{xxxx}; and (iii) it restricts the IPDs to run only a single application~\cite{InOS}. 
+			Under this model a program is seen as one big idempotent operational region that has one common context. Generally, The progress of the program is saved and updated by means of checkpointing---where all the program context (e.g. CPU registers, the stack and the global variables) is saved to a non-volatile memory. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos, harvOS, hibernus}. The benefit of this model is that it does not require code modification by a programmer. However, it has a number of drawbacks: (i) It suffers from significant overhead \cite{chain}; (ii) the programmer should not access the non-volatile memory to guarantee the consistency of the memory~\cite{xxxx}; and (iii) it restricts the IPDs to run only a single application~\cite{inos}. 
 		\item \emph{Modular Intermittent Execution Model}:
-			At the heart of this model is the concept of an idempotent task. The idempotent task is C function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an IPD by interleaving their tasks~\cite{InOS}. However, it obviously requires code modification---for example, if an algorithm is written according to the continuous execution model it has to be splitted, by a programmer, into small tasks to run under the modular intermittent execution model.
+			At the heart of this model is the concept of an idempotent task. The idempotent task is C function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an IPD by interleaving their tasks~\cite{inos}. However, it obviously requires code modification---for example, if an algorithm is written according to the continuous execution model it has to be splitted, by a programmer, into small tasks to run under the modular intermittent execution model.
 	\end{itemize}
 
 Despite that the superiority of the Modular Intermittent Execution model, it is still a static approach that completely depends on a programmer's estimation which is mostly result in a sub-optimal code devision. Moreover, this model can only consider a single hardware configuration and it does not take environment changing into considerations. 
@@ -69,14 +108,14 @@ How to approach the optimal task size given an unknown energy buffer size and en
 
 \subsection{Why not Adapting Current Approaches}
 Here we highlight the challenges of adapting the state-of-the-art proposed methods to enable the execution of dynamic task sizes. 
-
-	\begin{figure}[t]
-	    \centering
-	         \subfigure[Chain: Sequential task execution flow control.]{\includegraphics[width=0.35\columnwidth]{figures/dynamic-chain.pdf} \label{fig:DynamicChainSeq} } 
-	         \subfigure[Chain: Random task execution flow control.]{\includegraphics[width=0.61\columnwidth]{figures/dynamic-chain-2.pdf} \label{fig:DynamicChainRan}}
-	    \caption{Task flow control of Chain}
-	    \label{fig:DynamicChain}
-	\end{figure}
+%
+%	\begin{figure}[t]
+%	    \centering
+%	         \subfigure[Chain: Sequential task execution flow control.]{\includegraphics[width=0.35\columnwidth]{figures/dynamic-chain.pdf} \label{fig:DynamicChainSeq} } 
+%	         \subfigure[Chain: Random task execution flow control.]{\includegraphics[width=0.61\columnwidth]{figures/dynamic-chain-2.pdf} \label{fig:DynamicChainRan}}
+%	    \caption{Task flow control of Chain}
+%	    \label{fig:DynamicChain}
+%	\end{figure}
 
 
 \noindent\textbf{Chain: Tasks and Channels for Reliable Intermittent Programs } \\
@@ -221,7 +260,7 @@ VIPOS data consistency preservation methods are designed with goal of minimal in
 		\label{fig:dmaTimeEnergy}
 	\end{figure}
 %
-	Since accessing/updating buffers is more costly than directly accessing FRAM, at least without specialized hardware~\cite{Clank}, we introduce the second method to apply the virtualization principle to the Modular Execution Model. This method utilizing the Direct Memory Access (DMA) Module~\cite{DMA}. As Fig.~\ref{fig:dmaTimeEnergy} shows that DMA is much more efficient in transferring a block of data than the conventional (pointer based) way from the energy and time perspectives. 
+	Since accessing/updating buffers is more costly than directly accessing FRAM, at least without specialized hardware~\cite{clank}, we introduce the second method to apply the virtualization principle to the Modular Execution Model. This method utilizing the Direct Memory Access (DMA) Module. As Fig.~\ref{fig:dmaTimeEnergy} shows that DMA is much more efficient in transferring a block of data than the conventional (pointer based) way from the energy and time perspectives. 
 
 	This method combines a number of techniques to preserve the persistence and consistency of the data. It backs up the status of the global variables in the non-volatile memory, and double buffers them to guarantee their consistency. Furthermore, on each power up it populates the global variables in the volatile memory from the most recent back up in the non-volatile memory to enable a faster task execution since the task does not need to interact with non-volatile memory which is generally slower and more energy expensive.   
 
@@ -306,7 +345,7 @@ Fig.~\ref{fig:IPOSPerformance} shows that VIPOS requires a shorter execution tim
 \subsection{Intermittent Power Supply}
 ...
 
-\bibliographystyle{plain}
-\bibliography{references}
+\bibliographystyle{abbrvnat}
+\bibliography{bib}
 
 \end{document}
