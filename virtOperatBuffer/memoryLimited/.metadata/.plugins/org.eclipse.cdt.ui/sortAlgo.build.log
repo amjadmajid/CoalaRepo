@@ -2,6 +2,19 @@
 **** Build of configuration Debug for project sortAlgo ****
 
 /Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
-gmake[1]: 'sortAlgo.out' is up to date.
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/sortAlgo" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+../main.c: In function 'task_inner_loop':
+../main.c:53:9: warning: implicit declaration of function 'os_jump' [-Wimplicit-function-declaration]
+         os_jump(0);
+         ^~~~~~~
+Finished building: ../main.c
+ 
+Building target: sortAlgo.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"sortAlgo.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"sortAlgo.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: sortAlgo.out
+ 
 
 **** Build Finished ****

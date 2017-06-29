@@ -1,11 +1,12 @@
 #include <operationalBuffer.h>
-
+     uint16_t __wb_returned_value = 0;
 __nv uint16_t _persistBufCom = 0;
      uint16_t _indexTableDynSize = 0;
      uint16_t _indexTable[TEMPBUFSIZE_RAWS] = {0};   // _indexTable is used  to speedup the commit process
      uint16_t tempVirtualBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
 __nv uint16_t tempPersistentBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS] ={{0}};
 
+#ifdef NOT_NEEDED
 /************************************
     initialize the _indexTable
 ************************************/
@@ -24,14 +25,6 @@ void wb_initTable()
 }
 
 /************************************
-          hash function
-************************************/
-uint16_t wb_hash(uint16_t * addr)
-{
-    return  ((uint16_t) addr) & TEMPBUFSIZE_RAWS;
-}
-
-/************************************
        search the _indexTable
 ************************************/
 uint16_t wb_search(uint16_t * addr )
@@ -47,12 +40,20 @@ uint16_t wb_search(uint16_t * addr )
     return 0;
 
 }
+#endif
 
-uint16_t __wb_returned_value = 0;
+/************************************
+          hash function
+************************************/
+uint16_t wb_hash(uint16_t * addr)
+{
+    return  ( ((uint16_t) addr) & TEMPBUFSIZE_RAWS);
+}
+
 /************************************
         get the returned value
 ************************************/
-uint16_t __wb_get_val(uint16_t * addr )
+uint16_t __wb_get_val()
 {
     return __wb_returned_value;
 }
@@ -63,7 +64,7 @@ uint16_t __wb_get_val(uint16_t * addr )
 ************************************/
 uint16_t wb_get(uint16_t * addr )
 {
-    uint16_t hashVal = wb_hash((uint16_t *) addr);
+    uint16_t hashVal = wb_hash(addr);
     __wb_returned_value = tempVirtualBuf[ hashVal ][1];
     return tempVirtualBuf[ hashVal ][0] ; // either the address (True) or zero (False)
 }
@@ -74,15 +75,17 @@ uint16_t wb_get(uint16_t * addr )
 ************************************/
 void wb_insert(uint16_t * addr, uint16_t val)
 {
-      uint16_t hashVal = wb_hash(addr);
+    // the order in this function is very important
+    // to enable checking for the value without searching
+    uint16_t hashVal = wb_hash(addr);
+    if ( !tempVirtualBuf[ hashVal ][0] )  // if it is not found insert it
+        {
+            _indexTable[_indexTableDynSize] = (uint16_t)  addr;
+            _indexTableDynSize++;
+        }
+
       tempVirtualBuf[ hashVal ][0] = (uint16_t) addr ;
       tempVirtualBuf[ hashVal ][1] = val ;
-
-      if ( !wb_search(addr) )  // if it is not found inset it
-          {
-              _indexTable[_indexTableDynSize] = addr;
-          }
-      _indexTableDynSize++;
 }
 
 /************************************
@@ -119,7 +122,6 @@ void wb_secondPhaseCommit()
     uint16_t i;
   for(i = 0 ; i < _persistBufCom; i++)
   {
-
     *((uint16_t *) tempPersistentBuf[ i ][0] ) = tempPersistentBuf[ i ][1] ;
   }
 }

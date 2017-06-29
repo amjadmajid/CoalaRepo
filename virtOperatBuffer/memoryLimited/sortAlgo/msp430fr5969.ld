@@ -232,25 +232,6 @@ SECTIONS
     KEEP (*(.dtors))
   } > ROM
 
-  .ram_vars :
-  {
-    . = ALIGN(2);
-    PROVIDE (__ram_vars_start = .);
-    *(.ram_vars)
-    . = ALIGN(2);
-    PROVIDE (__ram_vars_end = .);
-  } > RAM_VARS
-
-/* Maybe not needed it */
-  .rom_vars :
-  {
-    . = ALIGN(2);
-    PROVIDE (__ram_vars_start = .);
-    *(.ram_vars)
-    . = ALIGN(2);
-    PROVIDE (__ram_vars_end = .);
-  } > ROM_VARS
-
 
   .nv_vars :
   {

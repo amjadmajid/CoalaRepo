@@ -6,8 +6,6 @@
 #define INCLUDE_GLOBAL_H_
 
 #define __nv  __attribute__((section(".nv_vars")))
-//#define __p  __attribute__((section(".rom_vars")))
-//#define __v  __attribute__((section(".ram_vars")))
 
 // Special memory locaitons
 #define BASE_ADDR       0x1980

@@ -19,7 +19,8 @@ typedef struct wb_node {
 #define TEMPBUFSIZE_COLS 2
 
 extern uint16_t tempPersistentBuf[TEMPBUFSIZE_RAWS][TEMPBUFSIZE_COLS];
-
+uint16_t wb_hash(uint16_t * addr);
+uint16_t __wb_get_val();
 uint16_t wb_get(uint16_t * addr );
 void wb_insert(uint16_t * addr, uint16_t val);
 void wb_firstPhaseCommit();

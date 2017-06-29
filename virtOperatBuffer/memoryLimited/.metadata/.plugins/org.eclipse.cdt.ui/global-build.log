@@ -1,4 +1,43 @@
 
+**** Build of configuration Debug for project ipos-gcc-vob ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../ipos/operationalBuffer.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"ipos/operationalBuffer.d" -MT"ipos/operationalBuffer.o" -o"ipos/operationalBuffer.o"  "../ipos/operationalBuffer.c"
+../ipos/operationalBuffer.c: In function 'wb_hash':
+../ipos/operationalBuffer.c:50:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+     return  ( ((uint16_t) addr) & TEMPBUFSIZE_RAWS);
+                ^
+../ipos/operationalBuffer.c: In function 'wb_insert':
+../ipos/operationalBuffer.c:83:47: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+             _indexTable[_indexTableDynSize] = (uint16_t)  addr;
+                                               ^
+../ipos/operationalBuffer.c:87:38: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+       tempVirtualBuf[ hashVal ][0] = (uint16_t) addr ;
+                                      ^
+../ipos/operationalBuffer.c: In function 'wb_firstPhaseCommit':
+../ipos/operationalBuffer.c:104:31: warning: passing argument 1 of 'wb_hash' makes pointer from integer without a cast [-Wint-conversion]
+           hashedVal = wb_hash(_indexTable[i]);
+                               ^~~~~~~~~~~
+../ipos/operationalBuffer.c:48:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'uint16_t {aka short unsigned int}'
+ uint16_t wb_hash(uint16_t * addr)
+          ^~~~~~~
+../ipos/operationalBuffer.c: In function 'wb_secondPhaseCommit':
+../ipos/operationalBuffer.c:125:7: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+     *((uint16_t *) tempPersistentBuf[ i ][0] ) = tempPersistentBuf[ i ][1] ;
+       ^
+Finished building: ../ipos/operationalBuffer.c
+ 
+Building target: libipos-gcc-vob.a
+Invoking: GNU Librarian
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-ar" -r "libipos-gcc-vob.a" "./ipos/operationalBuffer.o" "./ipos/pTCB.o" "./ipos/psched.o" 
+Finished building target: libipos-gcc-vob.a
+ 
+/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-ar: creating libipos-gcc-vob.a
+
+**** Build Finished ****
+
 **** Build of configuration Debug for project sortAlgo ****
 
 /Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
@@ -9,6 +48,79 @@ gmake[1]: 'sortAlgo.out' is up to date.
 **** Build of configuration Debug for project sortAlgo ****
 
 /Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
-gmake[1]: 'sortAlgo.out' is up to date.
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/sortAlgo" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+../main.c: In function 'task_inner_loop':
+../main.c:53:9: warning: implicit declaration of function 'os_jump' [-Wimplicit-function-declaration]
+         os_jump(0);
+         ^~~~~~~
+Finished building: ../main.c
+ 
+Building target: sortAlgo.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"sortAlgo.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"sortAlgo.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: sortAlgo.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project sortAlgo ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/sortAlgo" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+../main.c: In function 'task_inner_loop':
+../main.c:53:9: warning: implicit declaration of function 'os_jump' [-Wimplicit-function-declaration]
+         os_jump(0);
+         ^~~~~~~
+Finished building: ../main.c
+ 
+Building target: sortAlgo.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"sortAlgo.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"sortAlgo.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: sortAlgo.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project sortAlgo ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/sortAlgo" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+../main.c: In function 'task_inner_loop':
+../main.c:53:9: warning: implicit declaration of function 'os_jump' [-Wimplicit-function-declaration]
+         os_jump(0);
+         ^~~~~~~
+Finished building: ../main.c
+ 
+Building target: sortAlgo.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"sortAlgo.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"sortAlgo.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: sortAlgo.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project sortAlgo ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/sortAlgo" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+../main.c: In function 'task_inner_loop':
+../main.c:53:9: warning: implicit declaration of function 'os_jump' [-Wimplicit-function-declaration]
+         os_jump(0);
+         ^~~~~~~
+Finished building: ../main.c
+ 
+Building target: sortAlgo.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"sortAlgo.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"sortAlgo.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: sortAlgo.out
+ 
 
 **** Build Finished ****

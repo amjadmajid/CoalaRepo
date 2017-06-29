@@ -68,7 +68,7 @@ void os_scheduler(){
     if (__commit_flag == COMMITTING)
         goto commit;
 
-    wb_initTable(); // initialize the hashed table
+//    wb_initTable(); // initialize the hashed table
 
         if(__reboot_state[0] == __task_address )      //Died on the same task
         {
