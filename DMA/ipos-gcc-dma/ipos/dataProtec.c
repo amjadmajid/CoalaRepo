@@ -7,10 +7,10 @@
 
 
  // THIS IS ALSO DEFINED IN THE LINKER FILE
-#define BLOCKSIZE 112           // The block size of the transfered data
-#define ROM_2   0xFF7F - BLOCKSIZE
-#define ROM_1   0xFF7F - BLOCKSIZE - BLOCKSIZE
-#define RAM_VARS_ADDR  0x2400 - BLOCKSIZE
+#define BLOCKSIZE 0x64           // The block size of the transfered data in WORDS
+#define ROM_2   (0xFF7F - BLOCKSIZE - BLOCKSIZE)     //we need to duplicate the number of bytes, since the transfer is in words
+#define ROM_1   (0xFF7F - BLOCKSIZE - BLOCKSIZE- BLOCKSIZE - BLOCKSIZE- 0x2)  // DMA transfer more than specified, therefore we added offset
+#define RAM_VARS_ADDR  0x2000
 
 #include <msp430fr5969.h>
 /************************************
