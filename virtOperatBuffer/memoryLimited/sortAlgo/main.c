@@ -26,8 +26,8 @@ void task_inner_loop();
 
 ////// Global variables
 //DVAR( uint16_t arr[], ={3,1,4,6,9,5,10,8,16,20} );
-__nv uint16_t arr[] = {3,1,4,6,9,5,10,8,16,20};
-     uint16_t arr_len = 10;
+__nv uint16_t arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89};
+     uint16_t arr_len = 20;
 __nv uint16_t i =  0;
 __nv uint16_t j = 1;
 
@@ -79,8 +79,6 @@ void task_finish()
     P3OUT |=BIT5;
     P3OUT &=~BIT5;
 
-    P1OUT |=BIT0;
-    P1OUT &=~BIT0;
 
     arr[0]=3;
     arr[1]=1;
@@ -92,6 +90,16 @@ void task_finish()
     arr[7]=8;
     arr[8]=16;
     arr[9]=20;
+    arr[10]= 19;
+    arr[11]=40;
+    arr[12]=16;
+    arr[13]=17;
+    arr[14]=2;
+    arr[15]=41;
+    arr[16]=80;
+    arr[17]=100;
+    arr[18]=5;
+    arr[19]=89;
 
     WVAR(i, 0) ;
     WVAR(j, 1);

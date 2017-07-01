@@ -1,0 +1,187 @@
+
+**** Build of configuration Debug for project DFT ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/DFT" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'discTimeSign':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:99:23: note: in expansion of macro 'RVAR'
+     uint16_t in_x_n = RVAR(x[in_n]);
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:105:9: note: in expansion of macro 'WVAR'
+         WVAR(x[in_n] ,in_x_n);
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+../main.c:110:13: warning: implicit declaration of function 'os_jump' [-Wimplicit-function-declaration]
+             os_jump(0);
+             ^~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'dft_real':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:136:25: note: in expansion of macro 'RVAR'
+     uint16_t in_Xre_k = RVAR(Xre[in_k]);
+                         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:138:21: note: in expansion of macro 'RVAR'
+         in_Xre_k += RVAR(x[in_n]) * cosf(in_n * in_k * PI2 / SIZE);
+                     ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:140:9: note: in expansion of macro 'WVAR'
+         WVAR(Xre[in_k], in_Xre_k);
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'dft_im':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:157:25: note: in expansion of macro 'RVAR'
+     uint16_t in_Xim_k = RVAR(Xim[in_k]);
+                         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:159:21: note: in expansion of macro 'RVAR'
+         in_Xim_k -= RVAR(x[in_n]) * sinf(in_n * in_k * PI2 / SIZE);
+                     ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:160:9: note: in expansion of macro 'WVAR'
+         WVAR(Xim[in_k], in_Xim_k);
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'dft_power':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:176:25: note: in expansion of macro 'RVAR'
+     uint16_t in_Xim_k = RVAR(Xim[in_k]);
+                         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:177:25: note: in expansion of macro 'RVAR'
+     uint16_t in_Xre_k = RVAR(Xre[in_k]);
+                         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:178:23: note: in expansion of macro 'RVAR'
+     uint16_t in_p_k = RVAR(P[in_k]);
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' from incompatible pointer type [-Wincompatible-pointer-types]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:185:5: note: in expansion of macro 'WVAR'
+     WVAR(P[in_k], in_p_k);
+     ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'float *'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+At top level:
+../main.c:227:13: warning: 'blinkLed' defined but not used [-Wunused-function]
+ static void blinkLed(uint32_t wait )
+             ^~~~~~~~
+Finished building: ../main.c
+ 
+Building target: DFT.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"DFT.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"DFT.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lm -lc -Wl,--end-group 
+makefile:144: recipe for target 'DFT.out' failed
+/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/../lib/gcc/msp430-elf/6.2.1/../../../../msp430-elf/bin/ld: cannot find -lipos-gcc-vob
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [DFT.out] Error 1
+gmake: *** [all] Error 2
+makefile:140: recipe for target 'all' failed
+
+**** Build Finished ****

@@ -253,7 +253,6 @@ SECTIONS
     PROVIDE (__ram_vars_end = .);
   } > ROM_VARS
 
-
   .nv_vars :
   {
     . = ALIGN(2);
@@ -264,6 +263,7 @@ SECTIONS
     . = ALIGN(2);
     PROVIDE (__fram_vars_end = .);
   } > ROM
+
 
 
   .upper.rodata :

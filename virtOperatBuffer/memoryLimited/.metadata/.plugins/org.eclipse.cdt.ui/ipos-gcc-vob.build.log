@@ -2,9 +2,27 @@
 **** Build of configuration Debug for project ipos-gcc-vob ****
 
 /Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
-Building file: ../ipos/operationalBuffer.c
+Building file: ../ipos/pTCB.c
 Invoking: GNU Compiler
-"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"ipos/operationalBuffer.d" -MT"ipos/operationalBuffer.o" -o"ipos/operationalBuffer.o"  "../ipos/operationalBuffer.c"
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"ipos/pTCB.d" -MT"ipos/pTCB.o" -o"ipos/pTCB.o"  "../ipos/pTCB.c"
+../ipos/pTCB.c: In function 'os_memMapper':
+../ipos/pTCB.c:19:23: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+     *(__head +*cnt) = (uint16_t) _task.func;
+                       ^
+../ipos/pTCB.c:23:22: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+     *(__head +*cnt) =(uint16_t) (__head +1+(*cnt)); // a pointer to the next node
+                      ^
+../ipos/pTCB.c: In function 'os_addTasks':
+../ipos/pTCB.c:54:30: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+         __task_address    =  (uint16_t) __head ;
+                              ^
+../ipos/pTCB.c: In function 'os_search':
+../ipos/pTCB.c:64:13: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+         if( (uint16_t *) *__current ==  (uint16_t *) func )
+             ^
+../ipos/pTCB.c:69:19: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+         __current = *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
+                   ^
 ../ipos/operationalBuffer.c: In function 'wb_hash':
 ../ipos/operationalBuffer.c:50:16: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
      return  ( ((uint16_t) addr) & TEMPBUFSIZE_RAWS);
@@ -27,13 +45,42 @@ Invoking: GNU Compiler
 ../ipos/operationalBuffer.c:125:7: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
      *((uint16_t *) tempPersistentBuf[ i ][0] ) = tempPersistentBuf[ i ][1] ;
        ^
+Finished building: ../ipos/pTCB.c
+ 
+Building file: ../ipos/operationalBuffer.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"ipos/operationalBuffer.d" -MT"ipos/operationalBuffer.o" -o"ipos/operationalBuffer.o"  "../ipos/operationalBuffer.c"
 Finished building: ../ipos/operationalBuffer.c
+ 
+Building file: ../ipos/psched.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"ipos/psched.d" -MT"ipos/psched.o" -o"ipos/psched.o"  "../ipos/psched.c"
+../ipos/psched.c: In function 'os_scheduler':
+../ipos/psched.c:89:31: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+      __current_task_virtual = (uint16_t *) __task_address ;
+                               ^
+../ipos/psched.c:95:15: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+             ( (funcPt)( *__current_task_virtual ) ) ();                          // access a task
+               ^
+../ipos/psched.c:100:36: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+                 __task_address  =  (uint16_t) (__current_task_virtual) ;       // firm transition
+                                    ^
+../ipos/psched.c:125:37: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+             __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     // soft transition
+                                     ^
+../ipos/psched.c:129:45: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
+                     __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  // soft transition
+                                             ^
+/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccOrIj0T.s: Assembler messages:
+/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccOrIj0T.s:27: Warning: a NOP might be needed here because of successive changes in interrupt state
+/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccOrIj0T.s:52: Warning: a NOP might be needed here because of successive changes in interrupt state
+Finished building: ../ipos/psched.c
  
 Building target: libipos-gcc-vob.a
 Invoking: GNU Librarian
 "/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-ar" -r "libipos-gcc-vob.a" "./ipos/operationalBuffer.o" "./ipos/pTCB.o" "./ipos/psched.o" 
+/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-ar: creating libipos-gcc-vob.a
 Finished building target: libipos-gcc-vob.a
  
-/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-ar: creating libipos-gcc-vob.a
 
 **** Build Finished ****

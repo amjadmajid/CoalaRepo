@@ -1,0 +1,33 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+# Add inputs and outputs from these tool invocations to the build variables 
+LD_SRCS += \
+../msp430fr5969.ld 
+
+C_SRCS += \
+../double_buffering.c \
+../main.c 
+
+C_DEPS += \
+./double_buffering.d \
+./main.d 
+
+OBJS += \
+./double_buffering.o \
+./main.o 
+
+OBJS__QUOTED += \
+"double_buffering.o" \
+"main.o" 
+
+C_DEPS__QUOTED += \
+"double_buffering.d" \
+"main.d" 
+
+C_SRCS__QUOTED += \
+"../double_buffering.c" \
+"../main.c" 
+
+

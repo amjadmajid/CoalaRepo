@@ -8,7 +8,8 @@
 *************************************/
 #define WRITE_ADDR 0x6600u
 #define  READ_ADDR 0x8400u
-#define   DATA_LEN 0x1840u
+#define   DATA_LEN 0x64
+#define   DATA_LEN_LOC 0x1840u
 #define   BYTE_LEN 8u
 #define   WORD_LEN 16u
 #define  TABLE_LEN 16u
@@ -152,162 +153,6 @@ void initData()
     *((uint8_t *) 0x8461) = 0xB4;
     *((uint8_t *) 0x8462) = 0xD6;
     *((uint8_t *) 0x8463) = 0x9A;
-    *((uint8_t *) 0x8464) = 0xD3;
-//   *((uint8_t *) 0x8465) = 0x5A;
-//   *((uint8_t *) 0x8466) = 0x6C;
-//   *((uint8_t *) 0x8467) = 0x79;
-//   *((uint8_t *) 0x8468) = 0x03;
-//   *((uint8_t *) 0x8469) = 0x5F;
-//   *((uint8_t *) 0x846a) = 0x69;
-//   *((uint8_t *) 0x846b) = 0xBD;
-//   *((uint8_t *) 0x846c) = 0x34;
-//   *((uint8_t *) 0x846d) = 0xD6;
-//   *((uint8_t *) 0x846e) = 0x9A;
-//   *((uint8_t *) 0x846f) = 0xD3;
-//   *((uint8_t *) 0x8470) = 0x5A;
-//   *((uint8_t *) 0x8471) = 0x6C;
-//   *((uint8_t *) 0x8472) = 0x79;
-//   *((uint8_t *) 0x8473) = 0xE3;
-//   *((uint8_t *) 0x8474) = 0x5F;
-//   *((uint8_t *) 0x8475) = 0x69;
-//   *((uint8_t *) 0x8476) = 0xAD;
-//   *((uint8_t *) 0x8477) = 0x35;
-//   *((uint8_t *) 0x8478) = 0xA6;
-//   *((uint8_t *) 0x8479) = 0xB4;
-//   *((uint8_t *) 0x847a) = 0xD6;
-//   *((uint8_t *) 0x847b) = 0x9B;
-//   *((uint8_t *) 0x847c) = 0x1E;
-//   *((uint8_t *) 0x847d) = 0x78;
-//   *((uint8_t *) 0x847e) = 0xD7;
-//   *((uint8_t *) 0x847f) = 0xDA;
-//   *((uint8_t *) 0x8480) = 0x6B;
-//   *((uint8_t *) 0x8481) = 0x4D;
-//   *((uint8_t *) 0x8482) = 0x69;
-//   *((uint8_t *) 0x8483) = 0xA0;
-//   *((uint8_t *) 0x8484) = 0x69;
-//   *((uint8_t *) 0x8485) = 0xAD;
-//   *((uint8_t *) 0x8486) = 0x36;
-//   *((uint8_t *) 0x8487) = 0x3C;
-//   *((uint8_t *) 0x8488) = 0x81;
-//   *((uint8_t *) 0x8489) = 0xAF;
-//   *((uint8_t *) 0x848a) = 0xB4;
-//   *((uint8_t *) 0x848b) = 0xD6;
-//   *((uint8_t *) 0x848c) = 0x9A;
-//   *((uint8_t *) 0x848d) = 0xD3;
-//   *((uint8_t *) 0x848e) = 0x5A;
-//   *((uint8_t *) 0x848f) = 0x6B;
-//   *((uint8_t *) 0x8490) = 0x4D;
-//   *((uint8_t *) 0x8491) = 0x8F;
-//   *((uint8_t *) 0x8492) = 0x3C;
-//   *((uint8_t *) 0x8493) = 0x6B;
-//   *((uint8_t *) 0x8494) = 0xED;
-//   *((uint8_t *) 0x8495) = 0x35;
-//   *((uint8_t *) 0x8496) = 0xA6;
-//   *((uint8_t *) 0x8497) = 0xB4;
-//   *((uint8_t *) 0x8498) = 0xD6;
-//   *((uint8_t *) 0x8499) = 0x9A;
-//   *((uint8_t *) 0x849a) = 0xD3;
-//   *((uint8_t *) 0x849b) = 0x7B;
-//   *((uint8_t *) 0x849c) = 0x8F;
-//   *((uint8_t *) 0x849d) = 0x3C;
-//   *((uint8_t *) 0x849e) = 0x6B;
-//   *((uint8_t *) 0x849f) = 0xED;
-//   *((uint8_t *) 0x84a0) = 0x35;
-//   *((uint8_t *) 0x84a1) = 0xA6;
-//   *((uint8_t *) 0x84a2) = 0xB4;
-//   *((uint8_t *) 0x84a3) = 0xD6;
-//   *((uint8_t *) 0x84a4) = 0x9A;
-//   *((uint8_t *) 0x84a5) = 0xD3;
-//   *((uint8_t *) 0x84a6) = 0x63;
-//   *((uint8_t *) 0x84a7) = 0xCF;
-//   *((uint8_t *) 0x84a8) = 0x1A;
-//   *((uint8_t *) 0x84a9) = 0xFB;
-//   *((uint8_t *) 0x84aa) = 0x4D;
-//   *((uint8_t *) 0x84ab) = 0x69;
-//   *((uint8_t *) 0x84ac) = 0xAD;
-//   *((uint8_t *) 0x84ad) = 0x35;
-//   *((uint8_t *) 0x84ae) = 0xA6;
-//   *((uint8_t *) 0x84af) = 0xB4;
-//   *((uint8_t *) 0x84b0) = 0xD8;
-//   *((uint8_t *) 0x84b1) = 0xF2;
-//   *((uint8_t *) 0x84b2) = 0x06;
-//   *((uint8_t *) 0x84b3) = 0xBF;
-//   *((uint8_t *) 0x84b4) = 0x26;
-//   *((uint8_t *) 0x84b5) = 0x9A;
-//   *((uint8_t *) 0x84b6) = 0xD3;
-//   *((uint8_t *) 0x84b7) = 0x5A;
-//   *((uint8_t *) 0x84b8) = 0x6B;
-//   *((uint8_t *) 0x84b9) = 0x4D;
-//   *((uint8_t *) 0x84ba) = 0x69;
-//   *((uint8_t *) 0x84bb) = 0xB1;
-//   *((uint8_t *) 0x84bc) = 0xE4;
-//   *((uint8_t *) 0x84bd) = 0x0D;
-//   *((uint8_t *) 0x84be) = 0x7F;
-//   *((uint8_t *) 0x84bf) = 0xBE;
-//   *((uint8_t *) 0x84c0) = 0xCD;
-//   *((uint8_t *) 0x84c1) = 0x78;
-//   *((uint8_t *) 0x84c2) = 0x7B;
-//   *((uint8_t *) 0x84c3) = 0xEC;
-//   *((uint8_t *) 0x84c4) = 0x66;
-//   *((uint8_t *) 0x84c5) = 0x2F;
-//   *((uint8_t *) 0x84c6) = 0x05;
-//   *((uint8_t *) 0x84c7) = 0x63;
-//   *((uint8_t *) 0x84c8) = 0xCF;
-//   *((uint8_t *) 0x84c9) = 0x1A;
-//   *((uint8_t *) 0x84ca) = 0xFB;
-//   *((uint8_t *) 0x84cb) = 0xD8;
-//   *((uint8_t *) 0x84cc) = 0x86;
-//   *((uint8_t *) 0x84cd) = 0xD3;
-//   *((uint8_t *) 0x84ce) = 0x5A;
-//   *((uint8_t *) 0x84cf) = 0x68;
-//   *((uint8_t *) 0x84d0) = 0x5A;
-//   *((uint8_t *) 0x84d1) = 0x6B;
-//   *((uint8_t *) 0x84d2) = 0x4D;
-//   *((uint8_t *) 0x84d3) = 0x8F;
-//   *((uint8_t *) 0x84d4) = 0x3D;
-//   *((uint8_t *) 0x84d5) = 0xB5;
-//   *((uint8_t *) 0x84d6) = 0xF9;
-//   *((uint8_t *) 0x84d7) = 0x8D;
-//   *((uint8_t *) 0x84d8) = 0xF6;
-//   *((uint8_t *) 0x84d9) = 0x9A;
-//   *((uint8_t *) 0x84da) = 0xD3;
-//   *((uint8_t *) 0x84db) = 0x5E;
-//   *((uint8_t *) 0x84dc) = 0x1E;
-//   *((uint8_t *) 0x84dd) = 0xEF;
-//   *((uint8_t *) 0x84de) = 0x05;
-//   *((uint8_t *) 0x84df) = 0x63;
-//   *((uint8_t *) 0x84e0) = 0xCF;
-//   *((uint8_t *) 0x84e1) = 0x1A;
-//   *((uint8_t *) 0x84e2) = 0xFB;
-//   *((uint8_t *) 0x84e3) = 0xD8;
-//   *((uint8_t *) 0x84e4) = 0x86;
-//   *((uint8_t *) 0x84e5) = 0xD3;
-//   *((uint8_t *) 0x84e6) = 0x5A;
-//   *((uint8_t *) 0x84e7) = 0x6B;
-//   *((uint8_t *) 0x84e8) = 0x4D;
-//   *((uint8_t *) 0x84e9) = 0x69;
-//   *((uint8_t *) 0x84ea) = 0xBD;
-//   *((uint8_t *) 0x84eb) = 0xC7;
-//   *((uint8_t *) 0x84ec) = 0x9E;
-//   *((uint8_t *) 0x84ed) = 0xDA;
-//   *((uint8_t *) 0x84ee) = 0xFC;
-//   *((uint8_t *) 0x84ef) = 0xC6;
-//   *((uint8_t *) 0x84f0) = 0xFB;
-//   *((uint8_t *) 0x84f1) = 0x4D;
-//   *((uint8_t *) 0x84f2) = 0x69;
-//   *((uint8_t *) 0x84f3) = 0xAF;
-//   *((uint8_t *) 0x84f4) = 0x0F;
-//   *((uint8_t *) 0x84f5) = 0x77;
-//   *((uint8_t *) 0x84f6) = 0x82;
-//   *((uint8_t *) 0x84f7) = 0xB1;
-//   *((uint8_t *) 0x84f8) = 0xE7;
-//   *((uint8_t *) 0x84f9) = 0x8D;
-//   *((uint8_t *) 0x84fa) = 0x7D;
-//   *((uint8_t *) 0x84fb) = 0xEC;
-//   *((uint8_t *) 0x84fc) = 0x43;
-//   *((uint8_t *) 0x84fd) = 0x69;
-//   *((uint8_t *) 0x84fe) = 0xAD;
-//   *((uint8_t *) 0x84ff) = 0x35;
 
 
 
@@ -316,7 +161,7 @@ void initData()
       //b2 d0 80 00 05 02 b2 d0 80 00
 
       //:02     1840     00         8613   B4
-      *( (uint16_t *)   DATA_LEN)  = 0x64; // the length of the data
+      *( (uint16_t *)   DATA_LEN_LOC)  = DATA_LEN; // the length of the data
       //:02195000ffff00    init_flag
       // *( (uint8_t *)   0x1950)  = 0xff;
 
@@ -471,7 +316,7 @@ void task_write()
 
 
         // if decompressing the data is not done
-        if( ( writePt -  WRITE_ADDR ) >=  0x64) // *( (uint16_t *) DATA_LEN ) )
+        if( ( writePt -  WRITE_ADDR ) >= DATA_LEN) // *( (uint16_t *) DATA_LEN ) )
         {
             P3OUT |=BIT5;
             P3OUT &=~BIT5;

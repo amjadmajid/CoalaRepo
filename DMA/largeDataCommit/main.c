@@ -2,7 +2,7 @@
 #include <msp430fr5969.h>
 #include <ipos.h>
 
-#define ARRSIZE 100
+#define ARRSIZE 50
 __v volatile uint16_t data[ARRSIZE] = {0};
 
 void init();
