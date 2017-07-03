@@ -93,7 +93,7 @@ data = [ [chain_dd_time, ipos_dd_time],
 
 data = np.transpose(data)
 hatches = ['+', '/']
-colors = ['0.6', '0.8']
+colors = ['#edf8b1', '#7fcdbb']
 # colors = ['c', 'm']
 labels = ["Chain", "IPOS"]
 

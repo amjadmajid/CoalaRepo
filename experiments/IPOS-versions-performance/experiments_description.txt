@@ -16,8 +16,8 @@ The applications to be tested are:
 
 	2- sortAlgo (selecton sort algorithm)
 		The sortAlgo applicaiton will attempt to sort 20 numbers
-	3-
-	4-
+	3- largeDataCommit: 
+		Manipulate and commit 50 variables
 
 
 

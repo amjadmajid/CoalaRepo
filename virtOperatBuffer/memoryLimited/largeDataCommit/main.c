@@ -2,8 +2,10 @@
 #include <msp430fr5969.h>
 #include <ipos.h>
 
-#define ARRSIZE 50
-__nv volatile uint16_t data[ARRSIZE] = {0};
+#define ARRSIZE 128
+#define FIX_ARRSIZE 128
+__nv volatile uint16_t data[FIX_ARRSIZE] = {0};
+
 
 void init();
 void task0();

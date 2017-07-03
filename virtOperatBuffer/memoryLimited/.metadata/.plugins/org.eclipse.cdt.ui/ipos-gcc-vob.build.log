@@ -71,9 +71,9 @@ Invoking: GNU Compiler
 ../ipos/psched.c:129:45: warning: assignment makes pointer from integer without a cast [-Wint-conversion]
                      __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  // soft transition
                                              ^
-/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccOrIj0T.s: Assembler messages:
-/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccOrIj0T.s:27: Warning: a NOP might be needed here because of successive changes in interrupt state
-/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccOrIj0T.s:52: Warning: a NOP might be needed here because of successive changes in interrupt state
+/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccDKDKB5.s: Assembler messages:
+/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccDKDKB5.s:27: Warning: a NOP might be needed here because of successive changes in interrupt state
+/var/folders/ld/yctbh6c13lb4_p837j7skjnw0000gn/T//ccDKDKB5.s:52: Warning: a NOP might be needed here because of successive changes in interrupt state
 Finished building: ../ipos/psched.c
  
 Building target: libipos-gcc-vob.a

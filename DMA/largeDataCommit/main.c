@@ -2,8 +2,10 @@
 #include <msp430fr5969.h>
 #include <ipos.h>
 
-#define ARRSIZE 50
-__v volatile uint16_t data[ARRSIZE] = {0};
+//#define ARRSIZE 50
+#define ARRSIZE 128
+#define FIX_ARRSIZE 128
+__v volatile uint16_t data[FIX_ARRSIZE] = {0};
 
 void init();
 void task0();
@@ -20,6 +22,7 @@ void init()
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
     P3DIR |=BIT5;
+    P4DIR |=BIT0;
 }
 
 /********************************
@@ -76,6 +79,14 @@ void task4()
 }
 void task5()
 {
+
+    if(data[1] == data[50])
+    {
+        P4OUT |= BIT0;
+        __delay_cycles(5000);
+        P4OUT &= ~BIT0;
+    }
+
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)
     {

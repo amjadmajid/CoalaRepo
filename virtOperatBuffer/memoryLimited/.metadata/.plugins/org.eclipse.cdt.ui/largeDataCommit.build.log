@@ -11,7 +11,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
                                  ^
-../main.c:35:13: note: in expansion of macro 'RVAR'
+../main.c:38:13: note: in expansion of macro 'RVAR'
          x = RVAR(data[i]) +1;
              ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -24,7 +24,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define WVAR(name, value)   wb_insert( &name, value)
                                         ^
-../main.c:36:9: note: in expansion of macro 'WVAR'
+../main.c:39:9: note: in expansion of macro 'WVAR'
          WVAR(data[i], x );
          ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -41,7 +41,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
  #define WVAR(name, value)   wb_insert( &name, value)
                                                ^~~~~
-../main.c:46:23: note: in expansion of macro 'RVAR'
+../main.c:49:23: note: in expansion of macro 'RVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
                        ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -54,7 +54,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define WVAR(name, value)   wb_insert( &name, value)
                                         ^
-../main.c:46:9: note: in expansion of macro 'WVAR'
+../main.c:49:9: note: in expansion of macro 'WVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
          ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -71,7 +71,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
  #define WVAR(name, value)   wb_insert( &name, value)
                                                ^~~~~
-../main.c:56:23: note: in expansion of macro 'RVAR'
+../main.c:59:23: note: in expansion of macro 'RVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
                        ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -84,7 +84,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define WVAR(name, value)   wb_insert( &name, value)
                                         ^
-../main.c:56:9: note: in expansion of macro 'WVAR'
+../main.c:59:9: note: in expansion of macro 'WVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
          ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -101,7 +101,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
  #define WVAR(name, value)   wb_insert( &name, value)
                                                ^~~~~
-../main.c:67:23: note: in expansion of macro 'RVAR'
+../main.c:70:23: note: in expansion of macro 'RVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
                        ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -114,7 +114,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define WVAR(name, value)   wb_insert( &name, value)
                                         ^
-../main.c:67:9: note: in expansion of macro 'WVAR'
+../main.c:70:9: note: in expansion of macro 'WVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
          ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -131,7 +131,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
  #define WVAR(name, value)   wb_insert( &name, value)
                                                ^~~~~
-../main.c:77:23: note: in expansion of macro 'RVAR'
+../main.c:80:23: note: in expansion of macro 'RVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
                        ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -144,7 +144,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define WVAR(name, value)   wb_insert( &name, value)
                                         ^
-../main.c:77:9: note: in expansion of macro 'WVAR'
+../main.c:80:9: note: in expansion of macro 'WVAR'
          WVAR(data[i], RVAR(data[i]) +1 );
          ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
@@ -158,7 +158,7 @@ In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memory
 /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
  #define WVAR(name, value)   wb_insert( &name, value)
                                         ^
-../main.c:85:9: note: in expansion of macro 'WVAR'
+../main.c:88:9: note: in expansion of macro 'WVAR'
          WVAR(data[i], 0 );
          ^~~~
 In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,

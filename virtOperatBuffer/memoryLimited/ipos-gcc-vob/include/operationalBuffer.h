@@ -14,7 +14,7 @@ typedef struct wb_node {
 }wb_node;
 
 
-#define TABLESIZE 0x007f // My hashing function applies a masking technique
+#define TABLESIZE 0x00ff // My hashing function applies a masking technique
 #define TEMPBUFSIZE_RAWS TABLESIZE
 #define TEMPBUFSIZE_COLS 2
 
