@@ -3,7 +3,7 @@
 #include <ipos.h>
 
 //#define ARRSIZE 50
-#define ARRSIZE 128
+#define ARRSIZE 8
 #define FIX_ARRSIZE 128
 __v volatile uint16_t data[FIX_ARRSIZE] = {0};
 
@@ -80,12 +80,12 @@ void task4()
 void task5()
 {
 
-    if(data[1] == data[50])
-    {
-        P4OUT |= BIT0;
-        __delay_cycles(5000);
-        P4OUT &= ~BIT0;
-    }
+//    if(data[1] == data[50])
+//    {
+//        P4OUT |= BIT0;
+//        __delay_cycles(500);
+//        P4OUT &= ~BIT0;
+//    }
 
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)

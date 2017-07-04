@@ -22,7 +22,6 @@ void init()
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
     P3DIR |=BIT5;
-    P4DIR |=BIT0;
 }
 
 /********************************
@@ -88,11 +87,8 @@ void task5()
         WVAR(data[i], 0 );
     }
 
-//        P3OUT |=BIT5;
-//        P3OUT &=~BIT5;
-        P4OUT |=BIT0;
-        __delay_cycles(500);
-        P4OUT &= ~BIT0;
+        P3OUT |=BIT5;
+        P3OUT &=~BIT5;
 
 }
 

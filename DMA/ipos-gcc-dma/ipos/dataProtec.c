@@ -10,7 +10,7 @@
 #define BLOCKSIZE 128           // The block size of the transfered data in WORDS
 #define ROM_2   (0xFF7F - BLOCKSIZE - BLOCKSIZE)     //we need to duplicate the number of bytes, since the transfer is in words
 #define ROM_1   (0xFF7F - BLOCKSIZE - BLOCKSIZE- BLOCKSIZE - BLOCKSIZE- 0x2)  // DMA transfer more than specified, therefore we added offset
-#define RAM_VARS_ADDR  0x2000
+#define RAM_VARS_ADDR  0x1C00
 
 #include <msp430fr5969.h>
 /************************************

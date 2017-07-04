@@ -5,18 +5,42 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
+#define JUMP();    if(__jump !=1){   \
+                        __current_task_virtual  =  \
+                        (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     /* soft transition */ \
+                    }else{  \
+                        while(__jump_cnt < __jump_to)   \
+                            {   \
+                                __current_task_virtual  =  \
+                                (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  /* soft transition */ \
+                                __jump_cnt++;     \
+                            }       \
+                        __jump = 0;     \
+                        __jump_cnt = 0;    \
+                    }
+
+
 __nv volatile uint8_t __locker              = 0;
 __nv volatile uint8_t __commit_flag         = 0;
 __nv volatile uint16_t __task_address       = 0;    // Modified externally
+__nv volatile uint16_t __temp_task_address  = 0;
 
 __nv volatile uint16_t __virtualTaskSize    = 1; // Disable the virtualization algorithm 2;
 __nv volatile uint16_t __maxVirtualTaskSize = 1; // Disable the virtualization algorithm  100;
      volatile uint16_t __taskCounter        = 1; // Disable the virtualization algorithm  0;
+__nv  volatile uint16_t __temp_taskCounter  = 0;
 __nv volatile uint16_t __totalTaskCounter   = 0;
 
 __nv volatile uint16_t __jump               = 0;
 __nv volatile uint16_t __jump_to            = 0;
      volatile uint16_t __jump_cnt           = 0;
+
+     volatile uint16_t __numBlockedTasks=0;
+     volatile uint16_t __numUnblockedTasks=0;
+__nv volatile uint16_t __temp_numBlockedTasks=0;
+__nv volatile uint16_t __temp_numUnblockedTasks=0;
+__nv funcPt __blockedTasks [16]={0};      // TODO at most 16 tasks can be blocked
+__nv funcPt __unblockedTasks [16]={0};     // TODO at most 16 tasks can be blocked
 
 __nv uint16_t __reboot_state[2]={0};    //virtual Task size control
 
@@ -44,7 +68,8 @@ void os_initTasks( const uint16_t numTasks, funcPt tasks[])
             if (__commit_flag == 1)
                 goto init_commit;
 
-            tasks[i]();   // execute the init tasks
+            // execute the init tasks
+            tasks[i]();
 
             wb_firstPhaseCommit();
             __commit_flag=COMMITTING;
@@ -54,9 +79,11 @@ init_commit:
             i++;
         }while(i != numTasks);
 
-        __locker = __KEY;   // Lock this function
+        // Lock this function
+        __locker = __KEY;
     }
 }
+
 
 void os_jump(uint16_t j)
 {
@@ -64,79 +91,128 @@ void os_jump(uint16_t j)
     __jump_to=j;
 }
 
-void os_scheduler(){
+void os_block(funcPt func)
+{
+    __blockedTasks[__numBlockedTasks] = func;
+    __numBlockedTasks++;
+}
+
+void os_unblock(funcPt func)
+{
+    __unblockedTasks[__numUnblockedTasks] = func;
+    __numUnblockedTasks++;
+}
+
+void os_scheduler()
+{
     if (__commit_flag == COMMITTING)
+    {
         goto commit;
+    }
 
-    if(__locker == __KEY){
-            repopulate();                             // if os_initTasks() is not called,
-                                                      // repopulate() must not be called as well
-        }else{
-            __locker = __KEY;
-        }
+    if(__locker == __KEY)
+    {
+        // if os_initTasks() is not called, repopulate() must not be called as well
+        repopulate();
+    }
+    else
+    {
+        __locker = __KEY;
+    }
 
+    // Task Merging Algorithm (A)
 
-        if(__reboot_state[0] == __task_address )      //Died on the same task
+    /*
+    * OBDERVATION: Dying twice consecutively  on the same virtual task means
+    * this virtual task cannot be executed with the given energy buffer.
+    */
+    if(__reboot_state[0] == __task_address )      //Died on the same task
+    {
+        if(__reboot_state[1] != 0)
         {
-            if(__reboot_state[1] != 0)
+            if(__virtualTaskSize > 1)
             {
-                if(__virtualTaskSize > 1)
-                {
-                    __virtualTaskSize--;               // Decrease the virtual task size
-                    __maxVirtualTaskSize = __virtualTaskSize;
-                }
-                __reboot_state[1] = 0;                // reset the reboot state
+                __virtualTaskSize--;               // Decrease the virtual task size
+                __maxVirtualTaskSize = __virtualTaskSize;
             }
-        }else{                                        // At the very beginning  or  Dying on another task
-            __reboot_state[0] = __task_address;
-            __reboot_state[1] = 1;
+            __reboot_state[1] = 0;                // reset the reboot state
         }
+    }else{                                        // At the very beginning  or  Dying on another task
+        __reboot_state[0] = __task_address;
+        __reboot_state[1] = 1;
+    }
 
-     __current_task_virtual = (uint16_t *) __task_address ;
+    // Recover the virtual state
+    __current_task_virtual = (uint16_t *) __task_address ;
 
     while(1)
     {
-        if( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) == 0  )              // Skip block tasks
+        // Skip blocked tasks
+        while( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) != 0  )
         {
-            ( (funcPt)( *__current_task_virtual ) ) ();                          // access a task
+            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
 
-            __taskCounter++;
-            if( (__taskCounter  >= __virtualTaskSize) )
-            {
-                __task_address  =  (uint16_t) (__current_task_virtual) ;       // firm transition
-
-
-                if( (__totalTaskCounter + __taskCounter) > __totNumTask)
-                {
-                    if(__maxVirtualTaskSize > __virtualTaskSize )
-                    {
-                        __virtualTaskSize++;
-                        __reboot_state[0] = 0;           // To distinguish between consecutive power interrupt
-                                                        // and power interrupt on the same task after a complete round
-                    }
-                }
-
-                wb_firstPhaseCommit();                                  //  First stage, SRAM -> FRAM 
-                __commit_flag=COMMITTING;
-commit:
-                __totalTaskCounter += __taskCounter;
-                wb_secondPhaseCommit();                                 //  Second stage, FRAM -> FRAM
-                __commit_flag=COMMIT_FINISH;
-                __taskCounter=0;
-
-            }
         }
 
-        if(__jump !=1){
-            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     // soft transition
-        }else{
-            while(__jump_cnt < __jump_to)
+        //TODO a better way to skip the blocked tasks might be needed
+        // Maybe it is possible to use only the jump concept
+        uint16_t blockIndx ;
+        for (blockIndx = 0 ;__blockedTasks[blockIndx]; blockIndx++ )
+        {
+            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
+
+        }
+
+        // access a task
+        ( (funcPt)( *__current_task_virtual ) ) ();
+
+        //Task Merging Algorithm (B)
+        __taskCounter++;
+
+        if( (__taskCounter  >= __virtualTaskSize) )
+        {
+            if( (__totalTaskCounter + __taskCounter) > __totNumTask)
+            {
+                if(__maxVirtualTaskSize > __virtualTaskSize )
                 {
-                    __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  // soft transition
-                    __jump_cnt++;
+                    __virtualTaskSize++;
+                    // To distinguish between consecutive power interrupt
+                    // and power interrupt on the same task after a complete round
+                    __reboot_state[0] = 0;
+
                 }
-            __jump = 0;
-            __jump_cnt = 0;
+            }
+
+            // Two stages commit
+            //  First stage, SRAM -> FRAM
+            wb_firstPhaseCommit();
+            // virtual progress
+            JUMP();
+            __temp_task_address = (uint16_t) (__current_task_virtual) ;
+            __temp_taskCounter = __taskCounter;
+            __temp_numBlockedTasks   = __numBlockedTasks;
+            __temp_numUnblockedTasks = __numUnblockedTasks;
+            __commit_flag=COMMITTING;
+commit:
+             // firm transition
+             __task_address  =  __temp_task_address;
+            __totalTaskCounter += __temp_taskCounter;
+            //  Second stage, FRAM -> FRAM
+            wb_secondPhaseCommit();
+
+            // These buffers are being cleared inside the functions
+            __os_block(__blockedTasks,__temp_numBlockedTasks);
+            __os_unblock(__unblockedTasks,__temp_numUnblockedTasks);
+
+            __commit_flag=COMMIT_FINISH;
+
+            __taskCounter=0;
+
+        }
+        else
+        {
+            // virtual progress
+            JUMP();
         }
     }
 }

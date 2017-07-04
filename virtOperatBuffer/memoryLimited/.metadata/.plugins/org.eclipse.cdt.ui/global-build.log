@@ -1428,3 +1428,916 @@ Finished building target: largeDataCommit.out
  
 
 **** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/largeDataCommit" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task0':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:37:13: note: in expansion of macro 'RVAR'
+         x = RVAR(data[i]) +1;
+             ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:38:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], x );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task1':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:48:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:48:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task2':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:58:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:58:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task3':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:69:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:69:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task4':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:79:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:79:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task5':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:87:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], 0 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+Finished building: ../main.c
+ 
+Building target: largeDataCommit.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"largeDataCommit.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"largeDataCommit.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: largeDataCommit.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/largeDataCommit" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task0':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:38:13: note: in expansion of macro 'RVAR'
+         x = RVAR(data[i]) +1;
+             ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:39:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], x );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task1':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:49:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:49:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task2':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:59:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:59:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task3':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:70:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:70:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task4':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:80:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:80:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task5':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:88:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], 0 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+Finished building: ../main.c
+ 
+Building target: largeDataCommit.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"largeDataCommit.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"largeDataCommit.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: largeDataCommit.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/largeDataCommit" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task0':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:38:13: note: in expansion of macro 'RVAR'
+         x = RVAR(data[i]) +1;
+             ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:39:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], x );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task1':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:49:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:49:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task2':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:59:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:59:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task3':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:70:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:70:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task4':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:80:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:80:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task5':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:88:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], 0 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+Finished building: ../main.c
+ 
+Building target: largeDataCommit.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"largeDataCommit.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"largeDataCommit.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: largeDataCommit.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+gmake[1]: 'largeDataCommit.out' is up to date.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/largeDataCommit" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task0':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:38:13: note: in expansion of macro 'RVAR'
+         x = RVAR(data[i]) +1;
+             ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:39:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], x );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task1':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:49:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:49:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task2':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:59:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:59:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task3':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:70:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:70:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task4':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:80:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:80:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task5':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:88:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], 0 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+Finished building: ../main.c
+ 
+Building target: largeDataCommit.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"largeDataCommit.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"largeDataCommit.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: largeDataCommit.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+gmake[1]: 'largeDataCommit.out' is up to date.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+Building file: ../main.c
+Invoking: GNU Compiler
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -c -mmcu=msp430fr5969 -I"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include" -I"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/largeDataCommit" -I"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mlarge -mhwmult=f5series -mcode-region=none -mdata-region=none -MMD -MP -MF"main.d" -MT"main.o" -o"main.o"  "../main.c"
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task0':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+../main.c:38:13: note: in expansion of macro 'RVAR'
+         x = RVAR(data[i]) +1;
+             ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:39:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], x );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task1':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:49:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:49:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task2':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:59:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:59:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task3':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:70:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:70:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task4':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:19:33: warning: passing argument 1 of 'wb_get' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define RVAR(name)   ( (wb_get( &name)) ? __wb_get_val() : name )
+                                 ^
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:47: note: in definition of macro 'WVAR'
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                               ^~~~~
+../main.c:80:23: note: in expansion of macro 'RVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+                       ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:24:10: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ uint16_t wb_get(uint16_t * addr );
+          ^~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:80:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], RVAR(data[i]) +1 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:13:0,
+                 from ../main.c:3:
+../main.c: In function 'task5':
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/psched.h:16:40: warning: passing argument 1 of 'wb_insert' discards 'volatile' qualifier from pointer target type [-Wdiscarded-qualifiers]
+ #define WVAR(name, value)   wb_insert( &name, value)
+                                        ^
+../main.c:88:9: note: in expansion of macro 'WVAR'
+         WVAR(data[i], 0 );
+         ^~~~
+In file included from /Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/ipos.h:12:0,
+                 from ../main.c:3:
+/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/include/operationalBuffer.h:25:6: note: expected 'uint16_t * {aka short unsigned int *}' but argument is of type 'volatile uint16_t * {aka volatile short unsigned int *}'
+ void wb_insert(uint16_t * addr, uint16_t val);
+      ^~~~~~~~~
+Finished building: ../main.c
+ 
+Building target: largeDataCommit.out
+Invoking: GNU Linker
+"/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/bin/msp430-elf-gcc" -Os -g -gdwarf-3 -gstrict-dwarf -Wall -mhwmult=f5series -mcode-region=none -mdata-region=none -mlarge -Wl,-Map,"largeDataCommit.map" -L"/Applications/ti/ccsv7/ccs_base/msp430/include_gcc" -L"/Users/amjad/Documents/github/IPOS/virtOperatBuffer/memoryLimited/ipos-gcc-vob/Debug" -o"largeDataCommit.out" "./main.o" -T"../msp430fr5969.ld"  -Wl,--start-group -lgcc -lipos-gcc-vob -lc -Wl,--end-group 
+Finished building target: largeDataCommit.out
+ 
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+gmake[1]: 'largeDataCommit.out' is up to date.
+
+**** Build Finished ****
+
+**** Build of configuration Debug for project largeDataCommit ****
+
+/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
+gmake[1]: 'largeDataCommit.out' is up to date.
+
+**** Build Finished ****
