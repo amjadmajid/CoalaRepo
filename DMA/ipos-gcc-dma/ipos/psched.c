@@ -126,18 +126,22 @@ void os_scheduler()
     * OBDERVATION: Dying twice consecutively  on the same virtual task means
     * this virtual task cannot be executed with the given energy buffer.
     */
-    if(__reboot_state[0] == __task_address )      //Died on the same task
+    //Died on the same task
+    if(__reboot_state[0] == __task_address )
     {
         if(__reboot_state[1] != 0)
         {
             if(__virtualTaskSize > 1)
             {
-                __virtualTaskSize--;               // Decrease the virtual task size
+                // Decrease the virtual task size
+                __virtualTaskSize--;
                 __maxVirtualTaskSize = __virtualTaskSize;
             }
-            __reboot_state[1] = 0;                // reset the reboot state
+            // reset the reboot state
+            __reboot_state[1] = 0;
         }
-    }else{                                        // At the very beginning  or  Dying on another task
+    }else{
+        // At the very beginning or dying on another task
         __reboot_state[0] = __task_address;
         __reboot_state[1] = 1;
     }
@@ -147,6 +151,14 @@ void os_scheduler()
 
     while(1)
     {
+
+        /*
+         * Skip the persistently and softly blocked tasks
+         *
+         * TODO An alternative way to implement the blocking concept is to take a snapshot
+         * of the blocking status on the virtual task boundaries and to undo any changes
+         * on a power up.
+         */
         // Skip blocked tasks
         while( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) != 0  )
         {
