@@ -40,8 +40,7 @@ ENTRY(_start)
 MEMORY {
   SFR              : ORIGIN = 0x0000, LENGTH = 0x0010 /* END=0x0010, size 16 */
   BSL              : ORIGIN = 0x1000, LENGTH = 0x0800
-  RAM              : ORIGIN = 0x1C00, LENGTH = 0x0400 /* END=0x23FF, size 2048 */
-  RAM_VARS         : ORIGIN = 0x2000, LENGTH = 0x0400 /* END=0x23FF, size 2048 */
+  RAM              : ORIGIN = 0x1C00, LENGTH = 0x0800 /* END=0x23FF, size 2048 */
   INFOMEM          : ORIGIN = 0x1800, LENGTH = 0x0200 /* END=0x19FF, size 512 as 4 128-byte segments */
   INFOA            : ORIGIN = 0x1980, LENGTH = 0x0080 /* END=0x19FF, size 128 */
   INFOB            : ORIGIN = 0x1900, LENGTH = 0x0080 /* END=0x197F, size 128 */
@@ -233,14 +232,7 @@ SECTIONS
     KEEP (*(.dtors))
   } > ROM
 
-  .ram_vars :
-  {
-    . = ALIGN(2);
-    PROVIDE (__ram_vars_start = .);
-    *(.ram_vars)
-    . = ALIGN(2);
-    PROVIDE (__ram_vars_end = .);
-  } > RAM_VARS
+
 
   .nv_vars :
   {

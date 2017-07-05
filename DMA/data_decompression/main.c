@@ -247,11 +247,11 @@ void codeTable(void){
 //       Global variables
 // *******************************
 
-__v uint16_t  readPt;
-__v uint16_t  writePt;
-__v uint16_t  buf;
-__v uint16_t  bufIdx;
-__v uint8_t   byte_flag;
+uint16_t  readPt;
+uint16_t  writePt;
+uint16_t  buf;
+uint16_t  bufIdx;
+uint8_t   byte_flag;
 
 void init_task0()
 {

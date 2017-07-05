@@ -15,11 +15,11 @@ static void burn( uint32_t iters);
 /********************************
   Declare global variables
 ********************************/
-__v uint16_t var1;
-__v uint16_t var2;
-__v uint16_t var3;
-__v uint16_t var4;
-__v uint16_t var5;
+uint16_t var1;
+uint16_t var2;
+uint16_t var3;
+uint16_t var4;
+uint16_t var5;
 
 /********************************
         Helper functions

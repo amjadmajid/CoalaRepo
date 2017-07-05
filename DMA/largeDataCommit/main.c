@@ -5,7 +5,7 @@
 //#define ARRSIZE 50
 #define ARRSIZE 8
 #define FIX_ARRSIZE 128
-__v volatile uint16_t data[FIX_ARRSIZE] = {0};
+volatile uint16_t data[FIX_ARRSIZE] = {0};
 
 void init();
 void task0();
