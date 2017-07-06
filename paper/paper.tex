@@ -47,20 +47,35 @@
 \section{Computation on Intermittent Devices: Background}
 \label{sec:background}
 
-Performing complex operations on battery-less energy harvesting embedded platforms is challenging from many points of view. Here we will briefly provide a background on energy harvesting for embedded systems. 
+Performing complex operations on battery-less energy harvesting embedded platforms is challenging from many points of view. Here we shall briefly provide a background on computation with energy harvesting embedded systems. 
 
 \subsection{Energy Harvesting: Background}
+
+Supplying power to tiny embedded computers using batteries alone is not sustainable. Batteries are a great pollutant. A solution is to replace batteries with smaller, but more environment friendly capacitors and supply power directly from the ambient energy sources. 
+
+What platforms enable intermittent computation: WISP~\cite{} (with its variants such as WISPCam~\cite{}), Moo~\cite{}, ambient backscatter~\cite{}, or computation RFID commercial platforms such as~\cite{}. In case of the above platforms, the main source of energy is electromagnetic radiation in the radio frequency range.
+
+Application include long-term battery-less monitoring. One example is the distributed monitoring of moisture of large plant fields during vegetation~\cite{}. Other applications include battery-less image capture and processing~\cite{}, distributed low-power networking~\cite{}.
+
+Energy provided from the ambient is not stable and difficult to predict accurately. Combined with the fact that energy supply is small, there is little leeway to store enough of energy to guarantee prolonged periods of computation. Energy breaks happen every hundred of ms~\cite{}.
+
+Solution to the problem is to divide the program into smaller pieces that guarantee execution within a discharge region and track the state of the program in-between the program part execution times. 
 
 \subsection{(Task-based) Intermittent Computing: Background}
 
 \begin{figure}
 	\centering
 	%\includegraphics[width=0.25\columnwidth]{figures/}
-	\caption{Background image.}
-	\label{fig:}
+	\caption{Two problems with fixed-size task in intermittent execution. (a) task underestimation: task executed at device with capacitor size $X$, will not execute at device with capacitor $X\gg Y$; (b) task overestimation: with stable energy source task tracking causes unnecessary overhead.}
+	\label{fig:fixed_task_problem}
 \end{figure}
 
-Elaborating on the ``key challenge'' paragraphs near the end of the intro. We will need a picture.
+Various capacitor sizes of intermittent device result in a program being executed 
+
+Other forms of intermittent platforms will share the same problem. One of them considers actuation platforms, which will be powered directly from energy harvesting sources~\cite{}. will share the energy storage with computing platform. However, power supply for actuators is order of magnitude larger than for computation. Therefore, although capacitor is large enough to perform computation alone, energy to power actuators takes precedence leaving not much space for computing.
+
+
+\TODO{Elaborate on the ``key challenge'' paragraphs near the end of the intro.}
 
 \section{\sysfull}
 \label{sec:overeall_system}
