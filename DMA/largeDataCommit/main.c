@@ -2,10 +2,10 @@
 #include <msp430fr5969.h>
 #include <ipos.h>
 
-//#define ARRSIZE 50
-#define ARRSIZE 8
-#define FIX_ARRSIZE 128
-volatile uint16_t data[FIX_ARRSIZE] = {0};
+#define ARRSIZE 128
+#define FIX_ARRSIZE 2048
+__nv volatile uint16_t data[FIX_ARRSIZE] = {0};
+
 
 void init();
 void task0();
@@ -30,10 +30,13 @@ void init()
 ********************************/
 void task0()
 {
+
     volatile uint16_t i;
+    uint16_t x = 0;
     for (i = 0; i < ARRSIZE ; i++)
     {
-        data[i] += 1;
+        x = RVAR(data[i]) +1;
+        WVAR(data[i], x );
     }
 }
 
@@ -43,7 +46,7 @@ void task1()
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)
     {
-        data[i] += 1;
+        WVAR(data[i], RVAR(data[i]) +1 );
     }
 
 }
@@ -53,7 +56,7 @@ void task2()
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)
     {
-        data[i] += 1;
+        WVAR(data[i], RVAR(data[i]) +1 );
     }
 
 }
@@ -64,7 +67,7 @@ void task3()
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)
     {
-        data[i] += 1;
+        WVAR(data[i], RVAR(data[i]) +1 );
     }
 }
 
@@ -74,27 +77,22 @@ void task4()
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)
     {
-        data[i] += 1;
+        WVAR(data[i], RVAR(data[i]) +1 );
     }
 }
 void task5()
 {
-
-//    if(data[1] == data[50])
-//    {
-//        P4OUT |= BIT0;
-//        __delay_cycles(500);
-//        P4OUT &= ~BIT0;
-//    }
-
     volatile uint16_t i;
     for (i = 0; i < ARRSIZE ; i++)
     {
-        data[i] = 0;
+        WVAR(data[i], 0 );
     }
 
-        P3OUT |=BIT5;
-        P3OUT &=~BIT5;
+//        P3OUT |=BIT5;
+//        P3OUT &=~BIT5;
+        P4OUT |=BIT0;
+        __delay_cycles(500);
+        P4OUT &= ~BIT0;
 
 }
 
