@@ -133,7 +133,7 @@ void __bringPagROM(uint16_t pagTag)
 }
 
 /*
- * Bring a page to its ROM buffer
+ * Send a page to its final locaiton
  */
 void __sendPagROM(uint16_t pagTag)
 {
@@ -171,6 +171,10 @@ void __pagsCommit()
     for (cnt=0; cnt < NUM_PAG; cnt++)
     {
         // send the pages to their final locations in ROM
+        if(__persis_pagsInTemp[cnt] )
+        {
+            __sendPagROM( __persis_pagsInTemp[cnt] );
+        }
     }
 
 }
