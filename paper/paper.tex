@@ -1,32 +1,34 @@
 \documentclass[sigconf,anonymous,review]{acmart}
+
 \usepackage[normalem]{ulem}
-
-
-\usepackage{amssymb} % needed for: various symbols
-\usepackage{amsmath} % needed for: math symbols
-% http://tex.stackexchange.com/questions/229355/algorithm-algorithmic-algorithmicx-algorithm2e-algpseudocode-confused
-\usepackage{algorithm} % this used as an environment for the algorithm code (linke figure and table)
-\usepackage{algorithmicx} % this is used to write the pseudo code
-\usepackage[noend]{algpseudocode} % this is for the layout of the pseudo code
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm} % environment for the algorithm code (like figure and table)
+\usepackage{algorithmicx} % write the pseudo code
+\usepackage[noend]{algpseudocode} % layout of the pseudo code
 \usepackage{tikz} % needed for: tikz pics
-% \usepackage[inline]{enumitem}
 \usepackage{xcolor}
 \usepackage{xspace}
 \usepackage{natbib}
-
-\usepackage{graphicx}  
+\usepackage{graphicx}
 \usepackage{subfigure}
+%\usepackage[inline]{enumitem}
+
 \newcommand{\TODO}[1]{{\bf \em \textcolor{red}{TODO: #1}\xspace}}
-\newcommand{\sys}{NAME\xspace}
+\newcommand{\sys}{VIPRE\xspace}
+\newcommand{\sysfull}{Virtualized Intermittently-Powered Runtime Environment\xspace}
 
 \begin{document}
 
 \title{VIPRE: Virtualized Intermittently-Powered Runtime Environment}
-% \author{
-% 	\IEEEauthorblockN{Amjad Yousef Majid, Przemys{\l}aw Pawe{\l}czak}
-% 	\IEEEauthorblockA{TU Delft, Mekelweg\,4, 2628\,CD Delft, NL\\
-% 	\{a.y.majid, p.pawelczak\}@tudelft.nl}
-% }
+
+%Amjad Yousef Majid, Kas{\i}m Sinan Y{\i}ld{\i}r{\i}m, Przemys{\l}aw Pawe{\l}czak,
+%TU Delft, Mekelweg\,4, 2628\,CD Delft, NL
+%\{a.y.majid, k.s.yildirim, p.pawelczak\}@tudelft.nl
+%
+%Kiwan Maeng, Alexei Collin, Brandon Lucia
+%Carnegie Mellon University, 4720 Forbes Avenue, Pittsburgh, PA 15213, USA
+%\{kmaeng, acolin, blucia\}@kmaeng@andrew.cmu.edu
 
 \begin{abstract}
 \input{abstract}
@@ -36,12 +38,77 @@
 
 \section{Introduction}
 \label{sec:intro}
-\TODO{VIPER: Virtualized Intermittent Programming model, Execution model, and Runtime environment}
-\TODO{PREVIEW: Programming and Runtime Environment with Virtualized Intermittent Execution Windows}
+
+%\TODO{VIPER: Virtualised Intermittent Programming model, Execution model, and Runtime environment}
+%\TODO{PREVIEW: Programming and Runtime Environment with Virtualised Intermittent Execution Windows}
 
 \input{intro}
 
+\section{Computation on Intermittent Devices: Background}
+\label{sec:background}
 
+Performing complex operations on battery-less energy harvesting embedded platforms is challenging from many points of view. Here we will briefly provide a background on energy harvesting for embedded systems. 
+
+\subsection{Energy Harvesting: Background}
+
+\subsection{(Task-based) Intermittent Computing: Background}
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/}
+	\caption{Background image.}
+	\label{fig:}
+\end{figure}
+
+Elaborating on the ``key challenge'' paragraphs near the end of the intro. We will need a picture.
+
+\section{\sysfull}
+\label{sec:overeall_system}
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/}
+	\caption{\sys top-level description.}
+	\label{fig:}
+\end{figure}
+
+Describe the overall system, the programming model, and the semantics/execution model. This should include a discussion of memory virtualization and task coalescing.
+
+\section{Memory Virtualization}
+\label{sec:memory_virtulaization}
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/}
+	\caption{Memory virtualization architecture.}
+	\label{fig:}
+\end{figure}
+
+\section{Task Coalescing}
+\label{sec:memory_virtulaization}
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/}
+	\caption{Task coalescing architecture.}
+	\label{fig:}
+\end{figure}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\section{Methodology and Evaluation}
+\label{sec:methodology_evaluation}
+
+\section{Related Work}
+\label{sec:related_work}
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+This paper presented \sys: \sysfull.
+
+%%%%%
 
 \section{Old Introduction}
 	Intermittently powered devices (IPDs) are battery-less devices that utilize the ambient energy to sense, compute and, communicate. For example, Wireless Identification and Sensing platform WISP \cite{wisp} uses the RF signal power to drive its computation and communication. Because of the reliance of TPDs on intermittent power supply, the harvested energy when it is available, their programs are susceptible to a very frequent power interrupts, in the order of tens of millisconds~\cite{}. Therefore, these devices require a different software execution model that complies with the nature of a discontinuous power supply. 
