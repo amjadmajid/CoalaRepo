@@ -19,9 +19,13 @@ void __pagsCommit();
 
 
 // Memory Access interface
-                                         // Shift the var to RAM
-#define WVAR(var)  (*(__typeof__(var)*  ( (unsigned int)&var | BIGEN_RAM)))     = var;
 
+// check var in current page
+#define WVAR(var)   ( __is_varInCrntPag( &var) )?\
+                    // read the var from the current page
+                    (*(__typeof__(var)*  ( (unsigned int)&var | BIGEN_RAM)))     = var:\
+                    // do page swapping and read the var
+                    ( *(__typeof__(var)* )(__pageSwap(&var)+( ((unsigned int)&var) | BIGEN_RAM) ) ) = var;
 
                     // check var in current page
 #define RVAR(var)   ( __is_varInCrntPag( &var) )?\
