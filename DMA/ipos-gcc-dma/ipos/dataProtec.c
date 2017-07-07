@@ -12,38 +12,12 @@
               Paging
 #####################################*/
 
-/*
- * Max available memory is 48/2 = 24
- * Page size = 1KB
- * Maximum number of supported pages are 8
- * the tags (6 MSb)
- * 0000 01 (0x0400) (1KB)
- * 0000 10 (0x0800) (2KB)
- * 0000 11 (0x0c00) (3KB)
- * 0001 00 (0x1000) (4KB)
- * 0001 01 (0x1400) (5KB)
- * 0001 10 (0x1800) (6KB)
- * 0001 11 (0x1c00) (7KB)
- * 0010 00 (0x2000) (8KB)
- */
-
-
-// The location of any page is given by (BIGEN_ROM + pag_tag - PAG_SIZE)
-// The TEMP location of any page is given by ( END_ROM - TOT_PAG_SIZE + pag_tag - PAG_SIZE )
-#define END_ROM         0xFF7F
-#define BIFEN_ROM       0x4400
-#define BIGEN_RAM       0x1C00
-#define PAG_SIZE        0x400  // 1KB
-#define NUM_PAG         8
-#define PAG_ID_MSK      0xf
-#define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
-#define PAG_TAG_MSK     0xfc00
 
 uint16_t __pagsInTemp[NUM_PAG] = {0};
 __nv uint16_t __persis_pagsInTemp[NUM_PAG] = {0};
 
 // 1KB
-volatile uint16_t CrntPagTag = 0x0400;
+uint16_t CrntPagTag = PAG_SIZE;
 volatile uint16_t maskVar=0;
 __nv uint8_t pageCommit = 0;
 /*
@@ -56,7 +30,7 @@ uint16_t __is_varInCrntPag(uint16_t * var)
     // keep only the 6 MSb
      maskVar = (uint16_t)var & PAG_TAG_MSK;
     // If a variable is in the current page then its 6 MSb equals the tag of the page
-    return   ((maskVar & CrntPagTag) == CrntPagTag) ;
+    return   (uint16_t)((maskVar & CrntPagTag) == CrntPagTag) ;
 }
 
 
@@ -86,7 +60,7 @@ uint16_t __pageSwap(uint16_t ReqPagTag)
 void __sendPagTemp(uint16_t pagTag)
 {
     // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) BIGEN_RAM);
+    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) END_RAM-PAG_SIZE);
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) (END_ROM - TOT_PAG_SIZE + pagTag - PAG_SIZE) );
                                             // Destination single address
@@ -107,7 +81,7 @@ void __bringPagTemp(uint16_t pagTag)
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (END_ROM - TOT_PAG_SIZE + pagTag - PAG_SIZE) );
                                             // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  BIGEN_RAM);
+    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  END_RAM-PAG_SIZE);
                                             // Destination single address
     DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
@@ -124,7 +98,7 @@ void __bringPagROM(uint16_t pagTag)
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (BIFEN_ROM + pagTag - PAG_SIZE) );
                                             // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  BIGEN_RAM);
+    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  END_RAM-PAG_SIZE);
                                             // Destination single address
     DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
@@ -142,6 +116,24 @@ void __sendPagROM(uint16_t pagTag)
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (END_ROM - TOT_PAG_SIZE + pagTag - PAG_SIZE) );
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  (BIFEN_ROM + pagTag - PAG_SIZE) );
+                                            // Destination single address
+    DMA1SZ = PAG_SIZE;                            // Block size
+    DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
+    DMA1CTL |= DMAEN;                         // Enable DMA0
+
+    DMA1CTL |= DMAREQ;                      // Trigger block transfer
+}
+
+
+/*
+ * Bring a page to its ROM buffer
+ */
+void __bringCrntPagROM()
+{
+    // Configure DMA channel 1
+    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (BIFEN_ROM + CrntPagTag - PAG_SIZE) );
+                                            // Source block address
+    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  END_RAM-PAG_SIZE);
                                             // Destination single address
     DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc

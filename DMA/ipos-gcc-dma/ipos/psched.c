@@ -71,10 +71,9 @@ void os_initTasks( const uint16_t numTasks, funcPt tasks[])
             // execute the init tasks
             tasks[i]();
 
-            wb_firstPhaseCommit();
             __commit_flag=COMMITTING;
 init_commit:
-            wb_secondPhaseCommit();
+            __pagsCommit();
             __commit_flag=COMMIT_FINISH;
             i++;
         }while(i != numTasks);
@@ -110,15 +109,8 @@ void os_scheduler()
         goto commit;
     }
 
-    if(__locker == __KEY)
-    {
-        // if os_initTasks() is not called, repopulate() must not be called as well
-        repopulate();
-    }
-    else
-    {
-        __locker = __KEY;
-    }
+    __bringCrntPagROM();
+
 
     // Task Merging Algorithm (A)
 
