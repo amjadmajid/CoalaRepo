@@ -194,10 +194,6 @@ void os_scheduler()
 
                 }
             }
-
-            // Two stages commit
-            //  First stage, SRAM -> FRAM
-            wb_firstPhaseCommit();
             // virtual progress
             JUMP();
             __temp_task_address = (uint16_t) (__current_task_virtual) ;
@@ -209,8 +205,8 @@ commit:
              // firm transition
              __task_address  =  __temp_task_address;
             __totalTaskCounter += __temp_taskCounter;
-            //  Second stage, FRAM -> FRAM
-            wb_secondPhaseCommit();
+            //  Commit pages to their final locations
+            __pagsCommit();
 
             // These buffers are being cleared inside the functions
             __os_block(__blockedTasks,__temp_numBlockedTasks);

@@ -5,6 +5,10 @@
  *      Author: amjad
  */
 
+#include <msp430fr5969.h>
+#include <stdint.h>
+#include "global.h"
+
 #ifndef INCLUDE_DATAPROTEC_H_
 #define INCLUDE_DATAPROTEC_H_
 
@@ -22,16 +26,12 @@ void __pagsCommit();
 
 // check var in current page
 #define WVAR(var)   ( __is_varInCrntPag( &var) )?\
-                    // read the var from the current page
                     (*(__typeof__(var)*  ( (unsigned int)&var | BIGEN_RAM)))     = var:\
-                    // do page swapping and read the var
                     ( *(__typeof__(var)* )(__pageSwap(&var)+( ((unsigned int)&var) | BIGEN_RAM) ) ) = var;
 
                     // check var in current page
 #define RVAR(var)   ( __is_varInCrntPag( &var) )?\
-                    // read the var from the current page
                     ( *(__typeof__(var)* )( ((unsigned int)&var) | BIGEN_RAM) ):\
-                    // do page swapping and read the var
                     ( *(__typeof__(var)* )(__pageSwap(&var)+( ((unsigned int)&var) | BIGEN_RAM) ) );
 
 #endif /* INCLUDE_DATAPROTEC_H_ */

@@ -5,8 +5,8 @@
  *  Created on: 16 May 2017
  *      Author: Amjad
  */
-#include <msp430fr5969.h>
 
+#include "dataProtec.h"
 
 /*####################################
               Paging
@@ -39,12 +39,13 @@
 #define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
 #define PAG_TAG_MSK     0xfc00
 
-uint16_t __pagsInTemp[NUM_PAG] = {0}
-__nv uint16_t __persis_pagsInTemp[NUM_PAG] = {0}
+uint16_t __pagsInTemp[NUM_PAG] = {0};
+__nv uint16_t __persis_pagsInTemp[NUM_PAG] = {0};
 
 // 1KB
 volatile uint16_t CrntPagTag = 0x0400;
 volatile uint16_t maskVar=0;
+__nv uint8_t pageCommit = 0;
 /*
  * __is_varInCrntPag checks if a variable is in the current page
  * return: 0 page fault
@@ -53,7 +54,7 @@ volatile uint16_t maskVar=0;
 uint16_t __is_varInCrntPag(uint16_t * var)
 {
     // keep only the 6 MSb
-     maskVar = var & PAG_TAG_MSK;
+     maskVar = (uint16_t)var & PAG_TAG_MSK;
     // If a variable is in the current page then its 6 MSb equals the tag of the page
     return   ((maskVar & CrntPagTag) == CrntPagTag) ;
 }
@@ -65,14 +66,14 @@ uint16_t __is_varInCrntPag(uint16_t * var)
 uint16_t __pageSwap(uint16_t ReqPagTag)
 {
     // Send the current page to its temp location
-     sendPagTemp( CrntPagTag );
-     if( pagsInTemp[ReqPagTag & PAG_TAG_MSK] == ReqPagTag)
+     __sendPagTemp( CrntPagTag );
+     if( __pagsInTemp[ReqPagTag & PAG_TAG_MSK] == ReqPagTag)
      {
          // Bring from the temp buffer
-         bringPagTemp(CrntPagTag);
+         __bringPagTemp(ReqPagTag);
      }else{
         // bring from pages final locations in ROM
-         bringPagROM(pagTag);
+         __bringPagROM(ReqPagTag);
      }
      // keep track of the current page
      CrntPagTag = ReqPagTag;
@@ -89,13 +90,13 @@ void __sendPagTemp(uint16_t pagTag)
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) (END_ROM - TOT_PAG_SIZE + pagTag - PAG_SIZE) );
                                             // Destination single address
-    DMA1SZ = PAGE_SIZE;                            // Block size
+    DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
     DMA1CTL |= DMAEN;                         // Enable DMA0
 
     DMA1CTL |= DMAREQ;                      // Trigger block transfer
     // Keep track of the buffered pages
-    pagsInTemp[pagTag & PAG_TAG_MSK] = pagTag;
+    __pagsInTemp[pagTag & PAG_TAG_MSK] = pagTag;
 }
 
 /*
@@ -108,7 +109,7 @@ void __bringPagTemp(uint16_t pagTag)
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  BIGEN_RAM);
                                             // Destination single address
-    DMA1SZ = PAGE_SIZE;                            // Block size
+    DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
     DMA1CTL |= DMAEN;                         // Enable DMA0
 
@@ -125,7 +126,7 @@ void __bringPagROM(uint16_t pagTag)
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  BIGEN_RAM);
                                             // Destination single address
-    DMA1SZ = PAGE_SIZE;                            // Block size
+    DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
     DMA1CTL |= DMAEN;                         // Enable DMA0
 
@@ -142,7 +143,7 @@ void __sendPagROM(uint16_t pagTag)
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  (BIFEN_ROM + pagTag - PAG_SIZE) );
                                             // Destination single address
-    DMA1SZ = PAGE_SIZE;                            // Block size
+    DMA1SZ = PAG_SIZE;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
     DMA1CTL |= DMAEN;                         // Enable DMA0
 
@@ -158,11 +159,11 @@ void __pagsCommit()
     if(!pageCommit)
     {
         // send the current page to the temp buffer
-        sendPagTemp(pagTag);
+        __sendPagTemp(CrntPagTag);
         uint16_t i;
         for (i=0; i < NUM_PAG; i++)
         {
-            __persis_pagsInTemp[i] = __pagsInTem[i];
+            __persis_pagsInTemp[i] = __pagsInTemp[i];
         }
         pageCommit = 1;
     }
@@ -176,6 +177,8 @@ void __pagsCommit()
             __sendPagROM( __persis_pagsInTemp[cnt] );
         }
     }
+
+    pageCommit = 0;  // enable sending the first page to the temp buffer
 
 }
 
