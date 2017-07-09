@@ -1,28 +1,19 @@
-Advances in processor efficiency along with the development of energy-harvesting power systems has created a new category of devices that require neither a battery nor a tethered power supply~\cite{prasad_comst_2014,lucia_snapl_2017,soyata_csm_2016}. These devices operate entirely using energy extracted from their environment, such as RF energy~\cite{rf_powered_computing_gollakota_2014}, photovoltaic components~\cite{margolies_infocom_2016,margolies_tosn_2016}, and vibration~\cite{gorlatova_sigmetrics_2014}. Incorporating compute, storage, sensing, and communication hardware, such energy-independent devices are a promising candidate as the underlying technology for emerging Internet of Things (IoT) applications~\cite{ku_cst_2016}, in-body~\cite{nadeau_naturebio_2017} and on-body~\cite{bandodkar_electroanalysis_2015} medical applications, and emerging applications, like energy-harvesting nano-satellites~\cite{kicksat}.
+Advances in processor efficiency along with the development of energy-harvesting power systems has created a new category of devices that require neither a battery nor a tethered power supply~\cite{prasad_comst_2014,lucia_snapl_2017,soyata_csm_2016}. These devices operate entirely using energy extracted from their environment, such as RF energy~\cite{rf_powered_computing_gollakota_2014}, photovoltaic components~\cite{margolies_infocom_2016,margolies_tosn_2016}, and vibration~\cite{gorlatova_sigmetrics_2014}. Incorporating compute, storage, sensing, and communication hardware, such energy-independent devices are a promising underlying technology for applications in emerging areas such as Internet of Things (IoT)~\cite{ku_cst_2016}, in-body~\cite{nadeau_naturebio_2017} and on-body~\cite{bandodkar_electroanalysis_2015} medical systems, and energy-harvesting nano-satellites~\cite{kicksat}.
 
 While promising, energy-harvesting devices present a unique design challenge in
-that they operate only {\em intermittently} when energy is available. An
+that they operate only {\em intermittently} when energy is available~\cite{hicks_isca_2017,lucia_snapl_2017}. An
 energy-harvesting device buffers energy from its environment, e.g., in a
-capacitor. When a threshold quantity of energy accumulates, the device begins
-operating. Harvestable energy sources typically produce relatively very little
-power compared to a platform's operating power level. A devices operates for a
-brief period of time and when buffered energy is depleted, shuts down and
-begins recharging to later operate again. Charge and discharge times vary by
-device and some devices~\cite{wisp} may fail 10 to 100 times per second~\cite{}.
+capacitor~\cite[Fig. 3]{gorlatova_tmc_2013},~\cite[Fig. 1]{gunduz_commag_2014}. When a threshold quantity of energy accumulates, the device begins operating. Harvestable energy sources typically produce relatively very little power compared to a platform's operating power level---compare for instance~\cite[Table III and V]{prasad_comst_2014} with~\cite[Table I]{carrano_cst_2014}. A devices operates for a brief period of time and when buffered energy is depleted, shuts down and begins recharging to later operate again. As an example, inter-task time may even exceed 20\,s for wireless energy-harvesting battery-less vivo digestive tract monitoring system~\cite[Fig. 3c]{nadeau_naturebio_2017}. Charge and discharge times vary by device and some of them~\cite{wisp} may fail $\approx$10 to $\approx$100 times per second~\cite[Fig. 1]{tan_infocom_2016},~\cite[Fig. 1]{mementos}.
+
+\todo{Put exact reference for "tictpl"}{Brandon}
 
 Software in an energy-harvesting system operates according to the {\em
-intermittent execution model}~\cite{dino}, with bursts of execution that are
-interrupted by failure periods. When power fails, a device loses its volatile
-state, i.e., registers, stack, SRAM, and retains its non-volatile state, i.e.,
-FRAM, Flash. While capturing periodic checkpoints~\cite{mementos,tictpl,quickrecall}
-and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help to preserve
-execution progress, failures can leave volatile and non-volatile state inconsistent, leading to unrecoverable failures~\cite{mspcdino,edb,edbtoppicks}. 
-
-\TODO{Don't forget to include all the references in this section!}
+intermittent execution model}~\cite[Sec. 2]{dino}~\cite[Fig. 2]{lucia_snapl_2017}, with bursts of execution that are interrupted by failure periods. When power fails, a device loses its volatile state, i.e., registers, stack, SRAM, and retains its non-volatile state, i.e., FRAM, Flash. While capturing periodic checkpoints~\cite{mementos,quickrecall} and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help to preserve execution progress, failures can leave volatile and non-volatile state inconsistent, leading to unrecoverable failures~\cite{mspcdino,edb}. 
 
 %FRAM costs more than FRAM -- need to figure out how to execute out of SRAM
+
 New programming and execution models~\cite{dino,ratchet,chain,alpaca} and
-architecture mechanisms~\cite{clank,idetic,nvp} help avoid data
+architecture mechanisms~\cite{hicks_isca_2017,idetic,nvp} help avoid data
 inconsistency. New architectures require costly hardware changes and are
 inapplicable to today's systems. New programming models and compilers force
 programmers to use new memory models~\cite{chain,ratchet}, which may inhibit

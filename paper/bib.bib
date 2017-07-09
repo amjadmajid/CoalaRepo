@@ -1,5 +1,118 @@
 @STRING{IEEE_M_CAS= "{IEEE} Circuits Syst. Mag."}
 @STRING{IEEE_O_CSTO = "{IEEE} Commun. Surveys Tuts."}
+@STRING{IEEE_M_COM = "{IEEE} Commun. Mag."}
+@STRING{IEEE_J_MC = "{IEEE} Trans. Mobile Comput."}
+@STRING{IEEE_J_CAD = "{IEEE} Trans. Comput.-Aided Design Integr. Circuits Syst."}
+@STRING{IEEE_J_ES = "{IEEE} Embedded Syst. Lett."}
+@STRNIG{ACM_TOSN = "{ACM} Trans. Sen. Netw."}
+
+@inproceedings{edb,
+	title = "An energy-interference-free hardware-software debugger for intermittent energy-harvesting systems",
+	author = "Alexei {Colin} and Graham {Harvey} and Brandon {Lucia} and Alanson P. {Sample}",
+	booktitle = "Proc. ASPLOS",
+	month = apr  # " 2--6,",
+	address = "Atlanta, GA, USA",
+	pages = {577--589},
+	year = {2016},
+	publisher = {ACM}
+}
+
+@inproceedings{mspcdino,
+	title = "Nonvolatile memory is a broken time machine",
+	author = "Benjamin {Ransford} and Brandon {Lucia}",
+	booktitle = {Proc. MSPC},
+	address = "Edinburgh, United Kingdom",
+	month = jun  # " 13,",
+	year = {2014},
+	organization = {ACM}
+}
+
+@inproceedings{dewdrop,
+	title = "Dewdrop: an energy-aware runtime for computational {RFID}",
+	author = "Michael {Buettner} and Ben {Greenstein} and David {Wetherall}",
+	booktitle = {Proc. NSDI},
+	address = "Boston, MA, USA",
+ 	month_ = {Mar. 30~--~Apr. 1,},
+	pages = {197--210},
+	year = {2011},
+	publisher = "USENIX"
+}
+
+@article{hibernus,
+	title = "{Hibernus}: Sustaining computation during intermittent supply for energy-harvesting systems",
+	author = "Domenico {Balsamo} and Alex S. {Weddell} and Geoff V. {Merrett} and Bashir M. {Al-Hashimi} and Davide {Brunelli} and Luca {Benini}",
+	journal = IEEE_J_ES,
+	month = mar,
+	volume = {7},
+	number = {1},
+	pages = {15--18},
+	year = {2015},
+	publisher = "IEEE"
+}
+
+@article{hibernusplusplus,
+	title = "{Hibernus++}: a self-calibrating and adaptive system for transiently-powered embedded devices",
+	author = "Domenico {Balsamo} and Alex S. {Weddell} and Anup {Das} and Alberto  Rodriguez {Arreola} and Davide {Brunelli} and Bashir M. {Al-Hashimi} and Geoff V. {Merrett} and Luca {Benini}",
+	journal = IEEE_J_CAD,
+	month = dec,
+	volume = {35},
+	number = {12},
+	pages = {1968--1980},
+	year = {2016},
+	publisher = {IEEE}
+}
+
+@inproceedings{quickrecall,
+	title = "{QuickRecall}: A Low Overhead {HW/SW} Approach for Enabling Computations across Power Cycles in Transiently Powered Computers",
+	author = "Hrishikesh {Jayakumar} and Arnab {Raha} and Vijay {Raghunathan}",
+	booktitle = {Proc. International Conference on Embedded Systems Design},
+	month = jan  # " 5--9,",
+	year = "2014",
+	pages = {330--335},
+	address = {Mumbai, India},
+	publisher = "IEEE"
+}
+
+@inproceedings{dino,
+	title = "A simpler, safer programming and execution model for intermittent systems",
+	author = "Brandon {Lucia} and Benjamin {Ransford}",
+	booktitle = "Proc. PLDI",
+	address = "Portland, OR, US",
+	year = "2015",
+	month = jun # " 13--17,",
+	publisher = {ACM}
+}
+
+@article{carrano_cst_2014,
+	title = "Survey and Taxonomy of Duty Cycling Mechanisms in Wireless Sensor Networks",
+	author = "Ricardo C. {Carrano} and Diego {Passos} and Luiz C. S. {Magalhaes}",
+	journal = IEEE_O_CSTO,
+	volume = "16",
+	number = "1",
+	pages = "181--194",
+	month = "{First Quarter}"
+	year = {2014},
+	publisher = "IEEE"
+}
+
+@inproceedings{hicks_isca_2017,
+	author = "Matthew {Hicks}",
+	title = "Clank: Architectural Support for Intermittent Computation",
+	booktitle = "Proc. ISCA",
+	month = jun # " 24--28,",
+	address = "Toronto, ON, Canada"
+	year = "2017"}
+
+@inproceedings{mementos,
+	title = "Mementos: System support for long-running computation on {RFID}-scale devices",
+	author = "Benjamin {Ransford} and Jacob {Sorber} and Kevin {Fu}",
+	journal = "Proc. ASPLOS",
+	address = "Newport Beach, CA, USA",
+	month = mar # " 5--11,",
+	pages = {159--170},
+	year = {2012},
+	publisher = {ACM}
+}
 
 @online{kicksat,
 	author = "Zac {Manchester}",
@@ -34,6 +147,17 @@
 	publisher = "IEEE"
 }
 
+@inproceedings{tan_infocom_2016,
+	author = "Jethro {Tan} and Przemys{\l}aw {Pawe{\l}czak} and Aaron {Parks} and Joshua R. {Smith}", 
+	booktitle = "Proc. INFOCOM", 
+	title = "Wisent: Robust Downstream Communication and Storage for Computational {RFIDs}", 
+	year = "2016",
+	pages = "1--9",
+	month = apr # " 10--15,", 
+	address = "San Francisco, CA, USA",
+	publisher = "IEEE"
+}
+
 @article{prasad_comst_2014,
 	title = "Reincarnation in the Ambiance: Devices and Networks with Energy Harvesting",
 	author = "R. Venkatesha {Prasad} and Shruti {Devasenapathy} and Vijay S. {Rao} and Javad {Vazifehdan}",
@@ -46,20 +170,45 @@
 	publisher = "IEEE"
 }
 
+@article{gorlatova_tmc_2013,
+	author = "Maria {Gorlatova} and Aya {Wallwater} and Gil {Zussman}",
+	title = "Networking Low-Power Energy Harvesting Devices: Measurements and Algorithms",
+	journal = IEEE_J_MC,
+	volume = "12", 
+	number =  "9",
+	month = sep, 
+	year = "2013"
+	pages = "1853--1865",
+	publisher = "IEEE"
+	
+}
+
+@article{gunduz_commag_2014,
+	author = "Deniz {G\"{u}nd\"{u}z} and Kostas {Stamatiou} and Nicolo {Michelusi} and Michele {Zorzi}",
+	title = "Designing intelligent energy harvesting communication systems",
+	year = "2014",
+	journal = IEEE_M_COM,
+	month = jan,
+	volume = "52",
+	number = "1",
+	pages = " 210--216",
+	publisher = "IEEE"
+}
+
 @article{rf_powered_computing_gollakota_2014,
 	author = "Shyamnath {Gollakota} and Matthew {Reynolds} and Joshua {Smith} and David {Wetherall}",
 	title = "The Emergence of {RF}-Powered Computing",
-	journal = {Computer},
-	volume = {47},
-	number = {1},
+	journal = "Computer",
+	volume = "47",
+	number = "1",
 	month = jan,
-	year = {2014},
-	pages = {32--39},
+	year = "2014",
+	pages = "32--39",
 	publisher = {IEEE}
 } 
 
 @inproceedings{lucia_snapl_2017,
-	title = {Intermittent Computing: Challenges and Opportunities},
+	title = "Intermittent Computing: Challenges and Opportunities",
 	author = "Brandon {Lucia} and Vignesh {Balaji} and Alexei {Colin} and Kiwan {Maeng} and Emily {Ruppel}",
 	booktitle = "Proc. SNAPL",
 	pages = {},
@@ -97,7 +246,7 @@
 	month = nov,
 	volume = "11",
 	number = "4",
-	journal = "ACM Trans. Sen. Netw.",
+	journal = ACM_TOSN,	
 	pages = "62:1--62:27",
 	publisher = "ACM"
 }
@@ -124,17 +273,6 @@
 	title = "Prolonged energy harvesting for ingestible devices",
 	year = "2017",
 	publisher = "Macmillan Publishers Ltd."
-}
-
-@article{edb,
-	title={An energy-interference-free hardware-software debugger for intermittent energy-harvesting systems},
-	author={Colin, Alexei and Harvey, Graham and Lucia, Brandon and Sample, Alanson P},
-	journal={ACM SIGPLAN Notices},
-	volume={51},
-	number={4},
-	pages={577--589},
-	year={2016},
-	publisher={ACM}
 }
 
 @misc{forth,
@@ -171,25 +309,6 @@
 	organization={IEEE}
 }
 
-@article{hibernus,
-	title={Hibernus: Sustaining computation during intermittent supply for energy-harvesting systems},
-	author={Balsamo, Domenico and Weddell, Alex S and Merrett, Geoff V and Al-Hashimi, Bashir M and Brunelli, Davide and Benini, Luca},
-	journal={IEEE Embedded Systems Letters},
-	volume={7},
-	number={1},
-	pages={15--18},
-	year={2015},
-	publisher={IEEE}
-}
-@inproceedings{mspcdino,
-	title={Nonvolatile memory is a broken time machine},
-	author={Ransford, Benjamin and Lucia, Brandon},
-	booktitle={Proceedings of the workshop on Memory Systems Performance and Correctness},
-	pages={5},
-	year={2014},
-	organization={ACM}
-}
-
 @inproceedings{edbcases,
 	author = {Colin, Alexei and Sample, Alanson P. and Lucia, Brandon},
 	title = {Energy-interference-free System and Toolchain Support for Energy-harvesting Devices},
@@ -222,17 +341,6 @@
 	publisher = {ACM},
 	address = {New York, NY, USA},
 } 
-
-@inproceedings{dino,
-	title={A simpler, safer programming and execution model for intermittent systems},
-	author={Lucia, Brandon and Ransford, Benjamin},
-	booktitle={ACM SIGPLAN Notices},
-	volume={50},
-	number={6},
-	pages={575--585},
-	year={2015},
-	organization={ACM}
-}
 
 @inproceedings{idempotent2,
 	title={Static analysis and compiler design for idempotent processing},
@@ -323,24 +431,6 @@
 	year={2011},
 	publisher={ACM}
 }
-@article{mementos,
-	title={Mementos: System support for long-running computation on RFID-scale devices},
-	author={Ransford, Benjamin and Sorber, Jacob and Fu, Kevin},
-	journal={Acm Sigplan Notices},
-	volume={47},
-	number={4},
-	pages={159--170},
-	year={2012},
-	publisher={ACM}
-}
-@inproceedings{quickrecall,
-	title={QuickRecall: A low overhead HW/SW approach for enabling computations across power cycles in transiently powered computers},
-	author={Jayakumar, Hrishikesh and Raha, Arnab and Raghunathan, Vijay},
-	booktitle={VLSI Design and 2014 13th International Conference on Embedded Systems, 2014 27th International Conference on},
-	pages={330--335},
-	year={2014},
-	organization={IEEE}
-}
 
 @inproceedings{bailey:hotos11,
 	author    = {Katelin Bailey and Luis Ceze and Steven D. Gribble and
@@ -361,13 +451,6 @@
 	year      = 2004,
 	month     = Nov,
 	ee        = {\url{http://www.sics.se/~adam/dunkels04contiki.pdf}}
-}
-@inproceedings{dewdrop,
-	title={Dewdrop: an energy-aware runtime for computational RFID},
-	author={Buettner, Michael and Greenstein, Ben and Wetherall, David},
-	booktitle={Proc. USENIX NSDI},
-	pages={197--210},
-	year={2011}
 }
 
 @article{wisp,
@@ -658,17 +741,6 @@
 	pages={174--177},
 	year={2006},
 	organization={IEEE}
-}
-
-@article{hibernusplusplus,
-	title={Hibernus++: a self-calibrating and adaptive system for transiently-powered embedded devices},
-	author={Balsamo, Domenico and Weddell, Alex S and Das, Anup and Arreola, Alberto Rodriguez and Brunelli, Davide and Al-Hashimi, Bashir M and Merrett, Geoff V and Benini, Luca},
-	journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems},
-	volume={35},
-	number={12},
-	pages={1968--1980},
-	year={2016},
-	publisher={IEEE}
 }
 
 @inproceedings{mitbutton,
