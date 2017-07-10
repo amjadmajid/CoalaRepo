@@ -7,10 +7,10 @@
 
 #include <msp430fr5969.h>
 #include <stdint.h>
-#include "global.h"
 
 #ifndef INCLUDE_DATAPROTEC_H_
 #define INCLUDE_DATAPROTEC_H_
+
 
 /*
  * Max available memory is 48/2 = 24
@@ -58,6 +58,7 @@ void __bringCrntPagROM();
 //                    (*(__typeof__(var)*  ( (unsigned int)(&var)) | BIGEN_RAM)))   = val :\
 //                    ( *(__typeof__(var)* )(__pageSwap(&var)+( ((unsigned int)&var) | BIGEN_RAM) ) ) = val;
 
+                                                //TODO make the 6 MSb with 0
 #define WVAR(var, val)   *(  (__typeof__(var)*) ( (uint16_t)(&var) | (END_RAM-PAG_SIZE) )  ) =\
                          ( __is_varInCrntPag( &var) ) ? val : __pageSwap(&var)+val
 
