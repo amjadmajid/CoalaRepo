@@ -4,7 +4,89 @@
 @STRING{IEEE_J_MC = "{IEEE} Trans. Mobile Comput."}
 @STRING{IEEE_J_CAD = "{IEEE} Trans. Comput.-Aided Design Integr. Circuits Syst."}
 @STRING{IEEE_J_ES = "{IEEE} Embedded Syst. Lett."}
-@STRNIG{ACM_TOSN = "{ACM} Trans. Sen. Netw."}
+@STRING{IEEE_J_IM = "{IEEE} Trans. Instrum. Meas."}
+@STRING{ACM_TOSN = "{ACM} Trans. Sen. Netw."}
+
+@online{wisp5,
+	title = "{WISP}\,5.0 Firmware Git",
+	url = "https://github.com/wisp/wisp5",
+	year = "2014",
+	lastaccessed = "Jul. 10, 2017"
+}
+
+@article{wisp,
+	title = "Design of an {RFID}-based battery-free programmable sensing platform",
+	author = "Alanson P. {Sample} and Daniel J. {Yeager} and Pauline S. {Powledge} and Alexander V. {Mamishev} and Joshua R. {Smith}",
+	journal = IEEE_J_IM,
+	volume = "57",
+	number = "11",
+	pages = "2608--2615",
+	year = "2008",
+	month = nov,
+	publisher = {IEEE}
+}
+
+@online{wolverine,
+	author = "{Texas Instruments Inc.}",
+	title = "Overview for {MSP430FRxx} {FRAM}",
+	url = "http://ti.com/wolverine",
+	year = 2014,
+	lastaccessed = "Jul. 10, 2017"
+}
+
+@inproceedings{nvp,
+	title = "Architecture exploration for ambient energy harvesting nonvolatile processors",
+	author = "Kaisheng {Ma} and Yang {Zheng} and Shuangchen {Li} and Karthik {Swaminathan} and Xueqing {Li} and Yongpan {Liu} and Jack {Sampson} and Yuan {Xie} and Vijaykrishnan {Narayanan}",
+	booktitle = "Proc. HPCA",
+	address = "Burlingame, CA, USA",
+	month = feb  # " 7--11,",
+	pages = "526--537",
+	year = "2015",
+	publisher = "IEEE"
+}
+
+@inproceedings{idetic,
+	title = "{Idetic}: A high-level synthesis approach for enabling long computations on transiently-powered {ASICs}",
+	author = "Azalia {Mirhoseini} and Ebrahim M. {Songhori} and Farinaz {Koushanfar}",
+	booktitle = "Proc. PerCom",
+	address = " San Diego, CA, USA",
+	month = mar  # " 18--22,",
+	pages = "216--224",
+	year = "2013",
+	publisher = "IEEE"
+}
+
+@inproceedings{ratchet,
+	title = {Intermittent computation without hardware support or programmer intervention},
+	author = "Joel {Van Der Woude} and Matthew {Hicks}",
+	booktitle = "Proc. OSDI",
+	month = nov  # " 2--4,",
+	pages = "17--32",
+	address = "Savannah, GA, USA",
+	year = {2016},
+	publisher = "USENIX"
+}
+
+@inproceedings{chain,
+	title = "Chain: tasks and channels for reliable intermittent programs",
+	author = "Alexei {Colin} and Brandon {Lucia}",
+	booktitle = "Proc. OOPSLA",
+ 	month_ = {Oct. 30~--~Nov. 4,},
+	address = "Amsterdam, The Netherlands",
+	pages = {514--530},
+	year = {2016},
+	publisher = {ACM}
+}
+
+@inproceedings{alpaca,
+	author = "Kiwan {Maeng} and Alexei {Colin} and Brandon {Lucia}",
+	title = "Alpaca: Intermitent Execution without Checkpoints",
+	month = oct  # " 22--27,",
+	address = "Vancouver, BC, Canada",
+	booktitle = "Proc. OOPSLA",
+	year = "2017",
+	publisher = "ACM"
+}
 
 @inproceedings{edb,
 	title = "An energy-interference-free hardware-software debugger for intermittent energy-harvesting systems",
@@ -24,7 +106,7 @@
 	address = "Edinburgh, United Kingdom",
 	month = jun  # " 13,",
 	year = {2014},
-	organization = {ACM}
+	publisher = {ACM}
 }
 
 @inproceedings{dewdrop,
@@ -100,13 +182,15 @@
 	title = "Clank: Architectural Support for Intermittent Computation",
 	booktitle = "Proc. ISCA",
 	month = jun # " 24--28,",
-	address = "Toronto, ON, Canada"
-	year = "2017"}
+	address = "Toronto, ON, Canada",
+	year = "2017",
+	publisher = "ACM"
+}
 
 @inproceedings{mementos,
 	title = "Mementos: System support for long-running computation on {RFID}-scale devices",
 	author = "Benjamin {Ransford} and Jacob {Sorber} and Kevin {Fu}",
-	journal = "Proc. ASPLOS",
+	booktitle = "Proc. ASPLOS",
 	address = "Newport Beach, CA, USA",
 	month = mar # " 5--11,",
 	pages = {159--170},
@@ -119,7 +203,7 @@
 	title ="KickSat",
 	year = "2017",
 	url = "http://zacinaction.github.io/kicksat",
-	lastaccessed = "Jun. 7, 2017"
+	lastaccessed = "Jul. 7, 2017"
 }
 
 @article{bandodkar_electroanalysis_2015,
@@ -131,7 +215,7 @@
 	month = mar,
 	volume = "27",
 	number = "3",
-	year = "2015"
+	year = "2015",
 	publisher = "Wiley"
 }
 
@@ -175,9 +259,9 @@
 	title = "Networking Low-Power Energy Harvesting Devices: Measurements and Algorithms",
 	journal = IEEE_J_MC,
 	volume = "12", 
-	number =  "9",
+	number = "9",
 	month = sep, 
-	year = "2013"
+	year = "2013",
 	pages = "1853--1865",
 	publisher = "IEEE"
 	
@@ -453,18 +537,6 @@
 	ee        = {\url{http://www.sics.se/~adam/dunkels04contiki.pdf}}
 }
 
-@article{wisp,
-	title={Design of an RFID-based battery-free programmable sensing platform},
-	author={Sample, Alanson P and Yeager, Daniel J and Powledge, Pauline S and Mamishev, Alexander V and Smith, Joshua R},
-	journal={IEEE Transactions on Instrumentation and Measurement},
-	volume={57},
-	number={11},
-	pages={2608--2615},
-	year={2008},
-	publisher={IEEE}
-}
-
-
 @inproceedings{czeskis:handshakes,
 	author    = {Alexei Czeskis and Karl Koscher and Joshua R. Smith and
 		Tadayoshi Kohno},
@@ -487,21 +559,6 @@
 	year = 2014
 }
 
-@misc{wolverine,
-	author = {{TI Inc.}},
-	title = {{Overview for MSP430FRxx FRAM}},
-	howpublished = {\url{http://ti.com/wolverine}},
-	year = 2014,
-	note = {Accessed: 2014-07-28}
-}
-@inproceedings{idetic,
-	title={Idetic: A high-level synthesis approach for enabling long computations on transiently-powered ASICs},
-	author={Mirhoseini, Azalia and Songhori, Ebrahim M and Koushanfar, Farinaz},
-	booktitle={Pervasive Computing and Communications (PerCom), 2013 IEEE International Conference on},
-	pages={216--224},
-	year={2013},
-	organization={IEEE}
-}
 @inproceedings{pm,
 	title={Memory persistency},
 	author={Pelley, Steven and Chen, Peter M and Wenisch, Thomas F},
@@ -661,31 +718,6 @@
 	author = {Carlstrom, Brian D. and McDonald, Austen and Chafi, Hassan and Chung, JaeWoong and Minh, Chi Cao and Kozyrakis, Christos and Olukotun, Kunle},
 	year = {2006},
 	pages = {1--13}
-}
-@inproceedings{chain,
-	title={Chain: tasks and channels for reliable intermittent programs},
-	author={Colin, Alexei and Lucia, Brandon},
-	booktitle={Proceedings of the 2016 ACM SIGPLAN International Conference on Object-Oriented Programming, Systems, Languages, and Applications},
-	pages={514--530},
-	year={2016},
-	organization={ACM}
-}
-
-@inproceedings{ratchet,
-	title={Intermittent computation without hardware support or programmer intervention},
-	author={Van Der Woude, Joel and Hicks, Matthew},
-	booktitle={Proceedings of OSDI'16: 12th USENIX Symposium on Operating Systems Design and Implementation},
-	pages={17},
-	year={2016}
-}
-
-@inproceedings{nvp,
-	title={Architecture exploration for ambient energy harvesting nonvolatile processors},
-	author={Ma, Kaisheng and Zheng, Yang and Li, Shuangchen and Swaminathan, Karthik and Li, Xueqing and Liu, Yongpan and Sampson, Jack and Xie, Yuan and Narayanan, Vijaykrishnan},
-	booktitle={High Performance Computer Architecture (HPCA), 2015 IEEE 21st International Symposium on},
-	pages={526--537},
-	year={2015},
-	organization={IEEE}
 }
 
 @article{nvp2,
