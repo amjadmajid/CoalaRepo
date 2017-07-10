@@ -2,11 +2,11 @@ Performing complex operations on battery-less energy harvesting embedded platfor
 
 \subsection{Energy Harvesting: Background}
 
-Supplying power to tiny embedded computers using batteries alone is not sustainable. Batteries are a great pollutant. A solution is to replace batteries with smaller, but more environment friendly capacitors and supply power directly from the ambient energy sources. 
+Supplying power to tiny embedded computers using batteries alone is not sustainable. European Commission estimates that more than 160 kilotons of consumer batteries enter the European Union annually~\cite{eu_batteries_2016}. Since not all batteries are properly recycled, they constitute a potential environmental hazard. A potent solution is to replace batteries with smaller, but more environment friendly (super-)capacitors (promising millions of charge/discharge cycles~\cite[Sec. I]{ongaro_pwre_2012}) and to supply them directly from the ambient energy sources. The limitation of the capacitor as storage is lower energy density than battery, making effective capacitor discharge times orders of magnitude smaller than for battery.
 
-What platforms enable intermittent computation: WISP~\cite{} (with its variants such as WISPCam~\cite{}), Moo~\cite{}, ambient backscatter~\cite{}, or computation RFID commercial platforms such as~\cite{}. In case of the above platforms, the main source of energy is electromagnetic radiation in the radio frequency range.
+Many platforms already enable intermittent computation: WISP~\cite{} (with its variants such as WISPCam~\cite{}), Moo~\cite{moo}, ambient backscatter~\cite{liu_sigcomm_2013}, or computation RFID commercial platforms such as~\cite{}. In case of the above platforms, the main source of energy is electromagnetic radiation in the radio frequency range. Naturally, other forms of energy harvesting exist, The reader is refered to extensive surveys~\cite{}.
 
-Application include long-term battery-less monitoring. One example is the distributed monitoring of moisture of large plant fields during vegetation~\cite{}. Other applications include battery-less image capture and processing~\cite{}, distributed low-power networking~\cite{}.
+Application include long-term battery-less monitoring. One example is the distributed monitoring of moisture of large plant fields during vegetation~\cite{}. Other applications include battery-less image capture and processing~\cite{}, distributed low-power networking~\cite{} or implantable sensors~\cite{rodriguez_tbcs_2015}.
 
 Energy provided from the ambient is not stable and difficult to predict accurately. Combined with the fact that energy supply is small, there is little leeway to store enough of energy to guarantee prolonged periods of computation. Energy breaks happen every hundred of ms~\cite{}.
 
@@ -22,6 +22,8 @@ Solution to the problem is to divide the program into smaller pieces that guaran
 \end{figure}
 
 Various capacitor sizes of intermittent device result in a program being executed 
+
+
 
 Other forms of intermittent platforms will share the same problem. One of them considers actuation platforms, which will be powered directly from energy harvesting sources~\cite{}. will share the energy storage with computing platform. However, power supply for actuators is order of magnitude larger than for computation. Therefore, although capacitor is large enough to perform computation alone, energy to power actuators takes precedence leaving not much space for computing.
 
