@@ -3,7 +3,7 @@ Advances in processor efficiency along with the development of energy-harvesting
 While promising, energy-harvesting devices present a unique design challenge in
 that they operate only {\em intermittently} when energy is available~\cite{hicks_isca_2017,lucia_snapl_2017}. An
 energy-harvesting device buffers energy from its environment, e.g., in a
-capacitor~\cite[Fig. 3]{gorlatova_tmc_2013},~\cite[Fig. 1]{gunduz_commag_2014}. When a threshold quantity of energy accumulates, the device begins operating. Harvestable energy sources typically produce relatively very little power compared to a platform's operating power level---compare for instance~\cite[Table III and V]{prasad_comst_2014} with~\cite[Table I]{carrano_cst_2014}. A devices operates for a brief period of time and when buffered energy is depleted, shuts down and begins recharging to operate again later. As an example, inter-task time may even exceed 20\,s for wireless energy-harvesting battery-less vivo digestive tract monitoring system~\cite[Fig. 3c]{nadeau_naturebio_2017}. Charge and discharge times vary by device and some of them~\cite{wisp} may fail $\approx$10 to $\approx$100 times per second~\cite[Fig. 1]{tan_infocom_2016},~\cite[Fig. 1]{mementos},~\cite[Fig. 3]{nvp}.
+capacitor~\cite[Fig. 3]{gorlatova_tmc_2013},~\cite[Fig. 1]{gunduz_commag_2014}. When a threshold quantity of energy accumulates, the device begins operating. Harvestable energy sources typically produce relatively very little power compared to a platform's operating power level---compare for instance~\cite[Table III and V]{prasad_comst_2014} with~\cite[Table I]{carrano_cst_2014}. A devices operates for a brief period of time and when buffered energy is depleted, shuts down and begins recharging to operate again later. As an example, inter-task time may even exceed 20\,s for wireless energy-harvesting battery-less vivo digestive tract monitoring system~\cite[Fig. 3c]{nadeau_naturebio_2017}. On top of that, charge and discharge times vary by device and some of them~\cite{wisp} may fail $\approx$10 to $\approx$100 times per second~\cite[Fig. 1]{tan_infocom_2016},~\cite[Fig. 1]{mementos},~\cite[Fig. 3]{nvp}.
 
 \todo{Put exact reference for "tictpl"}{Brandon}
 \todo{Check if the list of authors for Alpaca is correct}{Brandon}
@@ -13,61 +13,36 @@ intermittent execution model}~\cite[Sec. 2]{dino}~\cite[Fig. 2]{lucia_snapl_2017
 
 %FRAM costs more than FRAM -- need to figure out how to execute out of SRAM
 
-New programming and execution models~\cite{dino,ratchet,chain,alpaca} and
-architecture mechanisms~\cite{hicks_isca_2017,idetic,nvp} for intermittently-powered devices help avoid data inconsistency. Nonetheless, both approaches---models and architectures---posses critical limitations. New architectures require costly hardware changes and are inapplicable to today's systems. For instance, they require dedicated idempotency violation control hardware buffers~\cite[Fig. 3]{hicks_isca_2017} or dedicated on-processor logic like on demand register backup~\cite[Fig. 9]{nvp}. Then, new programming models and compilers force programmers to use new memory models~\cite{chain,ratchet}, which may inhibit widespread adoption by programmers accustomed to classical (C) program writing. New memory models may also increase the amount of non-volatile memory accesses by requiring non-volatile versioning~\cite{chain} or completely precluding the use of volatile memory~\cite{ratchet}. Increasing pressure on non-volatile memory or precluding the use of volatile memory may degrade efficiency; e.g., FRAM has a higher access energy and latency than SRAM~\cite[Fig. 4]{nvp}---which will be also shown quantitatively in this paper. Commercially available devices are often provisioned with much less SRAM than FRAM, e.g. up to 64 FRAM/SRAM ratio of~\cite{wolverine}, and effectively leveraging the relatively high efficiency of SRAM is a key challenge for task-based intermittent systems.
+There are two fundamental approaches for dealing with data inconsistency for intermittently-powered devices: (i) programming and execution models~\cite{dino,ratchet,chain,alpaca} and (ii) architecture mechanisms~\cite{hicks_isca_2017,idetic,nvp}. Nonetheless, they both posses critical limitations. New architectures require costly hardware changes and are inapplicable to today's embedded off-the-shelf systems. For instance, they require dedicated idempotency violation control hardware buffers~\cite[Fig. 3]{hicks_isca_2017} or dedicated on-processor logic like on demand register backup~\cite[Fig. 9]{nvp}. Then, new programming models and compilers force programmers to use new memory models~\cite{chain,ratchet}, which may inhibit widespread adoption by programmers accustomed to classical (C) program writing. New memory models may also increase the amount of non-volatile memory accesses by requiring non-volatile versioning~\cite{chain} or completely precluding the use of volatile memory~\cite{ratchet}. Increasing pressure on non-volatile memory or precluding the use of volatile memory may degrade efficiency; e.g., FRAM has a higher access energy and latency than SRAM~\cite[Fig. 4]{nvp}---which will be also shown quantitatively in this paper. Commercially available devices are often provisioned with much less SRAM than FRAM, e.g. up to 64 FRAM/SRAM ratio of~\cite{wolverine}, and effectively leveraging the relatively high efficiency of SRAM is a key challenge for task-based intermittent systems. Despite the limitations, we conjecture that programming and execution models will be a {\em de facto choice for sustaining data consistency} of intermittently-powered devices. Simply put, programming model does not require any hardware investment and is dependent only upon the programmer's skills.
 
 %Task sizing is hard -- how to chop without risking inefficiency or non-term
 
-Several recent programming efforts~\cite{alpaca,chain} proposed {\em
-task-based} programming models, that require the programmer to statically
-decompose their program into tasks. A task is like a function with no callers
-that can include arbitrary computation and, upon completion, is guaranteed to
-have executed {\em atomically} and to have logically {\em committed} memory
-updates. The programmer expresses the flow of control from one task to another
-and task control-flow may be input-dependent. An important programming
-challenge in task-based models is that the length of execution of a task is
-limited by the total amount of energy that a device can buffer. Assuming that
-input power is negligible compared to operating power, a task will never be
-able to complete if its execution consumes more energy than the system can
-buffer. Transitioning from one task to the next imposes a cost and excessively
-small tasks may be inefficient. Appropriately sizing tasks to ensure progress
-and high performance is a key challenge for task-based intermittent systems. 
+Two recent programming and execution model~\cite{alpaca,chain} proposed {\em task-based} paradigm, that require the programmer to statically decompose their program into tasks. A task resembles a function with no callers. Task can include arbitrary computation and, upon completion, is guaranteed to have executed {\em atomically} and to have logically {\em committed} memory updates. The programmer expresses the flow of control from one task to another and task control-flow may be input-dependent~\cite[Fig. 4]{chain}. An important programming challenge in task-based models is that the length of execution of a task is limited by the total amount of energy that a device can buffer. Assuming that input power is negligible compared to operating power, a task will never be able to complete if its execution consumes more energy than the system can buffer. Transitioning from one task to the next imposes a cost and excessively small tasks may be inefficient. Appropriately sizing tasks to ensure progress and high performance is a key challenge for task-based intermittent systems.
 
-In this work, we develop \sys: a new programming and execution model that uses
-{\em volatile memory virtualization} to leverage efficient volatile memory and
-and {\em dynamic task coalescing} to efficiently execute tasks without
-exceeding available energy. \sys's memory virtualization mechanism uses a
-device's SRAM as the working memory during a task's execution, populating the
-SRAM with a page of data from FRAM as necessary at the start of the task. At
-the end of the task, the SRAM is committed back to FRAM using efficient DMA
-block copies. \TODO{Brandon sez: Is the next sentence what the system does?
-Or are we doing paging?} When a task accesses data outside of a page in SRAM,
-the task must fetch data from FRAM. We explore two strategies. The first
-strategy is {\em demand paging}, which swaps the SRAM page with a new page from
-FRAM, buffering the swapped-out page until commit. The second strategy is {\em
-buffered direct access} \TODO{better name}, which directly reads and writes
-FRAM relying on dynamic double-buffering to ensure memory is consistent at
-commit.
+In this work, we develop \sys: a new programming and execution model that uses two new runtime features: (i) {\em volatile memory virtualization} to leverage efficient volatile memory and (ii) {\em dynamic task coalescing} to efficiently execute tasks without exceeding available energy. \sys's memory virtualization mechanism uses a device's SRAM as the working memory during a task's execution, populating the SRAM with a page of data from FRAM as necessary at the start of the task. At the end of the task, the SRAM is committed back to FRAM using efficient DMA block copies~\cite{kistler_micro_2006}. When a task accesses data outside of a page in SRAM, the task must fetch data from FRAM. 
 
-\sys's dynamic task coalescing mechanism allows the programmer or a compiler to
-intuitively decompose their program into small tasks that amortize fixed
-per-task overheads, yet present no risk of exceeding device energy capacity. As
-such a decomposition executes, \sys {\em coalesces} dynamically consecutive
-tasks. Coalescing elides the commits of coalesced tasks by buffering multiple
-tasks' updates in an FRAM commit buffer. Periodically, as the span of the
-coalesced task grows, \sys ends coalescing and commits the state of the
-coalesced task. If a power failure interrupts a sequence of coalesced tasks,
-\sys adaptively reduces the number of tasks in that sequence that it will
-coalesce, committing sooner in future executions. Consequently, \sys's
-coalescing mechanism allows a program to execute efficiently across a range of
+\todo{articulate this last point better}{Przemek}
+
+With this paper we provide the following list of contributions.
+
+\begin{enumerate}
+
+\item {\bf Evaluation of data swapping strategies:} We propose and explore two data swapping strategies for intermittently-powered systems based on FRAM/SRAM architecture. The first strategy is {\em demand paging}, which swaps the SRAM page with a new page from FRAM, buffering the swapped-out page until commit. The second strategy is {\em buffered direct access}, which directly reads and writes FRAM relying on dynamic double-buffering to ensure memory is consistent at
+commit. 
+
+\todo{Once paging is fully implemented--update the paragraph}{Przemek}
+\todo{Provide numerical results for this section}{Przemek}
+\todo{Find better name for demand paging}{Brandon}
+
+\item {\bf Task coalescing mechanism:} \sys's core contribution is the introduction of dynamic task coalescing mechanism. It allows the programmer or a compiler to intuitively decompose the program into small tasks that amortize fixed per-task overheads, yet present no risk of exceeding device energy capacity. As such a decomposition executes, \sys {\em coalesces} dynamically consecutive tasks. Coalescing elides the commits of coalesced tasks by buffering multiple tasks' updates in an FRAM commit buffer. Periodically, as the span of the coalesced task grows, \sys ends coalescing and commits the state of the coalesced task. If a power failure interrupts a sequence of coalesced tasks, \sys adaptively reduces the number of tasks in that sequence that it will
+coalesce, committing sooner in future executions. Consequently, \sys's coalescing mechanism allows a program to execute efficiently across a range of
 energy buffer sizes, avoiding transition overheads in larger buffers, and
-ensuring progress in smaller buffers. \TODO{articulate this last point better}
+ensuring progress in smaller buffers.
 
-We evaluated our system on a collection of benchmark programs taken from the
-literature, and compare directly to prior work, showing that \sys has high
-performance and can flexible target a variety of platforms without recompiling
-the code. We further demonstrate the efficiency and versatility of \sys with
-an end-to-end evaluation of a sensing and data processing application deployed
-in a lab environment. \TODO{blah blah blah eval}.
+\todo{Provide numerical results for this section}{Przemek}
 
-\TODO{Bullet contribs if there's space}
+\item {\bf Extensive \sys evaluation:} We evaluated \sys on a collection of benchmark programs~\cite[Sec. 5]{chain}, and compare directly to state-of-the art task-based runtime~\cite{chain}, showing that \sys has high performance and can flexible target a variety of platforms without recompiling the code. We further demonstrate the efficiency and versatility of \sys with an end-to-end evaluation of a sensing and data processing application deployed in a lab environment. 
+
+\todo{add detailed text about evaluation results}{Przemek}
+
+\end{enumerate}
