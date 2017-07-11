@@ -2,84 +2,43 @@
 #include <stdint.h>
 #include "dataProtec.h"
 
-__p uint16_t rVar = 0x9191;
-uint16_t * pag1_var =    (uint16_t *) 0xBF80;
-uint16_t * pag2_var =    (uint16_t *) 0xc380;
+__p uint16_t rVar_p2 = 0x2222;
+__p uint8_t fillPage_2[999] ={0};
 
-void init()
-{
-    *pag1_var = 0xabc;
-    *pag2_var =  0xcba;
-
-    __bringCrntPagROM();
-}
-
-uint16_t readVar()
-{
-    if( RVAR(*pag1_var) == 0xabc )
-    {
-        return 1;
-    }
-    return 0;
-}
+__p uint16_t rVar_p1 = 0x1111;
+__p uint8_t fillPage_1[999] ={0};
 
 
-uint16_t readVarPagSwap()
-{
-    // check the page tracking table -- it should be clear so no DMA flush
 
-    if( RVAR(*pag2_var) == 0xcba )
-    {
-        return 1;
-    }
-    return 0;
-}
 
-uint16_t writeVar()
-{
-    WVAR(*pag2_var, 0xdead );
-
-        // check if the SRAM is modified
-
-        // check if FRAM is not modified
-
-        return 1;
-
-}
-
-uint16_t pagesCommit()
-{
-    // check if the FRAM is modified
-
-    //
-    __pagsCommit();
-}
-uint16_t res1 ;
-uint16_t res2;
+uint16_t res1 =0 ;
+uint16_t res2 =0;
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    init();
 
-    * (uint16_t *)  0x1ffe   = 0xbeaf;
-    //  > Send data from RAM to temp buffer ( 0x400 bytes from 0x1ff0 to 0xDF70 )
-    __sendPagTemp( BIGEN_ROM + 0x0010 );
+    res1 = __VAR_PT_IN_RAM(rVar_p1);
 
-    * (uint16_t *)  0xDF7e   = 0xabcd;
-    // < bring data from  temp buffer to RAM(0xDF70 --> 0x1ff0 send 0x400 bytes )
-    __bringPagTemp(BIGEN_ROM + 0x0010);
+    __bringCrntPagROM();
 
-    * (uint16_t *)  0x1ffe   = 0x5555;
-    //> Send data from RAM to ROM ( 0x400 bytes from 0x1ff0 to 0x4400 )
-    __sendPagROM(BIGEN_ROM + 0x0010);
-    * (uint16_t *)  0xBF7e   = 0x1010;
-    // < bring data from ROM to RAM (0x4400 --> 0x1ff0 send 0x400 bytes )
-    __bringPagROM(BIGEN_ROM + 0x0010);
+    res1 = __VAR_PT_IN_RAM(rVar_p1);
 
-     res1 = readVar() ;
-     res2 = readVarPagSwap() ;
+    res1 = __IS_VAR_IN_CRNT_PAG(rVar_p1);
+    res2 = __IS_VAR_IN_CRNT_PAG(rVar_p2);
 
+    __bringCrntPagROM();
+
+    __pageSwap(&rVar_p2);
+    __pageSwap(&rVar_p1);
+
+    // read a variable from the current page
+    res1 =  RVAR(rVar_p1);
+    res1++;
+    // Write a variable from the current page
+    WVAR(rVar_p1, res1);
+
+    __no_operation();
      while(1)
      {
          ;

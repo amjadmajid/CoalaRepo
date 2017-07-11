@@ -26,7 +26,7 @@
 // The location of any page is given by (BIGEN_ROM + pag_tag - PAG_SIZE)
 // The TEMP location of any page is given by ( END_ROM - TOT_PAG_SIZE + pag_tag - PAG_SIZE )
 #define END_ROM         0xFF70    //  using the address 0xFF7F disables DMA transfer
-#define END_RAM         0x23F0
+#define END_RAM         0x2200
 #define TAG_SIZE        6
 #define PAG_ADDR_SIZE   (16 - TAG_SIZE)
 #define NUM_PAG         8
@@ -45,7 +45,7 @@ void __sendPagROM(uint16_t pagTag);
 void __pagsCommit();
 void __bringCrntPagROM();
 
-extern uint16_t CrntPagHeader;
+extern uint16_t CrntPagHeader;	// Holds the address of the first byte of a page
 
 // Memory access interface
 
@@ -55,16 +55,16 @@ extern uint16_t CrntPagHeader;
 #define __VAR_ADDR(var)					((uint16_t) (&(var)) )
 
 #define __IS_VAR_IN_CRNT_PAG(var)     	( ( __VAR_ADDR(var)  >= CrntPagHeader ) && \
-                         				( __VAR_ADDR(var)  <  CrntPagHeader+PAG_SIZE))
+                         				( __VAR_ADDR(var)  <  (CrntPagHeader+PAG_SIZE) ))
 
 #define __VAR_PT_IN_RAM(var)			(  (__typeof__(var)*) (  (__VAR_ADDR(var) & ~MS6B) + RAM_PAG )  )
 
 #define WVAR(var, val)  * __VAR_PT_IN_RAM(var) =\
-                        (   __IS_VAR_IN_CRNT_PAG(var)  ) ? val : __pageSwap(&var)+val
+                        (   __IS_VAR_IN_CRNT_PAG(var)  ) ? val : __pageSwap(&(var))+val
 
 #define RVAR(var)   (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
                         ( * __VAR_PT_IN_RAM(var) ):\
-                    	( *(  (__typeof__(var)*) ( __pageSwap(&var) + ( ( __VAR_ADDR(var) & ~MS6B)  + RAM_PAG ) )  ) )
+                    	( *(  (__typeof__(var)*) ( __pageSwap(&(var)) + ( ( __VAR_ADDR(var) & ~MS6B)  + RAM_PAG  ) )  ) )
 
 #endif /* INCLUDE_DATAPROTEC_H_ */
 
