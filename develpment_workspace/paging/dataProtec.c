@@ -27,15 +27,15 @@ __nv uint8_t pageCommit = 0;
 void __bringCrntPagROM()
 {
     // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) ( __persis_CrntPagHeader) );
+    __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) ( __persis_CrntPagHeader) );
                                             // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) RAM_PAG );
+    __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) RAM_PAG );
                                             // Destination single address
-    DMA1SZ = PAG_SIZE_W;                            // Block size
-    DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
-    DMA1CTL |= DMAEN;                         // Enable DMA0
+    DMA0SZ = PAG_SIZE_W;                            // Block size
+    DMA0CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
+    DMA0CTL |= DMAEN;                         // Enable DMA0
 
-    DMA1CTL |= DMAREQ;                      // Trigger block transfer
+    DMA0CTL |= DMAREQ;                      // Trigger block transfer
 
     CrntPagHeader = __persis_CrntPagHeader; // update the volatile current page header
 }
@@ -129,12 +129,12 @@ void __sendPagROM(uint16_t pagHeader)
 /*
  * pageSwap:
  */
+//TODO this function does not
 uint16_t __pageSwap(uint16_t * varAddr)
 {
 
     //1// send the current page 
     __sendPagTemp( CrntPagHeader );
-
     //2// Find the requested page 
     uint16_t ReqPagTag;
     uint16_t ReqPagTag_dirty = (uint16_t) varAddr;
@@ -156,7 +156,7 @@ uint16_t __pageSwap(uint16_t * varAddr)
          __bringPagTemp(ReqPagTag);
      }else{
         // bring from pages final locations in ROM
-         __bringPagROM(0x1c20);
+         __bringPagROM(ReqPagTag);
      }
      //4// keep track of the current page
      CrntPagHeader = ReqPagTag;
