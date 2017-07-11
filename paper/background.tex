@@ -44,11 +44,13 @@ Solution to the problem is to divide the program into smaller parts that guarant
 
 Various capacitor sizes of intermittent device result in a program being executed 
 
-We can write the problem formally as
+We can write the problem of maximizing all task sizes formally as
 %
 \begin{equation}
-\underset{i}{\arg\,\min} \sum_{i}m_i+t_i \text{~subject to~} \forall_i mi+t_i>e
+\underset{i}{\arg\,\max} \sum_{i}m_i+t_i \text{~subject to~} \forall_i mi+t_i>e,
 \end{equation}
+%
+where $e$ is the required minimum energy to perform a task, $i$ is the total number of tasks, $m_i$ and $t_i$ are the cost of task traversal (memory copying time of task variables) and time to complete one task, respectively.
 
 Other forms of intermittent platforms will share the same problem. One of them considers actuation platforms, which will be powered directly from energy harvesting sources~\cite{}. will share the energy storage with computing platform. However, power supply for actuators is order of magnitude larger than for computation. Therefore, although capacitor is large enough to perform computation alone, energy to power actuators takes precedence leaving not much space for computing.
 
