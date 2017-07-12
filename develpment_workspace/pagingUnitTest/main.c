@@ -19,40 +19,23 @@ int main(void) {
 
     //******// Check the correctness of the address translation
     __bringCrntPagROM();            // bring the default page
-//    res1 = RVAR(rVar_p1);           // read the variable
-    res1 =   *(
-            (__typeof__(rVar_p1)*) (
-                                    (
-                                        ((uint16_t)(&rVar_p1)) -
-                                        CrntPagHeader
-                                    )
-                                    + RAM_PAG
-                                )
-                               );
-
-
-//    res1 =  * ((__typeof__(rVar_p1)*) (0x21f8));
-
-
-    res1 = __VAR_PT_IN_RAM(rVar_p1);
-
-
-
-    res1 = __VAR_PT_IN_RAM(rVar_p1);
-
-    res1 = __IS_VAR_IN_CRNT_PAG(rVar_p1);
-    res2 = __IS_VAR_IN_CRNT_PAG(rVar_p2);
-
-    __bringCrntPagROM();
-
-    __pageSwap(&rVar_p2);
-    __pageSwap(&rVar_p1);
-
-    // read a variable from the current page
-    res1 =  RVAR(rVar_p1);
+    res1 = RVAR(rVar_p1);           // read the variable
     res1++;
-    // Write a variable from the current page
-    WVAR(rVar_p1, res1);
+    WVAR(rVar_p1, res1);          // write a value into the RAM page
+
+    //******// Check the page swapping, Check the memory to see if the page1 went to its temporary location (0xDF70)
+    res2 = RVAR(rVar_p2);           // read the variable
+    res2++;
+    WVAR(rVar_p2, res2);          // write a value into the RAM page
+
+    //******// Check page swapping caused by writing to a variable
+    WVAR(rVar_p1, res2);          // write a value into a page that is not in RAM
+
+    WVAR(rVar_p2, res1);          // write a value into a page that is not in RAM
+
+
+    //******// Check the commit process
+    __pagsCommit();
 
     __no_operation();
      while(1)

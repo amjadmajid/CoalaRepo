@@ -4,7 +4,7 @@
 
 #define ARRSIZE 128
 #define FIX_ARRSIZE 2048
-__nv uint16_t data[FIX_ARRSIZE] = {0};
+__p uint16_t data[FIX_ARRSIZE] = {0};
 
 
 void init();

@@ -60,10 +60,10 @@ void __sendPagTemp(uint16_t pagHeader)
 
 
     // Find the page index
-    uint16_t pageGuess = pagHeader - BIGEN_ROM ; // the upper limit of the first page
+    uint16_t pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
     uint8_t idx=0;
     uint16_t __pageSizes = PAG_SIZE;
-    while( ! (pageGuess <= __pageSizes) )  // if the var is not with the page
+    while( pageGuess >= __pageSizes )
     {
         idx++;
         __pageSizes +=   PAG_SIZE;               // move to next page

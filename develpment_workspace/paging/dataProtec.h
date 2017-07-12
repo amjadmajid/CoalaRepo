@@ -59,8 +59,20 @@ extern uint16_t CrntPagHeader;	// Holds the address of the first byte of a page
 
 #define __VAR_PT_IN_RAM(var)			(  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
 
-#define WVAR(var, val)  * __VAR_PT_IN_RAM(var) =\
-                        (   __IS_VAR_IN_CRNT_PAG(var)  ) ? val : __pageSwap(&(var))+val
+
+#define WVAR(var, val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
+								{ \
+									*__VAR_PT_IN_RAM(var) = val ;\
+								}\
+								else{\
+									__pageSwap(&(var)) ;\
+									* __VAR_PT_IN_RAM(var) = val;\
+									}
+
+// #define WVAR(var, val)  * __VAR_PT_IN_RAM(var) =\
+//                         (   __IS_VAR_IN_CRNT_PAG(var)  ) ? val : (__pageSwap(&(var))+val)
+
+
 
 #define RVAR(var)   (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
                         ( * __VAR_PT_IN_RAM(var) ):\
