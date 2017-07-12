@@ -11,16 +11,32 @@ __p uint8_t fillPage_1[999] ={0};
 
 
 
-uint16_t res1 =0 ;
+volatile uint16_t res1 =0 ;
 uint16_t res2 =0;
 
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
+    //******// Check the correctness of the address translation
+    __bringCrntPagROM();            // bring the default page
+//    res1 = RVAR(rVar_p1);           // read the variable
+    res1 =   *(
+            (__typeof__(rVar_p1)*) (
+                                    (
+                                        ((uint16_t)(&rVar_p1)) -
+                                        CrntPagHeader
+                                    )
+                                    + RAM_PAG
+                                )
+                               );
+
+
+//    res1 =  * ((__typeof__(rVar_p1)*) (0x21f8));
+
 
     res1 = __VAR_PT_IN_RAM(rVar_p1);
 
-    __bringCrntPagROM();
+
 
     res1 = __VAR_PT_IN_RAM(rVar_p1);
 
