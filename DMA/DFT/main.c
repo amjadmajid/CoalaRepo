@@ -4,8 +4,6 @@
 #include <stdint.h>
 
 
-
-
 #if 0
 
 #define SIZE 16
@@ -78,74 +76,118 @@ static void burn( uint32_t iters);
 #define SIZE 8
 #define PI2 6.28
 
-float x[SIZE] ={0.0};              // discrete-time signal, x
-float Xre[SIZE] ={0.0}, Xim[SIZE]={0.0}; // DFT of x (real and imaginary parts)
-float P[SIZE] ={0.0};              // power spectrum of x
-uint16_t n =0, k = 0;
+__p  float x[SIZE] ={0.0};              // discrete-time signal, x
+__p  float Xre[SIZE] ={0.0}, Xim[SIZE]={0.0}; // DFT of x (real and imaginary parts)
+__p  float P[SIZE] ={0.0};              // power spectrum of x
+__p unsigned int n =0, k = 0;
 
 
 
 void discTimeSign()
 {
-    // Generate random discrete-time signal x in range (-1,+1)
-    x[n] = ((2.0 * rand()) / RAND_MAX) - 1.0;
-    n++;
+    // Get the input for the task
+    unsigned int in_n = RVAR(n);
+    unsigned int in_x_n = RVAR(x[in_n]);
 
-    if(n < SIZE){
-        os_jump(0);
-    }else{
-        n = 0;
-    }
+        // Generate random discrete-time signal x in range (-1,+1)
+        in_x_n = ((2.0 * rand()) / RAND_MAX) - 1.0;
+
+        WVAR(x[in_n] ,in_x_n);
+
+        in_n++;
+
+        if(in_n < SIZE){
+            os_jump(0);
+        }else{
+            in_n = 0;
+        }
+
+    // commit the output of the task
+    WVAR(n, in_n);
 }
 
 // Calculate DFT of x using brute force
 
 void dft_outer_loop() {
-    // empty task due to changing
-    // in the flow control strategy
+    // Get the input for the task
+
 }
 
 void dft_real() {
-  Xre[k] += x[n] * cosf(n * k * PI2 / SIZE);
-  n++;
-  if(n < SIZE)
-  {
-      os_jump(0);
-  }else{
-      n = 0;
-  }
+    // Get the input for the task
+    unsigned int in_k = RVAR(k);
+    unsigned int in_n = RVAR(n);
+    unsigned int in_Xre_k = RVAR(Xre[in_k]);
+
+        in_Xre_k += RVAR(x[in_n]) * cosf(in_n * in_k * PI2 / SIZE);
+        // commit to the buffer
+        WVAR(Xre[in_k], in_Xre_k);
+        in_n++;
+        if(in_n < SIZE)
+        {
+          os_jump(0);
+        }else{
+            in_n = 0;
+        }
+
+    // commit the output of the task
+    WVAR(n, in_n);
 }
 
 void dft_im() {
-    Xim[k] -= x[n] * sinf(n * k * PI2 / SIZE);
-    n++;
-    if(n < SIZE)
-    {
-        os_jump(0);
-    }else{
-        n = 0;
-    }
+    // Get the input for the task
+    unsigned int in_k = RVAR(k);
+    unsigned int in_n = RVAR(n);
+    unsigned int in_Xim_k = RVAR(Xim[in_k]);
+
+        in_Xim_k -= RVAR(x[in_n]) * sinf(in_n * in_k * PI2 / SIZE);
+        WVAR(Xim[in_k], in_Xim_k);
+        in_n++;
+        if(in_n < SIZE)
+        {
+            os_jump(0);
+        }else{
+            in_n = 0;
+        }
+
+    // commit the output of the task
+    WVAR(n, in_n);
 }
 
 void  dft_power(){
-    P[k] = Xre[k] * Xre[k] + Xim[k] * Xim[k];
-    k++;
+    // Get the input for the task
+    unsigned int in_k = RVAR(k);
+    unsigned int in_Xim_k = RVAR(Xim[in_k]);
+    unsigned int in_Xre_k = RVAR(Xre[in_k]);
+    unsigned int in_p_k = RVAR(P[in_k]);
 
-    if(k < SIZE )
-    {
-        os_jump(2);
-    }
+        in_p_k = in_Xre_k * in_Xre_k + in_Xim_k * in_Xim_k;
+        in_k++;
+
+    // commit the output of the task
+
+        if(in_k < SIZE )
+        {
+            os_jump(3);
+        }
+
+    WVAR(k, in_k);
+    WVAR(P[in_k], in_p_k);
 
 }
 
-void dft_end() {
-    P3OUT |= BIT5;
-    P3OUT &= ~BIT5;
-    k = 0;
 
-//    blinkLed(2500);
-    os_block(dft_end);
-    os_unblock(discTimeSign);
+void dft_end() {
+    // Get the input for the task
+    unsigned int in_k = RVAR(k);
+
+        P3OUT |= BIT5;
+        P3OUT &= ~BIT5;
+        in_k = 0;
+
+    // commit the output of the task
+    WVAR(k, in_k);
+
 }
 
 void init()
@@ -187,7 +229,7 @@ int main(void) {
                            {dft_real,0 },
                            {dft_im, 0},
                            {dft_power, 0},
-                           {dft_end,0}
+                           {dft_end,1}
        };
        //This function should be called only once
        os_addTasks(6, tasks );

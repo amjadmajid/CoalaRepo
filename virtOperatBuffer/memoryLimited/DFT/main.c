@@ -121,12 +121,7 @@ void discTimeSign()
 
 void dft_outer_loop() {
     // Get the input for the task
-    uint16_t in_k = RVAR(k);
 
-        if(in_k >= (SIZE-1) )
-        {
-            os_unblock(dft_end);
-        }
 }
 
 void dft_real() {
@@ -181,6 +176,12 @@ void  dft_power(){
         in_k++;
 
     // commit the output of the task
+
+        if(in_k < SIZE )
+        {
+            os_jump(3);
+        }
+
     WVAR(k, in_k);
     WVAR(P[in_k], in_p_k);
 
@@ -194,10 +195,6 @@ void dft_end() {
         P3OUT |= BIT5;
         P3OUT &= ~BIT5;
         in_k = 0;
-
-        //blinkLed(2500);
-        os_block(dft_end);
-        os_unblock(discTimeSign);
 
     // commit the output of the task
     WVAR(k, in_k);
