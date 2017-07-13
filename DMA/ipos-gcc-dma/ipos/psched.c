@@ -90,18 +90,6 @@ void os_jump(unsigned int j)
     __jump_to=j;
 }
 
-void os_block(funcPt func)
-{
-    __blockedTasks[__numBlockedTasks] = func;
-    __numBlockedTasks++;
-}
-
-void os_unblock(funcPt func)
-{
-    __unblockedTasks[__numUnblockedTasks] = func;
-    __numUnblockedTasks++;
-}
-
 void os_scheduler()
 {
     if (__commit_flag == COMMITTING)
@@ -144,29 +132,6 @@ void os_scheduler()
     while(1)
     {
 
-        /*
-         * Skip the persistently and softly blocked tasks
-         *
-         * TODO An alternative way to implement the blocking concept is to take a snapshot
-         * of the blocking status on the virtual task boundaries and to undo any changes
-         * on a power up.
-         */
-        // Skip blocked tasks
-        while( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) != 0  )
-        {
-            __current_task_virtual  =  (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
-
-        }
-
-        //TODO a better way to skip the blocked tasks might be needed
-        // Maybe it is possible to use only the jump concept
-        unsigned int blockIndx ;
-        for (blockIndx = 0 ;__blockedTasks[blockIndx]; blockIndx++ )
-        {
-            __current_task_virtual  =  (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
-
-        }
-
         // access a task
         ( (funcPt)( *__current_task_virtual ) ) ();
 
@@ -199,10 +164,6 @@ commit:
             __totalTaskCounter += __temp_taskCounter;
             //  Commit pages to their final locations
             __pagsCommit();
-
-            // These buffers are being cleared inside the functions
-            __os_block(__blockedTasks,__temp_numBlockedTasks);
-            __os_unblock(__unblockedTasks,__temp_numUnblockedTasks);
 
             __commit_flag=COMMIT_FINISH;
 

@@ -25,25 +25,25 @@ void task_outer_loop();
 void task_inner_loop();
 
 ////// Global variables
-//DVAR( uint16_t arr[], ={3,1,4,6,9,5,10,8,16,20} );
-__p uint16_t arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89};
-     uint16_t arr_len = 20;
-__p uint16_t i =  0;
-__p uint16_t j = 1;
+//DVAR( unsigned int arr[], ={3,1,4,6,9,5,10,8,16,20} );
+__p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89};
+     unsigned int arr_len = 20;
+__p unsigned int i =  0;
+__p unsigned int j = 1;
 
 /////  TASKS
 void task_inner_loop()
 {
 
-    uint16_t in_i = RVAR(i);
-    uint16_t in_j = RVAR(j);
-    uint16_t arr_i = RVAR( arr[ in_i ]);
-    uint16_t arr_j = RVAR(arr[ in_j ]);
+    unsigned int in_i = RVAR(i);
+    unsigned int in_j = RVAR(j);
+    unsigned int arr_i = RVAR( arr[ in_i ]);
+    unsigned int arr_j = RVAR(arr[ in_j ]);
 
 
     if( arr_i  > arr_j )
     {
-        uint16_t temp = arr_j;
+        unsigned int temp = arr_j;
         arr_j =  arr_i;
         arr_i =  temp;
     }
@@ -62,12 +62,12 @@ void task_inner_loop()
 
 void task_outer_loop()
 {
-    uint16_t in_i = RVAR(i);
+    unsigned int in_i = RVAR(i);
     in_i++;
 
-    if(in_i > arr_len)
+    if(in_i < arr_len)
     {
-        os_unblock(task_finish);
+        os_jump(2);
     }
 
     WVAR(i, in_i);
@@ -103,7 +103,7 @@ void task_finish()
 
     WVAR(i, 0) ;
     WVAR(j, 1);
-    os_block(task_finish);
+
 }
 
 void init()
@@ -118,7 +118,7 @@ void init()
 int main(void) {
     init();
 
-       taskId tasks[] = {  {task_inner_loop,0}, {task_outer_loop,0}, {task_finish,1}};
+       taskId tasks[] = {  {task_inner_loop,0}, {task_outer_loop,0}, {task_finish,0}};
        //This function should be called only once
        os_addTasks(3, tasks );
 

@@ -74,32 +74,3 @@ unsigned int * os_search(funcPt func)
 }
 
 
-
-void __os_block(funcPt func[], unsigned int numTasks)
-{
-    unsigned int i;
-    for(i=0; i < numTasks; i++)
-    {
-        unsigned int* taskPt = os_search(func[i]) ;
-        if( taskPt )
-        {
-            *(taskPt+BLOCK_OFFSET_PT)  = BLOCK;  // pointer arithmetic
-        }
-        func[i] = 0; // reset the location in the buffer
-    }
-}
-
-void __os_unblock(funcPt func[], unsigned int numTasks)
-{
-    unsigned int i;
-    for(i=0; i < numTasks; i++)
-    {
-        unsigned int* taskPt = os_search(func[i]) ;
-        if( taskPt )
-        {
-            *(taskPt+BLOCK_OFFSET_PT)  = UNBLOCK;  // pointer arithmetic
-        }
-        func[i] = 0; // reset the location in the buffer
-    }
-}
-

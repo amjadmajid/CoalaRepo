@@ -12,8 +12,6 @@ void os_scheduler();
 void os_exit_critical();
 void os_enter_critical();
 
-void os_block(funcPt func);
-void os_unblock(funcPt func);
 void os_jump(unsigned int j);
 
 #endif

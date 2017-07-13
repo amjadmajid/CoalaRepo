@@ -16,6 +16,4 @@ void os_memMapper(unsigned int *cnt, taskId _task);
 void os_addTasks(unsigned char numTasks, taskId tasks[]);
 unsigned int* os_search(funcPt func);
 
-void __os_block(funcPt func[], unsigned int numTasks);
-void __os_unblock(funcPt func[], unsigned int numTasks);
 #endif /* INCLUDE_PERSISTENTLIST_H_ */
