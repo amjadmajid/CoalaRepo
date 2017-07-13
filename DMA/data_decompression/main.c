@@ -320,10 +320,12 @@ void task_write()
         {
             P3OUT |=BIT5;
             P3OUT &=~BIT5;
-            os_unblock(init_task);
+//            os_unblock(init_task);
 //            blinkLed(2500 );
             break;
 
+        }else{
+            os_jump(2);  // jump the init_task
         }
 
     }

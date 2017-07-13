@@ -95,17 +95,14 @@ void discTimeSign()
         os_jump(0);
     }else{
         n = 0;
-        os_block(discTimeSign);
     }
 }
 
 // Calculate DFT of x using brute force
 
 void dft_outer_loop() {
-    if(k >= (SIZE-1) )
-    {
-        os_unblock(dft_end);
-    }
+    // empty task due to changing
+    // in the flow control strategy
 }
 
 void dft_real() {
@@ -133,6 +130,12 @@ void dft_im() {
 void  dft_power(){
     P[k] = Xre[k] * Xre[k] + Xim[k] * Xim[k];
     k++;
+
+    if(k < SIZE )
+    {
+        os_jump(2);
+    }
+
 }
 
 void dft_end() {
@@ -184,7 +187,7 @@ int main(void) {
                            {dft_real,0 },
                            {dft_im, 0},
                            {dft_power, 0},
-                           {dft_end,1}
+                           {dft_end,0}
        };
        //This function should be called only once
        os_addTasks(6, tasks );
