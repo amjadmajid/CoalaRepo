@@ -4,23 +4,23 @@
 
 #include <pTCB.h>
 
-uint16_t *__head   =   (uint16_t *)    LIST_HEAD;
+unsigned int* __head   =   (unsigned int*)    LIST_HEAD;
 #define BLOCK   1
 #define UNBLOCK   0
-__nv uint8_t funcBlocker = 0;
+__nv unsigned char funcBlocker = 0;
 
-volatile uint16_t  __totNumTask =0;
+volatile unsigned int  __totNumTask =0;
 
 /*
  * memMapper create a node of linkedlist in persistent memory (FRAM)
  */
 void os_memMapper(unsigned int *cnt, taskId _task)
 {
-    *(__head +*cnt) = (uint16_t) _task.func;
+    *(__head +*cnt) = (unsigned int) _task.func;
     ++(*cnt);
     *(__head +*cnt) = _task.block;  // This can be splitted into two bytes. One for blocking and one of priority
     ++(*cnt);
-    *(__head +*cnt) =(uint16_t) (__head +1+(*cnt)); // a pointer to the next node
+    *(__head +*cnt) =(unsigned int) (__head +1+(*cnt)); // a pointer to the next node
     ++(*cnt);
 }
 
@@ -51,22 +51,22 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
         }
         *(__head +(--cnt) ) =  (unsigned int)  LIST_HEAD;   // link the tail of the linkedlist with the head
 
-        __task_address    =  (uint16_t) __head ;
+        __task_address    =  (unsigned int) __head ;
         funcBlocker = 0xAD;
     }
 }
 
-uint16_t * os_search(funcPt func)
+unsigned int * os_search(funcPt func)
 {
-    uint16_t* __current = __head;
+    unsigned int* __current = __head;
 
     do{
-        if( (uint16_t *) *__current ==  (uint16_t *) func )
+        if( (funcPt) *__current ==  func )
         {
             return __current;
         }
 
-        __current = *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
+        __current = (unsigned int*) *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
 
     }while( __current != __head);
 
@@ -75,12 +75,12 @@ uint16_t * os_search(funcPt func)
 
 
 
-void __os_block(funcPt func[], uint16_t numTasks)
+void __os_block(funcPt func[], unsigned int numTasks)
 {
-    uint16_t i;
+    unsigned int i;
     for(i=0; i < numTasks; i++)
     {
-        uint16_t* taskPt = os_search(func[i]) ;
+        unsigned int* taskPt = os_search(func[i]) ;
         if( taskPt )
         {
             *(taskPt+BLOCK_OFFSET_PT)  = BLOCK;  // pointer arithmetic
@@ -89,12 +89,12 @@ void __os_block(funcPt func[], uint16_t numTasks)
     }
 }
 
-void __os_unblock(funcPt func[], uint16_t numTasks)
+void __os_unblock(funcPt func[], unsigned int numTasks)
 {
-    uint16_t i;
+    unsigned int i;
     for(i=0; i < numTasks; i++)
     {
-        uint16_t* taskPt = os_search(func[i]) ;
+        unsigned int* taskPt = os_search(func[i]) ;
         if( taskPt )
         {
             *(taskPt+BLOCK_OFFSET_PT)  = UNBLOCK;  // pointer arithmetic

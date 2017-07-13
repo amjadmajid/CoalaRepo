@@ -42,6 +42,7 @@ void __sendPagTemp(uint16_t pagTag);
 void __bringPagTemp(uint16_t pagTag);
 void __bringPagROM(uint16_t pagTag);
 void __sendPagROM(uint16_t pagTag);
+uint16_t __pageSwap(uint16_t * varAddr);
 void __pagsCommit();
 void __bringCrntPagROM();
 

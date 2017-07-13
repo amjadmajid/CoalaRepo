@@ -25,75 +25,84 @@ void task_outer_loop();
 void task_inner_loop();
 
 ////// Global variables
-unsigned arr[]= {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89};
-unsigned arr_len = 20;
-unsigned i =  0 ;
-unsigned j = 1;
+//DVAR( uint16_t arr[], ={3,1,4,6,9,5,10,8,16,20} );
+__p uint16_t arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89};
+     uint16_t arr_len = 20;
+__p uint16_t i =  0;
+__p uint16_t j = 1;
 
 /////  TASKS
 void task_inner_loop()
 {
-    if(arr[i] > arr[j])
+
+    uint16_t in_i = RVAR(i);
+    uint16_t in_j = RVAR(j);
+    uint16_t arr_i = RVAR( arr[ in_i ]);
+    uint16_t arr_j = RVAR(arr[ in_j ]);
+
+
+    if( arr_i  > arr_j )
     {
-        int temp = arr[j];
-        arr[j] = arr[i];
-        arr[i] = temp;
+        uint16_t temp = arr_j;
+        arr_j =  arr_i;
+        arr_i =  temp;
     }
 
-    if( j < arr_len)
+    if( in_j < arr_len)
     {
         os_jump(0);
     }
-    j++;
+
+
+    WVAR( arr[ in_i ] , arr_i);
+    WVAR( arr[ in_j ] , arr_j);
+    in_j++;
+    WVAR(j , in_j);
 }
 
 void task_outer_loop()
 {
-    i++;
-    j=i+1;
+    uint16_t in_i = RVAR(i);
+    in_i++;
 
-    if(i > arr_len)
+    if(in_i > arr_len)
     {
         os_unblock(task_finish);
     }
+
+    WVAR(i, in_i);
+    WVAR(j, in_i+1);
 }
 
 void task_finish()
 {
+    P3OUT |=BIT5;
+    P3OUT &=~BIT5;
 
-    if( (arr[19] == 100)  && (arr[0] ==1) )
-        {
-            P3OUT |=BIT5;
-            P3OUT &=~BIT5;
-        }
 
-//    P4OUT |= BIT0;
-//    __delay_cycles(500);
-//    P4OUT &= ~BIT0;
+    arr[0]=3;
+    arr[1]=1;
+    arr[2] =4;
+    arr[3]= 6;
+    arr[4]=9;
+    arr[5]=5;
+    arr[6]=10;
+    arr[7]=8;
+    arr[8]=16;
+    arr[9]=20;
+    arr[10]= 19;
+    arr[11]=40;
+    arr[12]=16;
+    arr[13]=17;
+    arr[14]=2;
+    arr[15]=41;
+    arr[16]=80;
+    arr[17]=100;
+    arr[18]=5;
+    arr[19]=89;
 
-//    arr[0]=3;
-//    arr[1]=1;
-//    arr[2] =4;
-//    arr[3]= 6;
-//    arr[4]=9;
-//    arr[5]=5;
-//    arr[6]=10;
-//    arr[7]=8;
-//    arr[8]=16;
-//    arr[9]=20;
-//    arr[10]= 19;
-//    arr[11]=40;
-//    arr[12]=16;
-//    arr[13]=17;
-//    arr[14]=2;
-//    arr[15]=41;
-//    arr[16]=80;
-//    arr[17]=100;
-//    arr[18]=5;
-//    arr[19]=89;
-
-    i =  0 ;
-    j = 1;
+    WVAR(i, 0) ;
+    WVAR(j, 1);
     os_block(task_finish);
 }
 
@@ -102,18 +111,12 @@ void init()
   WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
   // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
   PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
-  P3OUT = 0;
-  P4OUT = 0;
   P3DIR |=BIT5;
-  P4DIR |=BIT0;
+  P1DIR |=BIT0;
 }
 
 int main(void) {
     init();
-
-//    P4OUT |= BIT0;
-//    __delay_cycles(5000);
-//    P4OUT &= ~BIT0;
 
        taskId tasks[] = {  {task_inner_loop,0}, {task_outer_loop,0}, {task_finish,1}};
        //This function should be called only once

@@ -4,9 +4,9 @@
 
 #define ARRSIZE 128
 #define FIX_ARRSIZE 2048
-__p volatile uint16_t data[FIX_ARRSIZE] = {0};
+__p volatile unsigned int data[FIX_ARRSIZE] = {0};
 
-volatile uint16_t readVAr = 0;
+volatile unsigned int readVAr = 0;
 
 void init();
 void task0();
@@ -26,7 +26,7 @@ void init()
     P4DIR |=BIT0;
 }
 
-uint16_t x = 0;
+unsigned int x = 0;
 
 /********************************
             Tasks
@@ -34,7 +34,7 @@ uint16_t x = 0;
 void task0()
 {
 
-    volatile uint16_t i;
+    volatile unsigned int i;
 
     for (i = 0; i < ARRSIZE ; i++)
     {
@@ -53,15 +53,15 @@ void task1()
 
 void task2()
 {
-    uint16_t dummy= RVAR(data[100]);
+    unsigned int dummy= RVAR(data[100]);
     dummy++;
-        WVAR(data[200],  dummy);
+        WVAR(data[200],  dummy );
 }
 
 void task3()
 {
 
-    volatile uint16_t i;
+    volatile unsigned int i;
     for (i = 0; i < ARRSIZE ; i++)
     {
         WVAR(data[i], i );
@@ -71,7 +71,7 @@ void task3()
 void task4()
 {
 
-    volatile uint16_t i, dummy;
+    volatile unsigned int i, dummy;
     for (i = 0; i < ARRSIZE ; i++)
     {
          dummy = RVAR(data[i]);

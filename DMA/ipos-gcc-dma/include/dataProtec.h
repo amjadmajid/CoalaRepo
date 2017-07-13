@@ -36,21 +36,22 @@
 #define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
 
 
-void __sendPagTemp(uint16_t pagTag);
-void __bringPagTemp(uint16_t pagTag);
-void __bringPagROM(uint16_t pagTag);
-void __sendPagROM(uint16_t pagTag);
+void __sendPagTemp(unsigned int pagTag);
+void __bringPagTemp(unsigned int pagTag);
+void __bringPagROM(unsigned int pagTag);
+void __sendPagROM(unsigned int pagTag);
+unsigned int __pageSwap(unsigned int * varAddr);
 void __pagsCommit();
 void __bringCrntPagROM();
 
-extern uint16_t CrntPagHeader;  // Holds the address of the first byte of a page
+extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
 
 // Memory access interface
 
 // TODO send the page to temp buffer only if we wrote to it
 // #define __VAR_TAG(var)               ((uint16_t) (&(var)) )
 
-#define __VAR_ADDR(var)                 ((uint16_t) (&(var)) )
+#define __VAR_ADDR(var)                 ((unsigned int) (&(var)) )
 
 #define __IS_VAR_IN_CRNT_PAG(var)       ( ( __VAR_ADDR(var)  >= CrntPagHeader ) && \
                                         ( __VAR_ADDR(var)  <  (CrntPagHeader+PAG_SIZE) ))
@@ -66,10 +67,6 @@ extern uint16_t CrntPagHeader;  // Holds the address of the first byte of a page
                                     __pageSwap(&(var)) ;\
                                     * __VAR_PT_IN_RAM(var) = val;\
                                     }
-
-// #define WVAR(var, val)  * __VAR_PT_IN_RAM(var) =\
-//                         (   __IS_VAR_IN_CRNT_PAG(var)  ) ? val : (__pageSwap(&(var))+val)
-
 
 
 #define RVAR(var)   (  __IS_VAR_IN_CRNT_PAG(var) ) ? \

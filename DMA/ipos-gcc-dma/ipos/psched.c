@@ -7,12 +7,12 @@
 
 #define JUMP();    if(__jump !=1){   \
                         __current_task_virtual  =  \
-                        (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     /* soft transition */ \
+                        (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     /* soft transition */ \
                     }else{  \
                         while(__jump_cnt < __jump_to)   \
                             {   \
                                 __current_task_virtual  =  \
-                                (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  /* soft transition */ \
+                                (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  /* soft transition */ \
                                 __jump_cnt++;     \
                             }       \
                         __jump = 0;     \
@@ -20,32 +20,32 @@
                     }
 
 
-__nv volatile uint8_t __locker              = 0;
-__nv volatile uint8_t __commit_flag         = 0;
-__nv volatile uint16_t __task_address       = 0;    // Modified externally
-__nv volatile uint16_t __temp_task_address  = 0;
+__nv volatile unsigned char __locker              = 0;
+__nv volatile unsigned char __commit_flag         = 0;
+__nv unsigned int __task_address       = 0;    // Modified externally
+__nv unsigned int* __temp_task_address  = NULL;
 
-__nv volatile uint16_t __virtualTaskSize    = 1; // Disable the virtualization algorithm 2;
-__nv volatile uint16_t __maxVirtualTaskSize = 1; // Disable the virtualization algorithm  100;
-     volatile uint16_t __taskCounter        = 1; // Disable the virtualization algorithm  0;
-__nv  volatile uint16_t __temp_taskCounter  = 0;
-__nv volatile uint16_t __totalTaskCounter   = 0;
+__nv volatile unsigned int __virtualTaskSize    = 1; // Disable the virtualization algorithm 2;
+__nv volatile unsigned int __maxVirtualTaskSize = 1; // Disable the virtualization algorithm  100;
+     volatile unsigned int __taskCounter        = 1; // Disable the virtualization algorithm  0;
+__nv  volatile unsigned int __temp_taskCounter  = 0;
+__nv volatile unsigned int __totalTaskCounter   = 0;
 
-__nv volatile uint16_t __jump               = 0;
-__nv volatile uint16_t __jump_to            = 0;
-     volatile uint16_t __jump_cnt           = 0;
+__nv volatile unsigned int __jump               = 0;
+__nv volatile unsigned int __jump_to            = 0;
+     volatile unsigned int __jump_cnt           = 0;
 
-     volatile uint16_t __numBlockedTasks=0;
-     volatile uint16_t __numUnblockedTasks=0;
-__nv volatile uint16_t __temp_numBlockedTasks=0;
-__nv volatile uint16_t __temp_numUnblockedTasks=0;
+     volatile unsigned int __numBlockedTasks=0;
+     volatile unsigned int __numUnblockedTasks=0;
+__nv volatile unsigned int __temp_numBlockedTasks=0;
+__nv volatile unsigned int __temp_numUnblockedTasks=0;
 __nv funcPt __blockedTasks [16]={0};      // TODO at most 16 tasks can be blocked
 __nv funcPt __unblockedTasks [16]={0};     // TODO at most 16 tasks can be blocked
 
-__nv uint16_t __reboot_state[2]={0};    //virtual Task size control
+__nv unsigned int __reboot_state[2]={0};    //virtual Task size control
 
 //uint16_t * _current_task = NULL;
-uint16_t * __current_task_virtual = NULL;
+unsigned int * __current_task_virtual = NULL;
 
 void os_enter_critical()
 {
@@ -59,11 +59,11 @@ void os_exit_critical()
 
 
 // These tasks will be executed only once.
-void os_initTasks( const uint16_t numTasks, funcPt tasks[])
+void os_initTasks( const unsigned int numTasks, funcPt tasks[])
 {
     if(__locker != __KEY )
     {
-        uint16_t i = 0;
+        unsigned int i = 0;
         do{
             if (__commit_flag == 1)
                 goto init_commit;
@@ -84,7 +84,7 @@ init_commit:
 }
 
 
-void os_jump(uint16_t j)
+void os_jump(unsigned int j)
 {
     __jump=1;
     __jump_to=j;
@@ -139,7 +139,7 @@ void os_scheduler()
     }
 
     // Recover the virtual state
-    __current_task_virtual = (uint16_t *) __task_address ;
+    __current_task_virtual = (unsigned int *)__task_address ;
 
     while(1)
     {
@@ -154,16 +154,16 @@ void os_scheduler()
         // Skip blocked tasks
         while( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) != 0  )
         {
-            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
+            __current_task_virtual  =  (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
 
         }
 
         //TODO a better way to skip the blocked tasks might be needed
         // Maybe it is possible to use only the jump concept
-        uint16_t blockIndx ;
+        unsigned int blockIndx ;
         for (blockIndx = 0 ;__blockedTasks[blockIndx]; blockIndx++ )
         {
-            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
+            __current_task_virtual  =  (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
 
         }
 
@@ -188,14 +188,14 @@ void os_scheduler()
             }
             // virtual progress
             JUMP();
-            __temp_task_address = (uint16_t) (__current_task_virtual) ;
+            __temp_task_address = __current_task_virtual ;
             __temp_taskCounter = __taskCounter;
             __temp_numBlockedTasks   = __numBlockedTasks;
             __temp_numUnblockedTasks = __numUnblockedTasks;
             __commit_flag=COMMITTING;
 commit:
              // firm transition
-             __task_address  =  __temp_task_address;
+             __task_address  =  (unsigned int) __temp_task_address;
             __totalTaskCounter += __temp_taskCounter;
             //  Commit pages to their final locations
             __pagsCommit();

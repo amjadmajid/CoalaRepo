@@ -13,16 +13,16 @@
 #define BASE_ADDR       0x1980
 #define LIST_HEAD       (BASE_ADDR)           //2 bytes
 
-extern volatile uint16_t  __task_address;
-extern volatile uint16_t  __totNumTask;
-//extern uint16_t *__head;
-
 // function pointer
 typedef void (* funcPt)(void);
 
+extern unsigned int __task_address;
+extern volatile unsigned int  __totNumTask;
+//extern uint16_t *__head;
+
 //This is a task interface. It is shared between the user and IPOS
 typedef struct _taskId{
-  funcPt func;
+  funcPt * func;
   unsigned block;
 }taskId;
 

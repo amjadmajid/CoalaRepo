@@ -6,12 +6,14 @@
 #define PSECHED_H_
 
 // functions prototyping
-void os_initTasks( const uint16_t numTasks, funcPt tasks[]);
+void os_initTasks( const unsigned int numTasks, funcPt tasks[]);
 void os_scheduler();
 
 void os_exit_critical();
 void os_enter_critical();
 
-void os_jump(uint16_t j);
+void os_block(funcPt func);
+void os_unblock(funcPt func);
+void os_jump(unsigned int j);
 
 #endif

@@ -13,12 +13,12 @@
 #####################################*/
 
 //TODO check what happened when page size changed
-uint16_t __pagsInTemp[NUM_PAG] = {0};
-__nv uint16_t __persis_pagsInTemp[NUM_PAG] = {0};
+unsigned int __pagsInTemp[NUM_PAG] = {0};
+__nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
 
-uint16_t CrntPagHeader = BIGEN_ROM;
-__nv uint16_t __persis_CrntPagHeader = BIGEN_ROM;
-__nv uint8_t pageCommit = 0;
+unsigned int CrntPagHeader = BIGEN_ROM;
+__nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
+__nv unsigned char pageCommit = 0;
 
 
 /*
@@ -44,7 +44,7 @@ void __bringCrntPagROM()
 /*
  * Send a page to its temp buffer
  */
-void __sendPagTemp(uint16_t pagHeader)
+void __sendPagTemp(unsigned int pagHeader)
 {
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) RAM_PAG);
@@ -60,9 +60,9 @@ void __sendPagTemp(uint16_t pagHeader)
 
 
     // Find the page index
-    uint16_t pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
-    uint8_t idx=0;
-    uint16_t __pageSizes = PAG_SIZE;
+    unsigned int pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
+    unsigned char idx=0;
+    unsigned int __pageSizes = PAG_SIZE;
     while( pageGuess >= __pageSizes )
     {
         idx++;
@@ -77,7 +77,7 @@ void __sendPagTemp(uint16_t pagHeader)
 /*
  * Bring a page to its temp buffer
  */
-void __bringPagTemp(uint16_t pagHeader)
+void __bringPagTemp(unsigned int pagHeader)
 {
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (pagHeader + TOT_PAG_SIZE) );
@@ -94,7 +94,7 @@ void __bringPagTemp(uint16_t pagHeader)
 /*
  * Bring a page to its ROM buffer
  */
-void __bringPagROM(uint16_t pagHeader)
+void __bringPagROM(unsigned int pagHeader)
 {
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (pagHeader) );
@@ -111,7 +111,7 @@ void __bringPagROM(uint16_t pagHeader)
 /*
  * Send a page to its final locaiton
  */
-void __sendPagROM(uint16_t pagHeader)
+void __sendPagROM(unsigned int pagHeader)
 {
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA2SA,(unsigned long) pagHeader + TOT_PAG_SIZE);
@@ -130,17 +130,17 @@ void __sendPagROM(uint16_t pagHeader)
  * pageSwap:
  */
 //TODO this function does not
-uint16_t __pageSwap(uint16_t * varAddr)
+unsigned int __pageSwap(unsigned int * varAddr)
 {
 
     //1// send the current page
     __sendPagTemp( CrntPagHeader );
     //2// Find the requested page
-    uint16_t ReqPagTag;
-    uint16_t ReqPagTag_dirty = (uint16_t) varAddr;
-    uint16_t __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+    unsigned int ReqPagTag;
+    unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
+    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
     // TODO we are not checking if the var is not in any page !
-    uint8_t idx=0;
+    unsigned char idx=0;
     while( ! (ReqPagTag_dirty <= __temp_pagSize) )  // if the var is not with the page
     {
         idx++;
@@ -176,14 +176,14 @@ void __pagsCommit()
         // send the current page to the temp buffer
         __sendPagTemp(CrntPagHeader);
         __persis_CrntPagHeader = CrntPagHeader;  //Keep track of the last accessed page over a power cycle
-        uint16_t i;
+        unsigned int i;
         for (i=0; i < NUM_PAG; i++)
         {
             __persis_pagsInTemp[i] = __pagsInTemp[i];
         }
         pageCommit = 1;
     }
-    uint16_t cnt;
+    unsigned int cnt;
 
     for (cnt=0; cnt < NUM_PAG; cnt++)
     {
