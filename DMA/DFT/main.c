@@ -87,7 +87,7 @@ void discTimeSign()
 {
     // Get the input for the task
     unsigned int in_n = RVAR(n);
-    unsigned int in_x_n = RVAR(x[in_n]);
+    float in_x_n = RVAR(x[in_n]);
 
         // Generate random discrete-time signal x in range (-1,+1)
         in_x_n = ((2.0 * rand()) / RAND_MAX) - 1.0;
@@ -117,7 +117,7 @@ void dft_real() {
     // Get the input for the task
     unsigned int in_k = RVAR(k);
     unsigned int in_n = RVAR(n);
-    unsigned int in_Xre_k = RVAR(Xre[in_k]);
+    float in_Xre_k = RVAR(Xre[in_k]);
 
         in_Xre_k += RVAR(x[in_n]) * cosf(in_n * in_k * PI2 / SIZE);
         // commit to the buffer
@@ -138,7 +138,7 @@ void dft_im() {
     // Get the input for the task
     unsigned int in_k = RVAR(k);
     unsigned int in_n = RVAR(n);
-    unsigned int in_Xim_k = RVAR(Xim[in_k]);
+    float in_Xim_k = RVAR(Xim[in_k]);
 
         in_Xim_k -= RVAR(x[in_n]) * sinf(in_n * in_k * PI2 / SIZE);
         WVAR(Xim[in_k], in_Xim_k);
@@ -157,9 +157,9 @@ void dft_im() {
 void  dft_power(){
     // Get the input for the task
     unsigned int in_k = RVAR(k);
-    unsigned int in_Xim_k = RVAR(Xim[in_k]);
-    unsigned int in_Xre_k = RVAR(Xre[in_k]);
-    unsigned int in_p_k = RVAR(P[in_k]);
+    float in_Xim_k = RVAR(Xim[in_k]);
+    float in_Xre_k = RVAR(Xre[in_k]);
+    float in_p_k = RVAR(P[in_k]);
 
         in_p_k = in_Xre_k * in_Xre_k + in_Xim_k * in_Xim_k;
         in_k++;
