@@ -7,7 +7,7 @@
  *            constants             *
 *************************************/
 #define WRITE_ADDR 0x6600u
-#define  READ_ADDR 0x8400u
+#define  READ_ADDR 0x8400
 #define   DATA_LEN_LOC 0x1840u
 #define   DATA_LEN 0x64
 #define   BYTE_LEN 8u
@@ -25,12 +25,36 @@ uint8_t  * BCode   = (uint8_t  *)  0x1860;
 // the length of the need binary code 16 bytes  (ends at 1856)
 uint8_t  * LCode   = (uint8_t  *)  0x1870;
 
+volatile uint16_t work_x;
+
+/************************************
+ *       Protected globals          *
+*************************************/
+//__p unsigned char Comp_data[0x64];
+__p unsigned int  readPt;
+__p unsigned int  writePt;
+__p unsigned int  buf;
+__p unsigned int  bufIdx;
+__p unsigned int  byte_flag;
+
+
+/************************************
+ *      Functions Prototype          *
+*************************************/
 void initData();
+static void burn( uint32_t iters);
+static void blinkLed(uint32_t wait );
+void init();
+void codeTable(void);
+void init_task0();
+void init_task();
+void task_read();
+void task_write();
 
 /************************************
  *             delay                *
 *************************************/
-volatile uint16_t work_x;
+
 static void burn( uint32_t iters)
 {
     uint32_t iter = iters;
@@ -52,7 +76,108 @@ static void blinkLed(uint32_t wait )
 void initData()
 {
 
-        // Compressed test data
+//    Comp_data[0x00] = 0x0F;
+//    Comp_data[0x01] = 0xC9;
+//    Comp_data[0x02] = 0xE2;
+//    Comp_data[0x03] = 0xAC;
+//    Comp_data[0x04] = 0xDF;
+//    Comp_data[0x05] = 0x0F;
+//    Comp_data[0x06] = 0xC9;
+//    Comp_data[0x07] = 0xE2;
+//    Comp_data[0x08] = 0xAD;
+//    Comp_data[0x09] = 0x7C;
+//    Comp_data[0x0a] = 0x3F;
+//    Comp_data[0x0b] = 0x0F;
+//    Comp_data[0x0c] = 0x15;
+//    Comp_data[0x0d] = 0x6B;
+//    Comp_data[0x0e] = 0xE7;
+//    Comp_data[0x0f] = 0xAD;
+//    Comp_data[0x10] = 0x21;
+//    Comp_data[0x11] = 0x76;
+//    Comp_data[0x12] = 0x8C;
+//    Comp_data[0x13] = 0x5D;
+//    Comp_data[0x14] = 0xF0;
+//    Comp_data[0x15] = 0xC8;
+//    Comp_data[0x16] = 0x15;
+//    Comp_data[0x17] = 0xBE;
+//    Comp_data[0x18] = 0x48;
+//    Comp_data[0x19] = 0x81;
+//    Comp_data[0x1a] = 0x5D;
+//    Comp_data[0x1b] = 0xF3;
+//    Comp_data[0x1c] = 0x31;
+//    Comp_data[0x1d] = 0x6D;
+//    Comp_data[0x1e] = 0x83;
+//    Comp_data[0x1f] = 0x20;
+//    Comp_data[0x20] = 0x56;
+//    Comp_data[0x21] = 0xFA;
+//    Comp_data[0x22] = 0x44;
+//    Comp_data[0x23] = 0x0A;
+//    Comp_data[0x24] = 0xEF;
+//    Comp_data[0x25] = 0x99;
+//    Comp_data[0x26] = 0x06;
+//    Comp_data[0x27] = 0xC7;
+//    Comp_data[0x28] = 0x60;
+//    Comp_data[0x29] = 0x37;
+//    Comp_data[0x2a] = 0xBE;
+//    Comp_data[0x2b] = 0x8A;
+//    Comp_data[0x2c] = 0xC2;
+//    Comp_data[0x2d] = 0x9C;
+//    Comp_data[0x2e] = 0x05;
+//    Comp_data[0x2f] = 0x65;
+//    Comp_data[0x30] = 0xE6;
+//    Comp_data[0x31] = 0x3C;
+//    Comp_data[0x32] = 0x81;
+//    Comp_data[0x33] = 0xAF;
+//    Comp_data[0x34] = 0x9E;
+//    Comp_data[0x35] = 0x1A;
+//    Comp_data[0x36] = 0xD3;
+//    Comp_data[0x37] = 0x5A;
+//    Comp_data[0x38] = 0x68;
+//    Comp_data[0x39] = 0xDA;
+//    Comp_data[0x3a] = 0x6B;
+//    Comp_data[0x3b] = 0x4D;
+//    Comp_data[0x3c] = 0x8F;
+//    Comp_data[0x3d] = 0x3C;
+//    Comp_data[0x3e] = 0x6B;
+//    Comp_data[0x3f] = 0xED;
+//    Comp_data[0x40] = 0x37;
+//    Comp_data[0x41] = 0x7A;
+//    Comp_data[0x42] = 0xE5;
+//    Comp_data[0x43] = 0x3D;
+//    Comp_data[0x44] = 0x02;
+//    Comp_data[0x45] = 0xE5;
+//    Comp_data[0x46] = 0xFB;
+//    Comp_data[0x47] = 0x1E;
+//    Comp_data[0x48] = 0x40;
+//    Comp_data[0x49] = 0xD7;
+//    Comp_data[0x4a] = 0xDA;
+//    Comp_data[0x4b] = 0x6B;
+//    Comp_data[0x4c] = 0x4D;
+//    Comp_data[0x4d] = 0x69;
+//    Comp_data[0x4e] = 0xAD;
+//    Comp_data[0x4f] = 0x35;
+//    Comp_data[0x50] = 0xA6;
+//    Comp_data[0x51] = 0xC7;
+//    Comp_data[0x52] = 0x90;
+//    Comp_data[0x53] = 0x4D;
+//    Comp_data[0x54] = 0xAF;
+//    Comp_data[0x55] = 0x9E;
+//    Comp_data[0x56] = 0x1A;
+//    Comp_data[0x57] = 0xD3;
+//    Comp_data[0x58] = 0x5A;
+//    Comp_data[0x59] = 0x6B;
+//    Comp_data[0x5a] = 0x4D;
+//    Comp_data[0x5b] = 0x69;
+//    Comp_data[0x5c] = 0xB1;
+//    Comp_data[0x5d] = 0xE7;
+//    Comp_data[0x5e] = 0x8D;
+//    Comp_data[0x5f] = 0x7D;
+//    Comp_data[0x60] = 0xA6;
+//    Comp_data[0x61] = 0xB4;
+//    Comp_data[0x62] = 0xD6;
+//    Comp_data[0x63] = 0x9A;
+
+
     *((uint8_t *) 0x8400) = 0x0F;
     *((uint8_t *) 0x8401) = 0xC9;
     *((uint8_t *) 0x8402) = 0xE2;
@@ -153,164 +278,6 @@ void initData()
     *((uint8_t *) 0x8461) = 0xB4;
     *((uint8_t *) 0x8462) = 0xD6;
     *((uint8_t *) 0x8463) = 0x9A;
-//    *((uint8_t *) 0x8464) = 0xD3;
-//   *((uint8_t *) 0x8465) = 0x5A;
-//   *((uint8_t *) 0x8466) = 0x6C;
-//   *((uint8_t *) 0x8467) = 0x79;
-//   *((uint8_t *) 0x8468) = 0x03;
-//   *((uint8_t *) 0x8469) = 0x5F;
-//   *((uint8_t *) 0x846a) = 0x69;
-//   *((uint8_t *) 0x846b) = 0xBD;
-//   *((uint8_t *) 0x846c) = 0x34;
-//   *((uint8_t *) 0x846d) = 0xD6;
-//   *((uint8_t *) 0x846e) = 0x9A;
-//   *((uint8_t *) 0x846f) = 0xD3;
-//   *((uint8_t *) 0x8470) = 0x5A;
-//   *((uint8_t *) 0x8471) = 0x6C;
-//   *((uint8_t *) 0x8472) = 0x79;
-//   *((uint8_t *) 0x8473) = 0xE3;
-//   *((uint8_t *) 0x8474) = 0x5F;
-//   *((uint8_t *) 0x8475) = 0x69;
-//   *((uint8_t *) 0x8476) = 0xAD;
-//   *((uint8_t *) 0x8477) = 0x35;
-//   *((uint8_t *) 0x8478) = 0xA6;
-//   *((uint8_t *) 0x8479) = 0xB4;
-//   *((uint8_t *) 0x847a) = 0xD6;
-//   *((uint8_t *) 0x847b) = 0x9B;
-//   *((uint8_t *) 0x847c) = 0x1E;
-//   *((uint8_t *) 0x847d) = 0x78;
-//   *((uint8_t *) 0x847e) = 0xD7;
-//   *((uint8_t *) 0x847f) = 0xDA;
-//   *((uint8_t *) 0x8480) = 0x6B;
-//   *((uint8_t *) 0x8481) = 0x4D;
-//   *((uint8_t *) 0x8482) = 0x69;
-//   *((uint8_t *) 0x8483) = 0xA0;
-//   *((uint8_t *) 0x8484) = 0x69;
-//   *((uint8_t *) 0x8485) = 0xAD;
-//   *((uint8_t *) 0x8486) = 0x36;
-//   *((uint8_t *) 0x8487) = 0x3C;
-//   *((uint8_t *) 0x8488) = 0x81;
-//   *((uint8_t *) 0x8489) = 0xAF;
-//   *((uint8_t *) 0x848a) = 0xB4;
-//   *((uint8_t *) 0x848b) = 0xD6;
-//   *((uint8_t *) 0x848c) = 0x9A;
-//   *((uint8_t *) 0x848d) = 0xD3;
-//   *((uint8_t *) 0x848e) = 0x5A;
-//   *((uint8_t *) 0x848f) = 0x6B;
-//   *((uint8_t *) 0x8490) = 0x4D;
-//   *((uint8_t *) 0x8491) = 0x8F;
-//   *((uint8_t *) 0x8492) = 0x3C;
-//   *((uint8_t *) 0x8493) = 0x6B;
-//   *((uint8_t *) 0x8494) = 0xED;
-//   *((uint8_t *) 0x8495) = 0x35;
-//   *((uint8_t *) 0x8496) = 0xA6;
-//   *((uint8_t *) 0x8497) = 0xB4;
-//   *((uint8_t *) 0x8498) = 0xD6;
-//   *((uint8_t *) 0x8499) = 0x9A;
-//   *((uint8_t *) 0x849a) = 0xD3;
-//   *((uint8_t *) 0x849b) = 0x7B;
-//   *((uint8_t *) 0x849c) = 0x8F;
-//   *((uint8_t *) 0x849d) = 0x3C;
-//   *((uint8_t *) 0x849e) = 0x6B;
-//   *((uint8_t *) 0x849f) = 0xED;
-//   *((uint8_t *) 0x84a0) = 0x35;
-//   *((uint8_t *) 0x84a1) = 0xA6;
-//   *((uint8_t *) 0x84a2) = 0xB4;
-//   *((uint8_t *) 0x84a3) = 0xD6;
-//   *((uint8_t *) 0x84a4) = 0x9A;
-//   *((uint8_t *) 0x84a5) = 0xD3;
-//   *((uint8_t *) 0x84a6) = 0x63;
-//   *((uint8_t *) 0x84a7) = 0xCF;
-//   *((uint8_t *) 0x84a8) = 0x1A;
-//   *((uint8_t *) 0x84a9) = 0xFB;
-//   *((uint8_t *) 0x84aa) = 0x4D;
-//   *((uint8_t *) 0x84ab) = 0x69;
-//   *((uint8_t *) 0x84ac) = 0xAD;
-//   *((uint8_t *) 0x84ad) = 0x35;
-//   *((uint8_t *) 0x84ae) = 0xA6;
-//   *((uint8_t *) 0x84af) = 0xB4;
-//   *((uint8_t *) 0x84b0) = 0xD8;
-//   *((uint8_t *) 0x84b1) = 0xF2;
-//   *((uint8_t *) 0x84b2) = 0x06;
-//   *((uint8_t *) 0x84b3) = 0xBF;
-//   *((uint8_t *) 0x84b4) = 0x26;
-//   *((uint8_t *) 0x84b5) = 0x9A;
-//   *((uint8_t *) 0x84b6) = 0xD3;
-//   *((uint8_t *) 0x84b7) = 0x5A;
-//   *((uint8_t *) 0x84b8) = 0x6B;
-//   *((uint8_t *) 0x84b9) = 0x4D;
-//   *((uint8_t *) 0x84ba) = 0x69;
-//   *((uint8_t *) 0x84bb) = 0xB1;
-//   *((uint8_t *) 0x84bc) = 0xE4;
-//   *((uint8_t *) 0x84bd) = 0x0D;
-//   *((uint8_t *) 0x84be) = 0x7F;
-//   *((uint8_t *) 0x84bf) = 0xBE;
-//   *((uint8_t *) 0x84c0) = 0xCD;
-//   *((uint8_t *) 0x84c1) = 0x78;
-//   *((uint8_t *) 0x84c2) = 0x7B;
-//   *((uint8_t *) 0x84c3) = 0xEC;
-//   *((uint8_t *) 0x84c4) = 0x66;
-//   *((uint8_t *) 0x84c5) = 0x2F;
-//   *((uint8_t *) 0x84c6) = 0x05;
-//   *((uint8_t *) 0x84c7) = 0x63;
-//   *((uint8_t *) 0x84c8) = 0xCF;
-//   *((uint8_t *) 0x84c9) = 0x1A;
-//   *((uint8_t *) 0x84ca) = 0xFB;
-//   *((uint8_t *) 0x84cb) = 0xD8;
-//   *((uint8_t *) 0x84cc) = 0x86;
-//   *((uint8_t *) 0x84cd) = 0xD3;
-//   *((uint8_t *) 0x84ce) = 0x5A;
-//   *((uint8_t *) 0x84cf) = 0x68;
-//   *((uint8_t *) 0x84d0) = 0x5A;
-//   *((uint8_t *) 0x84d1) = 0x6B;
-//   *((uint8_t *) 0x84d2) = 0x4D;
-//   *((uint8_t *) 0x84d3) = 0x8F;
-//   *((uint8_t *) 0x84d4) = 0x3D;
-//   *((uint8_t *) 0x84d5) = 0xB5;
-//   *((uint8_t *) 0x84d6) = 0xF9;
-//   *((uint8_t *) 0x84d7) = 0x8D;
-//   *((uint8_t *) 0x84d8) = 0xF6;
-//   *((uint8_t *) 0x84d9) = 0x9A;
-//   *((uint8_t *) 0x84da) = 0xD3;
-//   *((uint8_t *) 0x84db) = 0x5E;
-//   *((uint8_t *) 0x84dc) = 0x1E;
-//   *((uint8_t *) 0x84dd) = 0xEF;
-//   *((uint8_t *) 0x84de) = 0x05;
-//   *((uint8_t *) 0x84df) = 0x63;
-//   *((uint8_t *) 0x84e0) = 0xCF;
-//   *((uint8_t *) 0x84e1) = 0x1A;
-//   *((uint8_t *) 0x84e2) = 0xFB;
-//   *((uint8_t *) 0x84e3) = 0xD8;
-//   *((uint8_t *) 0x84e4) = 0x86;
-//   *((uint8_t *) 0x84e5) = 0xD3;
-//   *((uint8_t *) 0x84e6) = 0x5A;
-//   *((uint8_t *) 0x84e7) = 0x6B;
-//   *((uint8_t *) 0x84e8) = 0x4D;
-//   *((uint8_t *) 0x84e9) = 0x69;
-//   *((uint8_t *) 0x84ea) = 0xBD;
-//   *((uint8_t *) 0x84eb) = 0xC7;
-//   *((uint8_t *) 0x84ec) = 0x9E;
-//   *((uint8_t *) 0x84ed) = 0xDA;
-//   *((uint8_t *) 0x84ee) = 0xFC;
-//   *((uint8_t *) 0x84ef) = 0xC6;
-//   *((uint8_t *) 0x84f0) = 0xFB;
-//   *((uint8_t *) 0x84f1) = 0x4D;
-//   *((uint8_t *) 0x84f2) = 0x69;
-//   *((uint8_t *) 0x84f3) = 0xAF;
-//   *((uint8_t *) 0x84f4) = 0x0F;
-//   *((uint8_t *) 0x84f5) = 0x77;
-//   *((uint8_t *) 0x84f6) = 0x82;
-//   *((uint8_t *) 0x84f7) = 0xB1;
-//   *((uint8_t *) 0x84f8) = 0xE7;
-//   *((uint8_t *) 0x84f9) = 0x8D;
-//   *((uint8_t *) 0x84fa) = 0x7D;
-//   *((uint8_t *) 0x84fb) = 0xEC;
-//   *((uint8_t *) 0x84fc) = 0x43;
-//   *((uint8_t *) 0x84fd) = 0x69;
-//   *((uint8_t *) 0x84fe) = 0xAD;
-//   *((uint8_t *) 0x84ff) = 0x35;
-
-
 
 
       //uncompressed test data (the beginning of the output)
@@ -387,7 +354,7 @@ void init()
 }
 
 void codeTable(void){
-    uint8_t i ;
+    unsigned char i ;
     for(i = 0 ; i < TABLE_LEN ; i++){
         *(LCode+i)    = ( (*code) >> 0) & 0x0f;     // the first 4 digits (length container)
         *(SCode+i)    = ( (*code) >> 4) & 0x0f ;    // the second 4 digits (symbol container)
@@ -397,12 +364,6 @@ void codeTable(void){
         code++;
       }
 }
-
-DVAR(uint16_t,  readPt);
-DVAR(uint16_t,  writePt);
-DVAR(uint16_t, buf);
-DVAR(uint16_t, bufIdx);
-DVAR(uint8_t,  byte_flag);
 
 void init_task0()
 {
@@ -418,15 +379,13 @@ void init_task()
     WVAR(buf,0);
     WVAR(bufIdx ,16);
     WVAR(byte_flag, 1);
-
-    os_block(init_task);
 }
 
 void task_read()
 {
-    uint16_t inbufIdx =             RVAR(bufIdx);
-    uint8_t *inreadPt = (uint8_t *) RVAR(readPt);
-    uint16_t inbuf    =             RVAR(buf);
+    unsigned int inbufIdx   =                   RVAR(bufIdx);
+    unsigned char *inreadPt = (unsigned char *) RVAR(readPt);
+    unsigned int inbuf      =                   RVAR(buf);
 
     while(inbufIdx >=8 )
     {
@@ -436,7 +395,7 @@ void task_read()
     }
 
     WVAR( buf, inbuf ) ;
-    WVAR(readPt, (uint16_t) inreadPt);
+    WVAR(readPt, (unsigned int) inreadPt);
     WVAR(bufIdx,inbufIdx );
 
 }
@@ -444,14 +403,14 @@ void task_read()
 void task_write()
 {
 
-    uint16_t inbufIdx =              RVAR(bufIdx);
-    uint8_t *inwritePt = (uint8_t *) RVAR(writePt);
-    uint16_t inbuf =                 RVAR(buf);
-    uint8_t inbyte_flag =            RVAR(byte_flag);
+    unsigned int inbufIdx =              RVAR(bufIdx);
+    unsigned char *inwritePt = (unsigned char *) RVAR(writePt);
+    unsigned int inbuf =                 RVAR(buf);
+    unsigned char inbyte_flag =            RVAR(byte_flag);
 
     while(inbufIdx < BYTE_LEN)
     {
-        uint8_t i;
+        unsigned char i;
         for(i=0; i < TABLE_LEN; i++){
             // If there is an exact match between the new byte and a code, output a symbol
             // the extra needed zeros (to form a byte) is added to the MSBs therefore shifting is not required
@@ -475,12 +434,12 @@ void task_write()
 
 
         WVAR( buf, inbuf ) ;
-        WVAR(writePt, (uint16_t ) inwritePt);
+        WVAR(writePt, (unsigned int ) inwritePt);
         WVAR(bufIdx,inbufIdx );
         WVAR(byte_flag, inbyte_flag);
 
         // if decompressing the data is not done
-        if( ( inwritePt - ( (uint8_t *) WRITE_ADDR ) ) >=  DATA_LEN) // *( (uint16_t *) DATA_LEN ) )
+        if( ( inwritePt - ( (unsigned char *) WRITE_ADDR ) ) >=  DATA_LEN) // *( (uint16_t *) DATA_LEN ) )
         {
             P3OUT |=BIT5;
             P3OUT &=~BIT5;
