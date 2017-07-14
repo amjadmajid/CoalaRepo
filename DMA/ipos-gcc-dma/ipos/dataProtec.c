@@ -18,7 +18,6 @@ __nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
 
 unsigned int CrntPagHeader = BIGEN_ROM;
 __nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
-__nv unsigned char pageCommit = 0;
 
 
 /*
@@ -169,22 +168,7 @@ unsigned int __pageSwap(unsigned int * varAddr)
 
 void __pagsCommit()
 {
-    // TODO what happen when the power interrupts during the
-    // commit of the page from SRAM to temp Buffer
-    if(!pageCommit)
-    {
-        // send the current page to the temp buffer
-        __sendPagTemp(CrntPagHeader);
-        __persis_CrntPagHeader = CrntPagHeader;  //Keep track of the last accessed page over a power cycle
-        unsigned int i;
-        for (i=0; i < NUM_PAG; i++)
-        {
-            __persis_pagsInTemp[i] = __pagsInTemp[i];
-        }
-        pageCommit = 1;
-    }
     unsigned int cnt;
-
     for (cnt=0; cnt < NUM_PAG; cnt++)
     {
         // send the pages to their final locations in ROM
@@ -193,9 +177,6 @@ void __pagsCommit()
             __sendPagROM( __persis_pagsInTemp[cnt] );
         }
     }
-
-    pageCommit = 0;  // enable sending the first page to the temp buffer
-
 }
 
 

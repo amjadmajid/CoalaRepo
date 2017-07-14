@@ -157,6 +157,13 @@ void os_scheduler()
             __temp_taskCounter = __taskCounter;
             __temp_numBlockedTasks   = __numBlockedTasks;
             __temp_numUnblockedTasks = __numUnblockedTasks;
+            __sendPagTemp( CrntPagHeader );
+            unsigned int i;
+            for (i=0; i < NUM_PAG; i++)
+            {
+                __persis_pagsInTemp[i] = __pagsInTemp[i];
+            }
+            __persis_CrntPagHeader = CrntPagHeader;  //Keep track of the last accessed page over a power cycle
             __commit_flag=COMMITTING;
 commit:
              // firm transition
