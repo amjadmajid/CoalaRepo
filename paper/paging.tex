@@ -1,0 +1,71 @@
+One of the main objectives of VIPRE run-time is to restrict virtual tasks to interface only with the volatile memory, since volatile memory access is relatively cheaper non-volatile memory access. To this end, the persistent variables a virtual task operates on should be brought from non-volatile memory to a fixed-sized \emph{volatile buffer} and when the virtual task is finished the modified variables in this buffer should be committed back to their original locations in non-volatile memory. However, this is not a trivial task due to the following facts: 
+
+\paragraph{I-Dynamic Access Overhead} The persistent variables accessed and/or modified by a virtual task might not be known in advance due to the dynamic program flow. Therefore, the  volatile buffer should keep track of the persistent variables accessed by any virtual task at runtime. When a persistent variable is read or written, first the volatile copy of the corresponding variable is \emph{searched} in this buffer. If it is found, the read or write operation is performed on the volatile copy. Otherwise, the persistent variable is read from the non-volatile memory and inserted in this buffer for future operations. Unfortunately, we observed that \emph{search--bring} operations at each access to the persistent variables introduce considerable overhead and might kill the benefit of task virtualization.
+ 
+\paragraph{II-Two Phase Commit Overhead}  For the consistency of the non-volatile memory, the volatile buffer should be committed at the end of each virtual task by means of a \emph{two-phase commit} approach.  However, two-phase commit is also very expensive since the committed variables are not \emph{contiguous}---leading the fact that copying or moving of data between/within volatile and non-volatile memory should be always performed with CPU intervention. 
+
+\paragraph{III-Main Memory Constraints:} Persistent variables can be allocated \emph{contiguously} in non-volatile memory with compiler support. In order to eliminate run-time buffer \emph{search} overhead, \emph{all} persistent variables can be brought from non-volatile memory to the volatile buffer at system start-up---very efficiently and faster thanks to Direct memory access (DMA) that eliminates CPU intervention for \emph{block} memory-memory copy/move operations. Two-phase commit is also very efficient in this case since DMA can be utilized to move volatile buffer as a block to non-volatile locations. However, bringing all persistent variables from non-volatile memory to the volatile buffer suffers from the \emph{memory fit problem}: the volatile memory is a scarce resource and may not be large enough to hold all persistent variables. 
+
+Considering these facts, we designed a \emph{paging-based} virtual memory in software that (i) partitions contiguously allocated persistent variables into pages; (ii) implements the volatile \emph{page buffer} that holds a single page---solves the aforementioned memory-fit problem; (ii) swaps the page in volatile memory with a new page in non-volatile memory efficiently by utilizing DMA-based memory block-copy operations; (iii) buffers the swapped volatile page until commit to enable task virtualization; (iv) implements two-phase commit of the modified pages to preserve the consistency of non-volatile memory; (v) and performs two-phase commit operations using DMA for the sake of efficiency. We explain the details of our design in the following subsections.  
+
+\subsection{Address Translation and Variable Access}
+
+Our virtual memory system provides an interface to the applications which is composed of two C macros: \texttt{RVAR(var)} and \texttt{WVAR(var,val)} that accept the name of the persistent variable \texttt{var} as an input argument. These macros obtain the \emph{physical address} of the corresponding persistent variable in non-volatile memory and translates it into the \emph{virtual address} in volatile memory which is composed of a \emph{page tag} and \emph{offset}. For the sake of simplicity and efficiency, we implemented this translation in a trivial way: the first byte of the physical address is considered to be the page tag and the rest is the offset within the corresponding page. 
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/}
+	\caption{Address translation}
+	\label{fig:address-translation}
+\end{figure}
+
+\begin{algorithm}[t]
+	\caption{\texttt{RWAR(var)} pseudo-code}
+	\label{algo:rwar}
+	\scriptsize
+	%\small
+	\begin{algorithmic}[1]
+		\State $\texttt{tag}\leftarrow \texttt{getTag(var)}$ 
+		\If { \texttt{tag} != \texttt{CrntPagTag} }	\Comment{Check if the page is in page buffer}
+		\State	\texttt{PageFault(tag)} \Comment{Page is not in the page buffer, bring it}
+		\EndIf
+				\State $\texttt{offset}\leftarrow \texttt{getOffset(var)}$ 		
+		\State \texttt{return pageBuf[offset]}  \Comment{Return directly from page buffer}
+	\end{algorithmic}
+\end{algorithm}
+
+
+After address translation and obtaining the virtual address, it is required to check if the corresponding page is already in volatile page buffer. To this end, our system maintains a \texttt{CrntPagTag} variable that holds the tag of the page currently in the page buffer. If the tag of the virtual address and \texttt{CrntPagTag} are equal, this indicates that page buffer holds the required page and the offset of the virtual address is used to read from/write to the location in the volatile page buffer immediately. If the required page is not in the page buffer, a \emph{page fault} routine is executed as we discuss in the next subsection. Observe that the computational complexity of the whole steps pertaining to address translation and variable access is $\mathcal{O}(1)$---introducing minimal overhead to the system to boost up benefits of volatile-only memory interfacing. The pseudo-code of \texttt{RWAR} is presented in Algorithm~\ref{algo:rwar}.
+
+
+\subsection{Page Faults and Swapping}
+
+\begin{algorithm}[t]
+	\caption{\texttt{PageFault(tag)} pseudo-code}
+	\label{algo:rwar}
+	\scriptsize
+	%\small
+	\begin{algorithmic}[1]
+		\If { \texttt{isModified(CrntPagTag)} }	\Comment{Check if the active page modified}
+		\State commit current page to \texttt{pagesTemp}
+		\EndIf
+		\If { tag is in \texttt{pagesTemp} }	\Comment{Check if the requested page has been modified}
+		\State bring from \texttt{pagesTemp} to \texttt{pageBuff} 
+		\Else
+		\State bring from original to \texttt{pageBuff} 
+		\EndIf 
+	\end{algorithmic}
+\end{algorithm}
+
+If the tag of the virtual address and \texttt{CrntPagTag} are not equal, the active page in page buffer should be swapped with the requested page. In this situation, we have the following two cases:
+\paragraph{Modified Active Page:} If the contents of the page buffer is modified, we commit it to an intermediate page buffer in non-volatile memory, namely to \texttt{pagesTemp}. If it is not modified, there is no need to commit the active page.
+
+\paragraph{Modified Requested Page:}  If the requested page is previously modified, it should be brought from \texttt{pagesTemp} rather than its original location in non-volatile memory. 
+
+After the swapping, the \texttt{CrntPagTag} is set to the tag of the requested page. It should be noted that DMA is used to introduce minimal overhead during page swapping. The pseudo-code of the page fault handling is presented in Algorithm~\ref{algo:pagefault}.
+
+
+
+\subsection{Page Committing}
+
+Using a two-phase commit by utilizing DMA. 
