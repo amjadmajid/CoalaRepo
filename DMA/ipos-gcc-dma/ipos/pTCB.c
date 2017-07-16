@@ -61,12 +61,25 @@ unsigned int * os_search(funcPt func)
     unsigned int* __current = __head;
 
     do{
+        // Do three lock ups before looping before executing a new loop cycle (a bit of optimizations)
         if( (funcPt) *__current ==  func )
         {
             return __current;
         }
 
         __current = (unsigned int*) *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
+
+        if( (funcPt) *__current ==  func )
+        {
+            return __current;
+        }
+
+        __current = (unsigned int*) *(__current+NEXT_OFFSET_PT);
+
+        if( (funcPt) *__current ==  func )
+        {
+            return __current;
+        }
 
     }while( __current != __head);
 

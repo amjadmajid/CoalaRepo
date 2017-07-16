@@ -35,12 +35,6 @@ __nv volatile unsigned int __jump               = 0;
 __nv volatile unsigned int __jump_to            = 0;
      volatile unsigned int __jump_cnt           = 0;
 
-     volatile unsigned int __numBlockedTasks=0;
-     volatile unsigned int __numUnblockedTasks=0;
-__nv volatile unsigned int __temp_numBlockedTasks=0;
-__nv volatile unsigned int __temp_numUnblockedTasks=0;
-__nv funcPt __blockedTasks [16]={0};      // TODO at most 16 tasks can be blocked
-__nv funcPt __unblockedTasks [16]={0};     // TODO at most 16 tasks can be blocked
 
 __nv unsigned int __reboot_state[2]={0};    //virtual Task size control
 
@@ -70,6 +64,8 @@ void os_initTasks( const unsigned int numTasks, funcPt tasks[])
 
             // execute the init tasks
             tasks[i]();
+//            __sendPagTemp( CrntPagHeader ); This is not
+            //TODO Either completely ignore or correct
 
             __commit_flag=COMMITTING;
 init_commit:
