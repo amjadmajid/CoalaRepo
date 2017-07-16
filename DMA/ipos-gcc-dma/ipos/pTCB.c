@@ -68,38 +68,23 @@ uint16_t * os_search(funcPt func)
 
         __current = *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
 
+        if( (uint16_t *) *__current ==  (uint16_t *) func )
+        {
+            return __current;
+        }
+
+        __current = *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
+
+        if( (uint16_t *) *__current ==  (uint16_t *) func )
+        {
+            return __current;
+        }
+
+        __current = *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
+
     }while( __current != __head);
 
      return NULL;
 }
 
-
-
-void __os_block(funcPt func[], uint16_t numTasks)
-{
-    uint16_t i;
-    for(i=0; i < numTasks; i++)
-    {
-        uint16_t* taskPt = os_search(func[i]) ;
-        if( taskPt )
-        {
-            *(taskPt+BLOCK_OFFSET_PT)  = BLOCK;  // pointer arithmetic
-        }
-        func[i] = 0; // reset the location in the buffer
-    }
-}
-
-void __os_unblock(funcPt func[], uint16_t numTasks)
-{
-    uint16_t i;
-    for(i=0; i < numTasks; i++)
-    {
-        uint16_t* taskPt = os_search(func[i]) ;
-        if( taskPt )
-        {
-            *(taskPt+BLOCK_OFFSET_PT)  = UNBLOCK;  // pointer arithmetic
-        }
-        func[i] = 0; // reset the location in the buffer
-    }
-}
 

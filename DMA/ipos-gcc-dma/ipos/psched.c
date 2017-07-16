@@ -35,12 +35,6 @@ __nv volatile uint16_t __jump               = 0;
 __nv volatile uint16_t __jump_to            = 0;
      volatile uint16_t __jump_cnt           = 0;
 
-     volatile uint16_t __numBlockedTasks=0;
-     volatile uint16_t __numUnblockedTasks=0;
-__nv volatile uint16_t __temp_numBlockedTasks=0;
-__nv volatile uint16_t __temp_numUnblockedTasks=0;
-__nv funcPt __blockedTasks [16]={0};      // TODO at most 16 tasks can be blocked
-__nv funcPt __unblockedTasks [16]={0};     // TODO at most 16 tasks can be blocked
 
 __nv uint16_t __reboot_state[2]={0};    //virtual Task size control
 
@@ -91,17 +85,6 @@ void os_jump(uint16_t j)
     __jump_to=j;
 }
 
-void os_block(funcPt func)
-{
-    __blockedTasks[__numBlockedTasks] = func;
-    __numBlockedTasks++;
-}
-
-void os_unblock(funcPt func)
-{
-    __unblockedTasks[__numUnblockedTasks] = func;
-    __numUnblockedTasks++;
-}
 
 void os_scheduler()
 {
@@ -152,28 +135,6 @@ void os_scheduler()
     while(1)
     {
 
-        /*
-         * Skip the persistently and softly blocked tasks
-         *
-         * TODO An alternative way to implement the blocking concept is to take a snapshot
-         * of the blocking status on the virtual task boundaries and to undo any changes
-         * on a power up.
-         */
-        // Skip blocked tasks
-        while( ( * (__current_task_virtual+BLOCK_OFFSET_PT )) != 0  )
-        {
-            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
-
-        }
-
-        //TODO a better way to skip the blocked tasks might be needed
-        // Maybe it is possible to use only the jump concept
-        uint16_t blockIndx ;
-        for (blockIndx = 0 ;__blockedTasks[blockIndx]; blockIndx++ )
-        {
-            __current_task_virtual  =  (uint16_t) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;
-
-        }
 
         // access a task
         ( (funcPt)( *__current_task_virtual ) ) ();
@@ -202,8 +163,6 @@ void os_scheduler()
             JUMP();
             __temp_task_address = (uint16_t) (__current_task_virtual) ;
             __temp_taskCounter = __taskCounter;
-            __temp_numBlockedTasks   = __numBlockedTasks;
-            __temp_numUnblockedTasks = __numUnblockedTasks;
             __commit_flag=COMMITTING;
 commit:
              // firm transition
@@ -211,10 +170,6 @@ commit:
             __totalTaskCounter += __temp_taskCounter;
             //  Second stage, FRAM -> FRAM
             wb_secondPhaseCommit();
-
-            // These buffers are being cleared inside the functions
-            __os_block(__blockedTasks,__temp_numBlockedTasks);
-            __os_unblock(__unblockedTasks,__temp_numUnblockedTasks);
 
             __commit_flag=COMMIT_FINISH;
 
