@@ -19,8 +19,8 @@ int main(void) {
 
     //******// Check the correctness of the address translation
     __bringCrntPagROM();            // bring the default page
-    res1 = RVAR(rVar_p1);           // read the variable
-    res1++;
+    res1 = RVAR(rVar_p1) + 1;           // read the variable
+//    res1++;
     WVAR(rVar_p1, res1);          // write a value into the RAM page
 
     //******// Check the page swapping, Check the memory to see if the page1 went to its temporary location (0xDF70)
