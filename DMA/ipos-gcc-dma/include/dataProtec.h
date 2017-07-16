@@ -69,6 +69,16 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                                     }
 
 
+#define GWVAR(var, oper,val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
+                                { \
+                                    *__VAR_PT_IN_RAM(var) oper val ;\
+                                }\
+                                else{\
+                                    __pageSwap(&(var)) ;\
+                                    * __VAR_PT_IN_RAM(var) oper val;\
+                                    }
+
+
 #define RVAR(var)   (\
                         (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
                         ( * __VAR_PT_IN_RAM(var) ):\

@@ -55,7 +55,7 @@ void task2()
 {
     unsigned int dummy= RVAR(data[100]);
     dummy++;
-        WVAR(data[200],  dummy );
+        GWVAR(data[200], &= , dummy );
 }
 
 void task3()
