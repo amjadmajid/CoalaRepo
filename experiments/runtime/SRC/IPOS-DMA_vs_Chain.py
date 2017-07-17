@@ -76,6 +76,7 @@ ipos_dft8 = open('../experiments_data/dft/IPOS_DFT8.csv')
 chain_dd_time = executionTime(chain_dd)  # Execution time
 ipos_dd_time = executionTime(ipos_dd) 
 
+
 chain_dft4_time = executionTime(chain_dft4) 
 ipos_dft4_time = executionTime(ipos_dft4)
 

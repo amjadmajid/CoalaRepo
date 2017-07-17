@@ -1,10 +1,3 @@
-/*
- * arrayBased_main.c
- *
- *  Created on: 14 Jul 2017
- *      Author: amjad
- */
-
 #include <msp430.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -13,11 +6,13 @@
 /************************************
  *            constants             *
 *************************************/
-#define  DATA_LEN_LOC 0x1840u
-#define  DATA_LEN     0x64
-#define  BYTE_LEN     8u
-#define  WORD_LEN     16u
-#define  TABLE_LEN    16u
+#define WRITE_ADDR 0x6600u
+#define  READ_ADDR 0x8400
+#define   DATA_LEN_LOC 0x1840u
+#define   DATA_LEN 0x64
+#define   BYTE_LEN 8u
+#define   WORD_LEN 16u
+#define  TABLE_LEN 16u
 /************************************
  *              globals             *
 *************************************/
@@ -35,8 +30,7 @@ volatile uint16_t work_x;
 /************************************
  *       Protected globals          *
 *************************************/
-__p unsigned char Comp_data[0x64];
-__p unsigned char Decomp_data[0x64];
+//__p unsigned char Comp_data[0x64];
 __p unsigned int  readPt;
 __p unsigned int  writePt;
 __p unsigned int  buf;
@@ -81,106 +75,210 @@ static void blinkLed(uint32_t wait )
 
 void initData()
 {
-    WVAR(Comp_data[0x00] , 0x0F);
-    WVAR(Comp_data[0x01] , 0xC9);
-    WVAR(Comp_data[0x02] , 0xE2);
-    WVAR(Comp_data[0x03] , 0xAC);
-    WVAR(Comp_data[0x04] , 0xDF);
-    WVAR(Comp_data[0x05] , 0x0F);
-    WVAR(Comp_data[0x06] , 0xC9);
-    WVAR(Comp_data[0x07] , 0xE2);
-    WVAR(Comp_data[0x08] , 0xAD);
-    WVAR(Comp_data[0x09] , 0x7C);
-    WVAR(Comp_data[0x0a] , 0x3F);
-    WVAR(Comp_data[0x0b] , 0x0F);
-    WVAR(Comp_data[0x0c] , 0x15);
-    WVAR(Comp_data[0x0d] , 0x6B);
-    WVAR(Comp_data[0x0e] , 0xE7);
-    WVAR(Comp_data[0x0f] , 0xAD);
-    WVAR(Comp_data[0x10] , 0x21);
-    WVAR(Comp_data[0x11] , 0x76);
-    WVAR(Comp_data[0x12] , 0x8C);
-    WVAR(Comp_data[0x13] , 0x5D);
-    WVAR(Comp_data[0x14] , 0xF0);
-    WVAR(Comp_data[0x15] , 0xC8);
-    WVAR(Comp_data[0x16] , 0x15);
-    WVAR(Comp_data[0x17] , 0xBE);
-    WVAR(Comp_data[0x18] , 0x48);
-    WVAR(Comp_data[0x19] , 0x81);
-    WVAR(Comp_data[0x1a] , 0x5D);
-    WVAR(Comp_data[0x1b] , 0xF3);
-    WVAR(Comp_data[0x1c] , 0x31);
-    WVAR(Comp_data[0x1d] , 0x6D);
-    WVAR(Comp_data[0x1e] , 0x83);
-    WVAR(Comp_data[0x1f] , 0x20);
-    WVAR(Comp_data[0x20] , 0x56);
-    WVAR(Comp_data[0x21] , 0xFA);
-    WVAR(Comp_data[0x22] , 0x44);
-    WVAR(Comp_data[0x23] , 0x0A);
-    WVAR(Comp_data[0x24] , 0xEF);
-    WVAR(Comp_data[0x25] , 0x99);
-    WVAR(Comp_data[0x26] , 0x06);
-    WVAR(Comp_data[0x27] , 0xC7);
-    WVAR(Comp_data[0x28] , 0x60);
-    WVAR(Comp_data[0x29] , 0x37);
-    WVAR(Comp_data[0x2a] , 0xBE);
-    WVAR(Comp_data[0x2b] , 0x8A);
-    WVAR(Comp_data[0x2c] , 0xC2);
-    WVAR(Comp_data[0x2d] , 0x9C);
-    WVAR(Comp_data[0x2e] , 0x05);
-    WVAR(Comp_data[0x2f] , 0x65);
-    WVAR(Comp_data[0x30] , 0xE6);
-    WVAR(Comp_data[0x31] , 0x3C);
-    WVAR(Comp_data[0x32] , 0x81);
-    WVAR(Comp_data[0x33] , 0xAF);
-    WVAR(Comp_data[0x34] , 0x9E);
-    WVAR(Comp_data[0x35] , 0x1A);
-    WVAR(Comp_data[0x36] , 0xD3);
-    WVAR(Comp_data[0x37] , 0x5A);
-    WVAR(Comp_data[0x38] , 0x68);
-    WVAR(Comp_data[0x39] , 0xDA);
-    WVAR(Comp_data[0x3a] , 0x6B);
-    WVAR(Comp_data[0x3b] , 0x4D);
-    WVAR(Comp_data[0x3c] , 0x8F);
-    WVAR(Comp_data[0x3d] , 0x3C);
-    WVAR(Comp_data[0x3e] , 0x6B);
-    WVAR(Comp_data[0x3f] , 0xED);
-    WVAR(Comp_data[0x40] , 0x37);
-    WVAR(Comp_data[0x41] , 0x7A);
-    WVAR(Comp_data[0x42] , 0xE5);
-    WVAR(Comp_data[0x43] , 0x3D);
-    WVAR(Comp_data[0x44] , 0x02);
-    WVAR(Comp_data[0x45] , 0xE5);
-    WVAR(Comp_data[0x46] , 0xFB);
-    WVAR(Comp_data[0x47] , 0x1E);
-    WVAR(Comp_data[0x48] , 0x40);
-    WVAR(Comp_data[0x49] , 0xD7);
-    WVAR(Comp_data[0x4a] , 0xDA);
-    WVAR(Comp_data[0x4b] , 0x6B);
-    WVAR(Comp_data[0x4c] , 0x4D);
-    WVAR(Comp_data[0x4d] , 0x69);
-    WVAR(Comp_data[0x4e] , 0xAD);
-    WVAR(Comp_data[0x4f] , 0x35);
-    WVAR(Comp_data[0x50] , 0xA6);
-    WVAR(Comp_data[0x51] , 0xC7);
-    WVAR(Comp_data[0x52] , 0x90);
-    WVAR(Comp_data[0x53] , 0x4D);
-    WVAR(Comp_data[0x54] , 0xAF);
-    WVAR(Comp_data[0x55] , 0x9E);
-    WVAR(Comp_data[0x56] , 0x1A);
-    WVAR(Comp_data[0x57] , 0xD3);
-    WVAR(Comp_data[0x58] , 0x5A);
-    WVAR(Comp_data[0x59] , 0x6B);
-    WVAR(Comp_data[0x5a] , 0x4D);
-    WVAR(Comp_data[0x5b] , 0x69);
-    WVAR(Comp_data[0x5c] , 0xB1);
-    WVAR(Comp_data[0x5d] , 0xE7);
-    WVAR(Comp_data[0x5e] , 0x8D);
-    WVAR(Comp_data[0x5f] , 0x7D);
-    WVAR(Comp_data[0x60] , 0xA6);
-    WVAR(Comp_data[0x61] , 0xB4);
-    WVAR(Comp_data[0x62] , 0xD6);
-    WVAR(Comp_data[0x63] , 0x9A);
+
+//    Comp_data[0x00] = 0x0F;
+//    Comp_data[0x01] = 0xC9;
+//    Comp_data[0x02] = 0xE2;
+//    Comp_data[0x03] = 0xAC;
+//    Comp_data[0x04] = 0xDF;
+//    Comp_data[0x05] = 0x0F;
+//    Comp_data[0x06] = 0xC9;
+//    Comp_data[0x07] = 0xE2;
+//    Comp_data[0x08] = 0xAD;
+//    Comp_data[0x09] = 0x7C;
+//    Comp_data[0x0a] = 0x3F;
+//    Comp_data[0x0b] = 0x0F;
+//    Comp_data[0x0c] = 0x15;
+//    Comp_data[0x0d] = 0x6B;
+//    Comp_data[0x0e] = 0xE7;
+//    Comp_data[0x0f] = 0xAD;
+//    Comp_data[0x10] = 0x21;
+//    Comp_data[0x11] = 0x76;
+//    Comp_data[0x12] = 0x8C;
+//    Comp_data[0x13] = 0x5D;
+//    Comp_data[0x14] = 0xF0;
+//    Comp_data[0x15] = 0xC8;
+//    Comp_data[0x16] = 0x15;
+//    Comp_data[0x17] = 0xBE;
+//    Comp_data[0x18] = 0x48;
+//    Comp_data[0x19] = 0x81;
+//    Comp_data[0x1a] = 0x5D;
+//    Comp_data[0x1b] = 0xF3;
+//    Comp_data[0x1c] = 0x31;
+//    Comp_data[0x1d] = 0x6D;
+//    Comp_data[0x1e] = 0x83;
+//    Comp_data[0x1f] = 0x20;
+//    Comp_data[0x20] = 0x56;
+//    Comp_data[0x21] = 0xFA;
+//    Comp_data[0x22] = 0x44;
+//    Comp_data[0x23] = 0x0A;
+//    Comp_data[0x24] = 0xEF;
+//    Comp_data[0x25] = 0x99;
+//    Comp_data[0x26] = 0x06;
+//    Comp_data[0x27] = 0xC7;
+//    Comp_data[0x28] = 0x60;
+//    Comp_data[0x29] = 0x37;
+//    Comp_data[0x2a] = 0xBE;
+//    Comp_data[0x2b] = 0x8A;
+//    Comp_data[0x2c] = 0xC2;
+//    Comp_data[0x2d] = 0x9C;
+//    Comp_data[0x2e] = 0x05;
+//    Comp_data[0x2f] = 0x65;
+//    Comp_data[0x30] = 0xE6;
+//    Comp_data[0x31] = 0x3C;
+//    Comp_data[0x32] = 0x81;
+//    Comp_data[0x33] = 0xAF;
+//    Comp_data[0x34] = 0x9E;
+//    Comp_data[0x35] = 0x1A;
+//    Comp_data[0x36] = 0xD3;
+//    Comp_data[0x37] = 0x5A;
+//    Comp_data[0x38] = 0x68;
+//    Comp_data[0x39] = 0xDA;
+//    Comp_data[0x3a] = 0x6B;
+//    Comp_data[0x3b] = 0x4D;
+//    Comp_data[0x3c] = 0x8F;
+//    Comp_data[0x3d] = 0x3C;
+//    Comp_data[0x3e] = 0x6B;
+//    Comp_data[0x3f] = 0xED;
+//    Comp_data[0x40] = 0x37;
+//    Comp_data[0x41] = 0x7A;
+//    Comp_data[0x42] = 0xE5;
+//    Comp_data[0x43] = 0x3D;
+//    Comp_data[0x44] = 0x02;
+//    Comp_data[0x45] = 0xE5;
+//    Comp_data[0x46] = 0xFB;
+//    Comp_data[0x47] = 0x1E;
+//    Comp_data[0x48] = 0x40;
+//    Comp_data[0x49] = 0xD7;
+//    Comp_data[0x4a] = 0xDA;
+//    Comp_data[0x4b] = 0x6B;
+//    Comp_data[0x4c] = 0x4D;
+//    Comp_data[0x4d] = 0x69;
+//    Comp_data[0x4e] = 0xAD;
+//    Comp_data[0x4f] = 0x35;
+//    Comp_data[0x50] = 0xA6;
+//    Comp_data[0x51] = 0xC7;
+//    Comp_data[0x52] = 0x90;
+//    Comp_data[0x53] = 0x4D;
+//    Comp_data[0x54] = 0xAF;
+//    Comp_data[0x55] = 0x9E;
+//    Comp_data[0x56] = 0x1A;
+//    Comp_data[0x57] = 0xD3;
+//    Comp_data[0x58] = 0x5A;
+//    Comp_data[0x59] = 0x6B;
+//    Comp_data[0x5a] = 0x4D;
+//    Comp_data[0x5b] = 0x69;
+//    Comp_data[0x5c] = 0xB1;
+//    Comp_data[0x5d] = 0xE7;
+//    Comp_data[0x5e] = 0x8D;
+//    Comp_data[0x5f] = 0x7D;
+//    Comp_data[0x60] = 0xA6;
+//    Comp_data[0x61] = 0xB4;
+//    Comp_data[0x62] = 0xD6;
+//    Comp_data[0x63] = 0x9A;
+
+
+    *((uint8_t *) 0x8400) = 0x0F;
+    *((uint8_t *) 0x8401) = 0xC9;
+    *((uint8_t *) 0x8402) = 0xE2;
+    *((uint8_t *) 0x8403) = 0xAC;
+    *((uint8_t *) 0x8404) = 0xDF;
+    *((uint8_t *) 0x8405) = 0x0F;
+    *((uint8_t *) 0x8406) = 0xC9;
+    *((uint8_t *) 0x8407) = 0xE2;
+    *((uint8_t *) 0x8408) = 0xAD;
+    *((uint8_t *) 0x8409) = 0x7C;
+    *((uint8_t *) 0x840a) = 0x3F;
+    *((uint8_t *) 0x840b) = 0x0F;
+    *((uint8_t *) 0x840c) = 0x15;
+    *((uint8_t *) 0x840d) = 0x6B;
+    *((uint8_t *) 0x840e) = 0xE7;
+    *((uint8_t *) 0x840f) = 0xAD;
+    *((uint8_t *) 0x8410) = 0x21;
+    *((uint8_t *) 0x8411) = 0x76;
+    *((uint8_t *) 0x8412) = 0x8C;
+    *((uint8_t *) 0x8413) = 0x5D;
+    *((uint8_t *) 0x8414) = 0xF0;
+    *((uint8_t *) 0x8415) = 0xC8;
+    *((uint8_t *) 0x8416) = 0x15;
+    *((uint8_t *) 0x8417) = 0xBE;
+    *((uint8_t *) 0x8418) = 0x48;
+    *((uint8_t *) 0x8419) = 0x81;
+    *((uint8_t *) 0x841a) = 0x5D;
+    *((uint8_t *) 0x841b) = 0xF3;
+    *((uint8_t *) 0x841c) = 0x31;
+    *((uint8_t *) 0x841d) = 0x6D;
+    *((uint8_t *) 0x841e) = 0x83;
+    *((uint8_t *) 0x841f) = 0x20;
+    *((uint8_t *) 0x8420) = 0x56;
+    *((uint8_t *) 0x8421) = 0xFA;
+    *((uint8_t *) 0x8422) = 0x44;
+    *((uint8_t *) 0x8423) = 0x0A;
+    *((uint8_t *) 0x8424) = 0xEF;
+    *((uint8_t *) 0x8425) = 0x99;
+    *((uint8_t *) 0x8426) = 0x06;
+    *((uint8_t *) 0x8427) = 0xC7;
+    *((uint8_t *) 0x8428) = 0x60;
+    *((uint8_t *) 0x8429) = 0x37;
+    *((uint8_t *) 0x842a) = 0xBE;
+    *((uint8_t *) 0x842b) = 0x8A;
+    *((uint8_t *) 0x842c) = 0xC2;
+    *((uint8_t *) 0x842d) = 0x9C;
+    *((uint8_t *) 0x842e) = 0x05;
+    *((uint8_t *) 0x842f) = 0x65;
+    *((uint8_t *) 0x8430) = 0xE6;
+    *((uint8_t *) 0x8431) = 0x3C;
+    *((uint8_t *) 0x8432) = 0x81;
+    *((uint8_t *) 0x8433) = 0xAF;
+    *((uint8_t *) 0x8434) = 0x9E;
+    *((uint8_t *) 0x8435) = 0x1A;
+    *((uint8_t *) 0x8436) = 0xD3;
+    *((uint8_t *) 0x8437) = 0x5A;
+    *((uint8_t *) 0x8438) = 0x68;
+    *((uint8_t *) 0x8439) = 0xDA;
+    *((uint8_t *) 0x843a) = 0x6B;
+    *((uint8_t *) 0x843b) = 0x4D;
+    *((uint8_t *) 0x843c) = 0x8F;
+    *((uint8_t *) 0x843d) = 0x3C;
+    *((uint8_t *) 0x843e) = 0x6B;
+    *((uint8_t *) 0x843f) = 0xED;
+    *((uint8_t *) 0x8440) = 0x37;
+    *((uint8_t *) 0x8441) = 0x7A;
+    *((uint8_t *) 0x8442) = 0xE5;
+    *((uint8_t *) 0x8443) = 0x3D;
+    *((uint8_t *) 0x8444) = 0x02;
+    *((uint8_t *) 0x8445) = 0xE5;
+    *((uint8_t *) 0x8446) = 0xFB;
+    *((uint8_t *) 0x8447) = 0x1E;
+    *((uint8_t *) 0x8448) = 0x40;
+    *((uint8_t *) 0x8449) = 0xD7;
+    *((uint8_t *) 0x844a) = 0xDA;
+    *((uint8_t *) 0x844b) = 0x6B;
+    *((uint8_t *) 0x844c) = 0x4D;
+    *((uint8_t *) 0x844d) = 0x69;
+    *((uint8_t *) 0x844e) = 0xAD;
+    *((uint8_t *) 0x844f) = 0x35;
+    *((uint8_t *) 0x8450) = 0xA6;
+    *((uint8_t *) 0x8451) = 0xC7;
+    *((uint8_t *) 0x8452) = 0x90;
+    *((uint8_t *) 0x8453) = 0x4D;
+    *((uint8_t *) 0x8454) = 0xAF;
+    *((uint8_t *) 0x8455) = 0x9E;
+    *((uint8_t *) 0x8456) = 0x1A;
+    *((uint8_t *) 0x8457) = 0xD3;
+    *((uint8_t *) 0x8458) = 0x5A;
+    *((uint8_t *) 0x8459) = 0x6B;
+    *((uint8_t *) 0x845a) = 0x4D;
+    *((uint8_t *) 0x845b) = 0x69;
+    *((uint8_t *) 0x845c) = 0xB1;
+    *((uint8_t *) 0x845d) = 0xE7;
+    *((uint8_t *) 0x845e) = 0x8D;
+    *((uint8_t *) 0x845f) = 0x7D;
+    *((uint8_t *) 0x8460) = 0xA6;
+    *((uint8_t *) 0x8461) = 0xB4;
+    *((uint8_t *) 0x8462) = 0xD6;
+    *((uint8_t *) 0x8463) = 0x9A;
+
 
       //uncompressed test data (the beginning of the output)
       //b2 d0 80 00 05 02 b2 d0 80 00
@@ -250,6 +348,7 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+    __enable_interrupt();
     P4DIR |= BIT0; // make Port 4 pin 0 an output
     P3DIR |=BIT5;
 }
@@ -275,8 +374,8 @@ void init_task0()
 
 void init_task()
 {
-    WVAR(readPt,   (unsigned int)Comp_data );       // Write
-    WVAR(writePt,  (unsigned int)Decomp_data);     // Read
+    WVAR(readPt,   READ_ADDR);       // Write
+    WVAR(writePt,  WRITE_ADDR);     // Read
     WVAR(buf,0);
     WVAR(bufIdx ,16);
     WVAR(byte_flag, 1);
@@ -304,10 +403,10 @@ void task_read()
 void task_write()
 {
 
-    unsigned int inbufIdx =                      RVAR(bufIdx);
+    unsigned int inbufIdx =              RVAR(bufIdx);
     unsigned char *inwritePt = (unsigned char *) RVAR(writePt);
-    unsigned int inbuf =                         RVAR(buf);
-    unsigned char inbyte_flag =                  RVAR(byte_flag);
+    unsigned int inbuf =                 RVAR(buf);
+    unsigned char inbyte_flag =            RVAR(byte_flag);
 
     while(inbufIdx < BYTE_LEN)
     {
@@ -319,11 +418,11 @@ void task_write()
             {
                 if(inbyte_flag == 1)
                 {
-                    WVAR((*inwritePt) , (*(SCode+i)<<4)) ;
+                    (*inwritePt)   = *(SCode+i)<<4 ;
                     inbyte_flag = 0;
                 }else{
                     inbyte_flag = 1;
-                   WVAR( (*inwritePt) , | *(SCode+i) ) ;
+                    (*inwritePt)  |= *(SCode+i) ;
                 }
 
                 break;
@@ -340,16 +439,16 @@ void task_write()
         WVAR(byte_flag, inbyte_flag);
 
         // if decompressing the data is not done
-        if( ( inwritePt - ( (unsigned char *) Decomp_data ) ) >=  DATA_LEN) // *( (uint16_t *) DATA_LEN ) )
+        if( ( inwritePt - ( (unsigned char *) WRITE_ADDR ) ) >=  DATA_LEN) // *( (uint16_t *) DATA_LEN ) )
         {
             P3OUT |=BIT5;
             P3OUT &=~BIT5;
+//            os_unblock(init_task);
 //            blinkLed(2500 );
-            os_jump(2);  // jump the init_task0
             break;
 
         }else{
-            os_jump(3);  // jump the init_task0, init_task
+            os_jump(2);  // jump the init_task
         }
 
     }
@@ -360,15 +459,14 @@ int main(int argc, char const *argv[])
 {
     init();
 
-//    funcPt init_tasks[] = {init_task0};
-//    os_initTasks(1, init_tasks);
+    funcPt init_tasks[] = {init_task0};
+    os_initTasks(1, init_tasks);
 
-    taskId tasks[] = {  {init_task0,0},
-                        {init_task,0},
+    taskId tasks[] = {  {init_task,0},
                         {task_read,0},
                         {task_write,0 }};
     //This function should be called only once
-    os_addTasks(4, tasks );
+    os_addTasks(3, tasks );
 
     os_scheduler();
     return 0;
