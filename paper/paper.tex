@@ -1,4 +1,8 @@
-\documentclass[sigconf,anonymous,review]{acmart}
+%\documentclass[sigconf,anonymous,review]{acmart}
+\documentclass[pageno]{jpaper}
+
+%replace XXX with the submission number you are given from the ASPLOS submission site.
+\newcommand{\asplossubmissionnumber}{XXX}
 
 \usepackage[normalem]{ulem}
 \usepackage{amssymb}
@@ -10,110 +14,113 @@
 \usepackage{xcolor}
 \usepackage{xspace}
 \usepackage{natbib}
-\usepackage{graphicx}
-\usepackage{subfigure}
+%\usepackage{graphicx}
+%\usepackage{subfigure}
 %\usepackage[inline]{enumitem}
 
 \newcommand{\TODO}[1]{{\bf \em \textcolor{red}{TODO: #1}\xspace}}
-
 \newcommand{\todo}[2]{\textcolor{red}{$\bullet$ \textbf{Task:} #1; \textbf{Responsible:} #2}}
-
 \newcommand{\sys}{VIPE\xspace}
 \newcommand{\sysfull}{Virtualized Intermittently-Powered Executor\xspace}
 
-\setcopyright{rightsretained}
+%\setcopyright{rightsretained}
 
-\acmDOI{http://dx.doi.org/xx.xxxx/xxxxxxx.xxxxxxx}
+%\acmDOI{http://dx.doi.org/xx.xxxx/xxxxxxx.xxxxxxx}
 
-\acmISBN{978-1-xxxx-xxxx-x/17/11}
+%\acmISBN{978-1-xxxx-xxxx-x/17/11}
 
-\acmConference[ASPLOS]{The 23rd ACM International Conference on Architectural Support for Programming Languages and Operating Systems}{March 24--28, 2017}{Williamsburg, VA, USA}
+%\acmConference[ASPLOS]{The 23rd ACM International Conference on Architectural Support for Programming Languages and Operating Systems}{March 24--28, 2017}{Williamsburg, VA, USA}
 
-\acmYear{2017}
+%\acmYear{2017}
 
-\copyrightyear{2017}
+%\copyrightyear{2017}
 
-\acmPrice{15.00}
+%\acmPrice{15.00}
 
 \begin{document}
 
-\title[VIPE: Virtualized Intermittently-Powered Executor]{VIPE: Virtualized Intermittently-Powered Executor}
+\title{VIPE: Virtualized Intermittently-Powered Executor}
 
 %Note: order of authors placed randomly
 
-\author{Kiwan Maeng}
+%\author{Kiwan Maeng}
 %\authornote{}
 %\orcid{}
-\affiliation{%
-	\institution{Carnegie Mellon University}
-	\streetaddress{4720 Forbes Avenue}
-	\city{Pittsburgh} 
-	\state{PA} 
-	\postcode{15213}
-}
-\email{kmaeng@andrew.cmu.edu}
+%\affiliation{%
+%	\institution{Carnegie Mellon University}
+%	\streetaddress{4720 Forbes Avenue}
+%\city{Pittsburgh} 
+%	\state{PA} 
+%	\postcode{15213}
+%}
+%\email{kmaeng@andrew.cmu.edu}
 
-\author{Alexei Colin}
+%\author{Alexei Colin}
 %\authornote{}
 %\orcid{}
-\affiliation{%
-	\institution{Carnegie Mellon University}
-	\streetaddress{4720 Forbes Avenue}
-	\city{Pittsburgh} 
-	\state{PA} 
-	\postcode{15213}
-}
-\email{acolin@andrew.cmu.edu}
+%\affiliation{%
+%	\institution{Carnegie Mellon University}
+%	\streetaddress{4720 Forbes Avenue}
+%	\city{Pittsburgh} 
+%	\state{PA} 
+%	\postcode{15213}
+%}
+%\email{acolin@andrew.cmu.edu}
 
-\author{Brandon Lucia}
+%\author{Brandon Lucia}
 %\authornote{}
 %\orcid{}
-\affiliation{%
-	\institution{Carnegie Mellon University}
-	\streetaddress{4720 Forbes Avenue}
-	\city{Pittsburgh} 
-	\state{PA} 
-	\postcode{15213}
-}
-\email{blucia@andrew.cmu.edu}
+%\affiliation{%
+%	\institution{Carnegie Mellon University}
+%	\streetaddress{4720 Forbes Avenue}
+%	\city{Pittsburgh} 
+%	\state{PA} 
+%	\postcode{15213}
+%}
+%\email{blucia@andrew.cmu.edu}
 
-\author{Amjad Yousef Majid}
+%\author{Amjad Yousef Majid}
 %\authornote{}
 %\orcid{}
-\affiliation{%
-	\institution{Delft University of Technology}
-	\streetaddress{Mekelweg 4}
-	\city{Delft, The Netherlands} 
-	\state{Zuid Holland} 
-	\postcode{2628\,CD}
-}
-\email{a.y.majid@tudelft.nl}
+%\affiliation{%
+%	\institution{Delft University of Technology}
+%	\streetaddress{Mekelweg 4}
+%	\city{Delft, The Netherlands} 
+%	\state{Zuid Holland} 
+%	\postcode{2628\,CD}
+%}
+%\email{a.y.majid@tudelft.nl}
 
-\author{Kas{\i}m Sinan Y{\i}ld{\i}r{\i}m}
+%\author{Kas{\i}m Sinan Y{\i}ld{\i}r{\i}m}
 %\authornote{}
 %\orcid{}
-\affiliation{%
-	\institution{Delft University of Technology}
-	\streetaddress{Mekelweg 4}
-	\city{Delft, The Netherlands} 
-	\state{Zuid Holland} 
-	\postcode{2628\,CD}
-}
-\email{k.s.yildirim@tudelft.nl}
+%\affiliation{%
+%	\institution{Delft University of Technology}
+%	\streetaddress{Mekelweg 4}
+%	\city{Delft, The Netherlands} 
+%	\state{Zuid Holland} 
+%	\postcode{2628\,CD}
+%}
+%\email{k.s.yildirim@tudelft.nl}
 
-\author{Przemys{\l}aw Pawe{\l}czak}
+%\author{Przemys{\l}aw Pawe{\l}czak}
 %\authornote{}
 %\orcid{}
-\affiliation{%
-	\institution{Delft University of Technology}
-	\streetaddress{Mekelweg 4}
-	\city{Delft, The Netherlands} 
-	\state{Zuid Holland} 
-	\postcode{2628\,CD}
-}
-\email{p.pawelczak@tudelft.nl}
+%\affiliation{%
+%	\institution{Delft University of Technology}
+%	\streetaddress{Mekelweg 4}
+%	\city{Delft, The Netherlands} 
+%	\state{Zuid Holland} 
+%	\postcode{2628\,CD}
+%}
+%\email{p.pawelczak@tudelft.nl}
 
-\renewcommand{\shortauthors}{A. Y. Majid et al.}
+%\renewcommand{\shortauthors}{A. Y. Majid et al.}
+
+\date{}
+\maketitle
+
+\thispagestyle{empty}
 
 \begin{abstract}
 \input{abstract}
@@ -123,48 +130,46 @@
 %http://dl.acm.org/ccs.cfm Please copy and paste the code instead of the 
 %example below. 
 
-\begin{CCSXML}
-	<ccs2012>
-	<concept>
-	<concept_id>10010520.10010553.10010562.10010564</concept_id>
-	<concept_desc>Computer systems organization~Embedded 
-	software</concept_desc>
-	<concept_significance>500</concept_significance>
-	</concept>
-	<concept>
-	<concept_id>10010520.10010575.10010578</concept_id>
-	<concept_desc>Computer systems organization~Availability</concept_desc>
-	<concept_significance>300</concept_significance>
-	</concept>
-	<concept>
-	<concept_id>10011007.10010940.10010941.10010949.10010957.10010688</concept_id>
-	<concept_desc>Software and its engineering~Scheduling</concept_desc>
-	<concept_significance>300</concept_significance>
-	</concept>
-	<concept>
-	<concept_id>10011007.10010940.10010941.10010949.10010965</concept_id>
-	<concept_desc>Software and its engineering~Communications 
-	management</concept_desc>
-	<concept_significance>300</concept_significance>
-	</concept>
-	<concept>
-	<concept_id>10011007.10010940.10010971.10010564</concept_id>
-	<concept_desc>Software and its engineering~Embedded 
-	software</concept_desc>
-	<concept_significance>300</concept_significance>
-	</concept>
-	</ccs2012>
-\end{CCSXML}
+%\begin{CCSXML}
+%	<ccs2012>
+%	<concept>
+%	<concept_id>10010520.10010553.10010562.10010564</concept_id>
+%	<concept_desc>Computer systems organization~Embedded 
+%	software</concept_desc>
+%	<concept_significance>500</concept_significance>
+%	</concept>
+%	<concept>
+%	<concept_id>10010520.10010575.10010578</concept_id>
+%	<concept_desc>Computer systems organization~Availability</concept_desc>
+%	<concept_significance>300</concept_significance>
+%	</concept>
+%	<concept>
+%	<concept_id>10011007.10010940.10010941.10010949.10010957.10010688</concept_id>
+%	<concept_desc>Software and its engineering~Scheduling</concept_desc>
+%	<concept_significance>300</concept_significance>
+%	</concept>
+%	<concept>
+%	<concept_id>10011007.10010940.10010941.10010949.10010965</concept_id>
+%	<concept_desc>Software and its engineering~Communications 
+%	management</concept_desc>
+%	<concept_significance>300</concept_significance>
+%	</concept>
+%	<concept>
+%	<concept_id>10011007.10010940.10010971.10010564</concept_id>
+%	<concept_desc>Software and its engineering~Embedded 
+%	software</concept_desc>
+%	<concept_significance>300</concept_significance>
+%	</concept>
+%	</ccs2012>
+%\end{CCSXML}
 
-\ccsdesc[500]{Computer systems organization~Embedded software}
-\ccsdesc[300]{Computer systems organization~Availability}
-\ccsdesc[300]{Software and its engineering~Scheduling}
-\ccsdesc[300]{Software and its engineering~Communications management}
-\ccsdesc[300]{Software and its engineering~Embedded software}
+%\ccsdesc[500]{Computer systems organization~Embedded software}
+%\ccsdesc[300]{Computer systems organization~Availability}
+%\ccsdesc[300]{Software and its engineering~Scheduling}
+%\ccsdesc[300]{Software and its engineering~Communications management}
+%\ccsdesc[300]{Software and its engineering~Embedded software}
 
-\keywords{Energy harvesting, transient operation, operating system}
-
-\maketitle
+%\keywords{Energy harvesting, transient operation, operating system}
 
 \section{Introduction}
 \label{sec:intro}
@@ -178,6 +183,7 @@
 \label{sec:background}
 
 \input{background}
+
 
 \section{\sysfull}
 \label{sec:overeall_system}
@@ -309,8 +315,8 @@ Some of the main problems in modifying Alpaca to support dynamic task's size are
 
 \begin{figure}[t]
     \centering
-         \subfigure[The energy cost of FRAM/SRAM \textbf{writes} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_write.eps} }
-         \subfigure[The energy cost of FRAM/SRAM \textbf{read} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_read.eps}}
+         \subfloat[The energy cost of FRAM/SRAM \textbf{writes} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_write.eps} }
+         \subfloat[The energy cost of FRAM/SRAM \textbf{read} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_read.eps}}
     \caption{The energy cost of accessing volatile/non-volatile memory}
     \label{fig:framEnergy}
 \end{figure}
@@ -425,7 +431,7 @@ Fig.~\ref{fig:IPOSPerformance} shows that VIPOS requires a shorter execution tim
 \subsection{Intermittent Power Supply}
 ...
 
-\bibliographystyle{abbrvnat}
+\bibliographystyle{plain}
 \bibliography{bib}
 
 \end{document}

@@ -1,6 +1,7 @@
 Performing complex operations on battery-less energy harvesting embedded platforms is challenging from many points of view. Here we shall briefly provide a background on computation with energy harvesting embedded systems. 
 
 \subsection{Energy Harvesting: Background}
+\label{sec:background_harvesting}
 
 Supplying power to tiny embedded computers using batteries alone is not sustainable. European Commission estimates that more than 160 kilotons of consumer batteries enter the European Union annually~\cite{eu_batteries_2016}. Since not all batteries are recycled, they constitute a potential environmental hazard. A potent solution is to replace batteries with smaller, but environment friendly {(super-)capacitors} (promising millions of charge/discharge cycles~\cite[Sec. I]{ongaro_pwre_2012}) and to supply them {\em directly from the ambient energy sources}---creating a truly self-sustainable computing device. The limitation of the capacitor as storage is its lower than battery energy density, making effective capacitor discharge times orders of magnitude smaller than for a battery.
 
@@ -28,6 +29,24 @@ Many platforms enable intermittent, battery-less computation. For instance, comp
 
 The biggest technical problem with energy provided from the ambient to battery-less platforms is that harvested energy is not stable and difficult to predict accurately. Combined with the fact that energy supply is small, there is little leeway to store enough of energy to guarantee prolonged periods of computation. Energy breaks happen every hundred of milliseconds, refer again to e.g.~\cite[Fig. 1]{mementos}. This causes each program running on such platform to restart. Solution to the problem is to divide the program into smaller parts that guarantee execution within a discharge region and track the state of the program in-between execution times.
 
+\subsection{Memory Consistency}
+\label{sec:background_consistency}
+
+Naturally, content of a volatile memory (i.e. run-time stack, global and local variables) of the microcontroller and program registers are erased after each power failure. Only what resides in a non-volatile memory, e.g. FRAM, persists after system reboot. A solution to sustain the progress of the program from the last power failure, instead from the beginning (the \emph{Sisyphus} effect~\cite[Sec. 2]{mementos})is a periodic checkpointing of a program state~\cite{mementos,hibernusplusplus,quickrecall,idetic}. The periodicity, and a position of a checkpoint, is the core of the contribution behind each of the proposed checkpoining solution. 
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/code_demo_incosistency}
+	%	for (byte = 0; byte < nBytes; ++byte){\\
+	%	checkpoint();\\
+		%data = reflectData(message\[byte\]) $^$ (remainder >> (WIDTH - 8));\\
+		%remainder = crcTable[data] $^$ (remainder << 8);}
+	\caption{Code demonstrating WAR and volatile memory checkpointing.}
+	\label{fig:code_demo_incosistency}
+\end{figure}
+
+Fig.~\ref{fig:code_demo_incosistency} demonstrates the problem through example. 
+
 \subsection{(Task-based) Intermittent Computing: Background}
 
 \begin{figure}
@@ -51,4 +70,10 @@ Other forms of intermittent platforms will share the same problem. One of them c
 
 %prior systems do fine grained task division (virtualization) {clank,aplaca}
 
-\TODO{Elaborate on the ``key challenge'' paragraphs near the end of the intro.}
+%Q1: Does Program Counter change size with task (checkpoint) size in Chain? In other words: bigger Chain task=bigger Program Counter?
+%Q2: Does Register File (RF) includes Program Counter (PC)? In other words: is always PC>RF in terms of memory size?
+
+%N_{checkpoints} \times e^{2\times N_{shared}} 
+
+\todo{Elaborate on the ``key challenge'' paragraphs near the end of the intro}{Przemek}
+\todo{Define the Task and Task based execution model}{Przemek}
