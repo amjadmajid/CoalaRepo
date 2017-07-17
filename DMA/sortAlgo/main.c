@@ -48,7 +48,7 @@ void task_inner_loop()
         arr_i =  temp;
     }
 
-    if( in_j < arr_len)
+    if( in_j < (arr_len-1) )
     {
         os_jump(0);
     }
