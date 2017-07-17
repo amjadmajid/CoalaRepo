@@ -151,8 +151,6 @@ void os_scheduler()
             JUMP();
             __temp_task_address = __current_task_virtual ;
             __temp_taskCounter = __taskCounter;
-            __temp_numBlockedTasks   = __numBlockedTasks;
-            __temp_numUnblockedTasks = __numUnblockedTasks;
             __sendPagTemp( CrntPagHeader );
             unsigned int i;
             for (i=0; i < NUM_PAG; i++)
