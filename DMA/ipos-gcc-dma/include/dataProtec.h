@@ -85,6 +85,13 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                         ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
+
+#define PVAR(var)   (\
+                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
+                        ( __VAR_PT_IN_RAM(var) ):\
+                        ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+                    )
+
 #endif /* INCLUDE_DATAPROTEC_H_ */
 
 

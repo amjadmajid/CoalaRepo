@@ -60,9 +60,12 @@ void task_inner_loop()
     WVAR(j , in_j);
 }
 
+unsigned int * in_i_pt;
+
 void task_outer_loop()
 {
     unsigned int in_i = RVAR(i);
+//    in_i_pt = PVAR(i);
     in_i++;
 
     if(in_i < arr_len)
