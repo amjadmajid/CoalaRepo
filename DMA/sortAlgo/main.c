@@ -27,7 +27,7 @@ void task_inner_loop();
 ////// Global variables
 //DVAR( unsigned int arr[], ={3,1,4,6,9,5,10,8,16,20} );
 __p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89};
-     unsigned int arr_len = 20;
+    unsigned int arr_len = 20;
 __p unsigned int i =  0;
 __p unsigned int j = 1;
 
@@ -60,7 +60,6 @@ void task_inner_loop()
     WVAR(j , in_j);
 }
 
-unsigned int * in_i_pt;
 
 void task_outer_loop()
 {
