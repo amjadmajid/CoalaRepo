@@ -180,7 +180,19 @@ void __pagsCommit()
 }
 
 
-
-
-
-
+/*
+ * swap if necessary and return address 
+ */
+uint8_t* __return_addr(uint8_t* var) {
+	if (var > END_ROM || var < BIGEN_ROM) {
+		return var;
+	}
+	if( __IS_VAR_IN_CRNT_PAG(*var) )
+	{ 
+		return __VAR_PT_IN_RAM(*var);
+	}
+	else{
+		__pageSwap((var));
+		return __VAR_PT_IN_RAM(*var);
+	}
+}
