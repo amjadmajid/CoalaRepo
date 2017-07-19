@@ -36,6 +36,7 @@ Naturally, content of a volatile memory (i.e. run-time stack, global and local v
 
 \begin{figure}
 	\centering
+	\fbox{\texttt{text}}
 	%\includegraphics[width=0.25\columnwidth]{figures/code_demo_incosistency}
 	%	for (byte = 0; byte < nBytes; ++byte){\\
 	%	checkpoint();\\
@@ -46,6 +47,11 @@ Naturally, content of a volatile memory (i.e. run-time stack, global and local v
 \end{figure}
 
 Fig.~\ref{fig:code_demo_incosistency} demonstrates the problem through example. 
+
+\subsection{Assumption on the Type of Computing Hardware}
+\label{sec:background_hardware}
+
+We assume that we operate on the microcontroller (more generally, computing hardware) equipped with a mix of volatile and non-volatile memory~\cite{}, such as FLASH, Ferroelectric RAM or Magnetoresistive RAM. \sys does not assume to rely on specific memory type (either volatile or non-volatile), in contrary to earlier works targeting non-volatile processors~\cite{ratchet}. Actually, \sys will exploit the properties of both memory types to maximize performance metrics of the program being executed. We make \sys able to I/O operations, however we do not enable the scheduling of operations (which nota bene forms a foundation for a simple runtime). All in all, our hardware model follows in assumptions the two most relevant intermittently-powered execution environments~\cite{alpaca,chain}.
 
 \subsection{(Task-based) Intermittent Computing: Background}
 
