@@ -11,6 +11,9 @@ __nv unsigned char funcBlocker = 0;
 
 volatile unsigned int  __totNumTask =0;
 
+__nv unsigned __numTasks = 0;
+__nv taskId *__tasks;
+
 /*
  * memMapper create a node of linkedlist in persistent memory (FRAM)
  */
@@ -37,7 +40,7 @@ void os_memMapper(unsigned int *cnt, taskId _task)
 /*
  * building the persistent circular linked list
  */
-
+#if 0
 void os_addTasks(unsigned char numTasks, taskId tasks[]){
     if( funcBlocker != 0xAD)
     {
@@ -55,35 +58,45 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
         funcBlocker = 0xAD;
     }
 }
+#endif
+void os_addTasks(unsigned char numTasks, taskId tasks[]){
+	if( funcBlocker != 0xAD)
+	{
+		__numTasks = numTasks;
+		__tasks = tasks;
+		__nv_task_index = 0;
+		funcBlocker = 0xAD;
+	}
+}
 
 unsigned int * os_search(funcPt func)
 {
-    unsigned int* __current = __head;
+	unsigned int* __current = __head;
 
-    do{
-        // Do three lock ups before looping before executing a new loop cycle (a bit of optimizations)
-        if( (funcPt) *__current ==  func )
-        {
-            return __current;
-        }
+	do{
+		// Do three lock ups before looping before executing a new loop cycle (a bit of optimizations)
+		if( (funcPt) *__current ==  func )
+		{
+			return __current;
+		}
 
-        __current = (unsigned int*) *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
+		__current = (unsigned int*) *(__current+NEXT_OFFSET_PT);  // pointer arithmetic
 
-        if( (funcPt) *__current ==  func )
-        {
-            return __current;
-        }
+		if( (funcPt) *__current ==  func )
+		{
+			return __current;
+		}
 
-        __current = (unsigned int*) *(__current+NEXT_OFFSET_PT);
+		__current = (unsigned int*) *(__current+NEXT_OFFSET_PT);
 
-        if( (funcPt) *__current ==  func )
-        {
-            return __current;
-        }
+		if( (funcPt) *__current ==  func )
+		{
+			return __current;
+		}
 
-    }while( __current != __head);
+	}while( __current != __head);
 
-     return NULL;
+	return NULL;
 }
 
 

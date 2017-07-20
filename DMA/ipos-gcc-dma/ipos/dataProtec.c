@@ -124,65 +124,6 @@ void __sendPagROM(unsigned int pagHeader)
     DMA2CTL |= DMAREQ;                      // Trigger block transfer
 }
 
-
-/*
- * pageSwap:
- */
-//TODO this function does not
-unsigned int __pageSwap(unsigned int * varAddr)
-{
-
-    //1// send the current page
-    __sendPagTemp( CrntPagHeader );
-    //2// Find the requested page
-    unsigned int ReqPagTag;
-    unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
-    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
-    // TODO we are not checking if the var is not in any page !
-    unsigned char idx=0;
-    while( ! (ReqPagTag_dirty <= __temp_pagSize) )  // if the var is not with the page
-    {
-        idx++;
-        __temp_pagSize +=   PAG_SIZE;               // move to next page
-    }
-
-    ReqPagTag = __temp_pagSize-PAG_SIZE;
-
-    //3// pull the ther requested page from the temp buffer or ROM
-     if( __pagsInTemp[idx] == ReqPagTag)
-     {
-         // Bring from the temp buffer
-         __bringPagTemp(ReqPagTag);
-     }else{
-        // bring from pages final locations in ROM
-         __bringPagROM(ReqPagTag);
-     }
-     //4// keep track of the current page
-     CrntPagHeader = ReqPagTag;
-    return 0;
-}
-
-/*####################################
-          Paging commit
-#####################################*/
-
-void __pagsCommit()
-{
-    unsigned int cnt;
-    for (cnt=0; cnt < NUM_PAG; cnt++)
-    {
-        // send the pages to their final locations in ROM
-        if(__persis_pagsInTemp[cnt] )
-        {
-            __sendPagROM( __persis_pagsInTemp[cnt] );
-        }
-    }
-}
-
-
-/*
- * swap if necessary and return address 
- */
 uint8_t* __return_addr(uint8_t* var) {
 	if (var > END_ROM || var < BIGEN_ROM) {
 		return var;
@@ -196,3 +137,65 @@ uint8_t* __return_addr(uint8_t* var) {
 		return __VAR_PT_IN_RAM(*var);
 	}
 }
+
+
+
+/*
+ * pageSwap:
+ */
+//TODO this function does not
+unsigned int __pageSwap(unsigned int * varAddr)
+{
+
+	//1// send the current page
+	__sendPagTemp( CrntPagHeader );
+	//2// Find the requested page
+	unsigned int ReqPagTag;
+	unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
+	unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+	// TODO we are not checking if the var is not in any page !
+	unsigned char idx=0;
+	while( ! (ReqPagTag_dirty <= __temp_pagSize) )  // if the var is not with the page
+	{
+		idx++;
+		__temp_pagSize +=   PAG_SIZE;               // move to next page
+	}
+
+	ReqPagTag = __temp_pagSize-PAG_SIZE;
+
+	//3// pull the ther requested page from the temp buffer or ROM
+	if( __pagsInTemp[idx] == ReqPagTag)
+	{
+		// Bring from the temp buffer
+		__bringPagTemp(ReqPagTag);
+	}else{
+		// bring from pages final locations in ROM
+		__bringPagROM(ReqPagTag);
+	}
+	//4// keep track of the current page
+	CrntPagHeader = ReqPagTag;
+	return 0;
+}
+
+/*####################################
+  Paging commit
+#####################################*/
+
+void __pagsCommit()
+{
+	unsigned int cnt;
+	for (cnt=0; cnt < NUM_PAG; cnt++)
+	{
+		// send the pages to their final locations in ROM
+		if(__persis_pagsInTemp[cnt] )
+		{
+			__sendPagROM( __persis_pagsInTemp[cnt] );
+		}
+	}
+}
+
+
+
+
+
+

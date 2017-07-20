@@ -33,9 +33,8 @@
 #define RAM_PAG         (END_RAM - PAG_SIZE)
 #define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
 #define PAG_SIZE_W      (PAG_SIZE/2)  //1KB
-//#define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
-// TODO because of the linker script
-#define BIGEN_ROM   0xBF70
+#define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
+
 
 void __sendPagTemp(unsigned int pagTag);
 void __bringPagTemp(unsigned int pagTag);
@@ -85,16 +84,18 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                         ( * __VAR_PT_IN_RAM(var) ):\
                         ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
-
-
-#define PVAR(var)   (\
-                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
-                        ( __VAR_PT_IN_RAM(var) ):\
-                        ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-                    )
+#if 0
+#define VAR(var)  if( __IS_VAR_IN_CRNT_PAG(var) )\
+                                { \
+                                    __VAR_PT_IN_RAM(var) ;\
+                                }\
+                                else{\
+                                    __pageSwap(&(var)) ;\
+                                    __VAR_PT_IN_RAM(var) ;\
+                                    }
+#endif
 #define VAR(var) (__typeof__(var)*) __return_addr(&var)
 #define P(var) (*((__typeof__(var)*) __return_addr(&var)))
-
 #endif /* INCLUDE_DATAPROTEC_H_ */
 
 
