@@ -90,6 +90,7 @@ void os_scheduler()
 {
     if (__commit_flag == COMMITTING)
     {
+        __current_task_virtual  =  (unsigned int) __temp_task_address;
         goto commit;
     }
 

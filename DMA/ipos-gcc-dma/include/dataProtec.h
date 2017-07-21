@@ -27,15 +27,14 @@
 #define END_RAM         0x2200
 #define TAG_SIZE        6
 #define PAG_ADDR_SIZE   (16 - TAG_SIZE)
-#define NUM_PAG         8
-#define PAG_SIZE        0x0400  // 1KB
+#define NUM_PAG         0x80
+#define PAG_SIZE        ((0x2000)/NUM_PAG)  // 1KB
 #define MS6B            0xfc00
 #define RAM_PAG         (END_RAM - PAG_SIZE)
 #define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
 #define PAG_SIZE_W      (PAG_SIZE/2)  //1KB
-//#define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
-// TODO because of the linker script
-#define BIGEN_ROM   0xBF70
+#define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
+
 
 void __sendPagTemp(unsigned int pagTag);
 void __bringPagTemp(unsigned int pagTag);

@@ -18,10 +18,6 @@ void init()
             Tasks
 ********************************/
 
-// initialize the persistent var
-void task0()
-{
-}
 
 // increase the persistent var
 void task1()
@@ -86,14 +82,60 @@ void task12()
 
 }
 
+void task13()
+{
+
+}
+
+void task14()
+{
+
+}
+
+void task15()
+{
+
+}
+
+void task16()
+{
+
+}
+
+void task17()
+{
+
+}
+
+void task18()
+{
+
+}
+
+void task19()
+{
+
+}
+
+void task20()
+{
+
+}
+
+void task21()
+{
+
+}
+void task22()
+{
+
+}
 
 
 
 int main(int argc, char const *argv[])
 {
     init();
-    funcPt init_tasks[] = {task0};
-    os_initTasks(1, init_tasks);
     taskId tasks[] = { {task1,0},
                        {task2,0},
                        {task3,0},
@@ -105,8 +147,19 @@ int main(int argc, char const *argv[])
                        {task9,0},
                        {task10,0},
                        {task11,0},
-                       {task12,0} };
-    os_addTasks(12, tasks );
+                       {task12,0},
+                       {task13,0},
+                     {task14,0},
+                     {task15,0},
+                     {task16,0},
+                     {task17,0},
+                     {task18,0},
+                     {task19,0},
+                     {task20,0},
+                     {task21,0},
+                     {task22,0}
+    };
+    os_addTasks(22, tasks );
     os_scheduler();
 
     return 0;
