@@ -28,7 +28,7 @@
 #define TAG_SIZE        6
 #define PAG_ADDR_SIZE   (16 - TAG_SIZE)
 #define NUM_PAG         0x80
-#define PAG_SIZE        ((0x2000)/NUM_PAG)  // 1KB
+#define PAG_SIZE        ((0x3000)/NUM_PAG)  // 1KB
 #define MS6B            0xfc00
 #define RAM_PAG         (END_RAM - PAG_SIZE)
 #define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
