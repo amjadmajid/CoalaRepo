@@ -4,9 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-//#include <libmsp/mem.h>
+//#include <mem.h>
 
-//#include "repeat.h"
+#include "repeat.h"
 
 #define TASK_NAME_SIZE 32
 #define CHAN_NAME_SIZE 32
@@ -18,8 +18,6 @@ typedef unsigned chain_time_t;
 typedef uint32_t task_mask_t;
 typedef uint16_t field_mask_t;
 typedef unsigned task_idx_t;
-
-#define __nv  __attribute__((section(".nv_vars")))
 
 typedef enum {
     CHAN_TYPE_T2T,

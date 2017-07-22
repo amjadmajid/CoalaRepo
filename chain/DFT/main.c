@@ -1,7 +1,7 @@
 /*
     This is a DFT implemention in chain
 
-    @ Author: Amjad Yousef Majid
+    @ Author: Anonymous
     @ Date  : 6/April/2017
 
 */
@@ -10,12 +10,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <math.h>    /// using the normal c math library   "-lm" must be added to the Makefile
+#include <math.h>
 
 #include <chain.h>
 #include <stdlib.h>
 
-#define SIZE 8
+#define SIZE 64
 #define PI2 6.28
 
 #ifdef DEBUG
@@ -41,12 +41,12 @@
       // Real part of X[k]
       Xre[k] = 0;
       for (n = 0; n < SIZE; ++n)
-        Xre[k] += x[n] * cos(n * k * PI2 / SIZE);
+        Xre[k] += x[n] * cosf(n * k * PI2 / SIZE);
 
       // Imaginary part of X[k]
       Xim[k] = 0;
       for (n = 0; n < SIZE; ++n)
-        Xim[k] -= x[n] * sin(n * k * PI2 / SIZE);
+        Xim[k] -= x[n] * sinf(n * k * PI2 / SIZE);
 
       // Power at kth frequency bin
       P[k] = Xre[k] * Xre[k] + Xim[k] * Xim[k];
@@ -61,9 +61,8 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;
     __enable_interrupt();
-    // P4DIR |=BIT0;
-    // P1DIR |=BIT4;
-    P3DIR |=BIT5;
+    P4DIR |=BIT0;
+    P1DIR |=BIT4;
 
 #ifdef DEBUG
     dft_c() ;
@@ -107,8 +106,6 @@ struct msg_x_im_re {
 struct msg_p_arr {
     CHAN_FIELD_ARRAY(unsigned, p, SIZE);
 };
-
-
 
 //DEBUGGING
 
@@ -174,6 +171,7 @@ void dft_init() {
     CHAN_OUT1(unsigned, n, n, CH(dft_init, signal_counter));
 
     srand(0);
+
     TRANSITION_TO(signal_counter);
 }
 
@@ -198,7 +196,6 @@ void signal_initializer() {
 #ifdef DEBUG
     x_chain[n] = x_n;
 #endif
-
     CHAN_OUT1(float, x[n], x_n , CH(signal_initializer, dft_real));
     CHAN_OUT1(float, x[n], x_n , CH(signal_initializer, dft_im));
     n++;
@@ -210,7 +207,7 @@ void signal_initializer() {
 
 void dft_outer_loop() {
     task_prologue();
-
+    P1OUT |=BIT4;
     unsigned k =  *CHAN_IN2( unsigned, k, CH( dft_init, dft_outer_loop), CH(dft_power,dft_outer_loop) );
     if (k < SIZE) {
         CHAN_OUT1(unsigned, k, k, CH(dft_outer_loop, dft_real));
@@ -223,9 +220,7 @@ void dft_outer_loop() {
 
         TRANSITION_TO(dft_inner_loop);
     } else {
-        P3OUT |= BIT5;
-        P3OUT &=~BIT5;
-
+        P1OUT &=~BIT4;
         TRANSITION_TO(dft_end);
     }
 }
@@ -252,6 +247,7 @@ void dft_real() {
     float xre_k =   *CHAN_IN2( float, xre[k], CH( dft_outer_loop,   dft_real ), CH( dft_update, dft_real ) );
 
     xre_k += x_n * cosf(n * k * PI2 / SIZE);
+
     CHAN_OUT1(float, xre[k], xre_k, CH(dft_real, dft_update));
     TRANSITION_TO(dft_im);
 }
@@ -319,8 +315,25 @@ void dft_power() {
 }
 
 void dft_end() {
-    task_prologue();
-    TRANSITION_TO(dft_init);
+#ifdef DEBUG
+    unsigned i ;
+    for(i=0; i< SIZE ; i++)
+    {
+        if(P[i] != p_deb[i] )
+        {
+                P4OUT |=BIT0;
+                __delay_cycles(300000);
+                P4OUT &=~BIT0;
+                __delay_cycles(300000);
+        }
+    }
+#endif
+    P4OUT |=BIT0;
+    __delay_cycles(30000);
+    P4OUT &=~BIT0;
+    __delay_cycles(30000);
+
+    TRANSITION_TO(dft_end);
 }
 
 ENTRY_TASK(dft_init)
