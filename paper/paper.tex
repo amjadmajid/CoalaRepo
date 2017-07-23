@@ -2,7 +2,7 @@
 \documentclass[pageno]{jpaper}
 
 %replace XXX with the submission number you are given from the ASPLOS submission site.
-\newcommand{\asplossubmissionnumber}{XXX}
+\newcommand{\asplossubmissionnumber}{39}
 
 \usepackage[normalem]{ulem}
 \usepackage{amssymb}
@@ -14,6 +14,9 @@
 \usepackage{xcolor}
 \usepackage{xspace}
 \usepackage{natbib}
+\usepackage{tikz}
+\usepackage{listings}
+
 %\usepackage{graphicx}
 %\usepackage{subfigure}
 %\usepackage[inline]{enumitem}
@@ -315,7 +318,7 @@ Some of the main problems in modifying Alpaca to support dynamic task's size are
 
 \begin{figure}[t]
     \centering
-         \subfloat[The energy cost of FRAM/SRAM \textbf{writes} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_write.eps} }
+         \subfloat[The energy cost of FRAM/SRAM \textbf{writes} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_write.eps} }\\
          \subfloat[The energy cost of FRAM/SRAM \textbf{read} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_read.eps}}
     \caption{The energy cost of accessing volatile/non-volatile memory}
     \label{fig:framEnergy}
