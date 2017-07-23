@@ -333,7 +333,7 @@ void chan_out(const char *field_name, const void *value,
 
 /** @brief Entry point upon reboot */
 int main() {
-//    _init();
+    _init();
 
     _numBoots++;
 

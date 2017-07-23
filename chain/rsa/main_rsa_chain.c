@@ -56,7 +56,7 @@ typedef struct {
 
 #define PRINT_HEX_ASCII_COLS 8
 
-unsigned overflow=0;
+//unsigned overflow=0;
 //__attribute__((interrupt(51)))
 //void TimerB1_ISR(void){
 //	TBCTL &= ~(0x0002);
@@ -600,7 +600,7 @@ void task_print_cyphertext()
     }
 //    BLOCK_PRINTF("\r\n");
 //    BLOCK_PRINTF_END();
-    while(1);
+//    while(1);
     TRANSITION_TO(task_print_cyphertext);
 }
 
