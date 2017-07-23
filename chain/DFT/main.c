@@ -61,8 +61,7 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;
     __enable_interrupt();
-    P4DIR |=BIT0;
-    P1DIR |=BIT4;
+    P1DIR |=BIT0;
 
 #ifdef DEBUG
     dft_c() ;
@@ -161,9 +160,9 @@ CHANNEL(dft_power           , dft_init              , msg_p_arr);
 
 
 void dft_init() {
-    task_prologue();
+//    task_prologue();
 
-    unsigned n = 0;
+    unsigned n = 0xabab;
     unsigned k = 0;
 
     CHAN_OUT1(unsigned, k, k, CH(dft_init, dft_outer_loop));
@@ -175,11 +174,13 @@ void dft_init() {
     TRANSITION_TO(signal_counter);
 }
 
+volatile unsigned n_ck;
 // initialize x[n] with random samples
 void signal_counter() {
-    task_prologue();
+//    task_prologue();
 
     unsigned n =  *CHAN_IN2( unsigned, n, CH( dft_init, signal_counter), CH(signal_initializer,signal_counter) );
+    n_ck = n ;
 
     if (n < SIZE) {
         CHAN_OUT1(unsigned, n, n, CH(signal_counter, signal_initializer));
@@ -190,7 +191,7 @@ void signal_counter() {
 }
 
 void signal_initializer() {
-    task_prologue();
+//    task_prologue();
     unsigned n =  *CHAN_IN1( unsigned, n, CH( signal_counter,signal_initializer ) );
     float x_n = ((2.0 * rand()) / RAND_MAX) - 1.0;
 #ifdef DEBUG
@@ -206,7 +207,7 @@ void signal_initializer() {
 
 
 void dft_outer_loop() {
-    task_prologue();
+//    task_prologue();
     P1OUT |=BIT4;
     unsigned k =  *CHAN_IN2( unsigned, k, CH( dft_init, dft_outer_loop), CH(dft_power,dft_outer_loop) );
     if (k < SIZE) {
@@ -227,7 +228,7 @@ void dft_outer_loop() {
 
 void dft_inner_loop()
 {
-    task_prologue();
+//    task_prologue();
 
     unsigned n =  *CHAN_IN2( unsigned, n, CH( dft_init, dft_inner_loop), CH(dft_update,dft_inner_loop) );
     CHAN_OUT1(unsigned, n, n, CH(dft_inner_loop, dft_real));
@@ -239,7 +240,7 @@ void dft_inner_loop()
 
 
 void dft_real() {
-    task_prologue();
+//    task_prologue();
 
     unsigned k =        *CHAN_IN1( unsigned, k   , CH( dft_outer_loop,      dft_real ) );
     unsigned n =        *CHAN_IN1( unsigned, n   , CH( dft_inner_loop,      dft_real ) );
@@ -254,7 +255,7 @@ void dft_real() {
 
 
 void dft_im() {
-    task_prologue();
+//    task_prologue();
 
     unsigned k =        *CHAN_IN1( unsigned, k      , CH( dft_outer_loop,       dft_im ) );
     unsigned n =        *CHAN_IN1( unsigned, n      , CH( dft_inner_loop,       dft_im ) );
@@ -271,7 +272,7 @@ void dft_im() {
 
 void dft_update()
 {
-    task_prologue();
+//    task_prologue();
     unsigned n =    *CHAN_IN1( unsigned, n   , CH( dft_inner_loop,  dft_update ) );
     unsigned k =    *CHAN_IN1( unsigned, k   , CH( dft_outer_loop,  dft_update ) );
 
@@ -297,7 +298,7 @@ void dft_update()
 }
 
 void dft_power() {
-    task_prologue();
+//    task_prologue();
     unsigned k     =    *CHAN_IN1( unsigned,k, CH( dft_outer_loop   , dft_power ) );
     float xim_k =   *CHAN_IN1( float, xim[k], CH( dft_update  , dft_power ) );
     float xre_k =   *CHAN_IN1( float, xre[k], CH( dft_update , dft_power ) );
@@ -328,9 +329,9 @@ void dft_end() {
         }
     }
 #endif
-    P4OUT |=BIT0;
+    P1OUT |=BIT0;
     __delay_cycles(30000);
-    P4OUT &=~BIT0;
+    P1OUT &=~BIT0;
     __delay_cycles(30000);
 
     TRANSITION_TO(dft_end);

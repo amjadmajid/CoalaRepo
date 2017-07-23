@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-//#include <mem.h>
+#include "mem.h"
 
 #include "repeat.h"
 

@@ -56,19 +56,19 @@ typedef struct {
 
 #define PRINT_HEX_ASCII_COLS 8
 
-unsigned overflow=0;
-__attribute__((interrupt(51))) 
-void TimerB1_ISR(void){
-	TBCTL &= ~(0x0002);
-	if(TBCTL && 0x0001){
-		overflow++;
-		TBCTL |= 0x0004;
-		TBCTL |= (0x0002);
-		TBCTL &= ~(0x0001);	
-	}
-}
-__attribute__((section("__interrupt_vector_timer0_b1"),aligned(2)))
-void(*__vector_timer0_b1)(void) = TimerB1_ISR;
+//unsigned overflow=0;
+//__attribute__((interrupt(51)))
+//void TimerB1_ISR(void){
+//	TBCTL &= ~(0x0002);
+//	if(TBCTL && 0x0001){
+//		overflow++;
+//		TBCTL |= 0x0004;
+//		TBCTL |= (0x0002);
+//		TBCTL &= ~(0x0001);
+//	}
+//}
+//__attribute__((section("__interrupt_vector_timer0_b1"),aligned(2)))
+//void(*__vector_timer0_b1)(void) = TimerB1_ISR;
 // #define SHOW_PROGRESS_ON_LED
 // #define SHOW_COARSE_PROGRESS_ON_LED
 
@@ -330,7 +330,7 @@ void init()
     __enable_interrupt();
 
 
-    PRINTF(".%u.\r\n", curctx->task->idx);
+//    PRINTF(".%u.\r\n", curctx->task->idx);
 }
 
 
@@ -340,11 +340,11 @@ void task_init()
     digit_t tmp;
     unsigned message_length = sizeof(PLAINTEXT) - 1; // skip the terminating null byte
 
-    LOG("init\r\n");
-    LOG("digit: %u\r\n", sizeof(digit_t));
-    LOG("unsigned: %u\r\n",sizeof(unsigned));
+//    LOG("init\r\n");
+//    LOG("digit: %u\r\n", sizeof(digit_t));
+//    LOG("unsigned: %u\r\n",sizeof(unsigned));
 
-    LOG("init: out modulus\r\n");
+//    LOG("init: out modulus\r\n");
 
     // TODO: consider passing pubkey as a structure type
     for (i = 0; i < NUM_DIGITS; ++i) {
@@ -356,7 +356,7 @@ void task_init()
                  task_reduce_multiply, task_reduce_add));
     }
 
-    LOG("init: out exp\r\n");
+//    LOG("init: out exp\r\n");
 
     unsigned zero = 0;
     CHAN_OUT1(digit_t, E, pubkey.e, CH(task_init, task_pad));
@@ -364,7 +364,7 @@ void task_init()
     CHAN_OUT1(unsigned, block_offset, zero, CH(task_init, task_pad));
     CHAN_OUT1(unsigned, cyphertext_len, zero, CH(task_init, task_mult_block_get_result));
 
-    LOG("init: done\r\n");
+//    LOG("init: done\r\n");
 
     TRANSITION_TO(task_pad);
 }
@@ -380,20 +380,20 @@ void task_pad()
 
     message_length = *CHAN_IN1(unsigned, message_length, CH(task_init, task_pad));
 
-    LOG("pad: len=%u offset=%u\r\n", message_length, block_offset);
+//    LOG("pad: len=%u offset=%u\r\n", message_length, block_offset);
 
     if (block_offset >= message_length) {
-        LOG("pad: message done\r\n");
+//        LOG("pad: message done\r\n");
         TRANSITION_TO(task_print_cyphertext);
     }
 
-    LOG("process block: padded block at offset=%u: ", block_offset);
-    for (i = 0; i < NUM_PAD_DIGITS; ++i)
-        LOG("%x ", PAD_DIGITS[i]);
-    LOG("'");
-    for (i = NUM_DIGITS - NUM_PAD_DIGITS - 1; i >= 0; --i)
-        LOG("%x ", PLAINTEXT[block_offset + i]);
-    LOG("\r\n");
+//    LOG("process block: padded block at offset=%u: ", block_offset);
+//    for (i = 0; i < NUM_PAD_DIGITS; ++i)
+//        LOG("%x ", PAD_DIGITS[i]);
+//    LOG("'");
+//    for (i = NUM_DIGITS - NUM_PAD_DIGITS - 1; i >= 0; --i)
+//        LOG("%x ", PLAINTEXT[block_offset + i]);
+//    LOG("\r\n");
 
     digit_t one = 1;
     digit_t zero = 0;
@@ -426,7 +426,7 @@ void task_exp()
     bool multiply;
 
     e = *CHAN_IN2(digit_t, E, CH(task_pad, task_exp), SELF_IN_CH(task_exp));
-    LOG("exp: e=%x\r\n", e);
+//    LOG("exp: e=%x\r\n", e);
 
     // ASSERT: e > 0
 
@@ -450,7 +450,7 @@ void task_mult_block()
     int i;
     digit_t b, m;
 
-    LOG("mult block\r\n");
+//    LOG("mult block\r\n");
 
     // TODO: pass args to mult: message * base
     for (i = 0; i < NUM_DIGITS; ++i) {
@@ -462,7 +462,7 @@ void task_mult_block()
                                 CH(task_mult_block_get_result, task_mult_block));
         CHAN_OUT1(digit_t, B[i], m, CALL_CH(ch_mult_mod));
 
-        LOG("mult block: a[%u]=%x b[%u]=%x\r\n", i, b, i, m);
+//        LOG("mult block: a[%u]=%x b[%u]=%x\r\n", i, b, i, m);
     }
     task_t* next_task=TASK_REF(task_mult_block_get_result);
     CHAN_OUT1(task_t*, next_task,next_task , CALL_CH(ch_mult_mod));
@@ -475,13 +475,13 @@ void task_mult_block_get_result()
     digit_t m, e;
     unsigned cyphertext_len;
 
-    LOG("mult block get result: block: ");
+//    LOG("mult block get result: block: ");
     for (i = NUM_DIGITS - 1; i >= 0; --i) { // reverse for printing
         m = *CHAN_IN1(digit_t, product[i], RET_CH(ch_mult_mod));
-        LOG("%x ", m);
+//        LOG("%x ", m);
         CHAN_OUT1(digit_t, block[i], m, CH(task_mult_block_get_result, task_mult_block));
     }
-    LOG("\r\n");
+//    LOG("\r\n");
 
     e = *CHAN_IN1(digit_t, E, CH(task_exp, task_mult_block_get_result));
 
@@ -502,7 +502,7 @@ void task_mult_block_get_result()
         cyphertext_len = *CHAN_IN2(unsigned, cyphertext_len,
                                    CH(task_init, task_mult_block_get_result),
                                    SELF_IN_CH(task_mult_block_get_result));
-        LOG("mult block get result: cyphertext len=%u\r\n", cyphertext_len);
+//        LOG("mult block get result: cyphertext len=%u\r\n", cyphertext_len);
 
         if (cyphertext_len + NUM_DIGITS <= CYPHERTEXT_SIZE) {
 
@@ -516,11 +516,12 @@ void task_mult_block_get_result()
                 cyphertext_len++;
             }
 
-        } else {
-            printf("WARN: block dropped: cyphertext overlow [%u > %u]\r\n",
-                   cyphertext_len + NUM_DIGITS, CYPHERTEXT_SIZE);
-            // carry on encoding, though
         }
+//        else {
+////            printf("WARN: block dropped: cyphertext overlow [%u > %u]\r\n",
+//                   cyphertext_len + NUM_DIGITS, CYPHERTEXT_SIZE);
+//            // carry on encoding, though
+//        }
 
         // TODO: implementation limitation: cannot multicast and send to self
         // in the same macro
@@ -528,7 +529,7 @@ void task_mult_block_get_result()
         CHAN_OUT1(unsigned, cyphertext_len, cyphertext_len,
                  CH(task_mult_block_get_result, task_print_cyphertext));
 
-        LOG("mult block get results: block done, cyphertext_len=%u\r\n", cyphertext_len);
+//        LOG("mult block get results: block done, cyphertext_len=%u\r\n", cyphertext_len);
         TRANSITION_TO(task_pad);
     }
 
@@ -541,7 +542,7 @@ void task_square_base()
     int i;
     digit_t b;
 
-    LOG("square base\r\n");
+//    LOG("square base\r\n");
 
     for (i = 0; i < NUM_DIGITS; ++i) {
         b = *CHAN_IN2(digit_t, base[i], MC_IN_CH(ch_base, task_pad, task_square_base),
@@ -549,7 +550,7 @@ void task_square_base()
         CHAN_OUT1(digit_t, A[i], b, CALL_CH(ch_mult_mod));
         CHAN_OUT1(digit_t, B[i], b, CALL_CH(ch_mult_mod));
 
-        LOG("square base: b[%u]=%x\r\n", i, b);
+//        LOG("square base: b[%u]=%x\r\n", i, b);
     }
     task_t* next_task=TASK_REF(task_square_base_get_result);
     CHAN_OUT1(task_t*, next_task, next_task, CALL_CH(ch_mult_mod));
@@ -562,11 +563,11 @@ void task_square_base_get_result()
     int i;
     digit_t b;
 
-    LOG("square base get result\r\n");
+//    LOG("square base get result\r\n");
 
     for (i = 0; i < NUM_DIGITS; ++i) {
         b = *CHAN_IN1(digit_t,product[i], RET_CH(ch_mult_mod));
-        LOG("suqare base get result: base[%u]=%x\r\n", i, b);
+//        LOG("suqare base get result: base[%u]=%x\r\n", i, b);
         CHAN_OUT1(digit_t, base[i], b, MC_OUT_CH(ch_square_base, task_square_base_get_result,
                                        task_square_base, task_mult_block));
     }
@@ -583,23 +584,23 @@ void task_print_cyphertext()
 
     cyphertext_len = *CHAN_IN1(unsigned, cyphertext_len,
                                CH(task_mult_block_get_result, task_print_cyphertext));
-    LOG("print cyphertext: len=%u\r\n", cyphertext_len);
+//    LOG("print cyphertext: len=%u\r\n", cyphertext_len);
 
-	PRINTF("TIME end is 65536*%u+%u\r\n",overflow,(unsigned)TBR);
-    BLOCK_PRINTF_BEGIN();
-    BLOCK_PRINTF("Cyphertext:\r\n");
+//	PRINTF("TIME end is 65536*%u+%u\r\n",overflow,(unsigned)TBR);
+//    BLOCK_PRINTF_BEGIN();
+//    BLOCK_PRINTF("Cyphertext:\r\n");
     for (i = 0; i < cyphertext_len; ++i) {
         c = *CHAN_IN1(digit_t, cyphertext[i], CH(task_mult_block_get_result, task_print_cyphertext));
-        BLOCK_PRINTF("%02x ", c);
+//        BLOCK_PRINTF("%02x ", c);
         if ((i + 1) % PRINT_HEX_ASCII_COLS == 0) {
-            BLOCK_PRINTF(" ");
+//            BLOCK_PRINTF(" ");
             j = 0;
-            BLOCK_PRINTF("\r\n");
+//            BLOCK_PRINTF("\r\n");
         }
     }
-    BLOCK_PRINTF("\r\n");
-    BLOCK_PRINTF_END();
-    while(1);
+//    BLOCK_PRINTF("\r\n");
+//    BLOCK_PRINTF_END();
+//    while(1);
     TRANSITION_TO(task_print_cyphertext);
 }
 
@@ -609,13 +610,13 @@ void task_mult_mod()
     int i;
     digit_t a, b;
 
-    LOG("mult mod\r\n");
+//    LOG("mult mod\r\n");
 
     for (i = 0; i < NUM_DIGITS; ++i) {
         a = *CHAN_IN1(digit_t, A[i], CALL_CH(ch_mult_mod));
         b = *CHAN_IN1(digit_t, B[i], CALL_CH(ch_mult_mod));
 
-        LOG("mult mod: i=%u a=%x b=%x\r\n", i, a, b);
+//        LOG("mult mod: i=%u a=%x b=%x\r\n", i, a, b);
 
         CHAN_OUT1(digit_t, A[i], a, CH(task_mult_mod, task_mult));
         CHAN_OUT1(digit_t, B[i], b, CH(task_mult_mod, task_mult));
@@ -637,7 +638,7 @@ void task_mult()
     digit = *CHAN_IN2(unsigned, digit, CH(task_mult_mod, task_mult), SELF_IN_CH(task_mult));
     carry = *CHAN_IN2(unsigned, carry, CH(task_mult_mod, task_mult), SELF_IN_CH(task_mult));
 
-    LOG("mult: digit=%u carry=%x\r\n", digit, carry);
+//    LOG("mult: digit=%u carry=%x\r\n", digit, carry);
 
     p = carry;
     c = 0;
@@ -650,14 +651,14 @@ void task_mult()
             c += dp >> DIGIT_BITS;
             p += dp & DIGIT_MASK;
 
-            LOG("mult: i=%u a=%x b=%x p=%x\r\n", i, a, b, p);
+//            LOG("mult: i=%u a=%x b=%x p=%x\r\n", i, a, b, p);
         }
     }
 
     c += p >> DIGIT_BITS;
     p &= DIGIT_MASK;
 
-    LOG("mult: c=%x p=%x\r\n", c, p);
+//    LOG("mult: c=%x p=%x\r\n", c, p);
 
     CHAN_OUT1(digit_t, product[digit], p, MC_OUT_CH(ch_product, task_mult,
              task_reduce_digits,
@@ -683,21 +684,21 @@ void task_reduce_digits()
     int d;
     digit_t m;
 
-    LOG("reduce: digits\r\n");
+//    LOG("reduce: digits\r\n");
 
     // Start reduction loop at most significant non-zero digit
     d = 2 * NUM_DIGITS;
     do {
         d--;
         m = *CHAN_IN1(digit_t, product[d], MC_IN_CH(ch_product, task_mult, task_reduce_digits));
-        LOG("reduce digits: p[%u]=%x\r\n", d, m);
+//        LOG("reduce digits: p[%u]=%x\r\n", d, m);
     } while (m == 0 && d > 0);
 
     if (m == 0) {
-        LOG("reduce: digits: all digits of message are zero\r\n");
+//        LOG("reduce: digits: all digits of message are zero\r\n");
         TRANSITION_TO(task_init);
     }
-    LOG("reduce: digits: d = %u\r\n", d);
+//    LOG("reduce: digits: d = %u\r\n", d);
 
     CHAN_OUT1(unsigned, digit, d, MC_OUT_CH(ch_digit, task_reduce_digits,
                                  task_reduce_normalizable, task_reduce_normalize,
@@ -712,7 +713,7 @@ void task_reduce_normalizable()
     unsigned m, n, d, offset;
     bool normalizable = true;
 
-    LOG("reduce: normalizable\r\n");
+//    LOG("reduce: normalizable\r\n");
 
     // Variables:
     //   m: message
@@ -743,7 +744,7 @@ void task_reduce_normalizable()
     d = *CHAN_IN1(unsigned, digit, MC_IN_CH(ch_digit, task_reduce_digits, task_reduce_noramlizable));
 
     offset = d + 1 - NUM_DIGITS; // TODO: can this go below zero
-    LOG("reduce: normalizable: d=%u offset=%u\r\n", d, offset);
+//    LOG("reduce: normalizable: d=%u offset=%u\r\n", d, offset);
 
     CHAN_OUT1(unsigned, offset, offset, CH(task_reduce_normalizable, task_reduce_normalize));
 
@@ -753,7 +754,7 @@ void task_reduce_normalizable()
         n = *CHAN_IN1(digit_t, NN[i - offset], MC_IN_CH(ch_modulus, task_init,
                                               task_reduce_normalizable));
 
-        LOG("normalizable: m[%u]=%x n[%u]=%x\r\n", i, m, i - offset, n);
+//        LOG("normalizable: m[%u]=%x n[%u]=%x\r\n", i, m, i - offset, n);
 
         if (m > n) {
             break;
@@ -764,7 +765,7 @@ void task_reduce_normalizable()
     }
 
     if (!normalizable && d == NUM_DIGITS - 1) {
-        LOG("reduce: normalizable: reduction done: message < modulus\r\n");
+//        LOG("reduce: normalizable: reduction done: message < modulus\r\n");
 
         // TODO: is this copy avoidable? a 'mult mod done' task doesn't help
         // because we need to ship the data to it.
@@ -778,7 +779,7 @@ void task_reduce_normalizable()
         transition_to(next_task);
     }
 
-    LOG("normalizable: %u\r\n", normalizable);
+//    LOG("normalizable: %u\r\n", normalizable);
 
     if (normalizable) {
         TRANSITION_TO(task_reduce_normalize);
@@ -795,7 +796,7 @@ void task_reduce_normalize()
     unsigned borrow, offset;
     const task_t *next_task;
 
-    LOG("normalize\r\n");
+//    LOG("normalize\r\n");
 
     offset = *CHAN_IN1(unsigned, offset, CH(task_reduce_normalizable, task_reduce_normalize));
 
@@ -820,8 +821,8 @@ void task_reduce_normalize()
         }
         d = m - s;
 
-        LOG("normalize: m[%u]=%x n[%u]=%x b=%u d=%x\r\n",
-                i + offset, m, i, n, borrow, d);
+//        LOG("normalize: m[%u]=%x n[%u]=%x b=%u d=%x\r\n",
+//                i + offset, m, i, n, borrow, d);
 
         CHAN_OUT1(digit_t, product[i + offset], d,
                  MC_OUT_CH(ch_normalized_product, task_reduce_normalize,
@@ -840,7 +841,7 @@ void task_reduce_normalize()
     if (offset > 0) { // l-1 > k-1 (loop bounds), where offset=l-k, where l=|m|,k=|n|
         next_task = TASK_REF(task_reduce_n_divisor);
     } else {
-        LOG("reduce: normalize: reduction done: no digits to reduce\r\n");
+//        LOG("reduce: normalize: reduction done: no digits to reduce\r\n");
         // TODO: is this copy avoidable?
         for (i = 0; i < NUM_DIGITS; ++i) {
             m = *CHAN_IN1(digit_t, product[i],
@@ -859,7 +860,7 @@ void task_reduce_n_divisor()
     digit_t n[2]; // [1]=N[msd], [0]=N[msd-1]
     digit_t n_div;
 
-    LOG("reduce: n divisor\r\n");
+//    LOG("reduce: n divisor\r\n");
 
     n[1]  = *CHAN_IN1(digit_t, NN[NUM_DIGITS - 1],
                       MC_IN_CH(ch_modulus, task_init, task_reduce_n_divisor));
@@ -868,7 +869,7 @@ void task_reduce_n_divisor()
     // Divisor, derived from modulus, for refining quotient guess into exact value
     n_div = ((n[1]<< DIGIT_BITS) + n[0]);
 
-    LOG("reduce: n divisor: n[1]=%x n[0]=%x n_div=%x\r\n", n[1], n[0], n_div);
+//    LOG("reduce: n divisor: n[1]=%x n[0]=%x n_div=%x\r\n", n[1], n[0], n_div);
 
     CHAN_OUT1(digit_t, n_div, n_div, CH(task_reduce_n_divisor, task_reduce_quotient));
 
@@ -885,7 +886,7 @@ void task_reduce_quotient()
     d = *CHAN_IN2(unsigned, digit, MC_IN_CH(ch_digit, task_reduce_digits, task_reduce_quotient),
                          SELF_IN_CH(task_reduce_quotient));
 
-    LOG("reduce: quotient: d=%u\r\n", d);
+//    LOG("reduce: quotient: d=%u\r\n", d);
 
     m[2] = *CHAN_IN3(digit_t, product[d],
                      MC_IN_CH(ch_product, task_mult, task_reduce_quotient),
@@ -908,7 +909,7 @@ void task_reduce_quotient()
     m_n = *CHAN_IN1(digit_t, NN[NUM_DIGITS - 1],
                     MC_IN_CH(ch_modulus, task_init, task_reduce_quotient));
 
-    LOG("reduce: quotient: m_n=%x m[d]=%x\r\n", m_n, m[2]);
+//    LOG("reduce: quotient: m_n=%x m[d]=%x\r\n", m_n, m[2]);
 
     // Choose an initial guess for quotient
     if (m[2] == m_n) {
@@ -917,7 +918,7 @@ void task_reduce_quotient()
         q = ((m[2] << DIGIT_BITS) + m[1]) / m_n;
     }
 
-    LOG("reduce: quotient: q0=%x\r\n", q);
+//    LOG("reduce: quotient: q0=%x\r\n", q);
 
     // Refine quotient guess
 
@@ -926,24 +927,24 @@ void task_reduce_quotient()
     // condition of the while loop below.
     n_q = ((uint32_t)m[2] << (2 * DIGIT_BITS)) + (m[1] << DIGIT_BITS) + m[0];
 
-    LOG("reduce: quotient: m[d]=%x m[d-1]=%x m[d-2]=%x n_q=%x%x\r\n",
-           m[2], m[1], m[0], (uint16_t)((n_q >> 16) & 0xffff), (uint16_t)(n_q & 0xffff));
+//    LOG("reduce: quotient: m[d]=%x m[d-1]=%x m[d-2]=%x n_q=%x%x\r\n",
+//           m[2], m[1], m[0], (uint16_t)((n_q >> 16) & 0xffff), (uint16_t)(n_q & 0xffff));
 
     n_div = *CHAN_IN1(digit_t, n_div, CH(task_reduce_n_divisor, task_reduce_quotient));
 
-    LOG("reduce: quotient: n_div=%x q0=%x\r\n", n_div, q);
+//    LOG("reduce: quotient: n_div=%x q0=%x\r\n", n_div, q);
 
     q++;
     do {
         q--;
         qn = mult16(n_div, q);
-        LOG("reduce: quotient: q=%x qn=%x%x\r\n", q,
-              (uint16_t)((qn >> 16) & 0xffff), (uint16_t)(qn & 0xffff));
+//        LOG("reduce: quotient: q=%x qn=%x%x\r\n", q,
+//              (uint16_t)((qn >> 16) & 0xffff), (uint16_t)(qn & 0xffff));
     } while (qn > n_q);
 
     // This is still not the final quotient, it may be off by one,
     // which we determine and fix in the 'compare' and 'add' steps.
-    LOG("reduce: quotient: q=%x\r\n", q);
+//    LOG("reduce: quotient: q=%x\r\n", q);
 
     CHAN_OUT1(digit_t, quotient, q, CH(task_reduce_quotient, task_reduce_multiply));
 
@@ -968,14 +969,14 @@ void task_reduce_multiply()
                                   task_reduce_quotient, task_reduce_multiply));
     q = *CHAN_IN1(digit_t, quotient, CH(task_reduce_quotient, task_reduce_multiply));
 
-    LOG("reduce: multiply: d=%x q=%x\r\n", d, q);
+//    LOG("reduce: multiply: d=%x q=%x\r\n", d, q);
 
     // As part of this task, we also perform the left-shifting of the q*m
     // product by radix^(digit-NUM_DIGITS), where NUM_DIGITS is the number
     // of digits in the modulus. We implement this by fetching the digits
     // of number being reduced at that offset.
     offset = d - NUM_DIGITS;
-    LOG("reduce: multiply: offset=%u\r\n", offset);
+//    LOG("reduce: multiply: offset=%u\r\n", offset);
 
     // For calling the print task we need to proxy to it values that
     // we do not modify
@@ -1001,8 +1002,8 @@ void task_reduce_multiply()
             // TODO: could break out of the loop  in this case (after CHAN_OUT)
         }
 
-        LOG("reduce: multiply: n[%u]=%x q=%x c=%x m[%u]=%x\r\n",
-               i - offset, n, q, c, i, m);
+//        LOG("reduce: multiply: n[%u]=%x q=%x c=%x m[%u]=%x\r\n",
+//               i - offset, n, q, c, i, m);
 
         c = m >> DIGIT_BITS;
         m &= DIGIT_MASK;
@@ -1023,7 +1024,7 @@ void task_reduce_compare()
     digit_t m, qn;
     char relation = '=';
 
-    LOG("reduce: compare\r\n");
+//    LOG("reduce: compare\r\n");
 
     // TODO: could transform this loop into a self-edge
     // TODO: this loop might not have to go down to zero, but to NUM_DIGITS
@@ -1040,7 +1041,7 @@ void task_reduce_compare()
         qn = *CHAN_IN1(digit_t, product[i],
                        MC_IN_CH(ch_qn, task_reduce_multiply, task_reduce_compare));
 
-        LOG("reduce: compare: m[%u]=%x qn[%u]=%x\r\n", i, m, i, qn);
+//        LOG("reduce: compare: m[%u]=%x qn[%u]=%x\r\n", i, m, i, qn);
 
         if (m > qn) {
             relation = '>';
@@ -1051,7 +1052,7 @@ void task_reduce_compare()
         }
     }
 
-    LOG("reduce: compare: relation %c\r\n", relation);
+//    LOG("reduce: compare: relation %c\r\n", relation);
 
     if (relation == '<') {
         TRANSITION_TO(task_reduce_add);
@@ -1077,7 +1078,7 @@ void task_reduce_add()
     // Part of this task is to shift modulus by radix^(digit - NUM_DIGITS)
     offset = d - NUM_DIGITS;
 
-    LOG("reduce: add: d=%u offset=%u\r\n", d, offset);
+//    LOG("reduce: add: d=%u offset=%u\r\n", d, offset);
 
     // For calling the print task we need to proxy to it values that
     // we do not modify
@@ -1115,7 +1116,7 @@ void task_reduce_add()
 
         r = c + m + n;
 
-        LOG("reduce: add: m[%u]=%x n[%u]=%x c=%x r=%x\r\n", i, m, j, n, c, r);
+//        LOG("reduce: add: m[%u]=%x n[%u]=%x c=%x r=%x\r\n", i, m, j, n, c, r);
 
         c = r >> DIGIT_BITS;
         r &= DIGIT_MASK;
@@ -1141,7 +1142,7 @@ void task_reduce_subtract()
     // The qn product had been shifted by this offset, no need to subtract the zeros
     offset = d - NUM_DIGITS;
 
-    LOG("reduce: subtract: d=%u offset=%u\r\n", d, offset);
+//    LOG("reduce: subtract: d=%u offset=%u\r\n", d, offset);
 
     // For calling the print task we need to proxy to it values that
     // we do not modify
@@ -1178,8 +1179,8 @@ void task_reduce_subtract()
             }
             r = m - s;
 
-            LOG("reduce: subtract: m[%u]=%x qn[%u]=%x b=%u r=%x\r\n",
-                   i, m, i, qn, borrow, r);
+//            LOG("reduce: subtract: m[%u]=%x qn[%u]=%x b=%u r=%x\r\n",
+//                   i, m, i, qn, borrow, r);
 
             CHAN_OUT1(digit_t, product[i], r, MC_OUT_CH(ch_reduce_subtract_product, task_reduce_subtract,
                                               task_reduce_quotient, task_reduce_compare));
@@ -1197,7 +1198,7 @@ void task_reduce_subtract()
 	    task_t* next_task=TASK_REF(task_reduce_quotient);
         CHAN_OUT1(task_t*, next_task, next_task, CALL_CH(ch_print_product));
     } else { // reduction finished: exit from the reduce hypertask (after print)
-        LOG("reduce: subtract: reduction done\r\n");
+//        LOG("reduce: subtract: reduction done\r\n");
 
         // TODO: Is it ok to get the next task directly from call channel?
         //       If not, all we have to do is have reduce task proxy it.

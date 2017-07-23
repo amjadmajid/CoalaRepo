@@ -5,7 +5,7 @@
 
 //#include <wisp-base.h>
 #include <chain.h>
-//#include <libio/log.h>
+//#include <log.h>
 
 #ifdef CONFIG_LIBEDB_PRINTF
 #include <libedb/edb.h>
@@ -240,7 +240,6 @@ CHANNEL(task_append_compressed, task_compress, msg_sample_count);
 
 void init()
 {
-
 //    WISP_init();
 
 //    GPIO(PORT_LED_1, DIR) |= BIT(PIN_LED_1);
@@ -758,3 +757,6 @@ void task_done()
 {
     TRANSITION_TO(task_done);
 }
+
+ENTRY_TASK(task_init)
+INIT_FUNC(init)
