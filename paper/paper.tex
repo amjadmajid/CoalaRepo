@@ -303,7 +303,7 @@ Some of the main problems in modifying Alpaca to support dynamic task's size are
 		An Intermittently executed program, as seen by the modular intermittent execution model, is a chain of tasks with a firm transition from one to another. 
 		Virtualizing this model means softening a number of transitions, by keeping the state of the execution progress in the volatile memory, to construct a bigger \emph{virtual task} to reduce energy consumption. Ideally, the size of the virtual task should match the length of a continuous interval of the intermittent power supply for the best performance. Another form of virtualization can be achieved by reducing the number of non-volatile memory accesses. This can be done by having a temporary copy of a global variable in the volatile memory (similar to the catching principle) and a task interacts with it and updates it before writing back the most recent value to the non-volatile memory during the commit process.
 
-		In this paper we are introducing VIPOS a runtime library the implement the Virtualed Intermittent Execution Model. VIPOS adapts two methods for data protection. One relies on a virtual buffer and the other uses the Direct Memory Access (DMA). VIPOS is able to approach the optimal tasks devision during the runtime. VIPOS reduces an application execution time by XX and the energy by XX. 
+		In this paper we are introducing \sys a runtime library the implement the Virtualed Intermittent Execution Model. \sys adapts two methods for data protection. One relies on a virtual buffer and the other uses the Direct Memory Access (DMA). \sys is able to approach the optimal tasks devision during the runtime. \sys reduces an application execution time by XX and the energy by XX. 
 
 
 \subsection{Contributions}
@@ -331,14 +331,14 @@ Four applications are developed to measure the energy consumption of \emph{Acces
 
 
 
-\section{VIPOS: Virtualized Intermittently Powered Runtime Environment}
-VIPOS is runtime library that facilitates tasks navigation and preserves data/memory consistency of the IPDs. It is able, on-demand, to merge tasks to reduce the number of commits to the non-volatile memory.
+\section{\sysfull}
+\sys is runtime library that facilitates tasks navigation and preserves data/memory consistency of the IPDs. It is able, on-demand, to merge tasks to reduce the number of commits to the non-volatile memory.
 
 \input{iposDataProtection}
 
-\subsection{VIPOS: The Virtualizing Engine}
+\subsection{\sys: The Virtualizing Engine}
 \subsubsection{Power Interrupt Immune Scheduler}
-It utilizes a persistent circular buffer (persistent linked-list) to keep the state of a program across power failures. VIPOS provides an API to enable a programmer to have a full control over the execution flow of the program, i.e. (un)blocking a task or re-execute the same task which is particularly important in the intermittent execution to emulate a persistent loop. 
+It utilizes a persistent circular buffer (persistent linked-list) to keep the state of a program across power failures. \sys provides an API to enable a programmer to have a full control over the execution flow of the program, i.e. (un)blocking a task or re-execute the same task which is particularly important in the intermittent execution to emulate a persistent loop. 
 
 \subsubsection{Task Merging Algorithms}
 
@@ -350,7 +350,7 @@ It utilizes a persistent circular buffer (persistent linked-list) to keep the st
 		\scriptsize
 		%\small
 		\begin{algorithmic}[1]
-			\State $VT \subset \text{\{VIPOS Tasks\}} $  \Comment{$VT:$ Virtual Task}
+			\State $VT \subset \text{\{\sys Tasks\}} $  \Comment{$VT:$ Virtual Task}
 			\State VTS : VT size
 			\State MVTS: maximum VT size
 			\vspace{0.1cm}
@@ -382,7 +382,7 @@ It utilizes a persistent circular buffer (persistent linked-list) to keep the st
 		\scriptsize
 		%\small
 		\begin{algorithmic}[1]
-			\State $VT \subset \text{\{VIPOS Tasks\}} $  \Comment{$VT:$ Virtual Task}
+			\State $VT \subset \text{\{\sys Tasks\}} $  \Comment{$VT:$ Virtual Task}
 			\State VTS : VT size
 			\vspace{0.1cm}
 
@@ -410,24 +410,24 @@ It utilizes a persistent circular buffer (persistent linked-list) to keep the st
 	\label{fig:virtualTaskSize}
 \end{figure}
 
-VIPOS is able to virtually merge tasks to construct a bigger virtual task and commit the state of the virtual task instead of the individual real tasks. 
+\sys is able to virtually merge tasks to construct a bigger virtual task and commit the state of the virtual task instead of the individual real tasks. 
 Fig.~\ref{fig:virtualTaskSize} show the benefit of virtualizing the Modular Intermittent Execution Mode (MIEM) in the best case scenario (continuous power supply). 
 
 Remark: A less obvious benefit of visualization is that it can enable a secure computation. By increasing the size of the virtual task, the energy in the super-capacitor will not be enough to finish the execution of the virtual task. Therefore, without the interrogator being close to the intermittently powered device and charging rate is not negligible as compared to the discharging rate this computation will not be finished. As such, virtualization can add a layer of security to the computation.
 
 \section{Results}
-We compare the performance of VIPOS against a state-of-the-art intermittent execution approach. For this purpose, we used two different applications: (i) A data decompression application, which utilizes Huffman decoding technique to decompress 100 byte of data.; (ii) A discrete Fourier transform (DFT) application that uses two different resolution (4 and 8 bites) to analyze a randomly generated signal. 
+We compare the performance of \sys against a state-of-the-art intermittent execution approach. For this purpose, we used two different applications: (i) A data decompression application, which utilizes Huffman decoding technique to decompress 100 byte of data.; (ii) A discrete Fourier transform (DFT) application that uses two different resolution (4 and 8 bites) to analyze a randomly generated signal. 
 
 \subsection{Continuous Power Supply}
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=0.8\columnwidth]{figures/ipos_chain}
-	\caption{Time to complation of VIPOS versus Chain. Decomp: Data decompression application. DFTx: Discrete Fourier Transform.}
+	\includegraphics[width=0.8\columnwidth]{figures/chain_vipe}
+	\caption{Time to complation of \sys versus Chain. Decomp: Data decompression application. DFTx: Discrete Fourier Transform.}
 	\label{fig:IPOSPerformance}
 \end{figure}
 
-Fig.~\ref{fig:IPOSPerformance} shows that VIPOS requires a shorter execution time to execute an application under the MIEM. The size of the virtual task that VIPOS uses equals One real task, in other words, no visualization is applied.
+Fig.~\ref{fig:IPOSPerformance} shows that \sys requires a shorter execution time to execute an application under the MIEM. The size of the virtual task that \sys uses equals One real task, in other words, no visualization is applied.
 
 
 
