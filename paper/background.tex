@@ -43,7 +43,7 @@ Naturally, content of a volatile memory (i.e. run-time stack, global and local v
 	\label{fig:code_demo_incosistency}
 \end{figure}
 
-Nevertheless, regular checkpointing of program state to a non-volatile memory still does not guarantee consistency. This phenomenon has been discussed extensively in e.g.~\cite{chain,alpaca}. For the completeness of this exposition we will provide our own example demonstrating this problem, please refer to Fig.~\ref{fig:code_demo_incosistency} and compare with~\cite[Sec 2.3]{alpaca},~\cite[Sec. 2.1]{chain}. We take an example of a fast procedure to calculate cyclic redundancy check (CRC) from~\cite{hicks_mibench2_2016}. Therein a CRC must be calculated for $\texttt{nBytes}$-long message $\texttt{msg}$ with specified initial reminder $\texttt{Rmnd}$ and constant, $\texttt{Rmnd}$ variable type-dependent, $\texttt{Wdth}$. Despite regular, fixed position checkpoints (line 3 in Fig.~\ref{fig:crc_example}) of all variables which are declared as non-volatile (denoted as \texttt{NV}) variable $\texttt{data}$ is calculated incorrectly. This is because of a write after read (WAR) hazard of variable $\texttt{Rmnd}$. WAR hazard is caused by consecutive write and read in-between two consecutive checkpoints using $\texttt{checkpoint()}$ function: $\texttt{data}$ variable is written \emph{before} (line 10 in Fig.~\ref{fig:crc_example}) $\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example}), or more specifically---updated before a new execution loop. 
+Nevertheless, regular checkpointing of program state to a non-volatile memory still does not guarantee consistency. This phenomenon has been discussed extensively in e.g.~\cite{chain,alpaca}. For the completeness of this exposition we will provide our own example demonstrating this problem. For this please refer to Fig.~\ref{fig:code_demo_incosistency} and compare with~\cite[Sec 2.3]{alpaca},~\cite[Sec. 2.1]{chain}. We take an example of a fast procedure to calculate cyclic redundancy check (CRC) from~\cite{hicks_mibench2_2016}. Therein a CRC must be calculated for $\texttt{nBytes}$-long message $\texttt{msg}$ with specified initial reminder $\texttt{Rmnd}$ and constant, $\texttt{Rmnd}$ variable type-dependent, $\texttt{Wdth}$. Despite regular, fixed position checkpoints (line 3 in Fig.~\ref{fig:crc_example}) of all variables which are declared as non-volatile (denoted as \texttt{NV}) variable $\texttt{data}$ is calculated incorrectly. This is because of a write after read (WAR) hazard of variable $\texttt{Rmnd}$. WAR hazard is caused by consecutive write and read in-between two consecutive checkpoints using $\texttt{checkpoint()}$ function: $\texttt{data}$ variable is written \emph{before} (line 10 in Fig.~\ref{fig:crc_example_war}) $\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example_war}), or more specifically---updated before a new execution loop. 
 
 \subsection{Assumption on the Type of Computing Hardware}
 \label{sec:background_hardware}
@@ -52,31 +52,81 @@ We assume that we operate on the microcontroller (more generally, computing hard
 
 \subsection{(Task-based) Intermittent Computing: Background}
 
-\begin{figure}
+There is increasing amount of work that deals with protecting memory consistency. Table~\ref{table:chechpoint_comparison} provides a summary of various costs associated with most relevant task-based/checkpointing solutions. This table generalizes discussion from~\cite[Sec. 2.4]{alpaca}.
+
+\begin{table}
 	\centering
-	%\includegraphics[width=0.25\columnwidth]{figures/}
-	\caption{Two problems with fixed-size task in intermittent execution. (a) task underestimation: task executed at device with capacitor size $X$, will not execute at device with capacitor $X\gg Y$; (b) task overestimation: with stable energy source task tracking causes unnecessary overhead.}
-	\label{fig:fixed_task_problem}
-\end{figure}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		{~} & CP & SZ & NV \\
+		\hline\hline
+		\!\!Mementos~\cite{mementos}\!\! & \!\!$N_2\leq N_1$\!\! & \!\!R + S\!\! & \!\!R + S\!\! \\
+		\!\!DINO~\cite{dino}\!\! & $N_2$\!\! & \!\!R + W\!\! & \!\!R + W\!\! \\
+		\!\!Chain~\cite{chain}, Alpaca~\cite{alpaca}\!\! & \!\!$N_2$\!\! & P\!\! & \!\!2W + P\!\!\\
+		\!\!Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017}\!\! & $N_3\geq N_2\geq N_1$\!\! & \!\!R\!\! & R\!\!\\
+		\hline 
+	\end{tabular}
+	\caption{Cost of various checkpointing methods; Symbols---R: register, S: stack, W: WAR-dependent variables, P: program counter, $N_1, N_2, N_3$: relative number of checkpoints for each method, CP: no. checkpoints, SZ: checkpoint size, NV: copy to non-volatile memory size.}
+	\label{table:chechpoint_comparison}
+\end{table}
+
+The energy cost of a single checkpoint is $w\text{CP(SZ+NV)}$, where $w$ is the cost of a single word copy into a non-volatile memory. Decrease of CP decreases the energy cost associated with each state preservation method and reduces operation cost which in most simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$, where PL is the cost of program execution without checkpointing. On the other hand, this increases task/checkpoint re-execution time. 
 
 Moreover, each battery-less platform has different storage sizes, refer to Table~\ref{table:capacitor}, which causes different charge/discharge periods. This result in different execution times. In the worst case the size of the capacitor might be too small to execute one task written by the programmer.
 
-We can write the problem of maximizing all task sizes formally as
-%
-\begin{equation}
-\underset{i}{\arg\,\max} \sum_{i}m_i+t_i \text{~subject to~} \forall_i mi+t_i>e,
-\end{equation}
-%
-where $e$ is the required minimum energy to perform a task, $i$ is the total number of tasks, $m_i$ and $t_i$ are the cost of task traversal (memory copying time of task variables) and time to complete one task, respectively.
-
-Other forms of intermittent platforms will share the same problem. One of them considers actuation platforms, which will be powered directly from energy harvesting sources~\cite{}. will share the energy storage with computing platform. However, power supply for actuators is order of magnitude larger than for computation. Therefore, although capacitor is large enough to perform computation alone, energy to power actuators takes precedence leaving not much space for computing.
-
 %prior systems do fine grained task division (virtualization) {clank,aplaca}
 
-%Q1: Does Program Counter change size with task (checkpoint) size in Chain? In other words: bigger Chain task=bigger Program Counter?
-%Q2: Does Register File (RF) includes Program Counter (PC)? In other words: is always PC>RF in terms of memory size?
+Task is a programmer (or compiler) defined code that is executed based on consistent set of inputs, i.e. memory fetched from a specified memory location, producing a consistent output stored in a specified (the same or different) memory location. Syntactically, we can treat a task as a continuous sub-section of a large program encapsulated by (i) task specific keywords defining the beginning and the end of a task and (ii) message passing between tasks connected with each other.
 
-%N_{checkpoints} \times e^{2\times N_{shared}} 
+\begin{figure}
+	\centering
+	%\includegraphics[width=\columnwidth]{figures/taskification_example}
+	\caption{Task flow example executed by \sys.\todo{Draw an example task diagram}{Przemek}}
+	\label{fig:task_flow_example}
+\end{figure}
+
+Let us look into how task-based programming is performed relying on an example provided in Fig.~\ref{fig:task_flow_example}. Each task is uniquely identified by a keyword. A separate part of code specifies a state machine than governs how tasks are connected with each other. This way a programmer specifies to which other task a current task needs to pass the result of its computation (and it can be either a new task or the task itself). Tasks are executed atomically. That is, task will be executed only once and will be considered as completed only when a task reaches a final instruction line informing a scheduler that a program is ready to enter into a new task.
+
+Just like Chain~\cite{chain} and Alpaca~\cite{alpaca}, \sys does not support concurrent programming, multi-threading (multi-task sequence) and does not consider priorities and on-demand scheduling. These features are extremely important to consider but go beyond the scope of this work. A comparative description of \sys is given in Table~\ref{table:feature_comparison}. 
+
+Important and a strong assumption about task-based programming for intermittently-powered systems is that an energy availability for the largest possible task execution must be guaranteed. Task is an atomic operation and  must preserve execution order and memory manipulations. Task that follows such an assumption is equivalent to task being executed on a continuously-powered non-interrupted system. Whenever a task cannot fit into a single energy reservoir, it must be divided into tasks that will be executed within a single discharge cycle.
+
+\begin{table}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		{~} & Alpaca~\cite{alpaca} & Chain~\cite{chain} & This work \\
+		\hline\hline
+		Task connections & in-task & in-task & outside \\
+		Task re-use & N & N & Y\\
+		Memory model & globals & globals & globals\\
+		Concurrency & N & N & N \\
+		Task blocking & N & N & Y \\
+		Energy-adaptive & N & N & Y \\
+		\hline
+	\end{tabular}
+	\caption{Comparison of existing task-based execution models against \sys.}
+	\label{table:feature_comparison}
+\end{table}
 
 \todo{Elaborate on the ``key challenge'' paragraphs near the end of the intro}{Przemek}
-\todo{Define the Task and Task based execution model}{Przemek}
+
+%%%Notes%%%
+
+%We can write the problem of maximizing all task sizes formally as
+%
+%\begin{equation}
+%\underset{i}{\arg\,\max} \sum_{i}m_i+t_i \text{~subject to~} \forall_i mi+t_i>e,
+%\end{equation}
+%
+%where $e$ is the required minimum energy to perform a task, $i$ is the total number of tasks, $m_i$ and $t_i$ are the cost of task traversal (memory copying time of task variables) and time to complete one task, respectively.
+
+%Two problems with fixed-size task in intermittent execution. (a) task underestimation: task executed at device with capacitor size $X$, will not execute at device with capacitor $X\gg Y$; (b) task overestimation: with stable energy source task tracking causes unnecessary overhead.
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=\columnwidth]{figures/taskification_example}
+%\caption{Program divided into tasks.}
+%\label{fig:taskification_example}
+%\end{figure}
+
+%Other forms of intermittent platforms will share the same problem. One of them considers actuation platforms, which will be powered directly from energy harvesting sources~\cite{}. will share the energy storage with computing platform. However, power supply for actuators is order of magnitude larger than for computation. Therefore, although capacitor is large enough to perform computation alone, energy to power actuators takes precedence leaving not much space for computing.
