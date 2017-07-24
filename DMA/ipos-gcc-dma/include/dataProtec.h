@@ -24,11 +24,16 @@
 // The location of any page is given by (BIGEN_ROM + pag_tag - PAG_SIZE)
 // The TEMP location of any page is given by ( END_ROM - TOT_PAG_SIZE + pag_tag - PAG_SIZE )
 #define END_ROM         0xFF70    //  using the address 0xFF7F disables DMA transfer
-#define END_RAM         0x2200
+#define END_RAM         0x2100
 #define TAG_SIZE        6
 #define PAG_ADDR_SIZE   (16 - TAG_SIZE)
-#define NUM_PAG         0x80
-#define PAG_SIZE        ((0x3000)/NUM_PAG)  // 1KB
+// 12 KB main memory size
+    //#define NUM_PAG         (12 * 16)
+    //#define PAG_SIZE        ((0x3000)/NUM_PAG)  // 1KB
+// 8 KB main memory size
+#define NUM_PAG         (8 * 16)
+#define PAG_SIZE        ((0x2000)/NUM_PAG)  // 1KB
+
 #define MS6B            0xfc00
 #define RAM_PAG         (END_RAM - PAG_SIZE)
 #define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)

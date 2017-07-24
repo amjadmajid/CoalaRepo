@@ -57,7 +57,7 @@ def figureSetting():
     plt.rcParams['legend.numpoints'] = 1
 
     
-apps = ['DataDecomp', 'DFT_8_float', 'sortAlgo', 'temp-log']
+apps = ['DataDecomp', 'DFT_float/16', 'DFT_float/8', 'sortAlgo/50var', 'temp-log']
 pagSizes = [64, 128, 256, 512, 1024]
 
 data =[]
@@ -83,8 +83,8 @@ f = plt.figure(figsize=(8,4))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3]) )
-ax.xaxis.set_major_formatter(ticker.FixedFormatter(('DataDecomp', 'DFT_8_float', 'sortAlgo', 'temp-log') ) )
+ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3,4]) )
+ax.xaxis.set_major_formatter(ticker.FixedFormatter(('DataDecomp', 'DFT16', 'DFT8', 'sortAlgo', 'temp-log') ) )
 
 plt.ylabel('Seconds')
 
@@ -92,7 +92,7 @@ plt.ylabel('Seconds')
 for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
     print('row', row)
     x = np.arange(len(row))      
-    plt.bar((x-0.23)+i *bar_width, row,    
+    plt.bar((x-0.35)+i *bar_width, row,    
             width=bar_width, 
             color=colors[i % len(colors)], 
            label = labels[i% len(labels)], 
