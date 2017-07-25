@@ -1,6 +1,3 @@
-\section{Compiler Support for Automatic Task Generation}
-\label{sec:compiler}
-
 \sys additionally provides a compiler support for automatic task
 generation, eliminating programmer's burden of writing a task-based
 program from scratch. The compiler gets a plain-C code as an input
@@ -44,7 +41,7 @@ the specific edge. Intuitively, when a task boundary is placed on a frequently v
 (such as a back edge of a loop) the system suffers from higher runtime overhead.
 There is no way of statically estimating the number of visit of each edges, so we initally set every
 edge penalty as 1. When analyzing loops, penalty of edges within loops are multiplied by loop count.
-\xxx{TODO: change the penalty to be 1 or 1*loopcount}
+\todo{Change the penalty to be 1 or 1*loopcount}{Kiwan}
 
 Ater constructing a graph and assigning price and penalty, the compiler analyzes loops. 
 

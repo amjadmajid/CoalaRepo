@@ -201,9 +201,16 @@
 
 Describe the overall system, the programming model, and the semantics/execution model. This should include a discussion of memory virtualization and task coalescing.
 
+\section{Compiler Support for Automatic Task Generation}
+\label{sec:compiler}
+
+\input{compiler}
+
 \section{Memory Virtualization}
 \label{sec:memory_virtulaization}
+
 \input{paging}
+
 \begin{figure}
 	\centering
 	%\includegraphics[width=0.25\columnwidth]{figures/}
@@ -240,23 +247,9 @@ This paper presented \sys: \sysfull.
 \newpage
 
 \section{Old Introduction}
-	Intermittently powered devices (IPDs) are battery-less devices that utilize the ambient energy to sense, compute and, communicate. For example, Wireless Identification and Sensing platform WISP \cite{wisp} uses the RF signal power to drive its computation and communication. Because of the reliance of TPDs on intermittent power supply, the harvested energy when it is available, their programs are susceptible to a very frequent power interrupts, in the order of tens of millisconds~\cite{}. Therefore, these devices require a different software execution model that complies with the nature of a discontinuous power supply. 
-
-	The intermittent (discontinuous) execution model defines a program execution as cumulative discrete process. The main difference between the intermittent and the conventional (or continuous) execution models is that, a power failure is seen by the continuous model as an \emph{exception} that may reset the progress of a program to its beginning. Whereas, in intermittent execution a power failure is regarded as a temporary \emph{pause} to the execution that may result in some progress degradation. Generally we can classify the intermittent execution model into: 
-	\begin{itemize}
-		\item \emph{Sequential Execution Model}:
-			Under this model a program is seen as one big idempotent operational region that has one common context. Generally, The progress of the program is saved and updated by means of checkpointing---where all the program context (e.g. CPU registers, the stack and the global variables) is saved to a non-volatile memory. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos, harvOS, hibernus}. The benefit of this model is that it does not require code modification by a programmer. However, it has a number of drawbacks: (i) It suffers from significant overhead \cite{chain}; (ii) the programmer should not access the non-volatile memory to guarantee the consistency of the memory~\cite{xxxx}; and (iii) it restricts the IPDs to run only a single application~\cite{inos}. 
-		\item \emph{Modular Intermittent Execution Model}:
-			At the heart of this model is the concept of an idempotent task. The idempotent task is C function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an IPD by interleaving their tasks~\cite{inos}. However, it obviously requires code modification---for example, if an algorithm is written according to the continuous execution model it has to be splitted, by a programmer, into small tasks to run under the modular intermittent execution model.
-	\end{itemize}
-
-Despite that the superiority of the Modular Intermittent Execution model, it is still a static approach that completely depends on a programmer's estimation which is mostly result in a sub-optimal code devision. Moreover, this model can only consider a single hardware configuration and it does not take environment changing into considerations. 
-
-
 
 
 % Energy source
-
 
 % The intermittent execution is cumulative discrete process. The intermittent execution model is only able to execute a few number of instructions, as compared to the conventional (continuous) model, before its progress is terminated. Therefore, the intermittent execution model adapts an execution progress state saving mechanism. This mechanism is realized either by means of a checkpoint~\cite{}, where all the context of the program is saved into non-volatile memory. Or 
 
@@ -265,6 +258,7 @@ Despite that the superiority of the Modular Intermittent Execution model, it is 
 % We define virtualization within the context of intermittent execution as utilizing the volatile memory instead of non-volatile when the intermittent execution model attempts to access the non-volatile memory. 
 
 \subsection{Why not Adapting Current Approaches}
+
 Here we highlight the challenges of adapting the state-of-the-art proposed methods to enable the execution of dynamic task sizes. 
 %
 %	\begin{figure}[t]
