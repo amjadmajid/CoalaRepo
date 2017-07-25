@@ -15,6 +15,7 @@
 #define __nv  __attribute__((section(".nv_vars")))
 #define __p  __attribute__((section(".p_vars")))
 
+
 /*
  * Max available memory is 48/2 = 24
  * Page size = 1KB
@@ -27,18 +28,21 @@
 // The location of any page is given by (BIGEN_ROM + pag_tag - PAG_SIZE)
 // The TEMP location of any page is given by ( END_ROM - TOT_PAG_SIZE + pag_tag - PAG_SIZE )
 #define END_ROM         0xFF70    //  using the address 0xFF7F disables DMA transfer
-#define END_RAM         0x2200
+#define END_RAM         0x2100
 #define TAG_SIZE        6
 #define PAG_ADDR_SIZE   (16 - TAG_SIZE)
-#define NUM_PAG         8
-#define PAG_SIZE        0x0200  // 1KB
+// 12 KB main memory size   [Linker script might need to be adjusted]
+    #define NUM_PAG         (12 * 16)
+    #define PAG_SIZE        ((0x3000)/NUM_PAG)  // 1KB
+// 8 KB main memory size
+//#define NUM_PAG         (8 * 4)
+//#define PAG_SIZE        ((0x2000)/NUM_PAG)  // 1KB
+
 #define MS6B            0xfc00
 #define RAM_PAG         (END_RAM - PAG_SIZE)
 #define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
 #define PAG_SIZE_W      (PAG_SIZE/2)  //1KB
-//#define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
-// TODO because of the linker script
-#define BIGEN_ROM   0xBF70
+#define BIGEN_ROM       ( (END_ROM - TOT_PAG_SIZE) - TOT_PAG_SIZE  ) // 0xBF70
 
 
 void __sendPagTemp(unsigned int pagTag);
@@ -62,6 +66,8 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                                         ( __VAR_ADDR(var)  <  (CrntPagHeader+PAG_SIZE) ))
 
 #define __VAR_PT_IN_RAM(var)            (  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
+
+
 
 
 #define WVAR(var, val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
@@ -97,7 +103,24 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                         ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
+
+#define PPVAR(wvar, rvar)  __typeof__(rvar) __var##__var = (*PVAR(rvar)); \
+                          (*PVAR(wvar)) = __var##__var
+
+
+
 #endif /* INCLUDE_DATAPROTEC_H_ */
+
+
+
+
+
+
+
+
+
+
+
 
 
 

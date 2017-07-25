@@ -154,7 +154,7 @@ void os_scheduler()
             __temp_taskCounter = __taskCounter;
             __sendPagTemp( CrntPagHeader );
             unsigned int i;
-            for (i=0; i < NUM_PAG; i++)
+            for (i=0; i < NUM_PAG; i++)    //TODO TOO SLOW //
             {
                 __persis_pagsInTemp[i] = __pagsInTemp[i];
             }
