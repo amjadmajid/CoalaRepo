@@ -90,6 +90,7 @@ void os_scheduler()
 {
     if (__commit_flag == COMMITTING)
     {
+        __current_task_virtual  =  (unsigned int) __temp_task_address;
         goto commit;
     }
 
@@ -153,7 +154,7 @@ void os_scheduler()
             __temp_taskCounter = __taskCounter;
             __sendPagTemp( CrntPagHeader );
             unsigned int i;
-            for (i=0; i < NUM_PAG; i++)
+            for (i=0; i < NUM_PAG; i++)    //TODO TOO SLOW //
             {
                 __persis_pagsInTemp[i] = __pagsInTemp[i];
             }

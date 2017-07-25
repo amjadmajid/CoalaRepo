@@ -10,7 +10,7 @@
 //#define __v  __attribute__((section(".ram_vars")))
 
 // Special memory locaitons
-#define BASE_ADDR       0x1980
+#define BASE_ADDR       0xBB70
 #define LIST_HEAD       (BASE_ADDR)           //2 bytes
 
 // function pointer

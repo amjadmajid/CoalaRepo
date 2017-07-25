@@ -1,12 +1,25 @@
-#include <msp430.h> 
-#include <libio/log.h>
-#include <libmspbuiltins/builtins.h>
-#include <libio/log.h>
-#include <libmsp/mem.h>
-#include <libmsp/periph.h>
-#include <libmsp/clock.h>
-#include <libmsp/watchdog.h>
-#include <libmsp/gpio.h>
+
+/*
+    The output should be like this
+    compressed block:
+    0000 0001 0000 0002 0000 0003 0000 0106
+    0100 0101 0102 0103 0104 0105 0107 010E
+    0108 0109 010A 010B 010C 010D 010F 0116
+    0110 0111 0112 0113 0114 0115 0117 011E
+    0118 0119 011A 011B 011C 011D 011F 0126
+    0120 0121 0122 0123 0124 0125 0127 012E
+    0128 0129 012A 012B 012C 012D 012F 0136
+    0130 0131 0132 0133 0134 0135 0137 013E
+
+    rate: samples/block: 353/64
+
+    The result should look like this. If you can't print, you can do assert with this
+
+ */
+
+#include <msp430.h>
+#include <ipos.h>
+
 
 #define NIL 0 // like NULL, but for indexes, not real pointers
 
@@ -59,22 +72,22 @@ void task_append_compressed();
 void task_print();
 void task_done();
 
-__nv letter_t _v_letter;
-__nv unsigned _v_letter_idx;
-__nv sample_t _v_prev_sample;
-__nv index_t _v_out_len;
-__nv index_t _v_node_count;
-__nv node_t _v_dict[DICT_SIZE];
-__nv sample_t _v_sample;
-__nv index_t _v_sample_count;
-__nv index_t _v_sibling;
-__nv index_t _v_child;
-__nv index_t _v_parent;
-__nv index_t _v_parent_next;
-__nv node_t _v_parent_node;
-__nv node_t _v_compressed_data[BLOCK_SIZE];
-__nv node_t _v_sibling_node;
-__nv index_t _v_symbol;
+__p letter_t _v_letter;
+__p unsigned _v_letter_idx;
+__p sample_t _v_prev_sample;
+__p index_t _v_out_len;
+__p index_t _v_node_count;
+__p node_t _v_dict[DICT_SIZE];
+__p sample_t _v_sample;
+__p index_t _v_sample_count;
+__p index_t _v_sibling;
+__p index_t _v_child;
+__p index_t _v_parent;
+__p index_t _v_parent_next;
+__p node_t _v_parent_node;
+__p node_t _v_compressed_data[BLOCK_SIZE];
+__p node_t _v_sibling_node;
+__p index_t _v_symbol;
 
 static sample_t acquire_sample(letter_t prev_sample)
 {
@@ -84,50 +97,49 @@ static sample_t acquire_sample(letter_t prev_sample)
 
 void task_init()
 {
-    LOG("init\r\n");
-    _v_parent_next = 0;
-    LOG("init: start parent %u\r\n", _v_parent);
-    _v_out_len = 0;
-    _v_letter = 0;
-    _v_prev_sample = 0;
-    _v_letter_idx = 0;;
-    _v_sample_count = 1;
+    WVAR(_v_parent_next, 0);
+    WVAR(_v_out_len, 0);
+    WVAR(_v_letter, 0);
+    WVAR(_v_prev_sample, 0);
+    WVAR(_v_letter_idx, 0);
+    WVAR(_v_sample_count, 1);
     os_jump(1);
 }
 
 void task_init_dict()
 {
-    LOG("init dict: letter %u\r\n", _v_letter);
+    letter_t _p_letter = RVAR(_v_letter);
 
     node_t node = {
-        .letter = _v_letter,
+        .letter = _p_letter,
         .sibling = NIL, // no siblings for 'root' nodes
         .child = NIL, // init an empty list for children
     };
-    int i = _v_letter;
-    _v_dict[i] = node;
-    _v_letter++;
-    if (_v_letter < NUM_LETTERS) {
+    int i = _p_letter;
+    WVAR(_v_dict[i], node);
+    _p_letter++;
+    WVAR(_v_letter, _p_letter);
+    if (_p_letter < NUM_LETTERS) {
         os_jump(0);
     } else {
-        _v_node_count = NUM_LETTERS;
+        WVAR(_v_node_count, NUM_LETTERS);
         os_jump(1);
     }
 }
 
 void task_sample()
 {
-    LOG("sample: letter idx %u\r\n", _v_letter_idx);
+    unsigned _p_letter_idx = RVAR(_v_letter_idx);
 
-    unsigned next_letter_idx = _v_letter_idx + 1;
+    unsigned next_letter_idx = _p_letter_idx + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
         next_letter_idx = 0;
 
-    if (_v_letter_idx == 0) {
-        _v_letter_idx = next_letter_idx;
+    if (_p_letter_idx == 0) {
+        WVAR(_v_letter_idx, next_letter_idx);
         os_jump(1);
     } else {
-        _v_letter_idx = next_letter_idx;
+        WVAR(_v_letter_idx, next_letter_idx);
         os_jump(2);
     }
 }
@@ -135,29 +147,27 @@ void task_sample()
 void task_measure_temp()
 {
     sample_t prev_sample;
-    prev_sample = _v_prev_sample;
+    prev_sample = RVAR(_v_prev_sample);
 
     sample_t sample = acquire_sample(prev_sample);
-    LOG("measure: %u\r\n", sample);
     prev_sample = sample;
-    _v_prev_sample = prev_sample;
-    _v_sample = sample;
+    WVAR(_v_prev_sample, prev_sample);
+    WVAR(_v_sample, sample);
     os_jump(1);
 }
 
 void task_letterize()
 {
-    unsigned letter_idx = _v_letter_idx;
+    unsigned letter_idx = RVAR(_v_letter_idx);
+    sample_t _p_sample = RVAR(_v_sample);
     if (letter_idx == 0)
         letter_idx = NUM_LETTERS_IN_SAMPLE;
     else
         letter_idx--;
     unsigned letter_shift = LETTER_SIZE_BITS * letter_idx;
-    letter_t letter = (_v_sample & (LETTER_MASK << letter_shift)) >> letter_shift;
+    letter_t letter = (_p_sample & (LETTER_MASK << letter_shift)) >> letter_shift;
 
-    LOG("letterize: sample %x letter %x (%u)\r\n", _v_sample, letter, letter);
-
-    _v_letter = letter;
+    WVAR(_v_letter, letter);
     os_jump(1);
 }
 
@@ -166,19 +176,17 @@ void task_compress()
     node_t parent_node;
 
     // pointer into the dictionary tree; starts at a root's child
-    index_t parent = _v_parent_next;
+    index_t parent = RVAR(_v_parent_next);
 
-    LOG("compress: parent %u\r\n", parent);
+    parent_node = RVAR(_v_dict[parent]);
 
-    parent_node = _v_dict[parent];
-
-    LOG("compress: parent node: l %u s %u c %u\r\n", parent_node.letter, parent_node.sibling, parent_node.child);
-
-    _v_sibling = parent_node.child;
-    _v_parent_node = parent_node;
-    _v_parent = parent;
-    _v_child = parent_node.child;
-    _v_sample_count++;
+    WVAR(_v_sibling, parent_node.child);
+    WVAR(_v_parent_node, parent_node);
+    WVAR(_v_parent, parent);
+    WVAR(_v_child, parent_node.child);
+    index_t _p_sample_count = RVAR(_v_sample_count);
+    _p_sample_count++;
+    WVAR(_v_sample_count, _p_sample_count);
 
     os_jump(1);
 }
@@ -186,40 +194,33 @@ void task_compress()
 void task_find_sibling()
 {
     node_t *sibling_node;
+    letter_t _p_letter = RVAR(_v_letter);
+    index_t _p_sibling = RVAR(_v_sibling);
+    index_t _p_child = RVAR(_v_child);
 
-    LOG("find sibling: l %u s %u\r\n", _v_letter, _v_sibling);
+    if (_p_sibling != NIL) {
+        int i = _p_sibling;
+        node_t _p_dict_i = RVAR(_v_dict[i]);
+        sibling_node = &_p_dict_i;
 
-    if (_v_sibling != NIL) {
-        int i = _v_sibling;
-        sibling_node = &_v_dict[i];
+        if (sibling_node->letter == _p_letter) { // found
 
-        LOG("find sibling: l %u, sn: l %u s %u c %u\r\n", _v_letter,
-                sibling_node->letter, sibling_node->sibling, sibling_node->child);
-
-        if (sibling_node->letter == _v_letter) { // found
-            LOG("find sibling: found %u\r\n", _v_sibling);
-
-            _v_parent_next = _v_sibling;
+            WVAR(_v_parent_next, _p_sibling);
             os_jump(10);
             return;
         } else { // continue traversing the siblings
             if(sibling_node->sibling != 0){
-                _v_sibling = sibling_node->sibling;
+                WVAR(_v_sibling, sibling_node->sibling);
                 os_jump(0);
                 return;
             }
         }
-
     }
-    LOG("find sibling: not found\r\n");
 
-    index_t starting_node_idx = (index_t)_v_letter;
-    _v_parent_next = starting_node_idx;
+    index_t starting_node_idx = (index_t)_p_letter;
+    WVAR(_v_parent_next, starting_node_idx);
 
-    LOG("find sibling: child %u\r\n", _v_child);
-
-
-    if (_v_child == NIL) {
+    if (_p_child == NIL) {
         os_jump(2);
     } else {
         os_jump(1);
@@ -229,79 +230,78 @@ void task_find_sibling()
 void task_add_node()
 {
     node_t *sibling_node;
-
-    int i = _v_sibling;
-    sibling_node = &_v_dict[i];
-
-    LOG("add node: s %u, sn: l %u s %u c %u\r\n", _v_sibling,
-            sibling_node->letter, sibling_node->sibling, sibling_node->child);
+    index_t _p_sibling = RVAR(_v_sibling);
+    int i = _p_sibling;
+    node_t _p_dict_i = RVAR(_v_dict[i]);
+    sibling_node = &_p_dict_i;
 
     if (sibling_node->sibling != NIL) {
         index_t next_sibling = sibling_node->sibling;
-        _v_sibling = next_sibling;
+        WVAR(_v_sibling, next_sibling);
         os_jump(0);
 
     } else { // found last sibling in the list
 
-        LOG("add node: found last\r\n");
-
         node_t sibling_node_obj = *sibling_node;
-        _v_sibling_node = sibling_node_obj;
+        WVAR(_v_sibling_node, sibling_node_obj);
         os_jump(1);
     }
 }
 
 void task_add_insert()
 {
-    LOG("add insert: nodes %u\r\n", _v_node_count);
+    index_t _p_node_count = RVAR(_v_node_count);
+    letter_t _p_letter = RVAR(_v_letter);
+    node_t _p_parent_node = RVAR(_v_parent_node);
+    node_t _p_sibling_node = RVAR(_v_sibling_node);
+    index_t _p_parent = RVAR(_v_parent);
+    index_t _p_sibling = RVAR(_v_sibling);
 
-    if (_v_node_count == DICT_SIZE) { // wipe the table if full
+    if (_p_node_count == DICT_SIZE) { // wipe the table if full
         while (1);
     }
-    LOG("add insert: l %u p %u, pn l %u s %u c%u\r\n", _v_letter, _v_parent,
-            _v_parent_node.letter, _v_parent_node.sibling, _v_parent_node.child);
 
-    index_t child = _v_node_count;
+    index_t child = _p_node_count;
     node_t child_node = {
-        .letter = _v_letter,
+        .letter = _p_letter,
         .sibling = NIL,
         .child = NIL,
     };
 
-    if (_v_parent_node.child == NIL) { // the only child
-        LOG("add insert: only child\r\n");
+    if (_p_parent_node.child == NIL) { // the only child
 
-        node_t parent_node_obj = _v_parent_node;
+        node_t parent_node_obj = _p_parent_node;
         parent_node_obj.child = child;
-        int i = _v_parent;
-        _v_dict[i] = parent_node_obj;
+        int i = _p_parent;
+        WVAR(_v_dict[i], parent_node_obj);
 
     } else { // a sibling
 
-        index_t last_sibling = _v_sibling;
-        node_t last_sibling_node = _v_sibling_node;
-
-        LOG("add insert: sibling %u\r\n", last_sibling);
+        index_t last_sibling = _p_sibling;
+        node_t last_sibling_node = _p_sibling_node;
 
         last_sibling_node.sibling = child;
-        _v_dict[last_sibling] = last_sibling_node;
+        WVAR(_v_dict[last_sibling], last_sibling_node);
     }
-    _v_dict[child] = child_node;
-    _v_symbol = _v_parent;
-    _v_node_count++;
-
+    WVAR(_v_dict[child], child_node);
+    WVAR(_v_symbol, _p_parent);
+    _p_node_count++;
+    WVAR(_v_node_count, _p_node_count);
     os_jump(1);
 }
 
 void task_append_compressed()
 {
-    LOG("append comp: sym %u len %u \r\n", _v_symbol, _v_out_len);
-    int i = _v_out_len;
-    _v_compressed_data[i].letter = _v_symbol;
+    index_t _p_symbol = RVAR(_v_symbol);
+    index_t i = RVAR(_v_out_len);
 
-    if (++_v_out_len == BLOCK_SIZE) {
+    WVAR(_v_compressed_data[i].letter, _p_symbol);
+
+    if (++i == BLOCK_SIZE) {
+        WVAR(_v_out_len, i);
         os_jump(1);
     } else {
+        WVAR(_v_out_len, i);
         os_jump(5);
     }
 }
@@ -310,34 +310,24 @@ void task_print()
 {
     unsigned i;
 
-    PRINTF("TIME end is 65536*%u+%u\r\n",overflow,(unsigned)TBR);
-    BLOCK_PRINTF_BEGIN();
-    BLOCK_PRINTF("compressed block:\r\n");
+
     for (i = 0; i < BLOCK_SIZE; ++i) {
-        index_t index = _v_compressed_data[i].letter;
-        BLOCK_PRINTF("%04x ", index);
+        index_t index = RVAR(_v_compressed_data[i].letter);
         if (i > 0 && (i + 1) % 8 == 0){
-            BLOCK_PRINTF("\r\n");
         }
     }
-    BLOCK_PRINTF("\r\n");
-    BLOCK_PRINTF("rate: samples/block: %u/%u\r\n", _v_sample_count, BLOCK_SIZE);
-    BLOCK_PRINTF_END();
     os_jump(1);
 }
 
 void task_done()
 {
     //  TRANSITION_TO(task_init);
-    while (1);
+//    while (1);
+    P3OUT |=BIT5;
+    P3OUT &=~BIT5;
 }
 
-static void init_hw()
-{
-    msp_watchdog_disable();
-    msp_gpio_unlock();
-    msp_clock_setup();
-}
+
 
 void init()
 {
@@ -350,18 +340,17 @@ void init()
     TBCTL |= 0x0002; //interrupt enable
     //  *timer &= ~(0x0020); //set bit 5 to zero(halt!)
 #endif
-    //  WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
-    //  PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
-    init_hw();
+      WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
+//     Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
+      PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
 #ifdef CONFIG_EDB
     edb_init();
 #endif
 
-    INIT_CONSOLE();
-    //  P3DIR |=BIT5;
-    //  P1DIR |=BIT0;
+
+      P3DIR |=BIT5;
+
     __enable_interrupt();
 }
 
@@ -389,4 +378,5 @@ int main(void) {
     os_scheduler();
     return 0;
 }
+
 
