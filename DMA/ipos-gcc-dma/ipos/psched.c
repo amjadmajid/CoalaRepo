@@ -153,11 +153,25 @@ void os_scheduler()
             __temp_task_address = __current_task_virtual ;
             __temp_taskCounter = __taskCounter;
             __sendPagTemp( CrntPagHeader );
-            unsigned int i;
-            for (i=0; i < NUM_PAG; i++)    //TODO TOO SLOW //
+
+
+            unsigned int p_cnt=0;
+            unsigned int page;
+            while ( (page = __pagsInTemp[p_cnt]) !=0 )
             {
-                __persis_pagsInTemp[i] = __pagsInTemp[i];
+                // send the pages to their final locations in ROM
+                __persis_pagsInTemp[p_cnt] = page;
+                p_cnt++;
             }
+
+//            unsigned int i;
+//            for (i=0; i < NUM_PAG; i++)    //TODO TOO SLOW //
+//            {
+//                __persis_pagsInTemp[i] = __pagsInTemp[i];
+//            }
+//
+
+
             __persis_CrntPagHeader = CrntPagHeader;  //Keep track of the last accessed page over a power cycle
             __commit_flag=COMMITTING;
 commit:

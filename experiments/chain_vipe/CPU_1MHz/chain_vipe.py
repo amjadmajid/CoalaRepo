@@ -60,7 +60,6 @@ def figureSetting():
 apps = ['DataDecomp/decomp_255var.csv',
         'DFT_float/8/dft_float.csv', 
         'DFT_float/16/dft_float.csv',
-        'Sort/20var/20var.csv',
         'Sort/50var/50var.csv']
 
 data =[]
@@ -76,7 +75,7 @@ for app in apps:
 
 # print(data)
 data = np.transpose(data)
-colors = ['0.2', '0.4', '0.6', '0.8', '1.0']
+colors = ['0.2', '0.4', '0.6', '0.8']
 labels = ["Chain", "VIPE"]
 
 
@@ -88,8 +87,8 @@ f = plt.figure(figsize=(8,4))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3,4]) )
-ax.xaxis.set_major_formatter(ticker.FixedFormatter( ('DataDecomp', 'DFT16', 'DFT8', 'Sort20', 'Sort50') ))
+ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3]) )
+ax.xaxis.set_major_formatter(ticker.FixedFormatter( ('DataDecomp', 'DFT8', 'DFT16', 'Sort') ))
 
 plt.ylabel('Seconds')
 

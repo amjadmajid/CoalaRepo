@@ -59,17 +59,32 @@ void __sendPagTemp(unsigned int pagHeader)
 
 
     // Find the page index
-    unsigned int pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
-    unsigned char idx=0;
-    unsigned int __pageSizes = PAG_SIZE;
-    while( pageGuess >= __pageSizes )
-    {
-        idx++;
-        __pageSizes +=   PAG_SIZE;               // move to next page
-    }
+//    unsigned int pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
+//    unsigned int __pageSizes = PAG_SIZE;
 
+    unsigned char idx=0;
+    while(__pagsInTemp[idx] !=0 )
+    {
+        if(pagHeader == __pagsInTemp[idx] )
+        {
+            break;
+        }
+        idx++;
+    }
     // Keep track of the buffered pages
     __pagsInTemp[ idx ] = pagHeader;
+
+
+
+//    while( pageGuess >= __pageSizes )
+//    {
+//        idx++;
+//        __pageSizes +=   PAG_SIZE;               // move to next page
+//    }
+//
+//    // Keep track of the buffered pages
+//    __pagsInTemp[ idx ] = pagHeader;
+//__no_operation();
 }
 
 
@@ -140,23 +155,42 @@ unsigned int __pageSwap(unsigned int * varAddr)
     unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
     // TODO we are not checking if the var is not in any page !
     unsigned char idx=0;
+
+    // Search the page in the buffer
+    while( (ReqPagTag = __pagsInTemp[idx]) != 0)
+    {
+        if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
+                {
+                    // we found the page
+                    __bringPagTemp( ReqPagTag );
+
+                    goto PAG_IN_TEMP;
+                }
+        idx++;
+    }
+
+    // search the page in the ROM if it is not in the buffer
     while( ! (ReqPagTag_dirty <= __temp_pagSize) )  // if the var is not with the page
     {
-        idx++;
         __temp_pagSize +=   PAG_SIZE;               // move to next page
     }
 
     ReqPagTag = __temp_pagSize-PAG_SIZE;
 
-    //3// pull the ther requested page from the temp buffer or ROM
-     if( __pagsInTemp[idx] == ReqPagTag)
-     {
-         // Bring from the temp buffer
-         __bringPagTemp(ReqPagTag);
-     }else{
-        // bring from pages final locations in ROM
-         __bringPagROM(ReqPagTag);
-     }
+    __bringPagROM(ReqPagTag);
+
+PAG_IN_TEMP:
+
+//    //3// pull the ther requested page from the temp buffer or ROM
+//     if( __pagsInTemp[idx] == ReqPagTag)
+//     {
+//         // Bring from the temp buffer
+//         __bringPagTemp(ReqPagTag);
+//     }else{
+//        // bring from pages final locations in ROM
+//         __bringPagROM(ReqPagTag);
+//     }
+
      //4// keep track of the current page
      CrntPagHeader = ReqPagTag;
     return 0;
@@ -168,15 +202,26 @@ unsigned int __pageSwap(unsigned int * varAddr)
 
 void __pagsCommit()
 {
-    unsigned int cnt;
-    for (cnt=0; cnt < NUM_PAG; cnt++)
+
+    unsigned int cnt=0;
+    unsigned int page;
+    while ( (page = __persis_pagsInTemp[cnt]) !=0 )
     {
         // send the pages to their final locations in ROM
-        if(__persis_pagsInTemp[cnt] )
-        {
-            __sendPagROM( __persis_pagsInTemp[cnt] );
-        }
+            __sendPagROM(page );
+           cnt++;
     }
+
+
+//    unsigned int cnt;
+//    for (cnt=0; cnt < NUM_PAG; cnt++)
+//    {
+//        // send the pages to their final locations in ROM
+//        if(__persis_pagsInTemp[cnt] )
+//        {
+//            __sendPagROM( __persis_pagsInTemp[cnt] );
+//        }
+//    }
 }
 
 
