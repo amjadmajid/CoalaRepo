@@ -38,10 +38,10 @@ void task_inner_loop()
 {
 
 
-    ORVAR(in_i, i);
-    ORVAR(in_j, j);
-    ORVAR(arr_i,  arr[ in_i ]);
-    ORVAR(arr_j, arr[ in_j ]);
+    in_i = RVAR(i);
+    in_j = RVAR( j);
+    arr_i = RVAR( arr[ in_i ]);
+    arr_j = RVAR( arr[ in_j ]);
 
 
     if( arr_i  > arr_j )
@@ -67,7 +67,7 @@ void task_inner_loop()
 void task_outer_loop()
 {
     unsigned int in_i;
-    ORVAR(in_i, i);
+    in_i = RVAR(i);
 //    in_i_pt = PVAR(i);
     in_i++;
 
