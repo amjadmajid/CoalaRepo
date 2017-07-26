@@ -31,9 +31,9 @@
 // 12 KB main memory size   [Linker script might need to be adjusted]
 //#define NUM_PAG         (12 * 16)   //64
 //#define NUM_PAG         (12 * 8)   //128
-//#define NUM_PAG         (12 * 4)   //256
+#define NUM_PAG         (12 * 4)   //256
 //#define NUM_PAG         (12 * 2)   //512
-#define NUM_PAG         (12 * 1)   //1024
+//#define NUM_PAG         (12 * 1)   //1024
 #define PAG_SIZE        ((0x3000)/NUM_PAG)  // 1KB
 
 // 8 KB main memory size
