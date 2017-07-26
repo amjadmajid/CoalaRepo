@@ -2,11 +2,11 @@ result are in cycle. Cross-compiled with -O0 Clang / -O1 gcc
 8MHz processor.
 
 cem
-delft	2,634,252
+delft	2,352,810
 chain	355,809
 
 cuckoo
-delft	167,994
+delft	127,476
 chain	91,599
 
 rsa
