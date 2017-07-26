@@ -33,18 +33,16 @@ capacitor-based energy storage is that capacitor energy density --- and
 consequently operating discharge time --- is orders of magnitude less than a
 battery.
 
-\TODO{I think this can be compressed a bit}
+\todo{Compress text}{Brandon}
 Given current technology development, battery-less systems are best suited for
 very long-term sensing and monitoring where access to recharge is either
 prohibitive or impossible. These include battery-less image capture and
-processing~\cite{naderiparizi_rfid_2015}, animal
-monitoring~\cite{thomas_jbcs_2012} or implantable~\cite{rodriguez_tbcs_2015}
+processing~\cite{naderiparizi_rfid_2015}, animal monitoring~\cite{thomas_jbcs_2012} or implantable~\cite{rodriguez_tbcs_2015}
 and digestible~\cite{nadeau_naturebio_2017} sensors.
-% 
+ 
 Many platforms enable intermittent, battery-less computation. For instance,
 computation RFIDs---open-source TI MSP430-based~\cite{wolverine}
-WISP~\cite{wisp5} (with its variants such as
-WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or
+WISP~\cite{wisp5} (with its variants such as WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or
 NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones
 such as~\cite{medusa_farsens_2017}. Other intermittently-powered platforms
 include ambient backscatter tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or
@@ -52,13 +50,7 @@ battery-less phone~\cite{talla_imwut_2017}. In all of the above, the main
 source of energy harvested is the electromagnetic radiation in the radio
 frequency range (ambient transmitters such as high power TV
 transmitters~\cite{liu_sigcomm_2013} or dedicated RFID
-antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}).
-Naturally, other forms of energy harvesting sources exist, including
-temperature gradient, (micro-)motions, light/sun radiation, vibrations, and
-body fluid flow (blood, gastric acid).  Several recent surveys discussing
-energy harvesting, low-power, embedded systems and intermittent computing at a
-high
-level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
+antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}). Naturally, other forms of energy harvesting sources exist, including temperature gradient, (micro-)motions, light/sun radiation, vibrations, and body fluid flow (blood, gastric acid).  Several recent surveys discussing energy harvesting, low-power, embedded systems and intermittent computing at a high level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
 
 \begin{table}
 	\centering
@@ -89,7 +81,7 @@ Before proceeding further with the background we need to make certain assumption
 \subsection{Intermittent Computing}
 \label{sec:background_consistency}
 
-Naturally, content of a volatile memory (i.e. run-time stack, global and local variables) of the microcontroller and program registers are erased after each power failure. Only what resides in a non-volatile memory, e.g. FRAM, persists after system reboot. A solution to sustain the progress of the program from the last power failure, instead from the beginning (the \emph{Sisyphus} effect~\cite[Sec. 2]{mementos})is a periodic checkpointing of a program state~\cite{mementos,hibernusplusplus,quickrecall,idetic}. The periodicity, and a position of a checkpoint, as well as the way to combat the \emph{program state consistency} phenomenon (discussed extensively in e.g.~\cite{chain,alpaca}), is the core of the contribution behind each of the proposed checkpoining solution. For the completeness of this exposition we will provide our own example demonstrating this phenomenon, viz. please refer to Fig.~\ref{fig:code_demo_incosistency} and compare with~\cite[Sec 2.3]{alpaca},~\cite[Sec. 2.1]{chain}.
+Naturally, content of a volatile memory (i.e. run-time stack, global and local variables) and program registers of the microcontroller are erased after each power failure. Only what resides in a non-volatile memory, e.g. FRAM, persists after system reboot. A solution to sustain the progress of the program from the last power failure, instead from the beginning (also denoted as the \emph{Sisyphus} effect~\cite[Sec. 2]{mementos}) is a periodic checkpointing of a program state~\cite{mementos,hibernusplusplus,quickrecall,idetic}. The periodicity, and a position of a checkpoint, as well as the way to combat the \emph{program state consistency} phenomenon (discussed extensively in e.g.~\cite{chain,alpaca}), is the core of the contribution behind each of the proposed checkpoining solution. For the completeness of this exposition we will provide our own example demonstrating this phenomenon, viz. please refer to Fig.~\ref{fig:code_demo_incosistency} and compare with~\cite[Sec 2.3]{alpaca},~\cite[Sec. 2.1]{chain}.
 
 \begin{figure}
 	\centering
@@ -103,13 +95,17 @@ Let us take an example of a fast procedure to calculate cyclic redundancy check 
 
 \subsection{(Task-based) Intermittent Computing: Background}
 
-Generally we can classify the intermittent execution model into:
+We can classify the intermittent execution models into two classes: \emph{sequential execution model} (which historically formed a baseline for this stream of research) and \emph{modular execution model} (a potent alternative, on which we base the design decisions of \sys).
+)
+\subsubsection{Baseline---Sequential Execution Model}
 
-\subsubsection{Sequential Execution Model}: Under this model a program is seen as one big idempotent operational region that has one common context. Generally, the progress of the program is saved and updated by means of checkpointing, refer to Section~\ref{sec:background_consistency}. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos,mottola2017harvos,hibernus}. The benefit of this model is that it does not require code modification by a programmer. However, it has a number of drawbacks: (i) It suffers from significant overhead \cite{chain}; (ii) the programmer should not access the non-volatile memory to guarantee the consistency of the memory~\cite{}; and (iii) it restricts the intermittently-powered devices to run only a single application.
+Under this model a program for intermittently-powered device is seen as a one idempotent operational region with one common context. Generally, the progress of the program is saved and updated by means of checkpointing, refer again to Section~\ref{sec:background_consistency}. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos,mottola2017harvos,hibernus}. The benefit of this model is that it does not require code modification by a programmer. However it suffers from significant overhead (refer to experiment result in~\cite[Fig. 3]{chain}, where it is concluded that each checkpoint causes overhead).
 
-\subsubsection{Modular Intermittent Execution Model}: At the heart of this model is the concept of an \emph{idempotent task}. The idempotent task is a C language function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an intermittently-powered device by interleaving their tasks~\cite{}. However, it obviously requires code modification. For example, if an algorithm is written according to the continuous execution model it has to be split, by a programmer, into small tasks to run under the modular intermittent execution model.
+\subsubsection{Alternative---Modular Execution Model}
 
-Both modular and intermittent models are present in the literature. Table~\ref{table:chechpoint_comparison} provides a summary of various costs associated with most relevant task-based/checkpointing solutions. This table generalizes discussion from~\cite[Sec. 2.4]{alpaca}.
+At the heart of this model is the concept of an \emph{idempotent task}. The idempotent task is a C language function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an intermittently-powered device by interleaving their tasks~\cite{}. However, it obviously requires code modification. For example, if an algorithm is written according to the continuous execution model it has to be split by a programmer, into small tasks to run under the modular intermittent execution model.
+
+Despite the benefit of the modular model certain limitations are still present that we must overcome and which inspired us to design \sys. Let us look at these problems in detail.
 
 \begin{table}
 	\centering
@@ -127,11 +123,44 @@ Both modular and intermittent models are present in the literature. Table~\ref{t
 	\label{table:chechpoint_comparison}
 \end{table}
 
-\textbf{Cost of a checkpoint:} Whatever the approach, the energy cost of a single checkpoint is $w\text{CP(SZ+NV)}$, where $w$ is the cost of a single word copy into a non-volatile memory. Decrease of CP decreases the energy cost associated with each state preservation method and reduces operation cost which in most simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$, where PL is the cost of program execution without checkpointing. On the other hand, this increases task/checkpoint re-execution time. 
+\paragraph{Problem 1---Idempotent task is also costly}
 
-\textbf{Cost of a fixed task size:} A modular intermittent execution model completely depends on a programmer's estimation which mostly results in a sub-optimal code division. Moreover, this model can only consider a single hardware configuration and it does not take environment changing into considerations. Each battery-less platform has different storage sizes, refer to Table~\ref{table:capacitor}, which causes different charge/discharge periods. This result in different execution times and in the worst case the size of the capacitor might be too small to execute one task written by the programmer.
+The most important modular and intermittent models are compared in Table~\ref{table:chechpoint_comparison}\footnote{This table generalizes discussion from~\cite[Sec. 2.4]{alpaca}.}. Although we concluded that sequential execution model introduces a significant overhead, a modular approach also introduces certain execution penalty. Whatever the approach, the energy cost of a single checkpoint/idempotent task is $w\text{CP(SZ+NV)}$, where $w$ is the cost of a single word copy into a non-volatile memory. 
 
-%prior systems do fine grained task division (virtualization) {clank,aplaca}
+\begin{figure}
+	\centering
+	\subfloat[Energy cost of \emph{write} operation]{\includegraphics[width=0.49\columnwidth]{figures/fram_write.eps}}
+	\subfloat[Energy cost of \emph{read} operation]{\includegraphics[width=0.49\columnwidth]{figures/fram_read.eps}}
+	\caption{Energy cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write (left) and read (right) operation.}
+	\label{fig:framEnergy}
+\end{figure}
+
+We have executed an experiment to measure exactly cost of read/write operations to volatile and non-volatile memory. The result is given in Figure~\ref{fig:framEnergy}. Four applications were developed to measure the energy consumption of \emph{accessing} the FRAM and SRAM of the MSP430FR5969 microcontroller~\cite{msp430datasheet}. The interference free debugger (EDB)~\cite{edb} is used as the energy measurement tool. The EDB probes the energy buffer before and after accessing the FRAM/SRAM 1600 times. This large number of FRAM access is used to increase the reliability of the results generated by the used measurement tool (e.g. reducing the effect of the quantization error). The energy buffer is charged, using the EDB, to $\approx$ 2.45\,V \textbf{only} at the beginning of the execution and of the programs. The write operations were performed by writing literal values, random numbers, to the memory. However, a read operation must be followed by a write operation. Therefore, we chose to write a read value to SRAM. Based on our measurements we conclude that a FRAM access equals $\frac{3}{2}$ SRAM access~\footnote{We would like to mention that TI has already mentioned in this document~\cite{} that FRAM write access is more energy expensive than SRAM write access. However, TI does not quantify the energy overhead.}. Therefore, reducing FRAM access is desirable when developing energy limited software solution---\emph{which is in sharp contrast to the main goal of all checkpoining solutions}.
+
+The above result reassures the intuitive observation that a decrease of CP (Table~\ref{table:chechpoint_comparison}) decreases the energy cost associated with each state preservation method and reduces operation cost which in most simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$, where PL is the cost of program execution without checkpointing. On the other hand, this increases task/checkpoint re-execution time. The ideal solution is a runtime that \emph{adaptively} changes task size during runtime, which brings us to a second problem.
+
+\paragraph{Problem 2---Modular execution models are not adaptive}
+
+A modular intermittent execution model completely depends on a programmer's estimation which mostly results in a sub-optimal code division. Moreover, this model can only consider a single hardware configuration and it does not take environment changing into considerations. Each battery-less platform has different storage sizes, refer to Table~\ref{table:capacitor}, which causes different charge/discharge periods. This result in different execution times and in the worst case the size of the capacitor might be too small to execute one task written by the programmer. This calls for the ability of the modular execution runtimes to \textbf{merge} multiple small tasks into a larger one or \textbf{split} a large task into a set of small ones on the fly (post-compilation time). Unfortunately the following features prevent us to perform this task using existing runtimes~\cite{chain,alpaca}.
+
+\begin{figure}
+	\centering
+	%\includegraphics[width=\columnwidth]{figures/Dynamic_chain_sequence_example}
+	\caption{Dynamic task merging problem.\todo{Draw merging diagram}{Przemek/Amjad}}
+	\label{fig:DynamicChainSeq}
+\end{figure}
+
+\begin{itemize}
+	\item \textbf{Lack of multi-versioning system} All known modular execution models define its own input for each task that is not shared with other tasks. This design decision makes the benefit of merging tasks of less importance since each task is interacting with its own variables.
+
+	\item \textbf{Irreversible tasks transitions} According to both Chain~\cite{chain} and Alpaca~\cite{alpaca} programming models, each task calls the next one. The transition is done through functions calls and manually clearing the stack, to prevent the stack overflow problem. This approach makes all the task transitions firm, preventing task merging.
+
+	\item \textbf{`All channels' requirement} Fig.~\ref{fig:DynamicChainSeq} shows that if the task control flow is a circular with no branches then task merging is possible. Moreover, all the intra-merged-tasks channel can be committed to SRAM instead of FRAM to save energy. However, this execution path is only a special one. If the general case (see Fig.~\ref{fig:DynamicChainRan}) is considered then leaving out the intra-merged-task channels might result in data inconsistency. Than is, if an application tries to access a merged task from the middle after a power interrupt then the input for that task is not ready, which result in an incorrect execution.
+
+	\item \textbf{Dependency on Privatization} Alpaca~\cite{alpaca} extended Chain~\cite{chain} with a concept of privatization, i.e. it protects task-shared variables from WAR dependency problem \emph{within} the scope of a task. Therefore, if tasks are on-demand merged the scope of these dependencies are changed and the static analysis to privatize these variables is not valid anymore and data consistency can not be preserved.
+\end{itemize}
+
+\subsection{Structuring a Task-based Intermittent Computing Program}
 
 Task is a programmer (or compiler) defined code that is executed based on consistent set of inputs, i.e. memory fetched from a specified memory location, producing a consistent output stored in a specified (the same or different) memory location. Syntactically, we can treat a task as a continuous sub-section of a large program encapsulated by (i) task specific keywords defining the beginning and the end of a task and (ii) message passing between tasks connected with each other.
 

@@ -24,7 +24,7 @@
 \newcommand{\TODO}[1]{{\bf \em \textcolor{red}{TODO: #1}\xspace}}
 \newcommand{\todo}[2]{\textcolor{red}{$\bullet$ \textbf{Task:} #1; \textbf{Responsible:} #2}}
 \newcommand{\sys}{VIPE\xspace}
-\newcommand{\sysfull}{Virtualized Intermittently-Powered Executor\xspace}
+\newcommand{\sysfull}{Virtualized Intermittently-Powered Execution\xspace}
 \newcommand{\sysfullalt}{Virtualized Intermittently-Powered Execution Runtime\xspace}
 
 %\setcopyright{rightsretained}
@@ -260,7 +260,7 @@ This paper presented \sys: \sysfull.
 \subsection{Why not Adapting Current Approaches}
 
 Here we highlight the challenges of adapting the state-of-the-art proposed methods to enable the execution of dynamic task sizes. 
-%
+
 %	\begin{figure}[t]
 %	    \centering
 %	         \subfigure[Chain: Sequential task execution flow control.]{\includegraphics[width=0.35\columnwidth]{figures/dynamic-chain.pdf} \label{fig:DynamicChainSeq} } 
@@ -269,29 +269,11 @@ Here we highlight the challenges of adapting the state-of-the-art proposed metho
 %	    \label{fig:DynamicChain}
 %	\end{figure}
 
-
 \noindent\textbf{Chain: Tasks and Channels for Reliable Intermittent Programs } \\
 Some of the main problems in modifying Chain to support dynamic task's size are:
 
-\begin{itemize}
-	\item \emph{Multi-versioning system:} Chain defines for each task its own input that is not shared with other tasks. This design decision makes the benefit of merging tasks of less importance since each task is interacting with its own variables. 
-	\item \emph{Direct FRAM system:} Chain tasks directly access FRAM which is more energy expensive Than SRAM. As result of being multi-versioning system that directly interacts with FRAM, Chain has a significant energy consumption overhead. 
-	\item \emph{Irreversible tasks transitions:} According to the Chain programming model, each task calls the next one. The transition is done through functions calls and manually clearing the stack, to prevent the stack overflow problem. This approach make all the transitions firm ones which prevent task merging.
-	\item \emph{All channels are required:} Fig.~\ref{fig:DynamicChainSeq} shows that if the task control flow is a circular with no branches then task merging is possible. Moreover, all the intra-merged-tasks channel can be committed to SRAM instead of FRAM to save energy. However, this execution path is only a special. If the general case (see Fig.~\ref{fig:DynamicChainRan}) is considered then leaving out the intra-merged-task channels might result in data inconsistency---If an application tries to access a merged task from the middle after a power interrupt then the input for that task is not ready which result in an incorrect execution. 
-
-
-\end{itemize}
-
-
 \noindent\textbf{Alpaca: Intermittent Execution without Checkpoints} \\
 Some of the main problems in modifying Alpaca to support dynamic task's size are:
-
-\begin{itemize}
-	\item \emph{Privatization:} The core concept of Alpaca is privatization. Privatization depends completely on detecting the variables that have a Write-after-read dependency within the scope of a task. Therefore, if tasks are on-demand merged the scope of these dependencies are changed and the static analysis to privatize these variables is not valid anymore and data consistency can not be preserved.  
-
-	\item \emph{Irreversible tasks transitions:} Similar to Chain problem. 
-
-\end{itemize}
 
 \noindent\textbf{Virtualizing Modular Intermittent Execution Model}
 
@@ -306,25 +288,6 @@ Some of the main problems in modifying Alpaca to support dynamic task's size are
 		 \item We have developed an algorithm that is able to determine the size of a virtual task based on the history of the execution of an application. 
 		 \item We enable efficient code portability by requiring that a real task to small and merging them during the execution.   
 	\end{enumerate}
-
-
- \section{Preliminary Results}
- \label{sec:prelResults}
-
-\begin{figure}[t]
-    \centering
-         \subfloat[The energy cost of FRAM/SRAM \textbf{writes} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_write.eps} }\\
-         \subfloat[The energy cost of FRAM/SRAM \textbf{read} operations.]{\includegraphics[width=0.48\columnwidth]{figures/fram_read.eps}}
-    \caption{The energy cost of accessing volatile/non-volatile memory}
-    \label{fig:framEnergy}
-\end{figure}
-
-Since the Intermittent execution models rely on the non-volatile memory to enable long-running operation, it is important to characterize the energy consumption of accessing this type of memory as compare to the volatile one.
-
-Four applications are developed to measure the energy consumption of \emph{Accessing} the FRAM and SRAM of the MSP430FR5969 microcontroller~\cite{xxx}. The interference free debugger (EDB)~\cite{xxx} is used as the energy measurement tool. The EDB probes the energy buffer before and after accessing the FRAM/SRAM 1600 times, This large number of FRAM access is used to increase the reliability of the results generated by the used measurement tool (e.g. reducing the effect of the quantization error).  The energy buffer is charged, using the EDB, to $\approx$ 2.45 volts \textbf{only} at the beginning of the execution and of the programs. The write operations were performed by writing literal values, random numbers, to the memory. However, a read operation must be followed by a write operation, therefore, we chose to write a read value to SRAM. Fig.~\ref{fig:framEnergy} shows that an FRAM access equals $\frac{3}{2}$ SRAM access~\footnote{We would like to mentioned that TI has already mentioned in this document~\cite{xxxx} that FRAM write access is more energy expensive than SRAM write access. However, TI does not quantify the energy overhead.}. Therefore, reducing FRAM access is desirable when developing  energy limited software solution  
-
-
-
 
 \section{\sysfull}
 \sys is runtime library that facilitates tasks navigation and preserves data/memory consistency of the IPDs. It is able, on-demand, to merge tasks to reduce the number of commits to the non-volatile memory.
