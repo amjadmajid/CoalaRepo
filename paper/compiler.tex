@@ -1,19 +1,6 @@
-\sys additionally provides a compiler support for automatic task
-generation, eliminating programmer's burden of writing a task-based
-program from scratch. The compiler gets a plain-C code as an input
-and generates a binary that is rewritten in task-based programming
-style that can run on \sys without additional programming effort. 
-Automatic task generation compiler is often inefficient than human-written
-code for \sys because if unbounded loop or pointer is present, the
-compiler makes a conservative decision. \xxx{If the performance is critical,
-the programmer may want to manually write the task-based code by himself.
-Otherwise, the programmer can rely on the compiler for simplicity.}
+\sys additionally provides a compiler support for automatic task generation, eliminating programmer's burden of writing a task-based program from scratch. The compiler gets a plain-C code as an input and generates a binary that is rewritten in task-based programming style that can run on \sys without additional programming effort. Automatic task generation compiler is often inefficient than human-written code for \sys because if unbounded loop or pointer is present, the compiler makes a conservative decision. \emph{If the performance is critical, the programmer may want to manually write the task-based code by himself. Otherwise, the programmer can rely on the compiler for simplicity.}
 
-The compiler consists of two part: analysis pass and transform pass.
-Analysis pass analyze the code structure and decides where to put
-task boundaries. Transform pass converts the code into task-style
-program and pepper it with necessary \sys keywords so that it can run
-on \sys system. It is implemented using LLVM.
+The compiler consists of two part: analysis pass and transform pass. Analysis pass analyze the code structure and decides where to put task boundaries. Transform pass converts the code into task-style program and pepper it with necessary \sys keywords so that it can run on \sys system. It is implemented using LLVM.
 
 \subsection{Analysis Pass}
 \label{sec:analysis}

@@ -160,6 +160,10 @@ A modular intermittent execution model completely depends on a programmer's esti
 	\item \textbf{Dependency on Privatization} Alpaca~\cite{alpaca} extended Chain~\cite{chain} with a concept of privatization, i.e. it protects task-shared variables from WAR dependency problem \emph{within} the scope of a task. Therefore, if tasks are on-demand merged the scope of these dependencies are changed and the static analysis to privatize these variables is not valid anymore and data consistency can not be preserved.
 \end{itemize}
 
+\subsection{Main Idea: Virtualization of a Task}
+
+To combat above limitations we propose a new concept of \textbf{virtualization}: a modular execution model with softening a number of transitions, by keeping the state of the execution progress in the volatile memory, to construct a bigger \emph{virtual task} to reduce energy consumption. Ideally, the size of the virtual task should match the length of a continuous interval of the intermittent power supply for the best performance. Another form of virtualization can be achieved by reducing the number of non-volatile memory accesses. This can be done by having a temporary copy of a global variable in the volatile memory (similar to the catching principle) and a task interacts with it and updates it before writing back the most recent value to the non-volatile memory during the commit process.
+
 \subsection{Structuring a Task-based Intermittent Computing Program}
 
 Task is a programmer (or compiler) defined code that is executed based on consistent set of inputs, i.e. memory fetched from a specified memory location, producing a consistent output stored in a specified (the same or different) memory location. Syntactically, we can treat a task as a continuous sub-section of a large program encapsulated by (i) task specific keywords defining the beginning and the end of a task and (ii) message passing between tasks connected with each other.
