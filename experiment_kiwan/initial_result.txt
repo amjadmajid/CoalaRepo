@@ -12,3 +12,17 @@ chain	91,599
 rsa
 delft	449,474
 chain	309,126
+
+ar
+delft	2,102,290
+chain	1,651,908
+
+blowfish
+
+
+bitcount
+delft	146,036
+chain	279,887
+
+
+
