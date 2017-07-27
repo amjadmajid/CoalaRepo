@@ -1,5 +1,12 @@
 One of the main objectives of VIPRE run-time is to restrict virtual tasks to interface only with the volatile memory, since volatile memory access is relatively cheaper non-volatile memory access. To this end, the persistent variables a virtual task operates on should be brought from non-volatile memory to a fixed-sized \emph{volatile buffer} and when the virtual task is finished the modified variables in this buffer should be committed back to their original locations in non-volatile memory. However, this is not a trivial task due to the following facts: 
 
+\begin{figure}
+	\centering
+	%\includegraphics[width=0.25\columnwidth]{figures/}
+	\caption{Memory virtualization architecture.}
+	\label{fig:}
+\end{figure}
+
 \paragraph{I-Dynamic Access Overhead} The persistent variables accessed and/or modified by a virtual task might not be known in advance due to the dynamic program flow. Therefore, the  volatile buffer should keep track of the persistent variables accessed by any virtual task at runtime. When a persistent variable is read or written, first the volatile copy of the corresponding variable is \emph{searched} in this buffer. If it is found, the read or write operation is performed on the volatile copy. Otherwise, the persistent variable is read from the non-volatile memory and inserted in this buffer for future operations. Unfortunately, we observed that \emph{search--bring} operations at each access to the persistent variables introduce considerable overhead and might kill the benefit of task virtualization.
  
 \paragraph{II-Two Phase Commit Overhead}  For the consistency of the non-volatile memory, the volatile buffer should be committed at the end of each virtual task by means of a \emph{two-phase commit} approach.  However, two-phase commit is also very expensive since the committed variables are not \emph{contiguous}---leading the fact that copying or moving of data between/within volatile and non-volatile memory should be always performed with CPU intervention. 

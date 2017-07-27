@@ -19,6 +19,7 @@ __nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
 unsigned int CrntPagHeader = BIGEN_ROM;
 __nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
 
+__nv unsigned int __pageFaultCounter = 0;
 
 /*
  * Bring a page to its ROM buffer
@@ -146,6 +147,7 @@ void __sendPagROM(unsigned int pagHeader)
 //TODO this function does not
 unsigned int __pageSwap(unsigned int * varAddr)
 {
+    __pageFaultCounter++;
 
     //1// send the current page
     __sendPagTemp( CrntPagHeader );
@@ -225,6 +227,20 @@ void __pagsCommit()
 }
 
 
+
+uint8_t* __return_addr(uint8_t* var) {
+    if (var > END_ROM || var < BIGEN_ROM) {
+        return var;
+    }
+    if( __IS_VAR_IN_CRNT_PAG(*var) )
+    {
+        return __VAR_PT_IN_RAM(*var);
+    }
+    else{
+        __pageSwap((var));
+        return __VAR_PT_IN_RAM(*var);
+    }
+}
 
 
 

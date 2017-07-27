@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 //#include <wisp-base.h>
-#include <chain.h>
+#include "../chain_ccs/old_include/chain.h"
 //#include <log.h>
 
 #ifdef CONFIG_LIBEDB_PRINTF
