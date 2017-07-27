@@ -31,8 +31,8 @@
 // 12 KB main memory size   [Linker script might need to be adjusted]
 //#define NUM_PAG         (12 * 16)   //64
 //#define NUM_PAG         (12 * 8)   //128
-#define NUM_PAG         (12 * 4)   //256
-//#define NUM_PAG         (12 * 2)   //512
+//#define NUM_PAG         (12 * 4)   //256
+#define NUM_PAG           (12 * 2)   //512
 //#define NUM_PAG         (12 * 1)   //1024
 #define PAG_SIZE        ((0x3000)/NUM_PAG)  // 1KB
 
@@ -70,15 +70,6 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
 #define __VAR_PT_IN_RAM(var)            (  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
 
 
-#define PPVAR(var, val)  if( __IS_VAR_IN_CRNT_PAG(val) )\
-                                { \
-                                    *__VAR_PT_IN_RAM(var) = val ;\
-                                }\
-                                else{\
-                                    __pageSwap(&(var)) ;\
-                                    * __VAR_PT_IN_RAM(var) = val;\
-                                    }
-
 
 
 #define WVAR(var, val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
@@ -114,14 +105,12 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                         ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
-//#define ORVAR(wvar, rvar)  if( __IS_VAR_IN_CRNT_PAG(rvar) )\
-//                                { \
-//                                   wvar =  *__VAR_PT_IN_RAM(rvar) ;\
-//                                }\
-//                                else{\
-//                                    __pageSwap(&(rvar)) ;\
-//                                    wvar =  *__VAR_PT_IN_RAM(rvar) ;\
-//                                    }
+#define PPVAR(wvar, rvar)  __typeof__(rvar) __var##__var = (*PVAR(rvar)); \
+                          (*PVAR(wvar)) = __var##__var
+
+
+#define VAR(var) (__typeof__(var)*) __return_addr(&var)
+#define P(var) (*((__typeof__(var)*) __return_addr(&var)))
 
 #endif /* INCLUDE_DATAPROTEC_H_ */
 

@@ -7,6 +7,7 @@
 
 #define __nv  __attribute__((section(".nv_vars")))
 #define __p  __attribute__((section(".p_vars")))
+#define __ro_nv __attribute__((section(".ro_nv_vars")))
 //#define __v  __attribute__((section(".ram_vars")))
 
 // Special memory locaitons

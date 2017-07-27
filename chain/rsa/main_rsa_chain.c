@@ -5,15 +5,15 @@
 
 //#include <libwispbase/wisp-base.h>
 //#include <wisp-base.h>
-#include <chain.h>
 #include <builtins.h>
 #include <log.h>
-#include <mem.h>
 #include <periph.h>
 #include <clock.h>
 #include <watchdog.h>
 #include <gpio.h>
 #include <msp-math.h>
+#include "../chain_ccs/old_include/chain.h"
+#include "../chain_ccs/old_include/mem.h"
 
 #ifdef CONFIG_LIBEDB_PRINTF
 #include <libedb/edb.h>

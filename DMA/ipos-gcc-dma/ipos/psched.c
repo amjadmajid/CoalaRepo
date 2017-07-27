@@ -25,9 +25,16 @@ __nv volatile unsigned char __commit_flag         = 0;
 __nv unsigned int __task_address       = 0;    // Modified externally
 __nv unsigned int* __temp_task_address  = NULL;
 
-__nv volatile unsigned int __virtualTaskSize    = 1; // Disable the virtualization algorithm 2;
-__nv volatile unsigned int __maxVirtualTaskSize = 1; // Disable the virtualization algorithm  100;
-     volatile unsigned int __taskCounter        = 1; // Disable the virtualization algorithm  0;
+#if COALESCING
+__nv volatile unsigned int __virtualTaskSize    = 2;
+__nv volatile unsigned int __maxVirtualTaskSize = 100;
+     volatile unsigned int __taskCounter        = 0;
+#else
+__nv volatile unsigned int __virtualTaskSize    = 1;
+__nv volatile unsigned int __maxVirtualTaskSize = 1;
+     volatile unsigned int __taskCounter        = 1;
+#endif
+
 __nv  volatile unsigned int __temp_taskCounter  = 0;
 __nv volatile unsigned int __totalTaskCounter   = 0;
 

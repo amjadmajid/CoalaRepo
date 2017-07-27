@@ -72,12 +72,12 @@ void task_append_compressed();
 void task_print();
 void task_done();
 
+__p node_t _v_dict[DICT_SIZE];
 __p letter_t _v_letter;
 __p unsigned _v_letter_idx;
 __p sample_t _v_prev_sample;
 __p index_t _v_out_len;
 __p index_t _v_node_count;
-__p node_t _v_dict[DICT_SIZE];
 __p sample_t _v_sample;
 __p index_t _v_sample_count;
 __p index_t _v_sibling;
@@ -103,7 +103,7 @@ void task_init()
     WVAR(_v_prev_sample, 0);
     WVAR(_v_letter_idx, 0);
     WVAR(_v_sample_count, 1);
-    os_jump(1);
+    // os_jump(1);
 }
 
 void task_init_dict()
@@ -123,7 +123,7 @@ void task_init_dict()
         os_jump(0);
     } else {
         WVAR(_v_node_count, NUM_LETTERS);
-        os_jump(1);
+        // os_jump(1);
     }
 }
 
@@ -137,7 +137,7 @@ void task_sample()
 
     if (_p_letter_idx == 0) {
         WVAR(_v_letter_idx, next_letter_idx);
-        os_jump(1);
+        // os_jump(1);
     } else {
         WVAR(_v_letter_idx, next_letter_idx);
         os_jump(2);
@@ -153,7 +153,7 @@ void task_measure_temp()
     prev_sample = sample;
     WVAR(_v_prev_sample, prev_sample);
     WVAR(_v_sample, sample);
-    os_jump(1);
+    // os_jump(1);
 }
 
 void task_letterize()
@@ -168,7 +168,7 @@ void task_letterize()
     letter_t letter = (_p_sample & (LETTER_MASK << letter_shift)) >> letter_shift;
 
     WVAR(_v_letter, letter);
-    os_jump(1);
+    // os_jump(1);
 }
 
 void task_compress()
@@ -188,7 +188,7 @@ void task_compress()
     _p_sample_count++;
     WVAR(_v_sample_count, _p_sample_count);
 
-    os_jump(1);
+    // os_jump(1);
 }
 
 void task_find_sibling()
@@ -223,7 +223,7 @@ void task_find_sibling()
     if (_p_child == NIL) {
         os_jump(2);
     } else {
-        os_jump(1);
+        // os_jump(1);
     }
 }
 
@@ -244,7 +244,7 @@ void task_add_node()
 
         node_t sibling_node_obj = *sibling_node;
         WVAR(_v_sibling_node, sibling_node_obj);
-        os_jump(1);
+        // os_jump(1);
     }
 }
 
@@ -287,7 +287,7 @@ void task_add_insert()
     WVAR(_v_symbol, _p_parent);
     _p_node_count++;
     WVAR(_v_node_count, _p_node_count);
-    os_jump(1);
+    // os_jump(1);
 }
 
 void task_append_compressed()
@@ -299,7 +299,7 @@ void task_append_compressed()
 
     if (++i == BLOCK_SIZE) {
         WVAR(_v_out_len, i);
-        os_jump(1);
+        // os_jump(1);
     } else {
         WVAR(_v_out_len, i);
         os_jump(5);
@@ -316,7 +316,7 @@ void task_print()
         if (i > 0 && (i + 1) % 8 == 0){
         }
     }
-    os_jump(1);
+    // os_jump(1);
 }
 
 void task_done()

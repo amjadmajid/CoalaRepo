@@ -4,20 +4,24 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "mem.h"
+#include <libmsp/mem.h>
 
 #include "repeat.h"
 
 #define TASK_NAME_SIZE 32
 #define CHAN_NAME_SIZE 32
 
-#define MAX_DIRTY_SELF_FIELDS 4
+//#define MAX_DIRTY_SELF_FIELDS 4
+#define MAX_DIRTY_SELF_FIELDS 32
 
 typedef void (task_func_t)(void);
 typedef unsigned chain_time_t;
 typedef uint32_t task_mask_t;
 typedef uint16_t field_mask_t;
 typedef unsigned task_idx_t;
+extern unsigned rcount;
+extern unsigned wcount;
+extern unsigned tcount;
 
 typedef enum {
     CHAN_TYPE_T2T,
@@ -29,8 +33,8 @@ typedef enum {
 
 // TODO: include diag fields only when diagnostics are enabled
 typedef struct _chan_diag_t {
-    char source_name[CHAN_NAME_SIZE];
-    char dest_name[CHAN_NAME_SIZE];
+//    char source_name[CHAN_NAME_SIZE];
+//    char dest_name[CHAN_NAME_SIZE];
 } chan_diag_t;
 
 typedef struct _chan_meta_t {
@@ -112,6 +116,7 @@ typedef struct {
  *  TODO: could CHAN_FIELD be a special case of CHAN_FIELD_ARRARY with size = 1?
  */
 #define CHAN_FIELD(type, name)                  FIELD_TYPE(type) name
+//#define CHAN_FIELD_ARRAY(type, name, size)      FIELD_TYPE(type) name[size]
 #define CHAN_FIELD_ARRAY(type, name, size)      FIELD_TYPE(type) name[size]
 #define SELF_CHAN_FIELD(type, name)             SELF_FIELD_TYPE(type) name
 #define SELF_CHAN_FIELD_ARRAY(type, name, size) SELF_FIELD_TYPE(type) name[size]
@@ -227,9 +232,17 @@ void chan_out(const char *field_name, const void *value,
 #define SELF_FIELDS_INITIALIZER_INNER(type) FIELD_INIT_ ## type
 #define SELF_FIELDS_INITIALIZER(type) SELF_FIELDS_INITIALIZER_INNER(type)
 
+//#define CHANNEL(src, dest, type, size) \
+//    __nv CH_TYPE(src, dest, type) _ch_ ## src ## _ ## dest __address(size) = \
+//        { { CHAN_TYPE_T2T, { #src, #dest } } }
+
 #define CHANNEL(src, dest, type) \
     __nv CH_TYPE(src, dest, type) _ch_ ## src ## _ ## dest = \
         { { CHAN_TYPE_T2T, { #src, #dest } } }
+
+//#define CHANNEL(src, dest, type) \
+//    __nv CH_TYPE(src, dest, type) _ch_ ## src ## _ ## dest = \
+//        { { CHAN_TYPE_T2T, { #src, #dest } } }
 
 #define SELF_CHANNEL(task, type) \
     __nv CH_TYPE(task, task, type) _ch_ ## task ## _ ## task = \
@@ -330,6 +343,9 @@ void chan_out(const char *field_name, const void *value,
 #define CHAN_IN1(type, field, chan0) \
     ((type*)((unsigned char *)chan_in(#field, sizeof(VAR_TYPE(type)), 1, \
           chan0, offsetof(__typeof__(chan0->data), field))))
+#define CHAN_IN_TEST(type, field, chan0, chan_overwrite) \
+    ((type*)((unsigned char *)chan_in(#field, sizeof(VAR_TYPE(type)), 1, \
+          chan_overwrite, offsetof(__typeof__(chan0->data), field))))
 #define CHAN_IN2(type, field, chan0, chan1) \
     ((type*)((unsigned char *)chan_in(#field, sizeof(VAR_TYPE(type)), 2, \
           chan0, offsetof(__typeof__(chan0->data), field), \
@@ -361,6 +377,9 @@ void chan_out(const char *field_name, const void *value,
 #define CHAN_OUT1(type, field, val, chan0) \
     chan_out(#field, &val, sizeof(VAR_TYPE(type)), 1, \
              chan0, offsetof(__typeof__(chan0->data), field))
+#define CHAN_OUT_TEST(type, field, val, chan0, chan_overwrite) \
+    chan_out(#field, &val, sizeof(VAR_TYPE(type)), 1, \
+             chan_overwrite, offsetof(__typeof__(chan0->data), field))
 #define CHAN_OUT2(type, field, val, chan0, chan1) \
     chan_out(#field, &val, sizeof(VAR_TYPE(type)), 2, \
              chan0, offsetof(__typeof__(chan0->data), field), \

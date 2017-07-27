@@ -4,8 +4,8 @@ date: 02/Jan/2017
 */
 #include <msp430.h>
 #include <stdio.h>
-#include <chain.h>
 #include <stdint.h>
+#include "../chain_ccs/old_include/chain.h"
 
 //define channel's fields
 struct msg_blinks{

@@ -12,10 +12,10 @@
 
 #include <math.h>
 
-#include <chain.h>
 #include <stdlib.h>
+#include "../chain_ccs/old_include/chain.h"
 
-#define SIZE 64
+#define SIZE 8
 #define PI2 6.28
 
 #ifdef DEBUG
@@ -165,9 +165,10 @@ void dft_init() {
     unsigned n = 0xabab;
     unsigned k = 0;
 
-    CHAN_OUT1(unsigned, k, k, CH(dft_init, dft_outer_loop));
-    CHAN_OUT1(unsigned, n, n, CH(dft_init, dft_inner_loop));
-    CHAN_OUT1(unsigned, n, n, CH(dft_init, signal_counter));
+    CHAN_OUT1(uint16_t, k, k, CH(dft_init, dft_outer_loop));
+    CHAN_OUT1(uint16_t, n, n, CH(dft_init, dft_inner_loop));
+    CHAN_OUT1(uint16_t, n, n, CH(dft_init, signal_counter));
+
 
     srand(0);
 
