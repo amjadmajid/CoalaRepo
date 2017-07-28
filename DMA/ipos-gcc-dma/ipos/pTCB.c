@@ -41,6 +41,8 @@ void os_memMapper(unsigned int *cnt, taskId _task)
 void os_addTasks(unsigned char numTasks, taskId tasks[]){
     if( funcBlocker != 0xAD)
     {
+        unsigned int __temp_head =  ((BIGEN_ROM - numTasks * 6) - 2);
+        __head =  (unsigned int*)  __temp_head;
         unsigned char i = 0;
         unsigned int cnt=0;
         __totNumTask = numTasks;
@@ -49,7 +51,7 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
             os_memMapper(&cnt, tasks[i]);
             i++;
         }
-        *(__head +(--cnt) ) =  (unsigned int)  LIST_HEAD;   // link the tail of the linkedlist with the head
+        *(__head +(--cnt) ) =  __temp_head;   // link the tail of the linkedlist with the head
 
         __task_address    =  (unsigned int) __head ;
         funcBlocker = 0xAD;
