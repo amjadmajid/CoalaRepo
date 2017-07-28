@@ -8,18 +8,23 @@ In all experiments we used the following computing hardware: WISP\,5.1~\cite{wis
 \subsection{Software Suite Description}
 \label{sec:results_software}
 
-We compare \sys against state of the art intermittent execution approach---Chain~\cite{chain}. We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca}---we did not have the access to its code during the preparation of this manuscript. 
+We compare \sys against state of the art intermittent execution approach---Chain~\cite{chain}. We are not comparing \sys against DINO~\cite{dino} or Mementos~\cite{mementos} (Refer to Section~\ref{sec:background_consistency}), as (i) Chain is the only modular execution model available to which we can compare \sys, and (ii) Chain proves already its superiority over sequential model counterparts (i.e. DINO and Mementos).
 
-The applications that were used in the evaluation are given in Table~\ref{table:benchmark_list}. These benchmarks are the same ones as used in~\cite{chain,alpaca}.
+We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation.
 
-\begin{table}
+\task{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
+
+The applications that were used in the evaluation are given in Table~\ref{table:benchmark_list}. These benchmarks are the same ones as used in~\cite{chain,alpaca}. In addition to Chain benchmark programs new applications were used for benchmarking: \emph{DFT}, \emph{Huffman compressor}, and \emph{selection sort}.
+
+\begin{table}[t]
 	\begin{tabular}{|c|c|c|}
 		\hline
-		Name & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
+		Nickname & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
 		\hline\hline
-		Temperature sensing & 388 & 721 \\ %53\%
+		Cold chain & 388 & 721 \\ %53\%
 		Cuckoo & 483 & 762 \\ %63\%
 		RSA & 887 & 1233 \\ %71\%
+		Bitcount & 351 & 588 \\ %59\%
 		DFT & --- & --- \\ %Two resolutions: 4 and 8 Bytes
 		Huffman & --- & --- \\ %Data decompression size: 100 bytes
 		Selection sort & --- & --- \\
@@ -29,38 +34,61 @@ The applications that were used in the evaluation are given in Table~\ref{table:
 \label{table:benchmark_list}
 \end{table}
 
-\subsection{Evaluation}
+\todo{finalize describing all applications once all experiments are done}{Przemek}
+
+\subsection{Evaluation Results}
 \label{sec:results_evaluation}
 
 \subsubsection{Compiler Performance}
 \label{sec:results_compiler}
 
-Compiler experiment: taskifying completion time of a code run, correctness (manual inspection---proof by example), comparison manual/automatic taskification - fixed power supply
+We start with evaluating the efficiency of a \sys compiler. 
 
-\todo{Provide structure to this section}{Kiwan}
+Expected results:
+\begin{itemize}
+	\item comparison between manual (Chain code) and automatic taskification: in terms of code SLOCs, number of tasks, completion time (Chain), memory use (other metrics required?); 
+	\item assessment of correctness (through manual inspection only?).
+\end{itemize}
 
-\subsubsection{}
-\label{sec:}
+\todo{Provide results and text to this section}{Kiwan}
+
+\subsubsection{Task Coalescing Performance}
+\label{sec:results_coalescing}
+
+We now proceed with the evaluation of task coalescing mechanism of \sys.
+
+Expected results:
+\begin{itemize}
+	\item For all apps: show amount of task merged, time to completion, overhead (in terms of what?), energy consumed. All experiments for fixed power, at 3 distances with wireless power, compared against Chain 
+\end{itemize} 
+
+\todo{Provide results and text to this section}{Amjad}
+
+\subsubsection{Memory Management Performance}
+\label{sec:results_memory_management}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/chain_vipe}
-	\caption{Time to complete for a set of testing applications (refer to Table~\cite{table:benchmark_list}) using \sys versus Chain.}
+	\caption{Time to complete for a set of testing applications (refer to Table~\ref{table:benchmark_list}) using \sys versus Chain (no coalescing applied, fixed power supply). \todo{Figure placeholder---will be replaced with final one}{Amjad}}
 	\label{fig:IPOSPerformance}
 \end{figure}
 
-Fig.~\ref{fig:IPOSPerformance} shows that \sys requires a shorter execution time to execute an application under the modular execution model. The size of the virtual task that \sys uses is one real task, i.e. no task coalescing is applied.
-
-Task coalescing experiment: with WISP at 3 distances and with fixed power, for all apps, compared against chain, show amount of task merged, time to completion, overhead (in terms of what?), energy consumed with fixed power
-
-\subsubsection{Memory Management}
-\label{sec:results_memory_management}
-
-Paging/memory experiment: page swapping cost (execution time)---comparing against chain and full double buffering approach, show number of page swaps, 
+Expected results:
+\begin{itemize}
+	\item Paging/memory experiment: page swapping cost (execution time)---comparing against chain and full double buffering approach, show number of page swaps,
+\end{itemize} 
 
 \todo{Provide argument for page swapping using hardware support}{Brandon}
 
 \subsubsection{Case Study}
 \label{sec:case_study}
 
-Battery-less microphone: with \sys and without \sys, compared against Chain.
+The final experiment assessing usefulness of \sys is its use in real application: battery-less microphone.
+
+Expected results:
+\begin{itemize}
+	\item Compare execution time: \sys compared against Chain
+\end{itemize}
+ 
+\todo{Provide results and text to this section---if time allows (this result is not critical)}{Amjad/Przemek}
