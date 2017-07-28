@@ -72,6 +72,7 @@ void task_append_compressed();
 void task_print();
 void task_done();
 
+__p node_t _v_compressed_data[BLOCK_SIZE];
 __p node_t _v_dict[DICT_SIZE];
 __p letter_t _v_letter;
 __p unsigned _v_letter_idx;
@@ -85,7 +86,6 @@ __p index_t _v_child;
 __p index_t _v_parent;
 __p index_t _v_parent_next;
 __p node_t _v_parent_node;
-__p node_t _v_compressed_data[BLOCK_SIZE];
 __p node_t _v_sibling_node;
 __p index_t _v_symbol;
 

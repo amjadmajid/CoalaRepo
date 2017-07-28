@@ -49,7 +49,7 @@ void __sendPagTemp(unsigned int pagHeader)
     // Configure DMA channel 1
     __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) RAM_PAG);
                                             // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) pagHeader + TOT_PAG_SIZE );
+    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) pagHeader + APP_MEM );
                                             // Destination single address
     DMA1SZ = PAG_SIZE_W;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
@@ -95,7 +95,7 @@ void __sendPagTemp(unsigned int pagHeader)
 void __bringPagTemp(unsigned int pagHeader)
 {
     // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (pagHeader + TOT_PAG_SIZE) );
+    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (pagHeader + APP_MEM) );
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  RAM_PAG );
                                             // Destination single address
@@ -129,7 +129,7 @@ void __bringPagROM(unsigned int pagHeader)
 void __sendPagROM(unsigned int pagHeader)
 {
     // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA2SA,(unsigned long) pagHeader + TOT_PAG_SIZE);
+    __data16_write_addr((unsigned short) &DMA2SA,(unsigned long) pagHeader + APP_MEM);
                                             // Source block address
     __data16_write_addr((unsigned short) &DMA2DA,(unsigned long)  pagHeader );
                                             // Destination single address

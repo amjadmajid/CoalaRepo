@@ -11,8 +11,19 @@
 //#define __v  __attribute__((section(".ram_vars")))
 
 // Special memory locaitons
-#define BASE_ADDR       0xBB70
-#define LIST_HEAD       (BASE_ADDR)           //2 bytes
+
+#define END_ROM         0xFF70   //  using the address 0xFF7F disables DMA transfer
+#define END_RAM         0x20a0
+#define APP_MEM         (12 * 1024)  // 12 KB [Linker script might need to be adjusted]
+#define PAG_SIZE        64   // 64 128 256 512 1024
+#define NUM_PAG         (APP_MEM/PAG_SIZE)  // 1KB
+#define RAM_PAG         (END_RAM - PAG_SIZE)
+//#define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)
+#define PAG_SIZE_W      (PAG_SIZE/2)  //1KB
+#define BIGEN_ROM       ( (END_ROM - APP_MEM) - APP_MEM  ) // 0xBF70
+
+#define TASKS_STRUC     0x400  // 1KB
+#define LIST_HEAD       (BIGEN_ROM - TASKS_STRUC)           //2 bytes
 
 // function pointer
 typedef void (* funcPt)(void);
@@ -22,7 +33,6 @@ extern volatile unsigned int  __totNumTask;
 extern unsigned int __persis_CrntPagHeader;
 extern unsigned int __pagsInTemp[];
 extern unsigned int __persis_pagsInTemp[];
-//extern uint16_t *__head;
 
 //This is a task interface. It is shared between the user and IPOS
 typedef struct _taskId{
