@@ -128,7 +128,7 @@ Before proceeding further with the background we need to make certain assumption
 
 \subsection{Structuring a Task-based Intermittent Computing Program}
 
-Task is a programmer (or compiler) defined code that is executed based on consistent set of inputs, i.e. memory fetched from a specified memory location, producing a consistent output stored in a specified (the same or different) memory location. Syntactically, we can treat a task as a continuous sub-section of a large program encapsulated by (i) task specific keywords defining the beginning and the end of a task and (ii) message passing between tasks connected with each other.
+\todo{Please check this is the right way for this section: it reads as it should be in Section 3 describing \sys}{Brandon} Task is a programmer (or compiler) defined code that is executed based on consistent set of inputs, i.e. memory fetched from a specified memory location, producing a consistent output stored in a specified (the same or different) memory location. Syntactically, we can treat a task as a continuous sub-section of a large program encapsulated by (i) task specific keywords defining the beginning and the end of a task and (ii) message passing between tasks connected with each other.
 
 \begin{figure}
 	\centering
@@ -139,7 +139,7 @@ Task is a programmer (or compiler) defined code that is executed based on consis
 
 Let us look into how task-based programming is performed relying on an example provided in Fig.~\ref{fig:task_flow_example}. Each task is uniquely identified by a keyword. A separate part of code specifies a state machine than governs how tasks are connected with each other. This way a programmer specifies to which other task a current task needs to pass the result of its computation (and it can be either a new task or the task itself). Tasks are executed atomically. That is, task will be executed only once and will be considered as completed only when a task reaches a final instruction line informing a scheduler that a program is ready to enter into a new task.
 
-Just like Chain~\cite{chain} and Alpaca~\cite{alpaca}, \sys does not support concurrent programming, multi-threading (multi-task sequence) and does not consider priorities and on-demand scheduling. These features are extremely important to consider but go beyond the scope of this work. A comparative description of \sys is given in Table~\ref{table:feature_comparison}. 
+Just like Chain~\cite{chain} and Alpaca~\cite{alpaca}, \sys does not support concurrent programming, multi-threading (multi-task sequence) and does not consider priorities and on-demand scheduling. These features are extremely important to consider but go beyond the scope of this work. A comparative description of \sys is given in Table~\ref{table:feature_comparison}. \todo{Decide if we need such table}{Brandon}
 
 Important and a strong assumption about task-based programming for intermittently-powered systems is that an energy availability for the largest possible task execution must be guaranteed. Task is an atomic operation and must preserve execution order and memory manipulations. Task that follows such an assumption is equivalent to task being executed on a continuously-powered non-interrupted system. Whenever a task cannot fit into a single energy reservoir, it must be divided into tasks that will be executed within a single discharge cycle.
 
