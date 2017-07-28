@@ -36,7 +36,7 @@
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
 								</option>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE.294484485" name="Optimize for space rather than speed (-Os)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE.294484485" name="Optimize for space rather than speed (-Os)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS.1655133836" name="Other flags" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS" useByScannerDiscovery="false" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mlarge"/>
 									<listOptionValue builtIn="false" value="-mhwmult=f5series"/>
@@ -46,6 +46,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG.551276491" name="Generate debug information (-g)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF.1752423255" name="Do not emit DWARF additions beyond selected version (-gstrict-dwarf)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION.1388362527" name="Generate debug information in DWARF version (-gdwarf-)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION.3" valueType="enumerated"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED.2074106725" name="Optimize for speed disregarding exact standards compliance (-Ofast)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED" value="true" valueType="boolean"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__C_SRCS.1518965904" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__CPP_SRCS.1526882200" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__CPP_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM_SRCS.107066764" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM_SRCS"/>
