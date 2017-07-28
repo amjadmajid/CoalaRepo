@@ -12,7 +12,7 @@ We compare \sys against state of the art intermittent execution approach---Chain
 
 We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation.
 
-\task{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
+\todo{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
 
 The applications that were used in the evaluation are given in Table~\ref{table:benchmark_list}. These benchmarks are the same ones as used in~\cite{chain,alpaca}. In addition to Chain benchmark programs new applications were used for benchmarking: \emph{DFT}, \emph{Huffman compressor}, and \emph{selection sort}.
 
@@ -46,7 +46,7 @@ We start with evaluating the efficiency of a \sys compiler.
 
 Expected results:
 \begin{itemize}
-	\item comparison between manual (Chain code) and automatic taskification: in terms of code SLOCs, number of tasks, completion time (Chain), memory use (other metrics required?); 
+	\item comparison between manual (Chain code) and automatic taskification: in terms of code SLOCs, number of tasks, completion time (Chain), memory use (other metrics required?)
 	\item assessment of correctness (through manual inspection only?).
 \end{itemize}
 
@@ -76,7 +76,7 @@ Expected results:
 
 Expected results:
 \begin{itemize}
-	\item Paging/memory experiment: page swapping cost (execution time)---comparing against chain and full double buffering approach, show number of page swaps,
+	\item page swapping cost in terms of execution time: compare against Chain and full double buffering approach; show number of page swaps---do the experiment for all applications
 \end{itemize} 
 
 \todo{Provide argument for page swapping using hardware support}{Brandon}
@@ -84,11 +84,15 @@ Expected results:
 \subsubsection{Case Study}
 \label{sec:case_study}
 
-The final experiment assessing usefulness of \sys is its use in real application: battery-less microphone.
+The final experiment assessing usefulness of \sys's use in real application. For this we have a implemented an battery-less wirelessly-powered sound detector as an example. To the best of our knowledge, this is the first case study that demonstrates a intermittently-powered system supplied by harvested energy at runtime, which continuously interacts with real-life signals. 
+
+The application aims at detecting a specific tone in the audio signal (in the implementation: 1\,kHz) based on on-the-fly audio measurement. For this we have connected an analog MEMS microphone~\cite{microphone} output to AUX3 port of WISP\,5.1 (while the microphone was powered directly by WISP, which was then wirelessly power-supplied by the RFID reader). Audio signal is sampled by the microcontroller's ADC and passed to the FFT function (internal function of the TI's Digital Signal Processing library~\cite{ti_dsp}) to find a tone above a predefined threshold. The output of the detection is signalled by the WISP on-board LED. The video of demonstrating the working system is available via \url{https://link_to_a_video}.
 
 Expected results:
 \begin{itemize}
-	\item Compare execution time: \sys compared against Chain
+	\item Compare execution time: \sys against Chain for X\,s long audio signal detection at two antenna distances
+	\item Make a video of the demonstration 
 \end{itemize}
  
+\todo{Check if we really need this application}{Brandon}
 \todo{Provide results and text to this section---if time allows (this result is not critical)}{Amjad/Przemek}
