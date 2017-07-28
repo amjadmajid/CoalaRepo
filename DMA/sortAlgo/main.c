@@ -155,7 +155,7 @@ void init()
 int main(void) {
     init();
 
-       taskId tasks[] = {  {task_inner_loop,0}, {task_outer_loop,0}, {task_finish,0}};
+       taskId tasks[] = {  {task_inner_loop,1}, {task_outer_loop,2}, {task_finish,3}};
        //This function should be called only once
        os_addTasks(3, tasks );
 

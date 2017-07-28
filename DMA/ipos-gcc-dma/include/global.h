@@ -22,8 +22,8 @@
 #define PAG_SIZE_W      (PAG_SIZE/2)  //1KB
 #define BIGEN_ROM       ( (END_ROM - APP_MEM) - APP_MEM  ) // 0xBF70
 
-#define TASKS_STRUC     0x400  // 1KB
-#define LIST_HEAD       (BIGEN_ROM - TASKS_STRUC)           //2 bytes
+//#define TASKS_STRUC     0x400  // 1KB
+//#define LIST_HEAD       (BIGEN_ROM - TASKS_STRUC)           //2 bytes
 
 // function pointer
 typedef void (* funcPt)(void);

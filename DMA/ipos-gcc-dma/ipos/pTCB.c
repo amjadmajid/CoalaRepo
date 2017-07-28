@@ -4,7 +4,7 @@
 
 #include <pTCB.h>
 
-unsigned int* __head   =   (unsigned int*)    LIST_HEAD;
+unsigned int* __head   =  NULL;
 #define BLOCK   1
 #define UNBLOCK   0
 __nv unsigned char funcBlocker = 0;
@@ -41,6 +41,7 @@ void os_memMapper(unsigned int *cnt, taskId _task)
 void os_addTasks(unsigned char numTasks, taskId tasks[]){
     if( funcBlocker != 0xAD)
     {
+        // each task needs 6 byte of meta data.
         unsigned int __temp_head =  ((BIGEN_ROM - numTasks * 6) - 2);
         __head =  (unsigned int*)  __temp_head;
         unsigned char i = 0;
