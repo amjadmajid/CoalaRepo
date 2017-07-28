@@ -5,10 +5,28 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
-#define JUMP2()  unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + jump_by)\
-                    if(totJumpSize > __totNumTask)\
-                    {  __current_task_virtual  =  (unsigned int*) (*(__current_task_virtual+ ( (__totNumTask - totJumSize)+(__totNumTask - totJumSize) )  ) ) } \
-                    else{__current_task_virtual  =  (unsigned int*) (*(__current_task_virtual+ ( jump_by+jump_by  ) )  }
+
+#define JUMP2()  { \
+    if(__jump !=1)  \
+    {   \
+            __current_task_virtual = (unsigned int *) *(__current_task_virtual + NEXT_OFFSET_PT) ;     /* soft transition */  \
+    }else{  \
+        unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + __jump_by);   \
+            if(totJumpSize > __totNumTask)  \
+            {   \
+                int dis  = totJumpSize - __totNumTask;  \
+                while( dis  > __totNumTask) \
+                {   \
+                    dis = dis - __totNumTask;   \
+                }   \
+                dis = dis - (totJumpSize - __jump_by);  \
+                __current_task_virtual  += (dis + dis + dis) ;  \
+            }else{  \
+                __current_task_virtual  += ( __jump_by+__jump_by  + __jump_by )  ;  \
+                }   \
+            __jump = 0; \
+        }   \
+}
 
 #define JUMP();    if(__jump !=1){   \
                         __current_task_virtual  =  \
@@ -42,8 +60,10 @@ volatile unsigned int __taskCounter = 1;
 __nv volatile unsigned int __temp_taskCounter = 0;
 __nv volatile unsigned int __totalTaskCounter = 0;
 
+//TODO I do not think these two variables need to be persistent
 __nv volatile unsigned int __jump = 0;
 __nv volatile unsigned int __jump_by = 0;
+
 volatile unsigned int __jump_cnt = 0;
 
 __nv unsigned int __reboot_state[2] = { 0 };    //virtual Task size control
@@ -60,6 +80,29 @@ void os_exit_critical()
 {
     __bic_SR_register(GIE);
 }
+
+
+//void JUMP2()  {
+//    if(__jump !=1)
+//    {
+//            __current_task_virtual = (unsinged int *) *(__current_task_virtual + NEXT_OFFSET_PT) ;     /* soft transition */ \
+//    }else{
+//        unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + __jump_by);
+//            if(totJumpSize > __totNumTask)
+//            {
+//                int dis  = totJumpSize - __totNumTask;
+//                while( dis  > __totNumTask)
+//                {
+//                    dis = dis - __totNumTask;
+//                }
+//                dis = dis - (totJumpSize - __jump_by);
+//                __current_task_virtual  += (dis + dis + dis) ;
+//            }else{
+//                __current_task_virtual  += ( __jump_by+__jump_by  + __jump_by )  ;
+//                }
+//            __jump = 0;
+//        }
+//}
 
 // These tasks will be executed only once.
 void os_initTasks(const unsigned int numTasks, funcPt tasks[])
@@ -182,7 +225,7 @@ void os_scheduler()
 
             __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
             __commit_flag = COMMITTING;
-            commit:
+commit:
             // firm transition
             __task_address = (unsigned int) __temp_task_address;
             __totalTaskCounter += __temp_taskCounter;

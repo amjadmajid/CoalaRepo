@@ -2,6 +2,8 @@
 
 \subsubsection{Power Interrupt Immune Scheduler}
 
+\input{relativeJumpAlgo.tex}
+
 It utilizes a persistent circular buffer (persistent linked-list) to keep the state of a program across power failures. \sys provides an API to enable a programmer to have a full control over the execution flow of the program, i.e. (un)blocking a task or re-execute the same task which is particularly important in the intermittent execution to emulate a persistent loop. 
 
 \paragraph{Fixed Virtual Task Size}
