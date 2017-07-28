@@ -5,11 +5,16 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
+#define JUMP2()  unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + jump_by)\
+                    if(totJumpSize > __totNumTask)\
+                    {  __current_task_virtual  =  (unsigned int*) (*(__current_task_virtual+ ( (__totNumTask - totJumSize)+(__totNumTask - totJumSize) )  ) ) } \
+                    else{__current_task_virtual  =  (unsigned int*) (*(__current_task_virtual+ ( jump_by+jump_by  ) )  }
+
 #define JUMP();    if(__jump !=1){   \
                         __current_task_virtual  =  \
                         (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     /* soft transition */ \
                     }else{  \
-                        while(__jump_cnt < __jump_to)   \
+                        while(__jump_cnt < __jump_by)   \
                             {   \
                                 __current_task_virtual  =  \
                                 (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;  /* soft transition */ \
@@ -19,31 +24,29 @@
                         __jump_cnt = 0;    \
                     }
 
-
-__nv volatile unsigned char __locker              = 0;
-__nv volatile unsigned char __commit_flag         = 0;
-__nv unsigned int __task_address       = 0;    // Modified externally
-__nv unsigned int* __temp_task_address  = NULL;
+__nv volatile unsigned char __locker = 0;
+__nv volatile unsigned char __commit_flag = 0;
+__nv unsigned int __task_address = 0;    // Modified externally
+__nv unsigned int* __temp_task_address = NULL;
 
 #if COALESCING
-__nv volatile unsigned int __virtualTaskSize    = 2;
+__nv volatile unsigned int __virtualTaskSize = 2;
 __nv volatile unsigned int __maxVirtualTaskSize = 100;
-     volatile unsigned int __taskCounter        = 0;
+volatile unsigned int __taskCounter = 0;
 #else
-__nv volatile unsigned int __virtualTaskSize    = 1;
+__nv volatile unsigned int __virtualTaskSize = 1;
 __nv volatile unsigned int __maxVirtualTaskSize = 1;
-     volatile unsigned int __taskCounter        = 1;
+volatile unsigned int __taskCounter = 1;
 #endif
 
-__nv  volatile unsigned int __temp_taskCounter  = 0;
-__nv volatile unsigned int __totalTaskCounter   = 0;
+__nv volatile unsigned int __temp_taskCounter = 0;
+__nv volatile unsigned int __totalTaskCounter = 0;
 
-__nv volatile unsigned int __jump               = 0;
-__nv volatile unsigned int __jump_to            = 0;
-     volatile unsigned int __jump_cnt           = 0;
+__nv volatile unsigned int __jump = 0;
+__nv volatile unsigned int __jump_by = 0;
+volatile unsigned int __jump_cnt = 0;
 
-
-__nv unsigned int __reboot_state[2]={0};    //virtual Task size control
+__nv unsigned int __reboot_state[2] = { 0 };    //virtual Task size control
 
 //uint16_t * _current_task = NULL;
 unsigned int * __current_task_virtual = NULL;
@@ -58,14 +61,14 @@ void os_exit_critical()
     __bic_SR_register(GIE);
 }
 
-
 // These tasks will be executed only once.
-void os_initTasks( const unsigned int numTasks, funcPt tasks[])
+void os_initTasks(const unsigned int numTasks, funcPt tasks[])
 {
-    if(__locker != __KEY )
+    if (__locker != __KEY)
     {
         unsigned int i = 0;
-        do{
+        do
+        {
             if (__commit_flag == 1)
                 goto init_commit;
 
@@ -74,48 +77,46 @@ void os_initTasks( const unsigned int numTasks, funcPt tasks[])
 //            __sendPagTemp( CrntPagHeader ); This is not
             //TODO Either completely ignore or correct
 
-            __commit_flag=COMMITTING;
-init_commit:
-            __pagsCommit();
-            __commit_flag=COMMIT_FINISH;
+            __commit_flag = COMMITTING;
+            init_commit: __pagsCommit();
+            __commit_flag = COMMIT_FINISH;
             i++;
-        }while(i != numTasks);
+        }
+        while (i != numTasks);
 
         // Lock this function
         __locker = __KEY;
     }
 }
 
-
 void os_jump(unsigned int j)
 {
-    __jump=1;
-    __jump_to=j;
+    __jump = 1;
+    __jump_by = j;
 }
 
 void os_scheduler()
 {
     if (__commit_flag == COMMITTING)
     {
-        __current_task_virtual  =  (unsigned int) __temp_task_address;
+        __current_task_virtual = __temp_task_address;
         goto commit;
     }
 
     __bringCrntPagROM();
 
-
     // Task Merging Algorithm (A)
 
     /*
-    * OBDERVATION: Dying twice consecutively  on the same virtual task means
-    * this virtual task cannot be executed with the given energy buffer.
-    */
+     * OBDERVATION: Dying twice consecutively  on the same virtual task means
+     * this virtual task cannot be executed with the given energy buffer.
+     */
     //Died on the same task
-    if(__reboot_state[0] == __task_address )
+    if (__reboot_state[0] == __task_address)
     {
-        if(__reboot_state[1] != 0)
+        if (__reboot_state[1] != 0)
         {
-            if(__virtualTaskSize > 1)
+            if (__virtualTaskSize > 1)
             {
                 // Decrease the virtual task size
                 __virtualTaskSize--;
@@ -124,29 +125,31 @@ void os_scheduler()
             // reset the reboot state
             __reboot_state[1] = 0;
         }
-    }else{
+    }
+    else
+    {
         // At the very beginning or dying on another task
         __reboot_state[0] = __task_address;
         __reboot_state[1] = 1;
     }
 
     // Recover the virtual state
-    __current_task_virtual = (unsigned int *)__task_address ;
+    __current_task_virtual = (unsigned int *) __task_address;
 
-    while(1)
+    while (1)
     {
 
         // access a task
-        ( (funcPt)( *__current_task_virtual ) ) ();
+        ((funcPt) (*__current_task_virtual))();
 
         //Task Merging Algorithm (B)
         __taskCounter++;
 
-        if( (__taskCounter  >= __virtualTaskSize) )
+        if ((__taskCounter >= __virtualTaskSize))
         {
-            if( (__totalTaskCounter + __taskCounter) > __totNumTask)
+            if ((__totalTaskCounter + __taskCounter) > __totNumTask)
             {
-                if(__maxVirtualTaskSize > __virtualTaskSize )
+                if (__maxVirtualTaskSize > __virtualTaskSize)
                 {
                     __virtualTaskSize++;
                     // To distinguish between consecutive power interrupt
@@ -157,14 +160,13 @@ void os_scheduler()
             }
             // virtual progress
             JUMP();
-            __temp_task_address = __current_task_virtual ;
+            __temp_task_address = __current_task_virtual;
             __temp_taskCounter = __taskCounter;
-            __sendPagTemp( CrntPagHeader );
+            __sendPagTemp(CrntPagHeader);
 
-
-            unsigned int p_cnt=0;
+            unsigned int p_cnt = 0;
             unsigned int page;
-            while ( (page = __pagsInTemp[p_cnt]) !=0 )
+            while ((page = __pagsInTemp[p_cnt]) != 0)
             {
                 // send the pages to their final locations in ROM
                 __persis_pagsInTemp[p_cnt] = page;
@@ -178,19 +180,18 @@ void os_scheduler()
 //            }
 //
 
-
-            __persis_CrntPagHeader = CrntPagHeader;  //Keep track of the last accessed page over a power cycle
-            __commit_flag=COMMITTING;
-commit:
-             // firm transition
-             __task_address  =  (unsigned int) __temp_task_address;
+            __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
+            __commit_flag = COMMITTING;
+            commit:
+            // firm transition
+            __task_address = (unsigned int) __temp_task_address;
             __totalTaskCounter += __temp_taskCounter;
             //  Commit pages to their final locations
             __pagsCommit();
 
-            __commit_flag=COMMIT_FINISH;
+            __commit_flag = COMMIT_FINISH;
 
-            __taskCounter=0;
+            __taskCounter = 0;
 
         }
         else
