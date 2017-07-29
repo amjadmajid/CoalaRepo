@@ -26,6 +26,7 @@ comp	7,837,399
 blowfish
 delft	12,223,145
 chain	2,887,759
+comp	-
 
 bitcount
 delft	146,036
