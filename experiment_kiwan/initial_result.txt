@@ -29,9 +29,9 @@ chain	2,887,759
 comp	-
 
 bitcount
-delft	146,036
-chain	279,887
-comp	-
+delft	144,974
+chain	278,821
+comp	224,052
 
 
 
