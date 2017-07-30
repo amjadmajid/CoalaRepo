@@ -1,3 +1,7 @@
+// This application requires a lot of memory
+// therefore it uses 8Kb for paging
+
+
 #include <msp430.h> 
 #include <math.h>
 #include "ipos.h"
@@ -224,12 +228,12 @@ int main(void) {
     init();
 
 
-       taskId tasks[] = {  {discTimeSign,0},
-                           {dft_outer_loop,0},
-                           {dft_real,0 },
-                           {dft_im, 0},
-                           {dft_power, 0},
-                           {dft_end,1}
+       taskId tasks[] = {  {discTimeSign,1},
+                           {dft_outer_loop,2},
+                           {dft_real,3 },
+                           {dft_im, 4},
+                           {dft_power, 5},
+                           {dft_end,6}
        };
        //This function should be called only once
        os_addTasks(6, tasks );

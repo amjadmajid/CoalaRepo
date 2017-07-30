@@ -21,7 +21,7 @@
  */
 
 
-
+uint8_t* __return_addr(uint8_t* var) ;
 void __sendPagTemp(unsigned int pagTag);
 void __bringPagTemp(unsigned int pagTag);
 void __bringPagROM(unsigned int pagTag);
@@ -29,6 +29,8 @@ void __sendPagROM(unsigned int pagTag);
 unsigned int __pageSwap(unsigned int * varAddr);
 void __pagsCommit();
 void __bringCrntPagROM();
+extern uint32_t __temp_temp;
+
 
 extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
 
@@ -43,7 +45,6 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                                         ( __VAR_ADDR(var)  <  (CrntPagHeader+PAG_SIZE) ))
 
 #define __VAR_PT_IN_RAM(var)            (  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
-
 
 
 
@@ -67,25 +68,36 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                                     }
 
 
-#define RVAR(var)   (\
-                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
-                        ( * __VAR_PT_IN_RAM(var) ):\
-                        ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-                    )
-
-
 #define PVAR(var)   (\
-                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
+                        (  __IS_VAR_IN_CRNT_PAG( (var) ) ) ? \
                         ( __VAR_PT_IN_RAM(var) ):\
                         ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
-#define PPVAR(wvar, rvar)  __typeof__(rvar) __var##__var = (*PVAR(rvar)); \
-                          (*PVAR(wvar)) = __var##__var
+#define RVAR(var)  *PVAR(var)
+
+//#define RVAR(var)   (\
+//                        (  __IS_VAR_IN_CRNT_PAG( (var) ) ) ? \
+//                        ( * __VAR_PT_IN_RAM(var) ):\
+//                        ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+//                    )
+
+
+#define PPVAR(wvar, rvar)  __temp_temp = (*PVAR( (rvar) )); \
+                          (*PVAR( (wvar) )) =  __temp_temp
+
+#define OPPVAR(wvar, rvar) if(  __IS_VAR_IN_CRNT_PAG(var)  ) { \
+                                __temp_temp =  (*__VAR_PT_IN_RAM(var)) ; \
+                                WVAR(wvar, __temp_temp); \
+                                }else{\
+                                //TODO check if the page is in the buffer if so  *(&var + (0x3000)/2 )
+                                // else var
+
+
 
 
 #define VAR(var) (__typeof__(var)*) __return_addr(&var)
-#define P(var) (*((__typeof__(var)*) __return_addr(&var)))
+#define P(var) ( *VAR(var) )
 
 #endif /* INCLUDE_DATAPROTEC_H_ */
 
