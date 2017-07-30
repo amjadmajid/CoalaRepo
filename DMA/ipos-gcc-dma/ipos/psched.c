@@ -42,11 +42,11 @@
                         __jump_cnt = 0;    \
                     }
 
-__nv volatile unsigned char __locker = 0;
-__nv volatile unsigned char __commit_flag = 0;
+__nv uint8_t __locker = 0;
+__nv uint8_t __commit_flag = 0;
 __nv unsigned int __task_address = 0;    // Modified externally
 __nv unsigned int* __temp_task_address = NULL;
-
+//#define COALESCING 1
 #if COALESCING
 __nv volatile unsigned int __virtualTaskSize = 2;
 __nv volatile unsigned int __maxVirtualTaskSize = 100;

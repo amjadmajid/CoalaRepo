@@ -8,12 +8,14 @@
 
 #include "dataProtec.h"
 
+uint32_t __temp_temp=0;
+
 /*####################################
               Paging
 #####################################*/
 
 //TODO check what happened when page size changed
-unsigned int __pagsInTemp[NUM_PAG] = {0};
+__nv unsigned int __pagsInTemp[NUM_PAG] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
 __nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
 
 unsigned int CrntPagHeader = BIGEN_ROM;
@@ -44,6 +46,7 @@ void __bringCrntPagROM()
 /*
  * Send a page to its temp buffer
  */
+uint32_t __chk = 0;
 void __sendPagTemp(unsigned int pagHeader)
 {
     // Configure DMA channel 1
@@ -149,8 +152,6 @@ unsigned int __pageSwap(unsigned int * varAddr)
 {
     __pageFaultCounter++;
 
-    //1// send the current page
-    __sendPagTemp( CrntPagHeader );
     //2// Find the requested page
     unsigned int ReqPagTag;
     unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
@@ -163,6 +164,7 @@ unsigned int __pageSwap(unsigned int * varAddr)
     {
         if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
                 {
+                    __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
                     // we found the page
                     __bringPagTemp( ReqPagTag );
 
@@ -171,14 +173,17 @@ unsigned int __pageSwap(unsigned int * varAddr)
         idx++;
     }
 
+    //TODO optimize this search (maybe with a switch statement )
     // search the page in the ROM if it is not in the buffer
-    while( ! (ReqPagTag_dirty <= __temp_pagSize) )  // if the var is not with the page
+    while( ! (ReqPagTag_dirty < __temp_pagSize) )  // if the var is not with the page
     {
         __temp_pagSize +=   PAG_SIZE;               // move to next page
     }
 
     ReqPagTag = __temp_pagSize-PAG_SIZE;
 
+    //TODO if there is not write operation then do not send it
+    __sendPagTemp( CrntPagHeader );
     __bringPagROM(ReqPagTag);
 
 PAG_IN_TEMP:
@@ -211,6 +216,7 @@ void __pagsCommit()
     {
         // send the pages to their final locations in ROM
             __sendPagROM(page );
+            __pagsInTemp[cnt] = 0; // clear the temp buffer
            cnt++;
     }
 

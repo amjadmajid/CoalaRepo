@@ -31,9 +31,9 @@
 #define LETTER_SIZE_BITS             8
 #define NUM_LETTERS (LETTER_MASK + 1)
 
-typedef unsigned index_t;
-typedef unsigned letter_t;
-typedef unsigned sample_t;
+typedef uint16_t index_t;
+typedef uint16_t letter_t;
+typedef uint16_t sample_t;
 
 // NOTE: can't use pointers, since need to ChSync, etc
 typedef struct _node_t {
@@ -43,21 +43,21 @@ typedef struct _node_t {
 } node_t;
 
 
-unsigned overflow=0;
-#ifdef BOARD_MSP_TS430
-__attribute__((interrupt(51)))
-    void TimerB1_ISR(void){
-        TBCTL &= ~(0x0002);
-        if(TBCTL && 0x0001){
-            overflow++;
-            TBCTL |= 0x0004;
-            TBCTL |= (0x0002);
-            TBCTL &= ~(0x0001);
-        }
-    }
-__attribute__((section("__interrupt_vector_timer0_b1"),aligned(2)))
-void(*__vector_timer0_b1)(void) = TimerB1_ISR;
-#endif
+// unsigned overflow=0;
+// #ifdef BOARD_MSP_TS430
+// __attribute__((interrupt(51)))
+//     void TimerB1_ISR(void){
+//         TBCTL &= ~(0x0002);
+//         if(TBCTL && 0x0001){
+//             overflow++;
+//             TBCTL |= 0x0004;
+//             TBCTL |= (0x0002);
+//             TBCTL &= ~(0x0001);
+//         }
+//     }
+// __attribute__((section("__interrupt_vector_timer0_b1"),aligned(2)))
+// void(*__vector_timer0_b1)(void) = TimerB1_ISR;
+// #endif
 ///// function Prototypes
 void task_init();
 void task_init_dict();
@@ -106,30 +106,49 @@ void task_init()
     // os_jump(1);
 }
 
+// void task_init_dict()
+// {
+//     letter_t _p_letter = RVAR(_v_letter);
+
+//     node_t node = {
+//         .letter = _p_letter,
+//         .sibling = NIL, // no siblings for 'root' nodes
+//         .child = NIL, // init an empty list for children
+//     };
+//     int i = _p_letter;
+//     WVAR(_v_dict[i], node);
+//     _p_letter++;
+//     WVAR(_v_letter, _p_letter);
+//     if (_p_letter < NUM_LETTERS) {
+//         os_jump(0);
+//     } else {
+//         WVAR(_v_node_count, NUM_LETTERS);
+//         // os_jump(1);
+//     }
+// }
+
+unsigned int _v_letter_chk =0;
 void task_init_dict()
 {
-    letter_t _p_letter = RVAR(_v_letter);
+    //LOG("init dict: letter %u\r\n", P(_v_letter));
 
-    node_t node = {
-        .letter = _p_letter,
-        .sibling = NIL, // no siblings for 'root' nodes
-        .child = NIL, // init an empty list for children
-    };
-    int i = _p_letter;
-    WVAR(_v_dict[i], node);
-    _p_letter++;
-    WVAR(_v_letter, _p_letter);
-    if (_p_letter < NUM_LETTERS) {
+    int i = RVAR(_v_letter);
+    WVAR(_v_dict[i].letter,i);
+    WVAR(_v_dict[i].sibling, NIL);
+    WVAR(_v_dict[i].child, NIL);
+    WVAR(_v_letter, ++i );
+    _v_letter_chk = i;
+    if (RVAR(_v_letter) < NUM_LETTERS) {
         os_jump(0);
     } else {
         WVAR(_v_node_count, NUM_LETTERS);
-        // os_jump(1);
+        os_jump(1);
     }
 }
 
 void task_sample()
 {
-    unsigned _p_letter_idx = RVAR(_v_letter_idx);
+    unsigned _p_letter_idx = RVAR(_v_letter_idx) +1 ;
 
     unsigned next_letter_idx = _p_letter_idx + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
