@@ -33,6 +33,9 @@ extern volatile unsigned int  __totNumTask;
 extern unsigned int __persis_CrntPagHeader;
 extern unsigned int __pagsInTemp[];
 extern unsigned int __persis_pagsInTemp[];
+extern volatile uint8_t dirtyPag ;
+extern uint32_t __temp_temp;
+extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
 
 //This is a task interface. It is shared between the user and IPOS
 typedef struct _taskId{

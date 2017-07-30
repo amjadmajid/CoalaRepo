@@ -7,7 +7,7 @@
  */
 
 #include "dataProtec.h"
-
+volatile uint8_t dirtyPag = 0;
 uint32_t __temp_temp=0;
 
 /*####################################
@@ -46,7 +46,6 @@ void __bringCrntPagROM()
 /*
  * Send a page to its temp buffer
  */
-uint32_t __chk = 0;
 void __sendPagTemp(unsigned int pagHeader)
 {
     // Configure DMA channel 1
@@ -164,7 +163,11 @@ unsigned int __pageSwap(unsigned int * varAddr)
     {
         if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
                 {
-                    __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
+                    if(dirtyPag)
+                    {
+                        __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
+                        dirtyPag=0;
+                    }
                     // we found the page
                     __bringPagTemp( ReqPagTag );
 
@@ -182,8 +185,11 @@ unsigned int __pageSwap(unsigned int * varAddr)
 
     ReqPagTag = __temp_pagSize-PAG_SIZE;
 
-    //TODO if there is not write operation then do not send it
-    __sendPagTemp( CrntPagHeader );
+    if(dirtyPag)
+    {
+        __sendPagTemp( CrntPagHeader );
+        dirtyPag=0;
+    }
     __bringPagROM(ReqPagTag);
 
 PAG_IN_TEMP:

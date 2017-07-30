@@ -29,10 +29,6 @@ void __sendPagROM(unsigned int pagTag);
 unsigned int __pageSwap(unsigned int * varAddr);
 void __pagsCommit();
 void __bringCrntPagROM();
-extern uint32_t __temp_temp;
-
-
-extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
 
 // Memory access interface
 
@@ -48,14 +44,15 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
 
 
 
-#define WVAR(var, val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
+#define WVAR(var, val)   if( __IS_VAR_IN_CRNT_PAG(var) )\
                                 { \
                                     *__VAR_PT_IN_RAM(var) = val ;\
                                 }\
                                 else{\
                                     __pageSwap(&(var)) ;\
                                     * __VAR_PT_IN_RAM(var) = val;\
-                                    }
+                                    }\
+                                    dirtyPag = 1;
 
 
 #define GWVAR(var, oper,val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
