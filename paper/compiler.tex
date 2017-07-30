@@ -1,44 +1,44 @@
-\sys additionally provides a compiler support for automatic task generation, eliminating programmer's burden of writing a task-based program from scratch. The compiler gets a plain-C code as an input and generates a binary that is rewritten in task-based programming style that can run on \sys without additional programming effort. Automatic task generation compiler is often inefficient than human-written code for \sys because if unbounded loop or pointer is present, the compiler makes a conservative decision. \emph{If the performance is critical, the programmer may want to manually write the task-based code by himself. Otherwise, the programmer can rely on the compiler for simplicity.}
+A unique feature of \sys is a compiler support for \emph{automatic task generation}. \sys literally eliminates the programmer's burden of writing a task-based program from scratch. In essence, the \sys compiler obtains a plain C code as an input and generates a binary file that is rewritten in task-based programming style that \sys executes.
 
-The compiler consists of two part: analysis pass and transform pass. Analysis pass analyze the code structure and decides where to put task boundaries. Transform pass converts the code into task-style program and pepper it with necessary \sys keywords so that it can run on \sys system. It is implemented using LLVM.
+The compiler consists of two parts called \emph{Passes}:
+%
+\begin{itemize}
+	\item \textbf{Analysis Pass}, which analyzes the code structure and decides where to put task boundaries;
+	\item \textbf{Transform Pass}, which converts the code into task-style program and fills it with necessary \sys keywords so that it can run on \sys.
+\end{itemize}
+%
+We shall now proceed with describing these two parts in detail.
 
-\subsection{Analysis Pass}
-\label{sec:analysis}
+\subsection{Compiler Analysis Pass}
+\label{sec:compiler_analysis_pass}
 
-\sys compiler decides the task size based on the number of LLVM IR instructions.
-That is, it tries to make every task to contain roughly the same amount of LLVM IR
-instructions. Intuitively, the number of LLVM IR instructions have a correlation with
-the total workload done by the task. However, the number of LLVM IR instructions is 
-a crude approach of estimating workload of a task since actual machine instructions are
-what count and it is not exactly the same as LLVM IR instruction. Also, different instructions
-have different power usage, use different cycles, etc. However, the size of each
-task need not be exactly the same and it is sufficient to make sure that all of the
-tasks are small enough to fit in to the energy budget. Counting LLVM IR instruction is sufficient
-in this perspective.
+In the first pass \sys compiler decides on the task size. \sys' task size metric is defined by the number of LLVM Intermediate Representation (IR) instructions. That is, \sys tries to make every task to have roughly the same amount of LLVM IR instructions. 
 
-\sys compiler first builds a CFG graph where each basic block is a vertice and branch
-from one basic block to another is a unidirectional edge. Each vertices has a
-{\em price}, which is the number of LLVM IR inside the vertice. 
-When forming a task, each task should contain a basic block so that the sum of price of the 
-blocks within each tasks should be roughly the same. Price makes the workload done by
-each tasks roughly the same and make no task exceed the energy bound.
+\begin{figure}
+	\centering
+	%\includegraphics[width=\columnwidth]{figures/compiler_graph}
+	\caption{\sys compiler flow diagram.\todo{Draw compiler flow graph diagram}{Kiwan}}
+	\label{fig:compiler_graph}
+\end{figure}
 
-Each edge has a {\em penalty}, which indicates the penalty of placing a task boundary at
-the specific edge. Intuitively, when a task boundary is placed on a frequently visited edge
-(such as a back edge of a loop) the system suffers from higher runtime overhead.
-There is no way of statically estimating the number of visit of each edges, so we initally set every
-edge penalty as 1. When analyzing loops, penalty of edges within loops are multiplied by loop count.
-\todo{Change the penalty to be 1 or 1*loopcount}{Kiwan}
+\sys compiler first builds a control flow graph where (i) vertice is a \emph{each basic block} and (ii) a unidirectional edge is a \emph{branch from one basic block to another}, see Figure~\cite{fig:compiler_graph}. Each vertice has a {\em price}, which is the number of LLVM IRs inside the vertice. When forming a task, each task should contain a basic block so that the sum of price of all blocks within each tasks should be roughly the same \todo{Provide more details on this algorithm}{Kiwan}. Price makes the workload done by each tasks roughly the same and make no task exceed the energy bound.\todo{Specify how do you decide on the minimum task size/energy reservoir}{Kiwan}
 
-Ater constructing a graph and assigning price and penalty, the compiler analyzes loops. 
+Each edge has a {\em penalty}, which indicates the penalty of placing a task boundary at the specific edge. Intuitively, when a task boundary is placed on a frequently visited edge (such as a back edge of a loop) the system suffers from higher runtime overhead. As we are unaware of a way to statically estimate the number of visit at each edge, we therefore initially set every edge penalty to one. When analyzing loops, penalty of edges within loops are multiplied by loop count \todo{Change the penalty to be one or 1$\times$loopcount}{Kiwan}. After constructing a graph and assigning price and penalty, the compiler analyzes loops \todo{Explain what do you mean by analyzing loops}{Kiwan}. Except those inside a loop which is set as the loop count \todo{Explain this statement}{Kiwan}. Unbounded loops are conservatively considered as very large \todo{Explain this statement}{Kiwan}.
 
-except those inside a loop which is set as the loop count. Unbounded loops are conservatively considered very large.
+\subsection{Compiler Transform Pass}
+\label{sec:compiler_transform_pass}
 
+Compiler transform pass is also implemented using LLVM. \todo{Fill in this section with details}{Kiwan}
 
+\subsection{Compiler Design Decisions}
+\label{sec:compiler_limitations}
 
+To be able to implement \sys compiler certain critical assumptions had to be made. 
 
+\begin{enumerate}
+	\item \textbf{Conservative handling of unbounded code sections:} When a C program contains an unbounded loop or pointer, the \sys compiler makes a conservative decision. \todo{Expand on this statement (define `conservative decision') by providing example and more details on this operation}{Kiwan}. This means that for performance-critical implementations, the programmer is advised to manually split the code into tasks.
+	%
+	\item \textbf{LLVM IR instruction as a workload metric:} Intuitively, the number of LLVM IR instructions correlates with the total workload performed by the task. However, we need to be aware that is nevertheless a crude approach of estimating task workload---actual machine instructions are what counts and they are not exactly equal to the LLVM IR instruction. Also, different instructions have different power usage, use different cycles, etc. However, the size of each task need not be exactly the same and it is sufficient to make sure that all of the tasks are small enough to fit in to the energy budget. Therefore we conjecture that from the \emph{implementation simplicity perspective} of \sys's compiler counting the LLVM IR instruction is sufficient.
+\end{enumerate}
 
-
-
-\subsection{Transform Pass}
-\label{sec:transform}
+In the light of this design decisions we will assess the compiler overhead in Section~\ref{sec:results_compiler}.
