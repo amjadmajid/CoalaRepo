@@ -10,11 +10,12 @@
 /*####################################
               Paging
 #####################################*/
+
      volatile uint8_t dirtyPag = DIRTY_PAGE;
      uint32_t __temp_temp=0;
-
-     unsigned int __pagsInTemp[NUM_PAG] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
-__nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
+     // TODO THIS ARRAY CONSUME TOO MUCH OF THE SRAM
+     unsigned int __pagsInTemp[NUM_PAG / 4 /* THIS IS A DIERY WORK AROUND  TO REDUCE THE SIZE OF THIS ARRAE*/] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
+__nv unsigned int __persis_pagsInTemp[NUM_PAG / 4 /* THIS IS A DIERY WORK AROUND  TO REDUCE THE SIZE OF THIS ARRAE*/ ] = {0};
 
      unsigned int CrntPagHeader = BIGEN_ROM;
 __nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;

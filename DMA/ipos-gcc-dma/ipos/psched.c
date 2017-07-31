@@ -39,10 +39,10 @@
                         __jump_cnt = 0;    \
                     }
 
-//#define COALESCING 1
+#define COALESCING 1
 
 #if COALESCING
-__nv volatile unsigned int __virtualTaskSize = 2;
+__nv volatile unsigned int __virtualTaskSize = 50;
 __nv volatile unsigned int __maxVirtualTaskSize = 100;
      volatile unsigned int __taskCounter = 0;
 #else
