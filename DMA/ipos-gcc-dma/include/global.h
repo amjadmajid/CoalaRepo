@@ -13,9 +13,9 @@
 // Special memory locaitons
 
 #define END_ROM         0xFF70   //  using the address 0xFF7F disables DMA transfer
-#define END_RAM         0x20a0
+#define END_RAM         0x2100
 #define APP_MEM         (12 * 1024)  // 12 KB [Linker script might need to be adjusted]
-#define PAG_SIZE        128   // 64 128 256 512 1024
+#define PAG_SIZE        256   // 64 128 256 512 1024
 #define NUM_PAG         (APP_MEM/PAG_SIZE)  // 1KB
 #define RAM_PAG         (END_RAM - PAG_SIZE)
 //#define TOT_PAG_SIZE    (PAG_SIZE * NUM_PAG)

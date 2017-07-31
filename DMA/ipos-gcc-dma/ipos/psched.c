@@ -1,34 +1,31 @@
 #include <psched.h>
 #include <msp430fr5969.h>
 
-#define __KEY  0xAD
+//#define __KEY  0xAD
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
+#define JUMP2()  if(!__jump)  \
+                    {   \
+                            __current_task_virtual = (unsigned int *) *(__current_task_virtual + NEXT_OFFSET_PT) ;     /* soft transition */  \
+                    }else{  \
+                        unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + __jump_by);   \
+                            if(totJumpSize > __totNumTask)  \
+                            {   \
+                                int dis  = totJumpSize - __totNumTask;  \
+                                while( dis  > __totNumTask) \
+                                {   \
+                                    dis = dis - __totNumTask;   \
+                                }   \
+                                dis = dis - (totJumpSize - __jump_by);  \
+                                __current_task_virtual  += (dis + dis + dis) ;  \
+                            }else{  \
+                                __current_task_virtual  += ( __jump_by+__jump_by  + __jump_by )  ;  \
+                                }   \
+                            __jump = 0; \
+                        }
 
-#define JUMP2()  { \
-    if(__jump !=1)  \
-    {   \
-            __current_task_virtual = (unsigned int *) *(__current_task_virtual + NEXT_OFFSET_PT) ;     /* soft transition */  \
-    }else{  \
-        unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + __jump_by);   \
-            if(totJumpSize > __totNumTask)  \
-            {   \
-                int dis  = totJumpSize - __totNumTask;  \
-                while( dis  > __totNumTask) \
-                {   \
-                    dis = dis - __totNumTask;   \
-                }   \
-                dis = dis - (totJumpSize - __jump_by);  \
-                __current_task_virtual  += (dis + dis + dis) ;  \
-            }else{  \
-                __current_task_virtual  += ( __jump_by+__jump_by  + __jump_by )  ;  \
-                }   \
-            __jump = 0; \
-        }   \
-}
-
-#define JUMP();    if(__jump !=1){   \
+#define JUMP();    if(!__jump){   \
                         __current_task_virtual  =  \
                         (unsigned int*) (*(__current_task_virtual + NEXT_OFFSET_PT)) ;     /* soft transition */ \
                     }else{  \
@@ -42,34 +39,34 @@
                         __jump_cnt = 0;    \
                     }
 
-__nv uint8_t __locker = 0;
-__nv uint8_t __commit_flag = 0;
-__nv unsigned int __task_address = 0;    // Modified externally
-__nv unsigned int* __temp_task_address = NULL;
 //#define COALESCING 1
+
 #if COALESCING
 __nv volatile unsigned int __virtualTaskSize = 2;
 __nv volatile unsigned int __maxVirtualTaskSize = 100;
-volatile unsigned int __taskCounter = 0;
+     volatile unsigned int __taskCounter = 0;
 #else
 __nv volatile unsigned int __virtualTaskSize = 1;
 __nv volatile unsigned int __maxVirtualTaskSize = 1;
-volatile unsigned int __taskCounter = 1;
+     volatile unsigned int __taskCounter = 1;
 #endif
 
 __nv volatile unsigned int __temp_taskCounter = 0;
 __nv volatile unsigned int __totalTaskCounter = 0;
 
 //TODO I do not think these two variables need to be persistent
-__nv volatile unsigned int __jump = 0;
+__nv volatile unsigned int __jump = 0;   //TODO we can eliminated and use only __jump_by
 __nv volatile unsigned int __jump_by = 0;
+     volatile unsigned int __jump_cnt = 0;
 
-volatile unsigned int __jump_cnt = 0;
+__nv uint8_t  __commit_flag = 0;
+//__nv uint8_t __locker = 0;
+__nv unsigned int __task_address = 0;    // Modified externally
+__nv unsigned int* __temp_task_address = NULL;
 
 __nv unsigned int __reboot_state[2] = { 0 };    //virtual Task size control
 
-//uint16_t * _current_task = NULL;
-unsigned int * __current_task_virtual = NULL;
+    unsigned int * __current_task_virtual = NULL;
 
 void os_enter_critical()
 {
@@ -104,33 +101,34 @@ void os_exit_critical()
 //        }
 //}
 
-// These tasks will be executed only once.
-void os_initTasks(const unsigned int numTasks, funcPt tasks[])
-{
-    if (__locker != __KEY)
-    {
-        unsigned int i = 0;
-        do
-        {
-            if (__commit_flag == 1)
-                goto init_commit;
 
-            // execute the init tasks
-            tasks[i]();
-//            __sendPagTemp( CrntPagHeader ); This is not
-            //TODO Either completely ignore or correct
-
-            __commit_flag = COMMITTING;
-            init_commit: __pagsCommit();
-            __commit_flag = COMMIT_FINISH;
-            i++;
-        }
-        while (i != numTasks);
-
-        // Lock this function
-        __locker = __KEY;
-    }
-}
+//// These tasks will be executed only once.
+//void os_initTasks(const unsigned int numTasks, funcPt tasks[])
+//{
+//    if (__locker != __KEY)
+//    {
+//        unsigned int i = 0;
+//        do
+//        {
+//            if (__commit_flag == 1)
+//                goto init_commit;
+//
+//            // execute the init tasks
+//            tasks[i]();
+////            __sendPagTemp( CrntPagHeader ); This is not
+//            //TODO Either completely ignore or correct
+//
+//            __commit_flag = COMMITTING;
+//            init_commit: __pagsCommit();
+//            __commit_flag = COMMIT_FINISH;
+//            i++;
+//        }
+//        while (i != numTasks);
+//
+//        // Lock this function
+//        __locker = __KEY;
+//    }
+//}
 
 void os_jump(unsigned int j)
 {
@@ -140,18 +138,28 @@ void os_jump(unsigned int j)
 
 void os_scheduler()
 {
+    /**************************************
+     *      Initialization
+     **************************************/
+
     if (__commit_flag == COMMITTING)
     {
+        // we need to do a page swap to bring the correct page from temp  or  ROM
+        // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
+        __pageSwap( (unsigned int *) __persis_CrntPagHeader );
         __current_task_virtual = __temp_task_address;
         goto commit;
     }
 
+    // Recover the virtual state
+    __current_task_virtual = (unsigned int *) __task_address;
     __bringCrntPagROM();
 
-    // Task Merging Algorithm (A)
-
+    /***************************************
+     *  Task Merging Algorithm part (A)
+     ***************************************/
     /*
-     * OBDERVATION: Dying twice consecutively  on the same virtual task means
+     * OBDERVATION: Dying twice consecutively  on the same virtual task means that
      * this virtual task cannot be executed with the given energy buffer.
      */
     //Died on the same task
@@ -176,16 +184,21 @@ void os_scheduler()
         __reboot_state[1] = 1;
     }
 
-    // Recover the virtual state
-    __current_task_virtual = (unsigned int *) __task_address;
-
+    /***************************************
+     *   Tasks navigating and executing
+     ***************************************/
     while (1)
     {
 
-        // access a task
+    /***************************************
+     *         Access a task
+     ***************************************/
         ((funcPt) (*__current_task_virtual))();
 
-        //Task Merging Algorithm (B)
+
+    /***************************************
+     *  Task Merging Algorithm part (B)
+     ***************************************/
         __taskCounter++;
 
         if ((__taskCounter >= __virtualTaskSize))
@@ -203,8 +216,13 @@ void os_scheduler()
             }
             // virtual progress
             JUMP();
+
+            /***************************************
+             *        The transition stage
+             ***************************************/
             __temp_task_address = __current_task_virtual;
             __temp_taskCounter = __taskCounter;
+
             __sendPagTemp(CrntPagHeader);
 
             unsigned int p_cnt = 0;
@@ -216,20 +234,16 @@ void os_scheduler()
                 p_cnt++;
             }
 
-//            unsigned int i;
-//            for (i=0; i < NUM_PAG; i++)    //TODO TOO SLOW //
-//            {
-//                __persis_pagsInTemp[i] = __pagsInTemp[i];
-//            }
-//
-
             __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
             __commit_flag = COMMITTING;
 commit:
             // firm transition
             __task_address = (unsigned int) __temp_task_address;
             __totalTaskCounter += __temp_taskCounter;
-            //  Commit pages to their final locations
+
+    /**********************************************
+     *    Commit pages to their final locations
+     **********************************************/
             __pagsCommit();
 
             __commit_flag = COMMIT_FINISH;

@@ -7,18 +7,16 @@
  */
 
 #include "dataProtec.h"
-volatile uint8_t dirtyPag = 0;
-uint32_t __temp_temp=0;
-
 /*####################################
               Paging
 #####################################*/
+     volatile uint8_t dirtyPag = DIRTY_PAGE;
+     uint32_t __temp_temp=0;
 
-//TODO check what happened when page size changed
-__nv unsigned int __pagsInTemp[NUM_PAG] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
+     unsigned int __pagsInTemp[NUM_PAG] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
 __nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
 
-unsigned int CrntPagHeader = BIGEN_ROM;
+     unsigned int CrntPagHeader = BIGEN_ROM;
 __nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
 
 __nv unsigned int __pageFaultCounter = 0;
@@ -43,6 +41,7 @@ void __bringCrntPagROM()
 }
 
 
+
 /*
  * Send a page to its temp buffer
  */
@@ -61,9 +60,6 @@ void __sendPagTemp(unsigned int pagHeader)
 
 
 
-    // Find the page index
-//    unsigned int pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
-//    unsigned int __pageSizes = PAG_SIZE;
 
     unsigned char idx=0;
     while(__pagsInTemp[idx] !=0 )
@@ -149,7 +145,9 @@ void __sendPagROM(unsigned int pagHeader)
 //TODO this function does not
 unsigned int __pageSwap(unsigned int * varAddr)
 {
+#if !DIRTY_PAGE
     __pageFaultCounter++;
+#endif
 
     //2// Find the requested page
     unsigned int ReqPagTag;
@@ -165,8 +163,9 @@ unsigned int __pageSwap(unsigned int * varAddr)
                 {
                     if(dirtyPag)
                     {
+                        __pageFaultCounter++;
                         __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
-                        dirtyPag=0;
+                        dirtyPag=DIRTY_PAGE;
                     }
                     // we found the page
                     __bringPagTemp( ReqPagTag );
@@ -187,8 +186,9 @@ unsigned int __pageSwap(unsigned int * varAddr)
 
     if(dirtyPag)
     {
+        __pageFaultCounter++;
         __sendPagTemp( CrntPagHeader );
-        dirtyPag=0;
+        dirtyPag=DIRTY_PAGE;
     }
     __bringPagROM(ReqPagTag);
 
@@ -205,6 +205,7 @@ PAG_IN_TEMP:
 //     }
 
      //4// keep track of the current page
+     // at this stage __persis_CrntPagHeader and  CrntPagHeader will be different
      CrntPagHeader = ReqPagTag;
     return 0;
 }
@@ -224,6 +225,11 @@ void __pagsCommit()
             __sendPagROM(page );
             __pagsInTemp[cnt] = 0; // clear the temp buffer
            cnt++;
+    }
+
+    while(cnt--)
+    {
+        __persis_pagsInTemp[cnt] =0;
     }
 
 

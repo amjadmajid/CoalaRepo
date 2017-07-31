@@ -32,8 +32,7 @@ void __bringCrntPagROM();
 
 // Memory access interface
 
-// TODO send the page to temp buffer only if we wrote to it
-// #define __VAR_TAG(var)               ((uint16_t) (&(var)) )
+#define DIRTY_PAGE  0      // make it 0 to commit only the dirty pages [This macro does not work with P() ]
 
 #define __VAR_ADDR(var)                 ((unsigned int) (&(var)) )
 
