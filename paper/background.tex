@@ -1,40 +1,16 @@
-In this section, we provide background on energy harvesting systems and the
-intermittent software execution model. We then discuss the key limitations of
-existing task-based execution models for intermittent computing that \sys
+In this section, we provide background on energy harvesting systems and the intermittent software execution model. We then discuss the key limitations of existing task-based execution models for intermittent computing that \sys
 addresses.
 
 \subsection{Energy Harvesting Systems}
 \label{sec:background_harvesting}
 
-Energy harvesting devices operate using energy extracted from their
-environment, from sources such as radio waves (RF)~\cite{wisp} and solar
-energy. Energy-harvesting devices need not use a tethered power supply or
-battery and instead, typically collect energy into a (super-)capacitor, operate
-when sufficient energy has accumulated, and upon depleting the stored energy,
-turn off and wait to collect more energy. 
-%
-Batteryless operation has a number of important advantages, making intermittent
-computing an important research domain. Supplying power to
-billions~\cite{gartner_iot} of embedded computers using batteries is not
-sustainable. The European Commission estimates that more than 160 kilotons of
-consumer batteries enter the European Union annually~\cite{eu_batteries_2016}.
-Batteries are an environmental risk, are fragile, are limited in their number
-of charge/discharge cycles, and may require costly physical maintenance that is
-difficult or impossible deployed (e.g. in space~\cite{kicksat}). By contrast,
-super-capacitors are durable, promising millions of charge/discharge
-cycles~\cite[Sec. I]{ongaro_pwre_2012}. The main limitation in moving to
-capacitor-based energy storage is that capacitor energy density---and
-consequently operating discharge time---is orders of magnitude less than a
-battery. 
+Energy harvesting devices operate using energy extracted from their environment, from sources such as radio waves (RF) and solar energy. Energy-harvesting devices need not use a tethered power supply or battery and instead, typically collect energy into a (super-)capacitor, operate when sufficient energy has accumulated, and upon depleting the stored energy, turn off and wait to collect more energy.
 
-%Given current technology development, battery-less systems are best suited for
-%very long-term sensing and monitoring where access to recharge is either
-%prohibitive or impossible. These include battery-less image capture and
-%processing~\cite{naderiparizi_rfid_2015}, animal
-%monitoring~\cite{thomas_jbcs_2012} or implantable~\cite{rodriguez_tbcs_2015}
-%and digestible~\cite{nadeau_naturebio_2017} sensors.
+Batteryless operation has a number of important advantages, making intermittent computing an important research domain. Supplying power to billions~\cite{gartner_iot} of embedded computers using batteries is not sustainable. The European Commission estimates that more than 160 kilotons of consumer batteries enter the European Union annually~\cite{eu_batteries_2016}. Batteries are an environmental risk, are fragile, are limited in their number of charge/discharge cycles, and may require costly physical maintenance that is difficult or impossible deployed (e.g. in space~\cite{kicksat}). By contrast, super-capacitors are durable, promising millions of charge/discharge cycles~\cite[Sec. I]{ongaro_pwre_2012}. The main limitation in moving to capacitor-based energy storage is that capacitor energy density---and consequently operating discharge time---is orders of magnitude less than a battery. 
 
- Many platforms enable intermittent, battery-less computation. For instance, computation RFIDs---open-source TI MSP430-based~\cite{wolverine} WISP~\cite{wisp5} (with its variants such as WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones such as~\cite{medusa_farsens_2017}. Other intermittently-powered platforms include ambient backscatter tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less phone~\cite{talla_imwut_2017}. In all of the above, the main source of energy harvested is the electromagnetic radiation in the radio frequency range (ambient transmitters such as high power TV transmitters~\cite{liu_sigcomm_2013} or dedicated RFID antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}).  Naturally, other forms of energy harvesting sources exist, including temperature gradient, (micro-)motions, light/sun radiation, vibrations, and body fluid flow (blood, gastric acid). Several recent surveys discussing energy harvesting, low-power, embedded systems and intermittent computing at a high level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
+%Given current technology development, battery-less systems are best suited for very long-term sensing and monitoring where access to recharge is either prohibitive or impossible. These include battery-less image capture and processing~\cite{naderiparizi_rfid_2015}, animal monitoring~\cite{thomas_jbcs_2012} or implantable~\cite{rodriguez_tbcs_2015} and digestible~\cite{nadeau_naturebio_2017} sensors.
+
+Many platforms enable intermittent, battery-less computation. For instance, computation RFIDs---open-source TI MSP430-based~\cite{wolverine} WISP~\cite{wisp5} (with its variants such as WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones such as~\cite{medusa_farsens_2017}. Other intermittently-powered platforms include ambient backscatter tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less phone~\cite{talla_imwut_2017}. In all of the above, the main source of energy harvested is the electromagnetic radiation in the radio frequency range (ambient transmitters such as high power TV transmitters~\cite{liu_sigcomm_2013} or dedicated RFID antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}). Naturally, other forms of energy harvesting sources exist, including temperature gradient, (micro-)motions, light/sun radiation, vibrations, and body fluid flow (blood, gastric acid). Several recent surveys discussing energy harvesting, low-power, embedded systems and intermittent computing at a high level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
 
 \begin{table}
 	\centering
@@ -56,31 +32,12 @@ battery.
 	\label{table:capacitor}
 \end{table}
 
-
 \subsection{Intermittent Computing}
 \label{sec:background_consistency}
-Energy-harvesting devices execute software according to the {\em intermittent
-execution model}~\cite{dino,chain,alpaca,ratchet}.  Physically, a device
-charges until a threshold, operates briefly until its energy is depleted, shuts
-down recharges, and repeats the cycle.  Software running on the device executes
-{\em intermittently} because energy is only available between when the
-capacitor reaches its threshold and when it is depleted. An intermittent
-execution is composed of operating periods interspersed with power failures.
-The frequency of power failures in an intermittent execution depends on the
-size of the device's energy storage buffer: a larger buffer allows longer
-operating periods.  Energy-harvesters provide input power that is orders of
-magnitude less than a device's operating power, making recharging negligible
-during operation.
 
-Software has different behavior when executed intermittently than when executed
-with continuous power.  Each power failure clears volatile memory (registers,
-stack, and global variables). Non-volatile memory (e.g., FRAM) persists across
-power failures. On a power failure, control flows back to a prior point in the
-execution. By default, after a power failure control flows to the beginning of
-{\tt main()}; a host of recent work proposed variations of the intermittent
-execution model that restart execution differently. Some systems restore to a
-checkpoint of execution context (i.e., registers and stack) stored in
-non-volatile memory~\cite{mementos,hibernusplusplus,quickrecall,idetic}.
+Energy-harvesting devices execute software according to the {\em intermittent execution model}~\cite{dino,chain,alpaca,ratchet}. Physically, a device charges until a threshold, operates briefly until its energy is depleted, shuts down recharges, and repeats the cycle. Software running on the device executes {\em intermittently} because energy is only available between when the capacitor reaches its threshold and when it is depleted. An intermittent execution is composed of operating periods interspersed with power failures. The frequency of power failures in an intermittent execution depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. Energy-harvesters provide input power that is orders of magnitude less than a device's operating power, making recharging negligible during operation.
+
+Software has different behavior when executed intermittently than when executed with continuous power.  Each power failure clears volatile memory (registers, stack, and global variables). Non-volatile memory (e.g., FRAM) persists across power failures. On a power failure, control flows back to a prior point in the execution. By default, after a power failure control flows to the beginning of {\tt main()}; a host of recent work proposed variations of the intermittent execution model that restart execution differently. Some systems restore to a checkpoint of execution context (i.e., registers and stack) stored in non-volatile memory~\cite{mementos,hibernusplusplus,quickrecall,idetic}.
 
 \begin{figure}
 	\centering
@@ -90,40 +47,19 @@ non-volatile memory~\cite{mementos,hibernusplusplus,quickrecall,idetic}.
 	\label{fig:code_demo_incosistency}
 \end{figure}
 
+Data may become inconsistent if an attempt to execute some computation {\em writes} to a non-volatile variable, then power fails, then a second attempt to re-execute the same computation {\em reads} the value written in the first
+attempt. Figure~\ref{fig:code_demo_incosistency} illustrates how state can become inconsistent in an intermittent execution using cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}. The code computes CRC for an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$. Even with programmer defined checkpoints (i.e., line 3 in Fig.~\ref{fig:crc_example}) of registers, stack, and non-volatile variables (labelled \texttt{NV}), the code may compute $\texttt{data}$ incorrectly. The code includes a write after read (WAR) hazard of variable $\texttt{Rmnd}$. WAR hazard is caused by consecutive write and read in-between two consecutive checkpoints using $\texttt{checkpoint()}$ function: $\texttt{data}$ variable is written \emph{before} (line 10 in Fig.~\ref{fig:crc_example_war}) $\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example_war}), or more specifically---updated before a new execution loop. 
 
-Data may become inconsistent if an attempt to execute some computation {\em
-writes} to a non-volatile variable, then power fails, then a second attempt to
-re-execute the same computation {\em reads} the value written in the first
-attempt.  Figure~\ref{fig:code_demo_incosistency} illustrates how state can
-become inconsistent in an intermittent execution using cyclic redundancy check
-(CRC) code from MIBench~\cite{hicks_mibench2_2016}. The code computes CRC for
-an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder
-$\texttt{Rmnd}$. Even with programmer defined checkpoints (i.e., line 3 in
-Fig.~\ref{fig:crc_example}) of registers, stack, and non-volatile variables
-(labeled \texttt{NV}), the code may compute  $\texttt{data}$ incorrectly.  The
-code includes a write after read (WAR) hazard of variable $\texttt{Rmnd}$.  WAR
-hazard is caused by consecutive write and read in-between two consecutive
-checkpoints using $\texttt{checkpoint()}$ function: $\texttt{data}$ variable is
-written \emph{before} (line 10 in Fig.~\ref{fig:crc_example_war})
-$\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example_war}), or more
-specifically---updated before a new execution loop. 
-
-As the figure illustrates, checkpoint-based systems risk violating the
-consistency of volatile and non-volatile memory~\cite{dino}. To maintain memory
-consistency, versioning systems~\cite{dino,ratchet} {\em version} a subset of
-non-volatile variables with the checkpointed execution context. Task-based
-systems~\cite{chain,alpaca}, which we focus on this work and discuss in detail
-next, ensure state is consistent by using programmer, compiler, and runtime
-support.
-
+As the Figure~\ref{fig:code_demo_incosistency} illustrates, checkpoint-based systems risk violating the consistency of volatile and non-volatile memory~\cite{dino}. To maintain memory consistency, versioning systems~\cite{dino,ratchet} {\em version} a subset of non-volatile variables with the checkpointed execution context. Task-based systems~\cite{chain,alpaca}, which we focus on this work and discuss in detail next, ensure state is consistent by using programmer, compiler, and runtime support.
 
 \subsection{Task-based Intermittent Computing}
-\TODO{This sequential / modular split seems pretty odd to me.  I think we can just talk about tasks in the sense of ratchet, alpaca, and chain.  Anything with static (programmer-written or compiler inserted) boundaries applies}
-Intermittent execution models combatting WAR can be classified into: \emph{sequential execution model} (which historically formed a baseline for this stream of research) and \emph{modular execution model} (a potent alternative, on which we base the design decisions of \sys).
-)
+\label{section:background_task_computing}
+
+%\TODO{This sequential/modular split seems pretty odd to me. I think we can just talk about tasks in the sense of ratchet, alpaca, and chain.  Anything with static (programmer-written or compiler inserted) boundaries applies}
+
+Intermittent execution models combatting WAR can be classified into: \emph{sequential execution model} (which historically formed a baseline for this stream of research) and \emph{modular execution model} (a potent alternative, on which we base the design decisions of \sys). \todo{Remove division per sequential/modular split}{Przemek}
 
 Under this model a program for intermittently-powered device is seen as a one idempotent operational region with one common context. Generally, the progress of the program is saved and updated by means of checkpointing, refer again to Section~\ref{sec:background_consistency}. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos,mottola2017harvos,hibernus}. The benefit of this model is that it does not require code modification by a programmer. However it suffers from significant overhead (refer to experiment result in~\cite[Fig. 3]{chain}, where it is concluded that each checkpoint causes overhead). \todo{I use the word `checkpoint' for normal checkpoint and task boundary interchangeably---check if it does not cause confusion}{Brandon}
-
 
 At the heart of this model is the concept of an \emph{idempotent task}. The idempotent task is a C language function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an intermittently-powered device by interleaving their tasks. However, it obviously requires code modification. For example, if an algorithm is written according to the continuous execution model it has to be split by a programmer into small tasks to run under the modular intermittent execution model.
 

@@ -93,7 +93,9 @@ void __bringCrntPagROM();
 
 
 #define VAR(var) (__typeof__(var)*) __return_addr(&var)
+#define VARW(var) (__typeof__(var)*) __return_addr_wr(&var)
 #define P(var) ( *VAR(var) )
+#define PW(var) ( *VARW(var) )
 
 #endif /* INCLUDE_DATAPROTEC_H_ */
 

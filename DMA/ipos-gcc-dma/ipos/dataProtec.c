@@ -290,6 +290,19 @@ uint8_t* __return_addr(uint8_t* var) {
     }
 }
 
-
-
+uint8_t* __return_addr_wr(uint8_t* var) {
+    if (var > END_ROM || var < BIGEN_ROM) {
+        return var;
+    }
+    if( __IS_VAR_IN_CRNT_PAG(*var) )
+    {
+		dirtyPag = 1;
+		return __VAR_PT_IN_RAM(*var);
+	}
+	else{
+		__pageSwap((var));
+		dirtyPag = 1;
+		return __VAR_PT_IN_RAM(*var);
+	}
+}
 
