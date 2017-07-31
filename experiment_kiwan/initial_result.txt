@@ -5,22 +5,22 @@ result are in cycle. Cross-compiled with -O0 Clang / -O1 gcc
 cem
 delft	2,352,810
 chain	355,809
-comp	2,056,970
+comp	1,993,538
 
 cuckoo
 delft	127,476
 chain	91,599
-comp	195,385
+comp	91,895
 
 rsa
 delft	449,474
 chain	309,126
-comp	1,813,513
+comp	769,839
 
 ar
 delft	2,102,290
 chain	1,651,908
-comp	7,837,399
+comp	7,370,927
 
 
 blowfish
@@ -29,9 +29,9 @@ chain	2,887,759
 comp	-
 
 bitcount
-delft	146,036
-chain	279,887
-comp	-
+delft	144,974
+chain	278,821
+comp	224,052
 
 
 

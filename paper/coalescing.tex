@@ -1,64 +1,60 @@
-\sys is able to virtually merge tasks to construct a bigger virtual task and commit the state of the virtual task instead of the individual real tasks. 
-
-\subsubsection{Task Merging Algorithms}
-
-
-
-\subsubsection{Power Interrupt Immune Scheduler}
-
-\input{relativeJumpAlgo.tex} %Task jumping algorithm
-
-It utilizes a persistent circular buffer (persistent linked list) to keep the state of a program across power failures. \sys provides an API to enable a programmer to have a full control over the execution flow of the program, i.e. (un)blocking a task or re-execute the same task which is particularly important in the intermittent execution to emulate a persistent loop. 
-
-\paragraph{Fixed Virtual Task Size}
-
-	\begin{algorithm}
-		\caption{Task coalescing mechanism}
-		\label{algo:fixVirtTask}
-		\scriptsize
-		%\small
-		\begin{algorithmic}[1]
-			\State $VT \subset \text{\{\sys Tasks\}} $  \Comment{$VT:$ Virtual Task}
-			\State VTS : VT size
-			\State MVTS: maximum VT size \Comment{line added in fixed size approach}
-			\vspace{0.1cm}
-
-			\While {$True$}
-				\State $VT \leftarrow VT_{next}$
-				\vspace{0.1cm}
-				\While {execute $VT$} 
-					\If { $\text{power failed twice}$ }				
-							\State $VTS--$  
-							\State $ MVTS = VTS $ \Comment{line added in fixed size approach}
-						\EndIf
-				\EndWhile
-
-				\vspace{0.1cm}
-				\If {$ \text{All tasks executed}$}
-					\If{$VTS < MVTS$} \Comment{line added in fixed size approach}
-					\State $VTS++$
-					\EndIf
-				\EndIf
-			\EndWhile
-		\end{algorithmic}
-	\end{algorithm}
+\sys is able to virtually merge tasks to construct a bigger virtual task and commit the state of the virtual task instead of the individual real tasks to improve execution time at stable energy supply environment. 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\columnwidth]{figures/virtualTaskSize.eps}
-	\caption{Size of the virtual task versus the execution time of a dummy application that contains 12 empty tasks.}
-	\label{fig:virtualTaskSize}
-\end{figure}
-
-\begin{figure}
-	\centering
-	%\includegraphics[width=0.25\columnwidth]{figures/task_coalescing}
+	%\includegraphics[width=\columnwidth]{figures/task_coalescing}
 	\caption{Task coalescing architecture.}
 	\label{fig:}
 \end{figure}
 
-The question remains, is the best strategy to coalesce all tasks into a singe one, as the energy becomes fully available, i.e. from energy harvesting to continuous power environment. To answer this question we have implemented a simple program composed of $x$ empty tasks.  Figure~\ref{fig:virtualTaskSize} shows the benefit of virtualizing the Modular Intermittent Execution Mode (MIEM) in the best case scenario (continuous power supply). 
+\subsection{Task Merging Algorithm}
 
+\begin{algorithm}[t]
+	\caption{\sys task coalescing mechanism}
+	\label{algorithm:coalescing_algorithm}
+	\scriptsize
+	\begin{algorithmic}[1]
+		\State $\text{VT} \subset \{\sys~\text{tasks set}\}$  \Comment{Virtual task}
+		\State $|\text{VT}|$ \Comment{VT size \todo{Define unit}{Amjad}}
+		\State $\text{VT}_{\max}$ \Comment{Maximum VT size (With upper bound on coalescing)}
+		\vspace{0.1cm}
+		
+		\While {True}
+		\State $\text{VT} \leftarrow \text{VT}_{\text{next}}$ \Comment{\todo{Define $\text{VT}_{\text{next}}$}{Amjad}}
+		\vspace{0.1cm}
+		\While {execute VT} 
+		\If { power failed $n$ times during task execution} \Comment{\todo{Define how it is detected}{Amjad}}				
+		\State $|\text{VT}|:=|\text{VT}|-1$
+		\State $\text{VT}_{\max} := |\text{VT}|$ \Comment{With upper bound on coalescing}
+		\EndIf
+		\EndWhile
+		
+		\vspace{0.1cm}
+		\If {All tasks executed} \Comment{\todo{Define how it is detected and when}{Amjad}}
+		\If{$|\text{VT}| < \text{VT}_{\max}$} \Comment{line added in fixed size approach}
+		\State $|\text{VT}|:=|\text{VT}|+1$
+		\EndIf
+		\EndIf
+		\EndWhile
+	\end{algorithmic}
+\end{algorithm}
+
+The complete algorithm is provided in Algorithm~\ref{algorithm:coalescing_algorithm}. \todo{Fill in with missing information: scheduler description, implementation details, discussion}{Przemek/Amjad}
+
+\subsection{Power Interrupt Immune Scheduler}
+
+\input{relativeJumpAlgo.tex} %Task jumping algorithm
+
+It utilizes a persistent circular buffer (i.e. persistent linked list) to keep the state of a program across power failures. \sys provides an API to enable a programmer to have a full control over the execution flow of the program, i.e. (un)blocking a task or re-execute the same task which is particularly important in the intermittent execution to emulate a persistent loop. \todo{Expand this section}{Amjad}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/virtualTaskSize.eps}
+	\caption{Execution time of a dummy application containing twelve empty tasks as a function of coalescing factor. We observe three times improvement from coalescing until four virtual tasks, while we observe a diminishing return from task coalescing beyond four. \todo{Improve the figure: make it narrower, larger font, remove legend, do not capitalize "Task" in X axis, add Y axis label (Execution time (ms))}{Amjad}}
+	\label{fig:virtualTaskSize}
+\end{figure}
+
+The question remains: does coalescing all program's tasks into a singe virtual task (as the energy becomes fully available, i.e. from energy harvesting to continuous power environment) is the best one?. To answer this question we have implemented a simple program composed of $x$ empty tasks. We execute the same program by increasing coalescing factor by one while the device on which the program was executed was running on a stable power supply (refer to Section~\ref{sec:methodology_evaluation} for details). The result is presented in Figure~\ref{fig:virtualTaskSize}. We observe a significant increase in execution time as task are coalescent from one to four (three times execution time improvement). However, as the coalescing increases beyond four, we observe diminishing returns from coalescing in terms of execution time. \todo{Decide whether to place this figure in Evaluation section or leave it here}{Przemek}
 
 %\begin{algorithm}
 %	\caption{Opportunistic virtual Task size}

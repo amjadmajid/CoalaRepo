@@ -217,10 +217,19 @@ int recursive_cnt(uint32_t x){
 
 	return cnt;
 }
+int non_recursive_cnt(uint32_t x){
+	int cnt = bits[(int)(x & 0x0000000FL)];
+
+	while (0L != (x >>= 4)) {
+		cnt += bits[(int)(x & 0x0000000FL)];
+	}
+
+	return cnt;
+}
 void task_ntbl_bitcnt() {
 	LOG("ntbl_bitcnt\r\n");
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_n_2) += recursive_cnt(tmp_seed);	
+	P(_v_n_2) += non_recursive_cnt(tmp_seed);	
 	P(_v_seed) = tmp_seed + 13;
 	P(_v_iter)++;
 
