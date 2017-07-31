@@ -96,3 +96,19 @@ Expected results:
  
 \todo{Check if we really need this application}{Brandon}
 \todo{Provide results and text to this section---if time allows (this result is not critical)}{Amjad/Przemek}
+
+%List of figres by Brandon - I will map them to sections asap
+
+%A plot showing performance for each application comparing bars for Chain, no coalescing/hand-tasked, coalescing/hand-tasked, no-coalescing/compiler, coalescing/compiler.  Performance depicted, normalized to one of the configurations (probably Chain).  This plot covers most of the eval dimensions that we care about.
+
+%There are a few things we might change, if this plot has too much in one place:
+
+%*Pull the compiler stuff into its own plot that compares compiler to hand-tasked, maybe only for the coalescing fig.  This reduces bars in plot 1, but runs the risk of making the compiler sound secondary, which we do not want to do.
+
+%*Report only Chain, coalescing/hand-tasked, coalescing/compiler in the main plot.  This says that coalescing is the "default configuration" for VIPER.  Later, in a second figure, we compare coalescing to no coalescing for hand-tasked and compiler as a characterization plot.
+
+%After the main plot, we need a sensitivity plot or two.  Two ideas come to mind:
+
+%*Page size sweep, like you sent out for Cuckoo, with a separate "bathtub" curve for each app (normalized).
+
+%*Task-size / cap-size sweep (remember we can vary either with approximately the same effect).  We only need, maybe, 3 task/cap size configurations here.  This plot is important because it shows VIPER's flexibility via coalescing (hopefully!)
