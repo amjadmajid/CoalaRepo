@@ -77,10 +77,10 @@ with continuous power.  Each power failure clears volatile memory (registers,
 stack, and global variables). Non-volatile memory (e.g., FRAM) persists across
 power failures. On a power failure, control flows back to a prior point in the
 execution. By default, after a power failure control flows to the beginning of
-{\tt main()}; a host of recent work proposed variations of the intermittent
-execution model that restart execution differently. Some systems restore to a
-checkpoint of execution context (i.e., registers and stack) stored in
-non-volatile memory~\cite{mementos,hibernusplusplus,quickrecall,idetic}.
+{\tt main()}. Early work on intermittent computing preserve intermittent
+progress by periodically capturing and restoring to a non-volatile checkpoint
+of the volatile execution context (i.e., registers and
+stack)~\cite{mementos,hibernusplusplus,quickrecall,idetic}
 
 \begin{figure}
 	\centering
@@ -90,22 +90,26 @@ non-volatile memory~\cite{mementos,hibernusplusplus,quickrecall,idetic}.
 	\label{fig:code_demo_incosistency}
 \end{figure}
 
+Checkpoints of volatile state preserve intermittent progress, but do not ensure
+data consistency~\cite{dino,chain,ratchet}.  Data may become inconsistent if an
+attempt to execute some computation {\em writes} to a non-volatile variable,
+then power fails, then a second attempt to re-execute the same computation
+incorrectly {\em reads} the value written in the first attempt, rather than the
+variable's original value.  The situation occurs when code includes a write
+after read (WAR) dependence between operations that manipulate non-volatile
+variables~\cite{ratchet,dino,alpaca}.
 
-Data may become inconsistent if an attempt to execute some computation {\em
-writes} to a non-volatile variable, then power fails, then a second attempt to
-re-execute the same computation {\em reads} the value written in the first
-attempt.  Figure~\ref{fig:code_demo_incosistency} illustrates how state can
-become inconsistent in an intermittent execution using cyclic redundancy check
-(CRC) code from MIBench~\cite{hicks_mibench2_2016}. The code computes CRC for
-an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder
-$\texttt{Rmnd}$. Even with programmer defined checkpoints (i.e., line 3 in
-Fig.~\ref{fig:crc_example}) of registers, stack, and non-volatile variables
-(labeled \texttt{NV}), the code may compute  $\texttt{data}$ incorrectly.  The
-code includes a write after read (WAR) hazard of variable $\texttt{Rmnd}$.  WAR
-hazard is caused by consecutive write and read in-between two consecutive
-checkpoints using $\texttt{checkpoint()}$ function: $\texttt{data}$ variable is
-written \emph{before} (line 10 in Fig.~\ref{fig:crc_example_war})
-$\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example_war}), or more
+Figure~\ref{fig:code_demo_incosistency} illustrates how state can become
+inconsistent in an intermittent execution using cyclic redundancy check (CRC)
+code from MIBench~\cite{hicks_mibench2_2016}. The code computes CRC for an
+$\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
+Even with the checkpoint at line 3 in Fig.~\ref{fig:crc_example}, the code may
+compute  $\texttt{data}$ incorrectly because  of a WAR dependence between the
+read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5.  
+Figure~\ref{fig:crc_example_war} shows an execution of the code in which
+power fails during the second loop iteration
+
+ $\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example_war}), or more
 specifically---updated before a new execution loop. 
 
 As the figure illustrates, checkpoint-based systems risk violating the
