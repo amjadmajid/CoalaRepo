@@ -101,7 +101,7 @@ run time overheads associated with ending one task and beginning another.
 
 To summarize, this work makes the following contributions:
 %
-\TODO{I think these were all much too long, given the depth of the intro and background already.  I am cutting to the barest minimum.}
+\TODO{I think these are all much too long, given the depth of the intro and background already.  I suggest we cut to the barest minimum.}
 \begin{enumerate}
 %
 \item {\bf Task coalescing mechanism:} \sys's core contribution is the introduction of dynamic task coalescing mechanism. It allows the programmer or a compiler to intuitively decompose the program into small tasks that amortize fixed per-task overheads, yet present no risk of exceeding device energy capacity. As such a decomposition executes, \sys~{\em coalesces dynamically} consecutive tasks. Coalescing elides the commits of coalesced tasks by buffering multiple tasks' updates in an FRAM commit buffer. Periodically, as the span of the coalesced task grows, \sys ends coalescing and commits the state of the coalesced task. If a power failure interrupts a sequence of coalesced tasks, \sys adaptively reduces the number of tasks in that sequence that it will coalesce, committing sooner in future executions. Consequently, \sys's coalescing mechanism allows a program to execute efficiently across a range of energy buffer sizes, avoiding transition overheads in larger buffers, and ensuring progress in smaller buffers.
