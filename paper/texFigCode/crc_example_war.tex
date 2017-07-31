@@ -46,9 +46,9 @@ data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8));
 Rmnd = crcTbl[data] ^ (Rmnd << 8);      
 $\text{\textcolor{red}{\lightning\hspace{0.5cm}\lightning\hspace{0.5cm}\lightning}\hspace{0.5cm}}$ //Power fails after Rmnd written, before checkpoint()
 
-$\textcolor{red}{\circlearrowright}\text{\textcolor{red}{checkpoint()}}$; //Restart iter. 2 from checkpoint; $\text{\textcolor{red}{Rmnd is stale.}}$
+$\textcolor{red}{\circlearrowright}\text{\textcolor{red}{checkpoint()}}$; //Restart from checkpoint; $\text{\textcolor{red}{Rmnd remains updated.}}$
 data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8)); 
-$\textcolor{red}{\times}\text{\textcolor{red}{ERROR: data updated with stale value of Rmnd}}$
+$\textcolor{red}{\times}\text{\textcolor{red}{ERROR: data updated using incorrect Rmnd value}}$
 
 $\ldots$
 \end{lstlisting} 

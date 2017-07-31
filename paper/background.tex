@@ -80,12 +80,13 @@ code from MIBench~\cite{hicks_mibench2_2016}. The code computes CRC for an
 $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
 Even with the checkpoint at line 3 in Fig.~\ref{fig:crc_example}, the code may
 compute  $\texttt{data}$ incorrectly because  of a WAR dependence between the
-read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5.  
-Figure~\ref{fig:crc_example_war} shows an execution of the code in which
-power fails during the second loop iteration
-
- $\texttt{Rmnd}$ is read (line 6 in Fig.~\ref{fig:crc_example_war}), or more
-specifically---updated before a new execution loop. 
+read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5.
+Figure~\ref{fig:crc_example_war} shows an execution of the code in which power
+fails during the second loop iteration.  The problem arises because line 6 of
+the execution writes $\texttt{Rmnd}$ in the second iteration, but power fails
+before capturing the next checkpoint.  After restarting from the checkpoint,
+the update to $\texttt{data}$ at line 10 reads the value of $\texttt{Rmnd}$
+that was updated before the power failure, producing an incorrect result.
 
 As the figure illustrates, checkpoint-based systems risk violating the
 consistency of volatile and non-volatile memory~\cite{dino}. To maintain memory
