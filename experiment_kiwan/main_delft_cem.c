@@ -86,13 +86,13 @@ static sample_t acquire_sample(letter_t prev_sample)
 void task_init()
 {
 	LOG("init\r\n");
-	P(_v_parent_next) = 0;
+	PW(_v_parent_next) = 0;
 	LOG("init: start parent %u\r\n", P(_v_parent));
-	P(_v_out_len) = 0;
-	P(_v_letter) = 0;
-	P(_v_prev_sample) = 0;
-	P(_v_letter_idx) = 0;;
-	P(_v_sample_count) = 1;
+	PW(_v_out_len) = 0;
+	PW(_v_letter) = 0;
+	PW(_v_prev_sample) = 0;
+	PW(_v_letter_idx) = 0;;
+	PW(_v_sample_count) = 1;
 
 	os_jump(1);
 }
@@ -102,21 +102,20 @@ void task_init_dict()
 	LOG("init dict: letter %u\r\n", P(_v_letter));
 
 	int i = P(_v_letter);	
-	P(_v_dict[i].letter) = P(_v_letter); 
-	P(_v_dict[i].sibling) = NIL; 
-	P(_v_dict[i].child) = NIL; 
-	(P(_v_letter))++;
+	PW(_v_dict[i].letter) = P(_v_letter); 
+	PW(_v_dict[i].sibling) = NIL; 
+	PW(_v_dict[i].child) = NIL; 
+	PW(_v_letter) = P(_v_letter) + 1;
 	if (P(_v_letter) < NUM_LETTERS) {
 		os_jump(0);
 	} else {
-		P(_v_node_count) = NUM_LETTERS;
+		PW(_v_node_count) = NUM_LETTERS;
 		os_jump(1);
 	} 
 }
 
 void task_sample()
 {
-	LOG("siba: %u\r\n", P(_v_sample));
 	LOG("sample: letter idx %u\r\n", P(_v_letter_idx));
 
 	unsigned next_letter_idx = P(_v_letter_idx) + 1;
@@ -124,10 +123,10 @@ void task_sample()
 		next_letter_idx = 0;
 
 	if (P(_v_letter_idx) == 0) {
-		P(_v_letter_idx) = next_letter_idx;
+		PW(_v_letter_idx) = next_letter_idx;
 		os_jump(1);
 	} else {
-		P(_v_letter_idx) = next_letter_idx;
+		PW(_v_letter_idx) = next_letter_idx;
 		os_jump(2);
 	}
 }
@@ -140,8 +139,8 @@ void task_measure_temp()
 	sample_t sample = acquire_sample(prev_sample);
 	LOG("measure: %u\r\n", sample);
 	prev_sample = sample;
-	P(_v_prev_sample) = prev_sample;
-	P(_v_sample) = sample;
+	PW(_v_prev_sample) = prev_sample;
+	PW(_v_sample) = sample;
 	os_jump(1);
 }
 
@@ -157,13 +156,12 @@ void task_letterize()
 
 	LOG("letterize: sample %x letter %x (%u)\r\n", P(_v_sample), letter, letter);
 
-	P(_v_letter) = letter;
+	PW(_v_letter) = letter;
 	os_jump(1);
 }
 
 void task_compress()
 {
-	LOG("siba: %u\r\n", P(_v_sample));
 	// pointer into the dictionary tree; starts at a root's child
 	index_t parent = P(_v_parent_next);
 
@@ -171,20 +169,19 @@ void task_compress()
 
 	LOG("compress: parent node: l %u s %u c %u\r\n", P(_v_dict[parent].letter), P(_v_dict[parent].sibling), P(_v_dict[parent].child));
 
-	P(_v_sibling) = P(_v_dict[parent].child);
-	P(_v_parent_node.letter) = P(_v_dict[parent].letter);
-	P(_v_parent_node.sibling) = P(_v_dict[parent].sibling);
-	P(_v_parent_node.child) = P(_v_dict[parent].child);
-	P(_v_parent) = parent;
-	P(_v_child) = P(_v_dict[parent].child);
-	(P(_v_sample_count))++;
+	PW(_v_sibling) = P(_v_dict[parent].child);
+	PW(_v_parent_node.letter) = P(_v_dict[parent].letter);
+	PW(_v_parent_node.sibling) = P(_v_dict[parent].sibling);
+	PW(_v_parent_node.child) = P(_v_dict[parent].child);
+	PW(_v_parent) = parent;
+	PW(_v_child) = P(_v_dict[parent].child);
+	(PW(_v_sample_count))++;
 
 	os_jump(1);
 }
 
 void task_find_sibling()
 {
-	LOG("siba: %u\r\n", P(_v_sample));
 	LOG("find sibling: l %u s %u\r\n", P(_v_letter), P(_v_sibling));
 
 	if (P(_v_sibling) != NIL) {
@@ -196,13 +193,13 @@ void task_find_sibling()
 		if (P(_v_dict[i].letter) == P(_v_letter)) { // found
 			LOG("find sibling: found %u\r\n", P(_v_sibling));
 
-			P(_v_parent_next) = P(_v_sibling);
+			PW(_v_parent_next) = P(_v_sibling);
 
 			os_jump(10);
 			return;
 		} else { // continue traversing the siblings
 			if(P(_v_dict[i].sibling) != 0){
-				P(_v_sibling) = P(_v_dict[i].sibling);
+				PW(_v_sibling) = P(_v_dict[i].sibling);
 				os_jump(0);
 				return;
 			}
@@ -212,7 +209,7 @@ void task_find_sibling()
 	LOG("find sibling: not found\r\n");
 
 	index_t starting_node_idx = (index_t)P(_v_letter);
-	P(_v_parent_next) = starting_node_idx;
+	PW(_v_parent_next) = starting_node_idx;
 
 	LOG("find sibling: child %u\r\n", P(_v_child));
 
@@ -233,16 +230,16 @@ void task_add_node()
 
 	if (P(_v_dict[i].sibling) != NIL) {
 		index_t next_sibling = P(_v_dict[i].sibling);
-		P(_v_sibling) = next_sibling;
+		PW(_v_sibling) = next_sibling;
 		os_jump(0);
 
 	} else { // found last sibling in the list
 
 		LOG("add node: found last\r\n");
 
-		P(_v_sibling_node.letter) = P(_v_dict[i].letter);
-		P(_v_sibling_node.sibling) = P(_v_dict[i].sibling);
-		P(_v_sibling_node.child) = P(_v_dict[i].child);
+		PW(_v_sibling_node.letter) = P(_v_dict[i].letter);
+		PW(_v_sibling_node.sibling) = P(_v_dict[i].sibling);
+		PW(_v_sibling_node.child) = P(_v_dict[i].child);
 
 		os_jump(1);
 	}
@@ -250,7 +247,6 @@ void task_add_node()
 
 void task_add_insert()
 {
-	LOG("siba: %u\r\n", P(_v_sample));
 	LOG("add insert: nodes %u\r\n", P(_v_node_count));
 
 	if (P(_v_node_count) == DICT_SIZE) { // wipe the table if full
@@ -264,39 +260,38 @@ void task_add_insert()
 	if (P(_v_parent_node.child) == NIL) { // the only child
 		LOG("add insert: only child\r\n");
 
-		P(_v_parent_node.child) = child;
+		PW(_v_parent_node.child) = child;
 		int i = P(_v_parent);
-		P(_v_dict[i].letter) = P(_v_parent_node.letter);
-		P(_v_dict[i].sibling) = P(_v_parent_node.sibling);
-		P(_v_dict[i].child) = P(_v_parent_node.child);
+		PW(_v_dict[i].letter) = P(_v_parent_node.letter);
+		PW(_v_dict[i].sibling) = P(_v_parent_node.sibling);
+		PW(_v_dict[i].child) = P(_v_parent_node.child);
 
 	} else { // a sibling
 
 		index_t last_sibling = P(_v_sibling);
 		LOG("add insert: sibling %u\r\n", last_sibling);
 
-		P(_v_sibling_node.sibling) = child;
-		P(_v_dict[last_sibling].letter) = P(_v_sibling_node.letter);
-		P(_v_dict[last_sibling].sibling) = P(_v_sibling_node.sibling);
-		P(_v_dict[last_sibling].child) = P(_v_sibling_node.child);
+		PW(_v_sibling_node.sibling) = child;
+		PW(_v_dict[last_sibling].letter) = P(_v_sibling_node.letter);
+		PW(_v_dict[last_sibling].sibling) = P(_v_sibling_node.sibling);
+		PW(_v_dict[last_sibling].child) = P(_v_sibling_node.child);
 	}
-	P(_v_dict[child].letter) = P(_v_letter);
-	P(_v_dict[child].sibling) = NIL;
-	P(_v_dict[child].child) = NIL;
-	P(_v_symbol) = P(_v_parent);
-	(P(_v_node_count))++;
+	PW(_v_dict[child].letter) = P(_v_letter);
+	PW(_v_dict[child].sibling) = NIL;
+	PW(_v_dict[child].child) = NIL;
+	PW(_v_symbol) = P(_v_parent);
+	(PW(_v_node_count))++;
 
 	os_jump(1);
 }
 
 void task_append_compressed()
 {
-	LOG("siba: %u\r\n", P(_v_sample));
 	LOG("append comp: sym %u len %u \r\n", P(_v_symbol), P(_v_out_len));
 	int i = P(_v_out_len);
-	P(_v_compressed_data[i].letter) = P(_v_symbol);
+	PW(_v_compressed_data[i].letter) = P(_v_symbol);
 
-	if (++P(_v_out_len) == BLOCK_SIZE) {
+	if (++PW(_v_out_len) == BLOCK_SIZE) {
 		os_jump(1);
 	} else {
 		os_jump(5);
@@ -320,7 +315,7 @@ void task_print()
 	BLOCK_PRINTF("\r\n");
 	BLOCK_PRINTF("rate: samples/block: %u/%u\r\n", P(_v_sample_count), BLOCK_SIZE);
 	BLOCK_PRINTF_END();
-	os_jump(0);
+	os_jump(1);
 }
 
 void task_done()

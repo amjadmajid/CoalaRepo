@@ -146,7 +146,7 @@ void os_scheduler()
     {
         // we need to do a page swap to bring the correct page from temp  or  ROM
         // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
-        __pageSwap( (unsigned int *) __persis_CrntPagHeader );
+        __bringPersisCrntPag( (unsigned int *) __persis_CrntPagHeader );
         __current_task_virtual = __temp_task_address;
         goto commit;
     }

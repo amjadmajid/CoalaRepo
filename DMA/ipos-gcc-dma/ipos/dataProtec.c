@@ -211,6 +211,35 @@ PAG_IN_TEMP:
     return 0;
 }
 
+
+
+/*
+ * pageSwap:
+ */
+//TODO this function does not
+void __bringPersisCrntPag(unsigned int * curntPag)
+{
+    unsigned int ReqPagTag;
+
+    // Search the page in the buffer
+    while( (ReqPagTag = __persis_CrntPagHeader[idx]) != 0)
+    {
+        if ( ReqPagTag  == curntPag )
+            {
+                __bringPagTemp( curntPag );
+                goto PAGE_PULLED;
+             }
+        idx++;
+    }
+
+        __bringPagROM(curntPag);
+
+PAGE_PULLED:
+
+     CrntPagHeader = curntPag;
+}
+
+
 /*####################################
           Paging commit
 #####################################*/
@@ -261,6 +290,19 @@ uint8_t* __return_addr(uint8_t* var) {
     }
 }
 
-
-
+uint8_t* __return_addr_wr(uint8_t* var) {
+    if (var > END_ROM || var < BIGEN_ROM) {
+        return var;
+    }
+    if( __IS_VAR_IN_CRNT_PAG(*var) )
+    {
+		dirtyPag = 1;
+		return __VAR_PT_IN_RAM(*var);
+	}
+	else{
+		__pageSwap((var));
+		dirtyPag = 1;
+		return __VAR_PT_IN_RAM(*var);
+	}
+}
 
