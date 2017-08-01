@@ -24,7 +24,7 @@
 #define TASK_NUM 11
 #define OFFSET(src, dest) src <= dest ? dest - src : TASK_NUM + dest - src 
 
-unsigned test = 1;
+unsigned test = 0;
 unsigned volatile *timer = &TBCTL;
 static __ro_nv const char cp[32] = {'1','2','3','4','5','6','7','8','9','0',
 	'A','B','C','D','E','F','F','E','D','C','B','A',
@@ -378,12 +378,12 @@ void print_long(uint32_t l) {
 #endif
 void task_init()
 {
-	P(_v_n) = 0;
-	P(_v_index) = 0;
-	P(_v_index2) = 0;
+	PW(_v_n) = 0;
+	PW(_v_index) = 0;
+	PW(_v_index2) = 0;
 	unsigned i;
 	for (i=0; i<8; ++i) {
-		P(_v_iv[i]) = 0;
+		PW(_v_iv[i]) = 0;
 	}
 	os_jump(OFFSET(t_init, t_set_ukey));
 }
@@ -398,7 +398,7 @@ void task_set_ukey() {
 		else
 			PRINTF("Key must be hexadecimal!!\r\n");
 		if ((i++) & 1) {
-			P(_v_ukey[i/2-1]) = by & 0xff;
+			PW(_v_ukey[i/2-1]) = by & 0xff;
 			LOG("ukey[%u]: %u\r\n",i/2-1,by & 0xff);
 		}
 
@@ -406,34 +406,43 @@ void task_set_ukey() {
 	os_jump(OFFSET(t_set_ukey, t_init_key));
 }
 void task_init_key() {
+	LOG("init key\r\n");
 	unsigned i;
 	for (i = 0; i < 18; ++i) {
-		P(_v_key[i]) = init_key[i];
+		PW(_v_key[i]) = init_key[i];
 	}
 	os_jump(OFFSET(t_init_key, t_init_s));
 }
 void task_init_s() {
+	LOG("init s: %u\r\n", P(_v_index));
 	unsigned i;
 
 	for (i = 0; i < 256; ++i) {
+//	for (i = 0; i < 128; ++i) {
+//		if (P(_v_index) == 0 || P(_v_index) == 1) 
 		if (P(_v_index) == 0) 
-			P(_v_s0[i]) = init_s0[i];
+			PW(_v_s0[i]) = init_s0[i];
+//		else if (P(_v_index) == 2 || P(_v_index) == 3)
 		else if (P(_v_index) == 1)
-			P(_v_s1[i]) = init_s1[i];
+			PW(_v_s1[i]) = init_s1[i];
+//		else if (P(_v_index) == 4 || P(_v_index) == 5)
 		else if (P(_v_index) == 2)
-			P(_v_s2[i]) = init_s2[i];
+			PW(_v_s2[i]) = init_s2[i];
+//		else if (P(_v_index) == 6 || P(_v_index) == 7)
 		else if (P(_v_index) == 3)
-			P(_v_s3[i]) = init_s3[i];
+			PW(_v_s3[i]) = init_s3[i];
 	}
 	if(P(_v_index) == 3){
+//	if(P(_v_index) == 7){
 		os_jump(OFFSET(t_init_s, t_set_key));
 	}
 	else {
-		++P(_v_index);
+		++PW(_v_index);
 		os_jump(OFFSET(t_init_s, t_init_s));
 	}
 }
 void task_set_key() {
+	LOG("set key\r\n");
 	unsigned i;
 	uint32_t ri, ri2;
 	unsigned d = 0;
@@ -458,18 +467,18 @@ void task_set_key() {
 		d = (d >= 8)? 0 : d;
 		uint32_t tmp_key = P(_v_key[i]);
 		tmp_key ^= ri;
-		P(_v_key[i]) = tmp_key;
+		PW(_v_key[i]) = tmp_key;
 	}
 	os_jump(OFFSET(t_set_key, t_set_key2));
 }
 void task_set_key2() {
 	if (P(_v_index2) == 0) {
-		P(_v_input[0]) = 0;
-		P(_v_input[1]) = 0;
+		PW(_v_input[0]) = 0;
+		PW(_v_input[1]) = 0;
 		uint32_t tmp_index2 = P(_v_index2);
 		tmp_index2 += 2;
-		P(_v_index2) = tmp_index2;
-		P(_v_next_task) = t_set_key2;
+		PW(_v_index2) = tmp_index2;
+		PW(_v_next_task) = t_set_key2;
 
 		os_jump(OFFSET(t_set_key2, t_encrypt));
 		return;
@@ -478,9 +487,9 @@ void task_set_key2() {
 		if (P(_v_index2) < 20) { //set key
 			uint32_t tmp_key = P(_v_input[0]);
 			uint32_t tmp_index2 = P(_v_index2);
-			P(_v_key[tmp_index2-2]) = tmp_key;
+			PW(_v_key[tmp_index2-2]) = tmp_key;
 			tmp_key = P(_v_input[1]);
-			P(_v_key[tmp_index2-1]) = tmp_key;
+			PW(_v_key[tmp_index2-1]) = tmp_key;
 #if VERBOSE > 0
 			LOG("key[%u]=",tmp_index2-2);
 			print_long(P(_v_input[0]));
@@ -488,7 +497,7 @@ void task_set_key2() {
 			print_long(P(_v_input[1]));	
 #endif
 			tmp_index2 += 2;
-			P(_v_index2) = tmp_index2;
+			PW(_v_index2) = tmp_index2;
 			os_jump(OFFSET(t_set_key2, t_encrypt));
 			return;
 		}
@@ -496,9 +505,9 @@ void task_set_key2() {
 			if (P(_v_index2) < (256 + 20)) { //set s0 
 				uint32_t tmp_s0 = P(_v_input[0]);
 				uint32_t tmp_index2 = P(_v_index2);
-				P(_v_s0[ tmp_index2-20]) = tmp_s0;
+				PW(_v_s0[ tmp_index2-20]) = tmp_s0;
 				tmp_s0 = P(_v_input[1]);
-				P(_v_s0[tmp_index2-19]) = tmp_s0;
+				PW(_v_s0[tmp_index2-19]) = tmp_s0;
 #if VERBOSE > 0
 				if (P(_v_index2) == 20 || P(_v_index2) == 254 + 20) {
 					LOG("s0[%u]=",P(_v_index2)-20);
@@ -510,16 +519,16 @@ void task_set_key2() {
 				}
 #endif
 				tmp_index2 += 2;
-				P(_v_index2) = tmp_index2;
+				PW(_v_index2) = tmp_index2;
 				os_jump(OFFSET(t_set_key2, t_encrypt));
 				return;
 			}
 			else if (P(_v_index2) < (512 + 20)) { //set s1
 				uint32_t tmp_s1 = P(_v_input[0]);
 				uint32_t tmp_index2 = P(_v_index2);
-				P(_v_s1[tmp_index2-(256+20)]) = tmp_s1;
+				PW(_v_s1[tmp_index2-(256+20)]) = tmp_s1;
 				tmp_s1 = P(_v_input[1]);
-				P(_v_s1[tmp_index2-(256+19)]) = tmp_s1;
+				PW(_v_s1[tmp_index2-(256+19)]) = tmp_s1;
 #if VERBOSE > 0
 				if (P(_v_index2) == 256 + 20 || P(_v_index2) == (256*2-2) + 20) {
 					LOG("s1[%u]=",P(_v_index2)-(256+20));
@@ -531,16 +540,16 @@ void task_set_key2() {
 				}
 #endif
 				tmp_index2 += 2;
-				P(_v_index2) = tmp_index2;
+				PW(_v_index2) = tmp_index2;
 				os_jump(OFFSET(t_set_key2, t_encrypt));
 				return;
 			}
 			else if (P(_v_index2) < (256*3 + 20)) { //set s2
 				uint32_t tmp_index2 = P(_v_index2);
 				uint32_t tmp_s2 = P(_v_input[0]);
-				P(_v_s2[tmp_index2-(256*2+20)]) = tmp_s2;
+				PW(_v_s2[tmp_index2-(256*2+20)]) = tmp_s2;
 				tmp_s2 = P(_v_input[1]);
-				P(_v_s2[tmp_index2-(256*2+19)]) = tmp_s2;
+				PW(_v_s2[tmp_index2-(256*2+19)]) = tmp_s2;
 #if VERBOSE > 0
 				if (P(_v_index2) == 256*2 + 20 || P(_v_index2) == (256*3-2) + 20) {
 					LOG("s2[%u]=",P(_v_index2)-(256*2+20));
@@ -552,16 +561,16 @@ void task_set_key2() {
 				}
 #endif
 				tmp_index2 += 2;
-				P(_v_index2) = tmp_index2;
+				PW(_v_index2) = tmp_index2;
 				os_jump(OFFSET(t_set_key2, t_encrypt));
 				return;
 			}
 			else if (P(_v_index2) < (256*4 + 20)) {
 				uint32_t tmp_s3 = P(_v_input[0]);
 				uint32_t tmp_index2 = P(_v_index2);
-				P(_v_s3[tmp_index2-(256*3+20)]) = tmp_s3;
+				PW(_v_s3[tmp_index2-(256*3+20)]) = tmp_s3;
 				tmp_s3 = P(_v_input[1]);
-				P(_v_s3[tmp_index2-(256*3+19)]) = tmp_s3;
+				PW(_v_s3[tmp_index2-(256*3+19)]) = tmp_s3;
 #if VERBOSE > 0
 				if (P(_v_index2) == 256*3 + 20 || P(_v_index2) == (256*4-2) + 20) {
 					LOG("s3[%u]=",P(_v_index2)-(256*3+20));
@@ -573,13 +582,13 @@ void task_set_key2() {
 				}
 #endif
 				tmp_index2 += 2;
-				P(_v_index2) = tmp_index2;
+				PW(_v_index2) = tmp_index2;
 				if (P(_v_index2) < (256*4 + 20)) {
 					os_jump(OFFSET(t_set_key2, t_encrypt));
 					return;
 				}
 				else { //done
-					P(_v_index2) = 0;
+					PW(_v_index2) = 0;
 					os_jump(OFFSET(t_set_key2, t_start_encrypt));
 					return;
 				}
@@ -646,13 +655,13 @@ void task_encrypt() {
 			print_long(r);
 			print_long(l);
 		}
-		while(1);
+		//while(1);
 #endif
 	}
 	p = P(_v_key[17]);
 	l ^= p;
-	P(_v_input[1]) = r;
-	P(_v_input[0]) = l;
+	PW(_v_input[1]) = r;
+	PW(_v_input[0]) = l;
 	os_jump(OFFSET(t_encrypt, P(_v_next_task)));
 	return;
 }
@@ -666,14 +675,14 @@ void task_start_encrypt() {
 		tmp_input_0|=((unsigned long)(P(_v_iv[1])))<<16L;
 		tmp_input_0|=((unsigned long)(P(_v_iv[2])))<< 8L;
 		tmp_input_0|=((unsigned long)(P(_v_iv[3])));
-		P(_v_input[0]) = tmp_input_0;
+		PW(_v_input[0]) = tmp_input_0;
 		uint32_t tmp_input_1;
 		tmp_input_1 =((unsigned long)(P(_v_iv[4])))<<24L;
 		tmp_input_1|=((unsigned long)(P(_v_iv[5])))<<16L;
 		tmp_input_1|=((unsigned long)(P(_v_iv[6])))<< 8L;
 		tmp_input_1|=((unsigned long)(P(_v_iv[7])));
-		P(_v_input[1]) = tmp_input_1;
-		P(_v_next_task) = t_start_encrypt2;
+		PW(_v_input[1]) = tmp_input_1;
+		PW(_v_next_task) = t_start_encrypt2;
 		os_jump(OFFSET(t_start_encrypt, t_encrypt));
 		return;
 	}
@@ -693,14 +702,14 @@ void task_start_encrypt2() {
 	tmp_iv[6] = (unsigned char)(((P(_v_input[1]))>> 8L)&0xff);
 	tmp_iv[7] = (unsigned char)(((P(_v_input[1]))     )&0xff);
 
-	P(_v_iv[0]) = tmp_iv[0];
-	P(_v_iv[1]) = tmp_iv[1];
-	P(_v_iv[2]) = tmp_iv[2];
-	P(_v_iv[3]) = tmp_iv[3];
-	P(_v_iv[4]) = tmp_iv[4];
-	P(_v_iv[5]) = tmp_iv[5];
-	P(_v_iv[6]) = tmp_iv[6];
-	P(_v_iv[7]) = tmp_iv[7];
+	PW(_v_iv[0]) = tmp_iv[0];
+	PW(_v_iv[1]) = tmp_iv[1];
+	PW(_v_iv[2]) = tmp_iv[2];
+	PW(_v_iv[3]) = tmp_iv[3];
+	PW(_v_iv[4]) = tmp_iv[4];
+	PW(_v_iv[5]) = tmp_iv[5];
+	PW(_v_iv[6]) = tmp_iv[6];
+	PW(_v_iv[7]) = tmp_iv[7];
 #if VERBOSE > 0
 	for (int i=0; i<8; ++i){
 		LOG("iv[%u]=%u\r\n",i,P(_v_iv[i]));
@@ -714,12 +723,12 @@ void task_start_encrypt3() {
 	unsigned char c;
 	c = indata[P(_v_index2)]^(P(_v_iv[P(_v_n)]));
 	uint32_t tmp_index2 = P(_v_index2);
-	P(_v_result[tmp_index2]) = c;
+	PW(_v_result[tmp_index2]) = c;
 	PRINTF("result: %x\r\n", c);
-	P(_v_iv[P(_v_n)]) = c;
-	P(_v_n) = (P(_v_n)+1)&0x07;
+	PW(_v_iv[P(_v_n)]) = c;
+	PW(_v_n) = (P(_v_n)+1)&0x07;
 	tmp_index2++;
-	P(_v_index2) = tmp_index2;
+	PW(_v_index2) = tmp_index2;
 	if (P(_v_index2) == LENGTH) {
 		os_jump(OFFSET(t_start_encrypt3, t_done));
 		return;
@@ -763,7 +772,7 @@ void init()
 	INIT_CONSOLE();
 
 	__enable_interrupt();
-
+	PRINTF(".%u.\r\n", __task_address);
 //	PRINTF(".%u.\r\n", curctx->task->idx);
 }
 

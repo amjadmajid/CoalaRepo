@@ -122,14 +122,14 @@ void init() {
 void task_init() {
 	LOG("init\r\n");
 
-	P(_v_func) = 0;
-	P(_v_n_0) = 0;
-	P(_v_n_1) = 0;
-	P(_v_n_2) = 0;
-	P(_v_n_3) = 0;
-	P(_v_n_4) = 0;
-	P(_v_n_5) = 0;
-	P(_v_n_6) = 0;
+	PW(_v_func) = 0;
+	PW(_v_n_0) = 0;
+	PW(_v_n_1) = 0;
+	PW(_v_n_2) = 0;
+	PW(_v_n_3) = 0;
+	PW(_v_n_4) = 0;
+	PW(_v_n_5) = 0;
+	PW(_v_n_6) = 0;
 
 	os_jump(OFFSET(t_init, t_select_func));
 }
@@ -137,35 +137,35 @@ void task_init() {
 void task_select_func() {
 	LOG("select func\r\n");
 
-	P(_v_seed) = (uint32_t)SEED; // for test, seed is always the same
-	P(_v_iter) = 0;
+	PW(_v_seed) = (uint32_t)SEED; // for test, seed is always the same
+	PW(_v_iter) = 0;
 	LOG("func: %u\r\n", P(_v_func));
 	if(P(_v_func) == 0){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_bit_count));
 	}
 	else if(P(_v_func) == 1){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_bitcount));
 	}
 	else if(P(_v_func) == 2){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_ntbl_bitcnt));
 	}
 	else if(P(_v_func) == 3){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_ntbl_bitcount));
 	}
 	else if(P(_v_func) == 4){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_BW_btbl_bitcount));
 	}
 	else if(P(_v_func) == 5){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_AR_btbl_bitcount));
 	}
 	else if(P(_v_func) == 6){
-		P(_v_func)++;
+		PW(_v_func)++;
 		os_jump(OFFSET(t_select_func, t_bit_shifter));
 	}
 	else{
@@ -175,13 +175,13 @@ void task_select_func() {
 void task_bit_count() {
 	LOG("bit_count\r\n");
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_seed) = tmp_seed + 13;
+	PW(_v_seed) = tmp_seed + 13;
 	unsigned temp = 0;
 	if(tmp_seed) do 
 		temp++;
 	while (0 != (tmp_seed = tmp_seed&(tmp_seed-1)));
-	P(_v_n_0) += temp;
-	P(_v_iter)++;
+	PW(_v_n_0) += temp;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_bit_count, t_bit_count));
@@ -193,14 +193,14 @@ void task_bit_count() {
 void task_bitcount() {
 	LOG("bitcount\r\n");
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_seed) = tmp_seed + 13;
+	PW(_v_seed) = tmp_seed + 13;
 	tmp_seed = ((tmp_seed & 0xAAAAAAAAL) >>  1) + (tmp_seed & 0x55555555L);
 	tmp_seed = ((tmp_seed & 0xCCCCCCCCL) >>  2) + (tmp_seed & 0x33333333L);
 	tmp_seed = ((tmp_seed & 0xF0F0F0F0L) >>  4) + (tmp_seed & 0x0F0F0F0FL);
 	tmp_seed = ((tmp_seed & 0xFF00FF00L) >>  8) + (tmp_seed & 0x00FF00FFL);
 	tmp_seed = ((tmp_seed & 0xFFFF0000L) >> 16) + (tmp_seed & 0x0000FFFFL);
-	P(_v_n_1) += (int)tmp_seed;
-	P(_v_iter)++;
+	PW(_v_n_1) += (int)tmp_seed;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_bitcount, t_bitcount));
@@ -229,9 +229,9 @@ int non_recursive_cnt(uint32_t x){
 void task_ntbl_bitcnt() {
 	LOG("ntbl_bitcnt\r\n");
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_n_2) += non_recursive_cnt(tmp_seed);	
-	P(_v_seed) = tmp_seed + 13;
-	P(_v_iter)++;
+	PW(_v_n_2) += non_recursive_cnt(tmp_seed);	
+	PW(_v_seed) = tmp_seed + 13;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_ntbl_bitcnt, t_ntbl_bitcnt));
@@ -242,7 +242,7 @@ void task_ntbl_bitcnt() {
 }
 void task_ntbl_bitcount() {
 	LOG("ntbl_bitcount\r\n");
-	P(_v_n_3) += bits[ (int) (P(_v_seed) & 0x0000000FUL)       ] +
+	PW(_v_n_3) += bits[ (int) (P(_v_seed) & 0x0000000FUL)       ] +
 		bits[ (int)((P(_v_seed) & 0x000000F0UL) >> 4) ] +
 		bits[ (int)((P(_v_seed) & 0x00000F00UL) >> 8) ] +
 		bits[ (int)((P(_v_seed) & 0x0000F000UL) >> 12)] +
@@ -251,8 +251,8 @@ void task_ntbl_bitcount() {
 		bits[ (int)((P(_v_seed) & 0x0F000000UL) >> 24)] +
 		bits[ (int)((P(_v_seed) & 0xF0000000UL) >> 28)];
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_seed) = tmp_seed + 13;
-	P(_v_iter)++;
+	PW(_v_seed) = tmp_seed + 13;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_ntbl_bitcount, t_ntbl_bitcount));
@@ -271,11 +271,11 @@ void task_BW_btbl_bitcount() {
 
 	U.y = P(_v_seed); 
 
-	P(_v_n_4) += bits[ U.ch[0] ] + bits[ U.ch[1] ] + 
+	PW(_v_n_4) += bits[ U.ch[0] ] + bits[ U.ch[1] ] + 
 		bits[ U.ch[3] ] + bits[ U.ch[2] ]; 
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_seed) = tmp_seed + 13;
-	P(_v_iter)++;
+	PW(_v_seed) = tmp_seed + 13;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_BW_btbl_bitcount, t_BW_btbl_bitcount));
@@ -293,10 +293,10 @@ void task_AR_btbl_bitcount() {
 	Accu += bits[ P(*Ptr++) ];
 	Accu += bits[ P(*Ptr++) ];
 	Accu += bits[ P(*Ptr) ];
-	P(_v_n_5)+= Accu;
+	PW(_v_n_5)+= Accu;
 	uint32_t tmp_seed = P(_v_seed);
-	P(_v_seed) = tmp_seed + 13;
-	P(_v_iter)++;
+	PW(_v_seed) = tmp_seed + 13;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_AR_btbl_bitcount, t_AR_btbl_bitcount));
@@ -311,12 +311,12 @@ void task_bit_shifter() {
 	uint32_t tmp_seed = P(_v_seed);
 	for (i = nn = 0; tmp_seed && (i < (sizeof(long) * CHAR_BIT)); ++i, tmp_seed >>= 1)
 		nn += (unsigned)(tmp_seed & 1L);
-	P(_v_n_6) += nn;
+	PW(_v_n_6) += nn;
 	tmp_seed = P(_v_seed);
 	tmp_seed += 13;
-	P(_v_seed) = tmp_seed;
+	PW(_v_seed) = tmp_seed;
 
-	P(_v_iter)++;
+	PW(_v_iter)++;
 
 	if(P(_v_iter) < ITER){
 		os_jump(OFFSET(t_bit_shifter, t_bit_shifter));

@@ -60,6 +60,7 @@ typedef struct _lookup_count {
 } lookup_count_t;
 
 #define TASK_NUM 15
+#define OFFSET(src, dest) src <= dest ? dest - src : TASK_NUM + dest - src 
 
 enum task_index {
 	t_init,
@@ -142,24 +143,24 @@ void task_init()
 {
 	unsigned i;
 	for (i = 0; i < NUM_BUCKETS ; ++i) {
-		P(_v_filter[i]) = 0;
+		PW(_v_filter[i]) = 0;
 	}
-	P(_v_insert_count) = 0;
-	P(_v_lookup_count) = 0;
-	P(_v_inserted_count) = 0;
-	P(_v_member_count) = 0;
-	P(_v_key) = init_key;
-	P(_v_next_task) = t_insert;
+	PW(_v_insert_count) = 0;
+	PW(_v_lookup_count) = 0;
+	PW(_v_inserted_count) = 0;
+	PW(_v_member_count) = 0;
+	PW(_v_key) = init_key;
+	PW(_v_next_task) = t_insert;
 	LOG("init end!!\r\n");
-	os_jump(2);
+	os_jump(OFFSET(t_init, t_generate_key));
 }
 void task_init_array() {
 	LOG("init array start\r\n");
 	unsigned i;
 	for (i = 0; i < BUFFER_SIZE - 1; ++i) {
-		P(_v_filter[i + P(_v_index)*(BUFFER_SIZE-1)]) = 0;
+		PW(_v_filter[i + P(_v_index)*(BUFFER_SIZE-1)]) = 0;
 	}
-	++P(_v_index);
+	++PW(_v_index);
 	if (P(_v_index) == NUM_BUCKETS/(BUFFER_SIZE-1)) {
 		os_jump(1);
 	}
@@ -175,7 +176,7 @@ void task_generate_key()
 	// If we use consecutive ints, they hash to consecutive DJB hashes...
 	// NOTE: we are not using rand(), to have the sequence available to verify
 	// that that are no false negatives (and avoid having to save the values).
-	P(_v_key) = (P(_v_key) + 1) * 17;
+	PW(_v_key) = (P(_v_key) + 1) * 17;
 	LOG("generate_key: key: %x\r\n", P(_v_key));
 	if (P(_v_next_task) >= t_generate_key) {
 		os_jump(P(_v_next_task) - t_generate_key);
@@ -187,7 +188,7 @@ void task_generate_key()
 
 void task_calc_indexes()
 {
-	P(_v_fingerprint) = hash_to_fingerprint(P(_v_key));
+	PW(_v_fingerprint) = hash_to_fingerprint(P(_v_key));
 	LOG("calc indexes: fingerprint: key %04x fp %04x\r\n", P(_v_key), P(_v_fingerprint));
 
 	os_jump(1);
@@ -195,7 +196,7 @@ void task_calc_indexes()
 
 void task_calc_indexes_index_1()
 {
-	P(_v_index1) = hash_to_index(P(_v_key));
+	PW(_v_index1) = hash_to_index(P(_v_key));
 	LOG("calc indexes: index1: key %04x idx1 %u\r\n", P(_v_key), P(_v_index1));
 	os_jump(1);
 }
@@ -203,7 +204,7 @@ void task_calc_indexes_index_1()
 void task_calc_indexes_index_2()
 {
 	index_t fp_hash = hash_to_index(P(_v_fingerprint));
-	P(_v_index2) = P(_v_index1) ^ fp_hash;
+	PW(_v_index2) = P(_v_index1) ^ fp_hash;
 
 	LOG("calc indexes: index2: fp hash: %04x idx1 %u idx2 %u\r\n",
 			fp_hash, P(_v_index1), P(_v_index2));
@@ -220,7 +221,7 @@ void task_calc_indexes_index_2()
 void task_insert()
 {
 	LOG("insert: key %04x\r\n", P(_v_key));
-	P(_v_next_task) = t_add; 
+	PW(_v_next_task) = t_add; 
 	os_jump(12);
 }
 
@@ -235,8 +236,8 @@ void task_add()
 	if (!P(_v_filter[P(_v_index1)])) {
 		LOG("add: filled empty slot at idx1 %u\r\n", P(_v_index1));
 
-		P(_v_success) = true;
-		P(_v_filter[P(_v_index1)]) = P(_v_fingerprint);
+		PW(_v_success) = true;
+		PW(_v_filter[P(_v_index1)]) = P(_v_fingerprint);
 		os_jump(2);
 		return;
 	} else {
@@ -244,8 +245,8 @@ void task_add()
 		if (!P(_v_filter[P(_v_index2)])) {
 			LOG("add: filled empty slot at idx2 %u\r\n", P(_v_index2));
 
-			P(_v_success) = true;
-			P(_v_filter[P(_v_index2)]) = P(_v_fingerprint);
+			PW(_v_success) = true;
+			PW(_v_filter[P(_v_index2)]) = P(_v_fingerprint);
 			os_jump(2);
 			return;
 		} else { // evict one of the two entries
@@ -263,10 +264,10 @@ void task_add()
 			LOG("add: evict [%u] = %04x\r\n", index_victim, fp_victim);
 
 			// Evict the victim
-			P(_v_filter[P(index_victim)]) = P(_v_fingerprint);
-			P(_v_index1) = index_victim;
-			P(_v_fingerprint) = fp_victim;
-			P(_v_relocation_count) = 0;
+			PW(_v_filter[P(index_victim)]) = P(_v_fingerprint);
+			PW(_v_index1) = index_victim;
+			PW(_v_fingerprint) = fp_victim;
+			PW(_v_relocation_count) = 0;
 
 			os_jump(1);
 			return;
@@ -287,8 +288,8 @@ void task_relocate()
 
 
 	if (!P(_v_filter[index2_victim])) { // slot was free
-		P(_v_success) = true;
-		P(_v_filter[index2_victim]) = fp_victim;
+		PW(_v_success) = true;
+		PW(_v_filter[index2_victim]) = fp_victim;
 		os_jump(1);
 		return;
 	} else { // slot was occupied, rellocate the next victim
@@ -297,15 +298,15 @@ void task_relocate()
 
 		if (P(_v_relocation_count) >= MAX_RELOCATIONS) { // insert failed
 			PRINTF("relocate: max relocs reached: %u\r\n", P(_v_relocation_count));
-			P(_v_success) = false;
+			PW(_v_success) = false;
 			os_jump(1);
 			return;
 		}
 
-		++P(_v_relocation_count);
-		P(_v_index1) = index2_victim;
-		P(_v_fingerprint) = P(_v_filter[index2_victim]);
-		P(_v_filter[index2_victim]) = fp_victim;
+		++PW(_v_relocation_count);
+		PW(_v_index1) = index2_victim;
+		PW(_v_fingerprint) = P(_v_filter[index2_victim]);
+		PW(_v_filter[index2_victim]) = fp_victim;
 		os_jump(0);
 		return;
 	}
@@ -326,18 +327,18 @@ void task_insert_done()
 	LOG("\r\n");
 #endif
 
-	++P(_v_insert_count);
-	P(_v_inserted_count) += P(_v_success);
+	++PW(_v_insert_count);
+	PW(_v_inserted_count) += P(_v_success);
 
 	LOG("insert done: insert %u inserted %u\r\n", P(_v_insert_count), P(_v_inserted_count));
 
 	if (P(_v_insert_count) < NUM_INSERTS) {
-		P(_v_next_task) = t_insert; 
+		PW(_v_next_task) = t_insert; 
 		os_jump(8);
 		return;
 	} else {
-		P(_v_next_task) = t_lookup; 
-		P(_v_key) = init_key;
+		PW(_v_next_task) = t_lookup; 
+		PW(_v_key) = init_key;
 		os_jump(8);
 		return;
 	}
@@ -346,7 +347,7 @@ void task_insert_done()
 void task_lookup()
 {
 	LOG("lookup: key %04x\r\n", P(_v_key));
-	P(_v_next_task) = t_lookup_search;
+	PW(_v_next_task) = t_lookup_search;
 	os_jump(8);
 }
 
@@ -356,15 +357,15 @@ void task_lookup_search()
 	LOG("lookup search: fp1 %04x\r\n", P(_v_filter[P(_v_index1)]));
 
 	if (P(_v_filter[P(_v_index1)]) == P(_v_fingerprint)) {
-		P(_v_member) = true;
+		PW(_v_member) = true;
 	} else {
 		LOG("lookup search: fp2 %04x\r\n", P(_v_filter[P(_v_index2)]));
 
 		if (P(_v_filter[P(_v_index2)]) == P(_v_fingerprint)) {
-			P(_v_member) = true;
+			PW(_v_member) = true;
 		}
 		else {
-			P(_v_member) = false;
+			PW(_v_member) = false;
 		}
 	}
 
@@ -379,13 +380,13 @@ void task_lookup_search()
 
 void task_lookup_done()
 {
-	++P(_v_lookup_count);
+	++PW(_v_lookup_count);
 
-	P(_v_member_count) += P(_v_member);
+	PW(_v_member_count) += P(_v_member);
 	LOG("lookup done: lookups %u members %u\r\n", P(_v_lookup_count), P(_v_member_count));
 
 	if (P(_v_lookup_count) < NUM_LOOKUPS) {
-		P(_v_next_task) = t_lookup;
+		PW(_v_next_task) = t_lookup;
 		os_jump(5);
 		return;
 	} else {

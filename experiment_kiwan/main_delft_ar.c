@@ -114,7 +114,7 @@ void ACCEL_singleSample_(threeAxis_t_8* result){
 	result->x = (P(_v_seed)*17)%85;
 	result->y = (P(_v_seed)*17*17)%85;
 	result->z = (P(_v_seed)*17*17*17)%85;
-	++P(_v_seed);
+	++PW(_v_seed);
 }
 
 static void init_hw()
@@ -157,16 +157,16 @@ void task_init()
 {
 	LOG("init\r\n");
 
-	P(_v_pinState) = MODE_IDLE;
+	PW(_v_pinState) = MODE_IDLE;
 
-	P(_v_count) = 0;
-	P(_v_seed) = 1;
+	PW(_v_count) = 0;
+	PW(_v_seed) = 1;
 	os_jump(OFFSET(t_init, t_selectMode));
 }
 void task_selectMode()
 {
 	uint16_t pin_state=1;
-	++P(_v_count);
+	++PW(_v_count);
 	LOG("count: %u\r\n",P(_v_count));
 	if(P(_v_count) >= 3) pin_state=2;
 	if(P(_v_count)>=5) pin_state=0;
@@ -183,32 +183,32 @@ void task_selectMode()
 			pin_state == P(_v_pinState)) {
 		pin_state = MODE_IDLE;
 	} else {
-		P(_v_pinState) = pin_state;
+		PW(_v_pinState) = pin_state;
 	}
 
 	LOG("selectMode: 0x%x\r\n", pin_state);
 
 	switch(pin_state) {
 		case MODE_TRAIN_STATIONARY:		
-			P(_v_discardedSamplesCount) = 0;
-			P(_v_mode) = MODE_TRAIN_STATIONARY;
-			P(_v_class) = CLASS_STATIONARY;
-			P(_v_samplesInWindow) = 0;
+			PW(_v_discardedSamplesCount) = 0;
+			PW(_v_mode) = MODE_TRAIN_STATIONARY;
+			PW(_v_class) = CLASS_STATIONARY;
+			PW(_v_samplesInWindow) = 0;
 
 			os_jump(OFFSET(t_selectMode, t_warmup));
 			break;
 
 		case MODE_TRAIN_MOVING:
-			P(_v_discardedSamplesCount) = 0;
-			P(_v_mode) = MODE_TRAIN_MOVING;
-			P(_v_class) = CLASS_MOVING;
-			P(_v_samplesInWindow) = 0;
+			PW(_v_discardedSamplesCount) = 0;
+			PW(_v_mode) = MODE_TRAIN_MOVING;
+			PW(_v_class) = CLASS_MOVING;
+			PW(_v_samplesInWindow) = 0;
 
 			os_jump(OFFSET(t_selectMode, t_warmup));
 			break;
 
 		case MODE_RECOGNIZE:
-			P(_v_mode) = MODE_RECOGNIZE;
+			PW(_v_mode) = MODE_RECOGNIZE;
 
 			os_jump(OFFSET(t_selectMode, t_resetStats));
 			break;
@@ -224,11 +224,11 @@ void task_resetStats()
 	LOG("resetStats\r\n");
 
 	// NOTE: not combined into one struct because not all code paths use both
-	P(_v_movingCount) = 0;
-	P(_v_stationaryCount) = 0;
-	P(_v_totalCount) = 0;
+	PW(_v_movingCount) = 0;
+	PW(_v_stationaryCount) = 0;
+	PW(_v_totalCount) = 0;
 
-	P(_v_samplesInWindow) = 0;
+	PW(_v_samplesInWindow) = 0;
 
 	os_jump(OFFSET(t_resetStats, t_sample));
 }
@@ -239,8 +239,10 @@ void task_sample()
 
 	accelReading sample;
 	ACCEL_singleSample_(&sample);
-	P(_v_window[P(_v_samplesInWindow)]) = sample;
-	++P(_v_samplesInWindow);
+	PW(_v_window[P(_v_samplesInWindow)].x) = sample.x;
+	PW(_v_window[P(_v_samplesInWindow)].y) = sample.y;
+	PW(_v_window[P(_v_samplesInWindow)].z) = sample.z;
+	++PW(_v_samplesInWindow);
 	LOG("sample: sample %u %u %u window %u\r\n",
 			sample.x, sample.y, sample.z, P(_v_samplesInWindow));
 
@@ -261,16 +263,16 @@ void task_transform()
 	accelReading transformedSample;
 
 	for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
-		if (P(_v_window[i]).x < SAMPLE_NOISE_FLOOR ||
-				P(_v_window[i]).y < SAMPLE_NOISE_FLOOR ||
-				P(_v_window[i]).z < SAMPLE_NOISE_FLOOR) {
+		if (P(_v_window[i].x) < SAMPLE_NOISE_FLOOR ||
+				P(_v_window[i].y) < SAMPLE_NOISE_FLOOR ||
+				P(_v_window[i].z) < SAMPLE_NOISE_FLOOR) {
 
-			P(_v_window[i]).x = (P(_v_window[i]).x > SAMPLE_NOISE_FLOOR)
-				? P(_v_window[i]).x : 0;
-			P(_v_window[i]).y = (P(_v_window[i]).y > SAMPLE_NOISE_FLOOR)
-				? P(_v_window[i]).y : 0;
-			P(_v_window[i]).z = (P(_v_window[i]).z > SAMPLE_NOISE_FLOOR)
-				? P(_v_window[i]).z : 0;
+			PW(_v_window[i].x) = (P(_v_window[i].x) > SAMPLE_NOISE_FLOOR)
+				? P(_v_window[i].x) : 0;
+			PW(_v_window[i].y) = (P(_v_window[i].y) > SAMPLE_NOISE_FLOOR)
+				? P(_v_window[i].y) : 0;
+			PW(_v_window[i].z) = (P(_v_window[i].z) > SAMPLE_NOISE_FLOOR)
+				? P(_v_window[i].z) : 0;
 		}
 	}
 	os_jump(OFFSET(t_transform, t_featurize));
@@ -287,10 +289,10 @@ void task_featurize()
 
 	int i;
 	for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
-		LOG("featurize: features: x %u y %u z %u \r\n", P(_v_window[i]).x,P(_v_window[i]).y,P(_v_window[i]).z);
-		mean.x += P(_v_window[i]).x;
-		mean.y += P(_v_window[i]).y;
-		mean.z += P(_v_window[i]).z;
+		LOG("featurize: features: x %u y %u z %u \r\n", P(_v_window[i].x),P(_v_window[i].y),P(_v_window[i].z));
+		mean.x += P(_v_window[i].x);
+		mean.y += P(_v_window[i].y);
+		mean.z += P(_v_window[i].z);
 	}
 	mean.x >>= 2;
 	mean.y >>= 2;
@@ -298,12 +300,12 @@ void task_featurize()
 
 	LOG("featurize: features: mx %u my %u mz %u \r\n", mean.x,mean.y,mean.z);
 	for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
-		stddev.x += P(_v_window[i]).x > mean.x ? P(_v_window[i]).x - mean.x
-			: mean.x - P(_v_window[i]).x;
-		stddev.y += P(_v_window[i]).y > mean.y ? P(_v_window[i]).y - mean.y
-			: mean.y - P(_v_window[i]).y;
-		stddev.z += P(_v_window[i]).z > mean.z ? P(_v_window[i]).z - mean.z
-			: mean.z - P(_v_window[i]).z;
+		stddev.x += P(_v_window[i].x) > mean.x ? P(_v_window[i].x) - mean.x
+			: mean.x - P(_v_window[i].x);
+		stddev.y += P(_v_window[i].y) > mean.y ? P(_v_window[i].y) - mean.y
+			: mean.y - P(_v_window[i].y);
+		stddev.z += P(_v_window[i].z) > mean.z ? P(_v_window[i].z) - mean.z
+			: mean.z - P(_v_window[i].z);
 	}
 	stddev.x >>= 2;
 	stddev.y >>= 2;
@@ -319,13 +321,13 @@ void task_featurize()
 	switch (P(_v_mode)) {
 		case MODE_TRAIN_STATIONARY:
 		case MODE_TRAIN_MOVING:
-			P(_v_features.meanmag) = features.meanmag;
-			P(_v_features.stddevmag) = features.stddevmag;
+			PW(_v_features.meanmag) = features.meanmag;
+			PW(_v_features.stddevmag) = features.stddevmag;
 			os_jump(OFFSET(t_featurize, t_train));
 			break;
 		case MODE_RECOGNIZE:
-			P(_v_features.meanmag) = features.meanmag;
-			P(_v_features.stddevmag) = features.stddevmag;
+			PW(_v_features.meanmag) = features.meanmag;
+			PW(_v_features.stddevmag) = features.stddevmag;
 			os_jump(OFFSET(t_featurize, t_classify));
 			break;
 		default:
@@ -384,7 +386,7 @@ void task_classify() {
 		}
 	}
 
-	P(_v_class) = (move_less_error > stat_less_error) ? CLASS_MOVING : CLASS_STATIONARY;
+	PW(_v_class) = (move_less_error > stat_less_error) ? CLASS_MOVING : CLASS_STATIONARY;
 
 	LOG("classify: class 0x%x\r\n", P(_v_class));
 
@@ -397,18 +399,18 @@ void task_stats()
 
 	LOG("stats\r\n");
 
-	++P(_v_totalCount);
+	++PW(_v_totalCount);
 	LOG("stats: total %u\r\n", P(_v_totalCount));
 
 	switch (P(_v_class)) {
 		case CLASS_MOVING:
 
-			++P(_v_movingCount);
+			++PW(_v_movingCount);
 			LOG("stats: moving %u\r\n", P(_v_movingCount));
 			break;
 		case CLASS_STATIONARY:
 
-			++P(_v_stationaryCount);
+			++PW(_v_stationaryCount);
 			LOG("stats: stationary %u\r\n", P(_v_stationaryCount));
 			break;
 	}
@@ -437,11 +439,11 @@ void task_warmup()
 	if (P(_v_discardedSamplesCount) < NUM_WARMUP_SAMPLES) {
 
 		ACCEL_singleSample_(&sample);
-		++P(_v_discardedSamplesCount);
+		++PW(_v_discardedSamplesCount);
 		LOG("warmup: discarded %u\r\n", P(_v_discardedSamplesCount));
 		os_jump(OFFSET(t_warmup, t_warmup));
 	} else {
-		P(_v_trainingSetSize) = 0;
+		PW(_v_trainingSetSize) = 0;
 		os_jump(OFFSET(t_warmup, t_sample));
 	}
 }
@@ -454,16 +456,16 @@ void task_train()
 
 	switch (P(_v_class)) {
 		case CLASS_STATIONARY:
-			P(_v_model_stationary[P(_v_trainingSetSize)].meanmag) = P(_v_features.meanmag);
-			P(_v_model_stationary[P(_v_trainingSetSize)].stddevmag) = P(_v_features.stddevmag);
+			PW(_v_model_stationary[P(_v_trainingSetSize)].meanmag) = P(_v_features.meanmag);
+			PW(_v_model_stationary[P(_v_trainingSetSize)].stddevmag) = P(_v_features.stddevmag);
 			break;
 		case CLASS_MOVING:
-			P(_v_model_moving[P(_v_trainingSetSize)].meanmag) = P(_v_features.meanmag);
-			P(_v_model_moving[P(_v_trainingSetSize)].stddevmag) = P(_v_features.stddevmag);
+			PW(_v_model_moving[P(_v_trainingSetSize)].meanmag) = P(_v_features.meanmag);
+			PW(_v_model_moving[P(_v_trainingSetSize)].stddevmag) = P(_v_features.stddevmag);
 			break;
 	}
 
-	++P(_v_trainingSetSize);
+	++PW(_v_trainingSetSize);
 	LOG("train: class %u count %u/%u\r\n", P(_v_class),
 			P(_v_trainingSetSize), MODEL_SIZE);
 

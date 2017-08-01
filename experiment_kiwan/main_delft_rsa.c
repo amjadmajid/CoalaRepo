@@ -194,15 +194,15 @@ void task_init()
 
 	// TODO: consider passing pubkey as a structure type
 	for (i = 0; i < NUM_DIGITS; ++i) {
-		P(_v_modulus[i]) = pubkey.n[i];
+		PW(_v_modulus[i]) = pubkey.n[i];
 		LOG("modulus 0: %x\r\n", P(_v_modulus[0]));
 	}
 
 	LOG("init: out exp\r\n");
 
-	P(_v_message_length) = message_length;
-	P(_v_block_offset) = 0;
-	P(_v_cyphertext_len) = 0;
+	PW(_v_message_length) = message_length;
+	PW(_v_block_offset) = 0;
+	PW(_v_cyphertext_len) = 0;
 
 	LOG("init: done\r\n");
 
@@ -231,19 +231,19 @@ void task_pad()
 
 	digit_t zero = 0;
 	for (i = 0; i < NUM_DIGITS - NUM_PAD_DIGITS; ++i) {
-		P(_v_base[i]) = (P(_v_block_offset) + i < P(_v_message_length)) ? PLAINTEXT[P(_v_block_offset) + i] : 0xFF;
+		PW(_v_base[i]) = (P(_v_block_offset) + i < P(_v_message_length)) ? PLAINTEXT[P(_v_block_offset) + i] : 0xFF;
 	}
 	for (i = NUM_DIGITS - NUM_PAD_DIGITS; i < NUM_DIGITS; ++i) {
-		P(_v_base[i]) = 1;
+		PW(_v_base[i]) = 1;
 	}
-	P(_v_block[0]) = 1;
+	PW(_v_block[0]) = 1;
 	for (i = 1; i < NUM_DIGITS; ++i)
-		P(_v_block[i]) = 0;
+		PW(_v_block[i]) = 0;
 
 	//P(_v_exponent_next) = P(_v_exponent);
-	P(_v_exponent) = pubkey.e;
+	PW(_v_exponent) = pubkey.e;
 
-	P(_v_block_offset) += NUM_DIGITS - NUM_PAD_DIGITS;
+	PW(_v_block_offset) += NUM_DIGITS - NUM_PAD_DIGITS;
 
 	os_jump(OFFSET(t_pad, t_exp));
 	return;
@@ -257,11 +257,11 @@ void task_exp()
 
 
 	if (P(_v_exponent) & 0x1) {
-		P(_v_exponent) >>= 1;
+		PW(_v_exponent) >>= 1;
 		os_jump(OFFSET(t_exp, t_mult_block));
 		return;
 	} else {
-		P(_v_exponent) >>= 1;
+		PW(_v_exponent) >>= 1;
 		os_jump(OFFSET(t_exp, t_square_base));
 		return;
 	}
@@ -274,7 +274,7 @@ void task_mult_block()
 	LOG("mult block\r\n");
 
 	// TODO: pass args to mult: message * base
-	P(_v_next_task) = t_mult_block_get_result;
+	PW(_v_next_task) = t_mult_block_get_result;
 	os_jump(OFFSET(t_mult_block, t_mult_mod));
 	return;
 }
@@ -285,7 +285,7 @@ void task_mult_block_get_result()
 
 	LOG("mult block get result: block: ");
 	for (i = NUM_DIGITS - 1; i >= 0; --i) { // reverse for printing
-		P(_v_block[i]) = P(_v_product[i]);
+		PW(_v_block[i]) = P(_v_product[i]);
 		LOG("%x ", P(_v_product[i]));
 	}
 	LOG("\r\n");
@@ -308,8 +308,8 @@ void task_mult_block_get_result()
 				// TODO: we could save this read by rolling this loop into the
 				// above loop, by paying with an extra conditional in the
 				// above-loop.
-				P(_v_cyphertext[P(_v_cyphertext_len)]) = P(_v_product[i]);
-				++P(_v_cyphertext_len);
+				PW(_v_cyphertext[P(_v_cyphertext_len)]) = P(_v_product[i]);
+				++PW(_v_cyphertext_len);
 			}
 
 		} else {
@@ -334,7 +334,7 @@ void task_square_base()
 {
 	LOG("square base\r\n");
 
-	P(_v_next_task) = t_square_base_get_result;
+	PW(_v_next_task) = t_square_base_get_result;
 	os_jump(OFFSET(t_square_base, t_mult_mod));
 	return;
 }
@@ -349,7 +349,7 @@ void task_square_base_get_result()
 
 	for (i = 0; i < NUM_DIGITS; ++i) {
 		LOG("suqare base get result: base[%u]=%x\r\n", i, P(_v_product[i]));
-		P(_v_base[i]) = P(_v_product[i]);
+		PW(_v_base[i]) = P(_v_product[i]);
 	}
 
 	os_jump(OFFSET(t_square_base_get_result, t_exp));
@@ -395,8 +395,8 @@ void task_mult_mod()
 {
 	LOG("mult mod\r\n");
 
-	P(_v_digit) = 0;
-	P(_v_carry) = 0;
+	PW(_v_digit) = 0;
+	PW(_v_carry) = 0;
 
 	os_jump(OFFSET(t_mult_mod, t_mult));
 	return;
@@ -429,16 +429,16 @@ void task_mult()
 	p &= DIGIT_MASK;
 
 	LOG("mult: c=%x p=%x\r\n", c, p);
-	P(_v_product[P(_v_digit)]) = p;
-	P(_v_print_which) = 0;
-	P(_v_digit)++;
+	PW(_v_product[P(_v_digit)]) = p;
+	PW(_v_print_which) = 0;
+	PW(_v_digit)++;
 
 	if (P(_v_digit) < NUM_DIGITS * 2) {
-		P(_v_carry) = c;
+		PW(_v_carry) = c;
 		os_jump(OFFSET(t_mult, t_mult));
 		return;
 	} else {
-		P(_v_next_task_print) = t_reduce_digits;
+		PW(_v_next_task_print) = t_reduce_digits;
 		os_jump(OFFSET(t_mult, t_print_product));
 		return;
 	}
@@ -464,7 +464,7 @@ void task_reduce_digits()
 	}
 	LOG("reduce: digits: d = %u\r\n", d);
 
-	P(_v_reduce) = d;
+	PW(_v_reduce) = d;
 
 	os_jump(OFFSET(t_reduce_digits, t_reduce_normalizable));
 	return;
@@ -506,7 +506,7 @@ void task_reduce_normalizable()
 
 	//	d = *READ(P(_v_reduce));
 
-	P(_v_offset) = P(_v_reduce) + 1 - NUM_DIGITS; // TODO: can this go below zero
+	PW(_v_offset) = P(_v_reduce) + 1 - NUM_DIGITS; // TODO: can this go below zero
 	LOG("reduce: normalizable: d=%u offset=%u\r\n", P(_v_reduce), P(_v_offset));
 
 	for (i = P(_v_reduce); i >= 0; --i) {
@@ -551,7 +551,7 @@ void task_reduce_normalize()
 
 	int i;
 	// To call the print task, we need to proxy the values we don't touch
-	P(_v_print_which) = 0;
+	PW(_v_print_which) = 0;
 
 	borrow = 0;
 	for (i = 0; i < NUM_DIGITS; ++i) {
@@ -570,17 +570,17 @@ void task_reduce_normalize()
 		LOG("normalize: m[%u]=%x n[%u]=%x b=%u d=%x\r\n",
 				i + P(_v_offset), m, i, n, borrow, d);
 
-		P(_v_product[i + P(_v_offset)]) = d;
+		PW(_v_product[i + P(_v_offset)]) = d;
 	}
 
 	// To call the print task, we need to proxy the values we don't touch
 
 	if (P(_v_offset) > 0) { // l-1 > k-1 (loop bounds), where offset=l-k, where l=|m|,k=|n|
-		P(_v_next_task_print) = t_reduce_n_divisor;
+		PW(_v_next_task_print) = t_reduce_n_divisor;
 	} else {
 		LOG("reduce: normalize: reduction done: no digits to reduce\r\n");
 		// TODO: is this copy avoidable?
-		P(_v_next_task_print) = P(_v_next_task);
+		PW(_v_next_task_print) = P(_v_next_task);
 	}
 	os_jump(OFFSET(t_reduce_normalize, t_print_product));
 }
@@ -590,7 +590,7 @@ void task_reduce_n_divisor()
 	LOG("reduce: n divisor\r\n");
 
 	// Divisor, derived from modulus, for refining quotient guess into exact value
-	P(_v_n_div) = ( P(_v_modulus[NUM_DIGITS - 1])<< DIGIT_BITS) + P(_v_modulus[NUM_DIGITS -2]);
+	PW(_v_n_div) = ( P(_v_modulus[NUM_DIGITS - 1])<< DIGIT_BITS) + P(_v_modulus[NUM_DIGITS -2]);
 
 	LOG("reduce: n divisor: n[1]=%x n[0]=%x n_div=%x\r\n", P(_v_modulus[NUM_DIGITS - 1]), P(_v_modulus[NUM_DIGITS -2]), P(_v_n_div));
 
@@ -610,9 +610,9 @@ void task_reduce_quotient()
 
 	// Choose an initial guess for quotient
 	if (P(_v_product[P(_v_reduce)]) == P(_v_modulus[NUM_DIGITS - 1])) {
-		P(_v_quotient) = (1 << DIGIT_BITS) - 1;
+		PW(_v_quotient) = (1 << DIGIT_BITS) - 1;
 	} else {
-		P(_v_quotient) = ((P(_v_product[P(_v_reduce)]) << DIGIT_BITS) + P(_v_product[P(_v_reduce) - 1])) / P(_v_modulus[NUM_DIGITS - 1]);
+		PW(_v_quotient) = ((P(_v_product[P(_v_reduce)]) << DIGIT_BITS) + P(_v_product[P(_v_reduce) - 1])) / P(_v_modulus[NUM_DIGITS - 1]);
 	}
 
 	LOG("reduce: quotient: q0=%x\r\n", q);
@@ -629,9 +629,9 @@ void task_reduce_quotient()
 
 	LOG("reduce: quotient: n_div=%x q0=%x\r\n", P(_v_n_div), P(_v_quotient));
 
-	P(_v_quotient)++;
+	PW(_v_quotient)++;
 	do {
-		P(_v_quotient)--;
+		PW(_v_quotient)--;
 		qn = mult16(P(_v_n_div), P(_v_quotient));
 		//qn = P(_v_n_div) * P(_v_quotient);
 		LOG("QN1 = %x\r\n", (uint16_t)((qn >> 16) & 0xffff));
@@ -643,7 +643,7 @@ void task_reduce_quotient()
 	// which we determine and fix in the 'compare' and 'add' steps.
 	LOG("reduce: quotient: q=%x\r\n", P(_v_quotient));
 
-	P(_v_reduce)--;
+	PW(_v_reduce)--;
 
 	os_jump(OFFSET(t_reduce_quotient, t_reduce_multiply));
 }
@@ -667,7 +667,7 @@ void task_reduce_multiply()
 	// For calling the print task we need to proxy to it values that
 	// we do not modify
 	for (i = 0; i < offset; ++i) {
-		P(_v_product2[i]) = 0;
+		PW(_v_product2[i]) = 0;
 	}
 
 	// TODO: could convert the loop into a self-edge
@@ -694,11 +694,11 @@ void task_reduce_multiply()
 		c = m >> DIGIT_BITS;
 		m &= DIGIT_MASK;
 
-		P(_v_product2[i]) = m;
+		PW(_v_product2[i]) = m;
 
 	}
-	P(_v_print_which) = 1;
-	P(_v_next_task_print) = t_reduce_compare;
+	PW(_v_print_which) = 1;
+	PW(_v_next_task_print) = t_reduce_compare;
 	os_jump(OFFSET(t_reduce_multiply, t_print_product));
 }
 
@@ -768,15 +768,15 @@ void task_reduce_add()
 			// TODO: could break out of the loop in this case (after WRITE)
 		}
 
-		P(_v_product[i]) = c + m + n;
+		PW(_v_product[i]) = c + m + n;
 
 		LOG("reduce: add: m[%u]=%x n[%u]=%x c=%x r=%x\r\n", i, m, j, n, c, P(_v_product[i]));
 
 		c = P(_v_product[i]) >> DIGIT_BITS;
-		P(_v_product[i]) &= DIGIT_MASK;
+		PW(_v_product[i]) &= DIGIT_MASK;
 	}
-	P(_v_print_which) = 0;
-	P(_v_next_task_print) = t_reduce_subtract;
+	PW(_v_print_which) = 0;
+	PW(_v_next_task_print) = t_reduce_subtract;
 	os_jump(OFFSET(t_reduce_add, t_print_product));
 }
 
@@ -812,24 +812,24 @@ void task_reduce_subtract()
 			} else {
 				borrow = 0;
 			}
-			P(_v_product[i]) = m - s;
+			PW(_v_product[i]) = m - s;
 
 			LOG("reduce: subtract: m[%u]=%x qn[%u]=%x b=%u r=%x\r\n",
 					i, m, i, qn, borrow, P(_v_product[i]));
 
 		}
 	}
-	P(_v_print_which) = 0;
+	PW(_v_print_which) = 0;
 
 	if (P(_v_reduce) + 1 > NUM_DIGITS) {
-		P(_v_next_task_print) = t_reduce_quotient;
+		PW(_v_next_task_print) = t_reduce_quotient;
 	} else { // reduction finished: exit from the reduce hypertask (after print)
 		LOG("reduce: subtract: reduction done\r\n");
 
 		// TODO: Is it ok to get the next task directly from call channel?
 		//       If not, all we have to do is have reduce task proxy it.
 		//       Also, do we need a dedicated epilogue task?
-		P(_v_next_task_print) = P(_v_next_task);
+		PW(_v_next_task_print) = P(_v_next_task);
 	}
 	os_jump(OFFSET(t_reduce_subtract, t_print_product));
 }
