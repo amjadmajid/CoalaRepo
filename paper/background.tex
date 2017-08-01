@@ -55,7 +55,8 @@ execution. By default, after a power failure control flows to the beginning of
 {\tt main()}. Early work on intermittent computing preserve intermittent
 progress by periodically capturing and restoring to a non-volatile checkpoint
 of the volatile execution context (i.e., registers and
-stack)~\cite{mementos,hibernusplusplus,quickrecall,idetic}
+stack)~\cite{mementos,quickrecall}, sometimes using
+hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
 
 \begin{figure}
 	\centering
@@ -101,12 +102,34 @@ support.
 \label{section:background_task_computing}
 
 %\TODO{This sequential/modular split seems pretty odd to me. I think we can just talk about tasks in the sense of ratchet, alpaca, and chain.  Anything with static (programmer-written or compiler inserted) boundaries applies}
+Task-based intermittent execution models~\cite{dino,chain,alpaca} ask the
+programmer to decompose their program into a collection tasks. A task is a
+function with no caller that contains arbitrary computation, sensing, and
+communication.  A programmer describes the sequence in which tasks may execute,
+creating a task graph. The flow of control from task to task happens at
+programmer demarcated points and may conditionally depend on program values.
+Task-based programming abstractions guarantee that tasks exhibit behavior as
+though they executed {\em atomically}, regardless of arbitrary power failures.
+Task-based runtime systems tolerate failures by repeatedly attempting to
+execute a task until it completes. Task-based runtime systems ensure
+task-atomic semantics by ensuring that repeated task executions are idempotent
+(i.e., have the same effect when repeatedly executed).  The key to idempotence
+is ensuring that updates to non-volatile state made by an interrupted, partial
+execution of a task are never visible to a subsequent (potentially completing)
+re-execution of the task.  
 
-Intermittent execution models combatting WAR can be classified into: \emph{sequential execution model} (which historically formed a baseline for this stream of research) and \emph{modular execution model} (a potent alternative, on which we base the design decisions of \sys). \todo{Remove division per sequential/modular split}{Przemek}
+There are several run time strategies to ensuring task idempotence. One
+approach~\cite{alpaca} is to identify non-volatile data involved in WAR
+dependences in a task (like DINO and Ratchet did for
+checkpoints~\cite{dino,ratchet}), execute the task using buffered copies of
+those data, and commit the buffered copies before completing the task. Another
+strategy is to statically create multiple versions of non-volatile data shared
+by tasks and ensure by construction that no task reads and writes the same
+non-volatile memory location~\cite{chain}.  Regardless of the idempotence
+strategy, the key to task-based execution is that fixed, statically defined
+tasks execute as though atomic, completing after zero or more attempts. 
 
-Under this model a program for intermittently-powered device is seen as a one idempotent operational region with one common context. Generally, the progress of the program is saved and updated by means of checkpointing, refer again to Section~\ref{sec:background_consistency}. Normally, the sequential model relies on a hardware assistant to measure the voltage level in the energy reservoir to place a checkpoint~\cite{mementos,mottola2017harvos,hibernus}. The benefit of this model is that it does not require code modification by a programmer. However it suffers from significant overhead (refer to experiment result in~\cite[Fig. 3]{chain}, where it is concluded that each checkpoint causes overhead). \todo{I use the word `checkpoint' for normal checkpoint and task boundary interchangeably---check if it does not cause confusion}{Brandon}
-
-At the heart of this model is the concept of an \emph{idempotent task}. The idempotent task is a C language function that does not have arguments and does not return a value. This task uses a well defined interface to interact with the non-volatile memory. Therefore, it tolerates arbitrary number of power interrupts. This model, generally, produces less overhead~\cite{chain} and allows multiple applications to run on an intermittently-powered device by interleaving their tasks. However, it obviously requires code modification. For example, if an algorithm is written according to the continuous execution model it has to be split by a programmer into small tasks to run under the modular intermittent execution model.
+\TODO{Brandon left off here.}
 
 Despite the benefit of the modular model certain limitations are still present that must be overcome and which inspired us to design \sys. Let us look at these problems in detail.
 
