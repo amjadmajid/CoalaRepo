@@ -38,16 +38,18 @@
 \begin{document}	
 
 \begin{lstlisting}[style = mystyle]
-$\text{\textcolor{red}{checkpoint()}}$; //Iteration 1: correct execution of the loop body
+$\text{\textcolor{red}{checkpoint()}}$; //Correct execution iteration 1 
 data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8));
 Rmnd = crcTbl[data] ^ (Rmnd << 8);
-
-$\text{\textcolor{red}{checkpoint()}}$; //Iteration 2: break before reminder calculation
+$\text{\textcolor{red}{checkpoint()}}$; //Capture checkpoint before iteration 2
 data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8));
-$\text{\textcolor{red}{\lightning\hspace{0.5cm}\lightning\hspace{0.5cm}\lightning}\hspace{0.5cm}}\textcolor{red}{\circlearrowright}$ //Power interrupt and restart
+Rmnd = crcTbl[data] ^ (Rmnd << 8);      
+$\text{\textcolor{red}{\lightning\hspace{0.5cm}\lightning\hspace{0.5cm}\lightning}\hspace{0.5cm}}$ //Power fails after Rmnd written, before checkpoint()
 
-$\text{\textcolor{red}{checkpoint()}}$; //Iteration 3: wrong/stale reminder used for data
-data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8));
+$\textcolor{red}{\circlearrowright}\text{\textcolor{red}{checkpoint()}}$; //Restart from checkpoint; $\text{\textcolor{red}{Rmnd remains updated.}}$
+data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8)); 
+$\textcolor{red}{\times}\text{\textcolor{red}{ERROR: data updated using incorrect Rmnd value}}$
+
 $\ldots$
 \end{lstlisting} 
 
