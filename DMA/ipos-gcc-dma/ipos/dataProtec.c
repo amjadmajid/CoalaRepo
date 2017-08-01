@@ -213,16 +213,73 @@ PAG_IN_TEMP:
 
 
 
+unsigned int __pageSwap_w(unsigned int * varAddr)
+{
+    //**// This page swap is caused by write operation //**//
+#if !DIRTY_PAGE
+    __pageFaultCounter++;
+#endif
+
+    //2// Find the requested page
+    unsigned int ReqPagTag;
+    unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
+    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+    // TODO we are not checking if the var is not in any page !
+    unsigned char idx=0;
+
+    // Search the page in the buffer
+    while( (ReqPagTag = __pagsInTemp[idx]) != 0)
+    {
+        if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
+                {
+                    if(dirtyPag)
+                    {
+                        __pageFaultCounter++;
+                        __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
+                    }
+                    // we found the page
+                    __bringPagTemp( ReqPagTag );
+
+                    goto PAG_IN_TEMP_W;
+                }
+        idx++;
+    }
+
+    //TODO optimize this search (maybe with a switch statement )
+    // search the page in the ROM if it is not in the buffer
+    while( ! (ReqPagTag_dirty < __temp_pagSize) )  // if the var is not with the page
+    {
+        __temp_pagSize +=   PAG_SIZE;               // move to next page
+    }
+
+    ReqPagTag = __temp_pagSize-PAG_SIZE;
+
+    if(dirtyPag)
+    {
+        __pageFaultCounter++;
+        __sendPagTemp( CrntPagHeader );
+    }
+    __bringPagROM(ReqPagTag);
+
+PAG_IN_TEMP_W:
+
+     dirtyPag=1;   // we want to write to this page show it is dirty
+     CrntPagHeader = ReqPagTag;
+    return 0;
+}
+
+
+
 /*
  * pageSwap:
  */
 //TODO this function does not
-void __bringPersisCrntPag(unsigned int * curntPag)
+void __bringPersisCrntPag(unsigned int curntPag)
 {
-    unsigned int ReqPagTag;
+    unsigned int ReqPagTag, idx=0;
 
     // Search the page in the buffer
-    while( (ReqPagTag = __persis_CrntPagHeader[idx]) != 0)
+    while( (ReqPagTag = __persis_pagsInTemp[idx]) != 0)
     {
         if ( ReqPagTag  == curntPag )
             {
@@ -232,11 +289,11 @@ void __bringPersisCrntPag(unsigned int * curntPag)
         idx++;
     }
 
-        __bringPagROM(curntPag);
+        __bringPagROM( curntPag);
 
 PAGE_PULLED:
 
-     CrntPagHeader = curntPag;
+     CrntPagHeader =  curntPag;
 }
 
 

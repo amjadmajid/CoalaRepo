@@ -27,6 +27,8 @@ void __bringPagTemp(unsigned int pagTag);
 void __bringPagROM(unsigned int pagTag);
 void __sendPagROM(unsigned int pagTag);
 unsigned int __pageSwap(unsigned int * varAddr);
+unsigned int __pageSwap_w(unsigned int * varAddr);
+void __bringPersisCrntPag(unsigned int curntPag);
 void __pagsCommit();
 void __bringCrntPagROM();
 
@@ -40,6 +42,10 @@ void __bringCrntPagROM();
                                         ( __VAR_ADDR(var)  <  (CrntPagHeader+PAG_SIZE) ))
 
 #define __VAR_PT_IN_RAM(var)            (  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
+
+
+
+
 
 
 
@@ -64,13 +70,16 @@ void __bringCrntPagROM();
                                     }
 
 
+
 #define PVAR(var)   (\
-                        (  __IS_VAR_IN_CRNT_PAG( (var) ) ) ? \
+                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
                         ( __VAR_PT_IN_RAM(var) ):\
                         ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
-#define RVAR(var)  *PVAR(var)
+
+#define RVAR(var)   ( * PVAR(var))
+
 
 //#define RVAR(var)   (\
 //                        (  __IS_VAR_IN_CRNT_PAG( (var) ) ) ? \
@@ -78,9 +87,8 @@ void __bringCrntPagROM();
 //                        ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
 //                    )
 
-
 #define PPVAR(wvar, rvar)  __temp_temp = (*PVAR( (rvar) )); \
-                          (*PVAR( (wvar) )) =  __temp_temp
+                          (*PVAR( (wvar) )) =  __temp_temp; dirtyPag = 1;
 
 #define OPPVAR(wvar, rvar) if(  __IS_VAR_IN_CRNT_PAG(var)  ) { \
                                 __temp_temp =  (*__VAR_PT_IN_RAM(var)) ; \
@@ -91,6 +99,37 @@ void __bringCrntPagROM();
 
 
 
+
+
+
+
+#define __RP(var)   (\
+                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
+                        ( __VAR_PT_IN_RAM(var) ):\
+                        ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+                    )
+
+#define __WP(var)   (\
+                        ( ( __IS_VAR_IN_CRNT_PAG(var) ) ) ? \
+                        ( (dirtyPag = __VAR_PT_IN_RAM(var)) ):\
+                        ( (  (__typeof__(var)*) ( (( __pageSwap_w(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+                    )
+
+
+#define __PP(wvar, rvar)  __temp_temp = RP(rvar) ; \
+                              WP(var) =  __temp_temp
+
+/******************************************
+ *        User Memory Interface
+ ******************************************/
+
+#define WP(var)         ( *__WP(var))
+#define RP(var)         ( *__RP(var))
+#define PP(wvar, rvar)  ( __PP(wvar, rvar) )
+
+/******************************************
+ *      Compiler Memory Interface
+ ******************************************/
 
 #define VAR(var) (__typeof__(var)*) __return_addr(&var)
 #define VARW(var) (__typeof__(var)*) __return_addr_wr(&var)
