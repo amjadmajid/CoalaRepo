@@ -34,29 +34,11 @@ Many platforms enable intermittent, battery-less computation. For instance, comp
 
 \subsection{Intermittent Computing}
 \label{sec:background_consistency}
-Energy-harvesting devices execute software according to the {\em intermittent
-execution model}~\cite{dino,chain,alpaca,ratchet}.  Physically, a device
-charges until a threshold, operates briefly until its energy is depleted, shuts
-down recharges, and repeats the cycle.  Software running on the device executes
-{\em intermittently} because energy is only available between when the
-capacitor reaches its threshold and when it is depleted. An intermittent
-execution is composed of operating periods interspersed with power failures.
-The frequency of power failures in an intermittent execution depends on the
-size of the device's energy storage buffer: a larger buffer allows longer
-operating periods.  Energy-harvesters provide input power that is orders of
-magnitude less than a device's operating power, making recharging negligible
-during operation.
 
-Software has different behavior when executed intermittently than when executed
-with continuous power.  Each power failure clears volatile memory (registers,
-stack, and global variables). Non-volatile memory (e.g., FRAM) persists across
-power failures. On a power failure, control flows back to a prior point in the
-execution. By default, after a power failure control flows to the beginning of
-{\tt main()}. Early work on intermittent computing preserve intermittent
-progress by periodically capturing and restoring to a non-volatile checkpoint
-of the volatile execution context (i.e., registers and
-stack)~\cite{mementos,quickrecall}, sometimes using
-hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
+Energy-harvesting devices execute software according to the {\em intermittent execution model}~\cite{dino,chain,alpaca,ratchet}. Physically, a device charges until a threshold, operates briefly until its energy is depleted, shuts down recharges, and repeats the cycle. Software running on the device executes {\em intermittently} because energy is only available between when the
+capacitor reaches its threshold and when it is depleted. An intermittent execution is composed of operating periods interspersed with power failures. The frequency of power failures in an intermittent execution depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. Energy-harvesters provide input power that is orders of magnitude less than a device's operating power, making recharging negligible during operation.
+
+Software has different behavior when executed intermittently than when executed with continuous power.  Each power failure clears volatile memory (registers, stack, and global variables). Non-volatile memory (e.g., FRAM) persists across power failures. On a power failure, control flows back to a prior point in the execution. By default, after a power failure control flows to the beginning of {\tt main()}. Early work on intermittent computing preserve intermittent progress by periodically capturing and restoring to a non-volatile checkpoint of the volatile execution context (i.e., registers and stack)~\cite{mementos,quickrecall}, sometimes using hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
 
 \begin{figure}
 	\centering
@@ -66,42 +48,19 @@ hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idet
 	\label{fig:code_demo_incosistency}
 \end{figure}
 
-Checkpoints of volatile state preserve intermittent progress, but do not ensure
-data consistency~\cite{dino,chain,ratchet}.  Data may become inconsistent if an
-attempt to execute some computation {\em writes} to a non-volatile variable,
-then power fails, then a second attempt to re-execute the same computation
-incorrectly {\em reads} the value written in the first attempt, rather than the
-variable's original value.  The situation occurs when code includes a write
-after read (WAR) dependence between operations that manipulate non-volatile
-variables~\cite{ratchet,dino,alpaca}.
+Checkpoints of volatile state preserve intermittent progress, but do not ensure data consistency~\cite{dino,chain,ratchet}. Data may become inconsistent if an attempt to execute some computation {\em writes} to a non-volatile variable, then power fails, then a second attempt to re-execute the same computation incorrectly {\em reads} the value written in the first attempt, rather than the variable's original value.  The situation occurs when code includes a write after read (WAR) dependence between operations that manipulate non-volatile variables~\cite{ratchet,dino,alpaca}.
 
-Figure~\ref{fig:code_demo_incosistency} illustrates how state can become
-inconsistent in an intermittent execution using cyclic redundancy check (CRC)
-code from MIBench~\cite{hicks_mibench2_2016}. The code computes CRC for an
-$\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
-Even with the checkpoint at line 3 in Fig.~\ref{fig:crc_example}, the code may
-compute  $\texttt{data}$ incorrectly because  of a WAR dependence between the
-read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5.
-Figure~\ref{fig:crc_example_war} shows an execution of the code in which power
-fails during the second loop iteration.  The problem arises because line 6 of
-the execution writes $\texttt{Rmnd}$ in the second iteration, but power fails
-before capturing the next checkpoint.  After restarting from the checkpoint,
-the update to $\texttt{data}$ at line 10 reads the value of $\texttt{Rmnd}$
-that was updated before the power failure, producing an incorrect result.
+Figure~\ref{fig:code_demo_incosistency} illustrates how state can become inconsistent in an intermittent execution using cyclic redundancy check (CRC) code from MIBench~\cite{hicks_mibench2_2016}. The code computes CRC for an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$. Even with the checkpoint at line 3 in Fig.~\ref{fig:crc_example}, the code may compute  $\texttt{data}$ incorrectly because of a WAR dependence between the read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5. Figure~\ref{fig:crc_example_war} shows an execution of the code in which power
+fails during the second loop iteration.  The problem arises because line 6 of the execution writes $\texttt{Rmnd}$ in the second iteration, but power fails before capturing the next checkpoint.  After restarting from the checkpoint, the update to $\texttt{data}$ at line 10 reads the value of $\texttt{Rmnd}$ that was updated before the power failure, producing an incorrect result.
 
-As the figure illustrates, checkpoint-based systems risk violating the
-consistency of volatile and non-volatile memory~\cite{dino}. To maintain memory
-consistency, versioning systems~\cite{dino,ratchet} {\em version} a subset of
-non-volatile variables with the checkpointed execution context. Task-based
-systems~\cite{chain,alpaca}, which we focus on this work and discuss in detail
-next, ensure state is consistent by using programmer, compiler, and runtime
-support.
-
+As the figure illustrates, checkpoint-based systems risk violating the consistency of volatile and non-volatile memory~\cite{dino}. To maintain memory consistency, versioning systems~\cite{dino,ratchet} {\em version} a subset of non-volatile variables with the checkpointed execution context. Task-based
+systems~\cite{chain,alpaca}, which we focus on this work and discuss in detail next, ensure state is consistent by using programmer, compiler, and runtime support.
 
 \subsection{Task-based Intermittent Computing}
 \label{section:background_task_computing}
 
-%\TODO{This sequential/modular split seems pretty odd to me. I think we can just talk about tasks in the sense of ratchet, alpaca, and chain.  Anything with static (programmer-written or compiler inserted) boundaries applies}
+%\TODO{This sequential/modular split seems pretty odd to me. I think we can just talk about tasks in the sense of ratchet, alpaca, and chain. Anything with static (programmer-written or compiler inserted) boundaries applies}
+
 Task-based intermittent execution models~\cite{dino,chain,alpaca} ask the
 programmer to decompose their program into a collection tasks. A task is a
 function with no caller that contains arbitrary computation, sensing, and
