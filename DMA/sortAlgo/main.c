@@ -36,8 +36,6 @@ __p unsigned int j = 1;
 unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
-
-
     in_i = RVAR(i);
     in_j = RVAR( j);
     arr_i = RVAR( arr[ in_i ]);
@@ -66,6 +64,10 @@ void task_inner_loop()
 
 void task_outer_loop()
 {
+//    PMMCTL0|= PMMSWBOR;
+
+//    PMMCTL0 = PMMPW|PMMSWBOR;
+
     unsigned int in_i;
     in_i = RVAR(i);
 //    in_i_pt = PVAR(i);

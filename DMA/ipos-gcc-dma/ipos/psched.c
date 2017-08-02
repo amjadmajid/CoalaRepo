@@ -42,7 +42,7 @@
 #define COALESCING 1
 
 #if COALESCING
-__nv volatile unsigned int __virtualTaskSize = 50;
+__nv volatile unsigned int __virtualTaskSize = 2;
 __nv volatile unsigned int __maxVirtualTaskSize = 100;
      volatile unsigned int __taskCounter = 0;
 #else
@@ -165,17 +165,20 @@ void os_scheduler()
     //Died on the same task
     if (__reboot_state[0] == __task_address)
     {
-        if (__reboot_state[1] != 0)
+        // ignore the first power interrupt
+        if (__reboot_state[1] != 1)
         {
+            // if you died more than one then decrease the virtual task size
             if (__virtualTaskSize > 1)
             {
                 // Decrease the virtual task size
                 __virtualTaskSize--;
-                __maxVirtualTaskSize = __virtualTaskSize;
+//                __maxVirtualTaskSize = __virtualTaskSize;
             }
-            // reset the reboot state
-            __reboot_state[1] = 0;
         }
+        // reset the reboot state on a power reboot
+        __reboot_state[1] = 0;
+
     }
     else
     {
@@ -198,6 +201,7 @@ void os_scheduler()
 
     /***************************************
      *  Task Merging Algorithm part (B)
+     *  Track tasks execution
      ***************************************/
         __taskCounter++;
 
@@ -205,14 +209,14 @@ void os_scheduler()
         {
             if ((__totalTaskCounter + __taskCounter) > __totNumTask)
             {
-                if (__maxVirtualTaskSize > __virtualTaskSize)
-                {
+//                if (__maxVirtualTaskSize > __virtualTaskSize)
+//                {
                     __virtualTaskSize++;
                     // To distinguish between consecutive power interrupt
                     // and power interrupt on the same task after a complete round
                     __reboot_state[0] = 0;
 
-                }
+//                }
             }
             // virtual progress
             JUMP();

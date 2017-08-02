@@ -39,6 +39,7 @@ void os_memMapper(unsigned int *cnt, taskId _task)
  */
 
 void os_addTasks(unsigned char numTasks, taskId tasks[]){
+    __totNumTask = numTasks;
     if( funcBlocker != 0xAD)
     {
         // each task needs 6 byte of meta data.
@@ -46,7 +47,6 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
         __head =  (unsigned int*)  __temp_head;
         unsigned char i = 0;
         unsigned int cnt=0;
-        __totNumTask = numTasks;
         while (i<numTasks)
         {
             os_memMapper(&cnt, tasks[i]);

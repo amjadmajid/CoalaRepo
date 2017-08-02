@@ -278,12 +278,14 @@ void task_print()
     for (i = 0; i < BLOCK_SIZE; ++i) {
         index_t index = RVAR(_v_compressed_data[i].letter);
     }
-    os_jump(0);
+//    os_jump(0);
 }
 
 void task_done()
 {
-    while (1);
+//    while (1);
+    P3OUT |=BIT5;
+    P3OUT &=~BIT5;
 }
 
 
@@ -294,6 +296,8 @@ void init()
       WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
       PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+
+      P3DIR |=BIT5;
 
       CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
   //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz

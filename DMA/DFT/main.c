@@ -199,6 +199,14 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+
+    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+//    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+    CSCTL0_H = 0;
+
     P3OUT &= ~BIT5;
     P3DIR |=BIT5;
 }

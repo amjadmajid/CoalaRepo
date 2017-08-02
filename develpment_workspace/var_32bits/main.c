@@ -1,7 +1,7 @@
 #include <msp430.h> 
 #include <stdint.h>
 #include <ipos.h>
-
+#include "printf.h"
 
 __p uint16_t volatile arr16_1[512] = {0};
 __p uint16_t volatile arr16_2[512] = {0};
@@ -46,10 +46,9 @@ void init()
   P3DIR |=BIT5;
   P1DIR |=BIT0;
 }
-
+volatile uint16_t x = 90;
 int main(void) {
     init();
-
        taskId tasks[] = {  {task_test32_1,0},
                            {task_test32_2,0},
                            {task_test16_1,0},

@@ -110,9 +110,9 @@ void __bringCrntPagROM();
                     )
 
 #define __WP(var)   (\
-                        ( ( __IS_VAR_IN_CRNT_PAG(var) ) ) ? \
-                        ( (dirtyPag = __VAR_PT_IN_RAM(var)) ):\
-                        ( (  (__typeof__(var)*) ( (( __pageSwap_w(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+                        ( ( dirtyPag = 1 + __IS_VAR_IN_CRNT_PAG(var) ) ==2 ) ? \
+                        ( (__VAR_PT_IN_RAM(var)) ):\
+                        ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
 

@@ -50,10 +50,12 @@ void __bringPagTemp(unsigned int pagTag);
 void __bringPagROM(unsigned int pagTag);
 void __sendPagROM(unsigned int pagTag);
 unsigned int __pageSwap(unsigned int * varAddr);
+unsigned int __pageSwap_w(unsigned int * varAddr);
 void __pagsCommit();
 void __bringCrntPagROM();
 
 extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
+extern uint16_t dirtyPag;
 
 // Memory access interface
 
@@ -90,13 +92,6 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                                     }
 
 
-#define RVAR(var)   (\
-                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
-                        ( * __VAR_PT_IN_RAM(var) ):\
-                        ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-                    )
-
-
 #define PVAR(var)   (\
                         (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
                         ( __VAR_PT_IN_RAM(var) ):\
@@ -104,10 +99,21 @@ extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a 
                     )
 
 
-#define PPVAR(wvar, rvar)  __typeof__(rvar) __var##__var = (*PVAR(rvar)); \
-                          (*PVAR(wvar)) = __var##__var
+#define RVAR(var)   ( * PVAR(var))
 
 
+
+#define PPVAR(wvar, rvar)  __temp_temp = (*PVAR( (rvar) )); \
+                          (*PVAR( (wvar) )) =  __temp_temp
+
+
+#define __WP(var)   (\
+                        ( ( __IS_VAR_IN_CRNT_PAG(var) ) ) ? \
+                        ( (dirtyPag = (uint16_t)__VAR_PT_IN_RAM(var)) ):\
+                        ( (  (__typeof__(var)*) ( (( __pageSwap_w(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+                    )
+
+#define WP(var)   (*__WP(var))
 
 #endif /* INCLUDE_DATAPROTEC_H_ */
 

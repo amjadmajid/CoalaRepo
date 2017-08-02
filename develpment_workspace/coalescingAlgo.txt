@@ -1,0 +1,20 @@
+
+TskID is an element of {Task IDs}
+
+VTskID : Virtual Task ID
+
+upon Power reboot
+
+	if  VTskID == TskID:
+		if reboot_state != 1:		// power interrupted the VT more than one
+			if(VTsize > 1):
+				VTsize --;
+		else:
+			reboot_state = 0:       // reset the state after the first power interrupt
+	else:
+		VTskID = TskID
+		reboot_state = 1;
+
+	if all tasks are executed:
+		VTsize++
+		reboot_state = 0

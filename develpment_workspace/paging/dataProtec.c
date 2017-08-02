@@ -20,6 +20,7 @@ unsigned int CrntPagHeader = BIGEN_ROM;
 __nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
 __nv uint8_t pageCommit = 0;
 
+uint16_t dirtyPag=0;
 
 /*
  * Bring a page to its ROM buffer
@@ -196,6 +197,59 @@ void __pagsCommit()
 
     pageCommit = 0;  // enable sending the first page to the temp buffer
 
+}
+
+
+
+
+unsigned int __pageSwap_w(unsigned int * varAddr)
+{
+    //**// This page swap is caused by write operation //**//
+
+    //2// Find the requested page
+    unsigned int ReqPagTag;
+    unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
+    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+    // TODO we are not checking if the var is not in any page !
+    unsigned char idx=0;
+
+    // Search the page in the buffer
+    while( (ReqPagTag = __pagsInTemp[idx]) != 0)
+    {
+        if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
+                {
+                    if(dirtyPag)
+                    {
+                        __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
+                    }
+                    // we found the page
+                    __bringPagTemp( ReqPagTag );
+
+                    goto PAG_IN_TEMP;
+                }
+        idx++;
+    }
+
+    //TODO optimize this search (maybe with a switch statement )
+    // search the page in the ROM if it is not in the buffer
+    while( ! (ReqPagTag_dirty < __temp_pagSize) )  // if the var is not with the page
+    {
+        __temp_pagSize +=   PAG_SIZE;               // move to next page
+    }
+
+    ReqPagTag = __temp_pagSize-PAG_SIZE;
+
+    if(dirtyPag)
+    {
+        __sendPagTemp( CrntPagHeader );
+    }
+    __bringPagROM(ReqPagTag);
+
+PAG_IN_TEMP:
+
+     dirtyPag=1;   // we want to write to this page show it is dirty
+     CrntPagHeader = ReqPagTag;
+    return 0;
 }
 
 
