@@ -32,10 +32,12 @@ __p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66
 __p unsigned int i =  0;
 __p unsigned int j = 1;
 
+__nv uint8_t pinCont = 0;
 /////  TASKS
 unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
+    pinCont =1;
     in_i = RVAR(i);
     in_j = RVAR( j);
     arr_i = RVAR( arr[ in_i ]);
@@ -84,9 +86,11 @@ void task_outer_loop()
 
 void task_finish()
 {
+    if(pinCont){
     P3OUT |=BIT5;
     P3OUT &=~BIT5;
-
+    }
+    pinCont=0;
 
     arr[0]=3;
     arr[1]=1;
@@ -150,8 +154,16 @@ void init()
   WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
   // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
   PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+
+  CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+//    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+  CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+  CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+  CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+  CSCTL0_H = 0;
+
+
   P3DIR |=BIT5;
-  P1DIR |=BIT0;
 }
 
 int main(void) {

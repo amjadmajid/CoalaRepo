@@ -166,8 +166,8 @@ void os_scheduler()
     if (__reboot_state[0] == __task_address)
     {
         // ignore the first power interrupt
-        // if (__reboot_state[1] != 1) KIWAN
-        // { KIWAN
+         if (__reboot_state[1] != 1)
+         {
             // if you died more than one then decrease the virtual task size
             if (__virtualTaskSize > 1)
             {
@@ -175,16 +175,16 @@ void os_scheduler()
                 __virtualTaskSize--;
 //                __maxVirtualTaskSize = __virtualTaskSize;
             }
-        //} KIWAN
+        }
         // reset the reboot state on a power reboot
-        // __reboot_state[1] = 0; KIWAN
+         __reboot_state[1] = 0;
 
     }
     else
     {
         // At the very beginning or dying on another task
         __reboot_state[0] = __task_address;
-        // __reboot_state[1] = 1; KIWAN
+         __reboot_state[1] = 1;
     }
 
     /***************************************
@@ -217,6 +217,8 @@ void os_scheduler()
                     __reboot_state[0] = 0;
 
                 }
+                    // reset __taskCounter, __temp_taskCounter and  __totalTaskCounter
+                    __taskCounter = 0;
             }
             // virtual progress
             JUMP();
@@ -243,13 +245,19 @@ void os_scheduler()
 commit:
             // firm transition
             __task_address = (unsigned int) __temp_task_address;
+
+            if(__temp_taskCounter){
             __totalTaskCounter += __temp_taskCounter;
+            }else{
+                // reset the total task counter after a successful program execution round
+                __totalTaskCounter=0;
+            }
 
     /**********************************************
      *    Commit pages to their final locations
      **********************************************/
             __pagsCommit();
-			__reboot_state[0] = 0; // KIWAN
+//			__reboot_state[0] = 0; // KIWAN
 
             __commit_flag = COMMIT_FINISH;
 
