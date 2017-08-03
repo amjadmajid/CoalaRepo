@@ -49,6 +49,8 @@
              unsigned int __virtualTaskmeter = 1;
 #endif
 
+              volatile uint16_t * vts_debug=  (volatile uint16_t *) 0x1980;
+         __nv unsigned int vts_d_idx = 0;
         __nv unsigned char  __commit_flag = 0;
 
         //TODO I do not think these two variables need to be persistent
@@ -60,13 +62,15 @@
         __nv unsigned int*  __temp_task_address = NULL;
              unsigned int * __current_task_virtual = NULL;
 
-        __nv unsigned int  __numReboots_fresh = 0;
-        __nv unsigned int  __numReboots_old = 0;
+        __nv unsigned int  __numReboots = 0;
+
 
         __nv unsigned int __reboot_state_0 = 0;    //virtual Task size control
         __nv unsigned int __reboot_state_1 = 0;
         __nv unsigned int __temp_virtualTaskmeter = 0;
         __nv unsigned int __totalTaskCounter = 0;
+
+        uint16_t __numExeutedTasks;
 
         void os_enter_critical()
         {
@@ -90,7 +94,7 @@
             /**************************************
              *      Initialization
              **************************************/
-            __numReboots_fresh++;
+            __numReboots++;
 
             if (__commit_flag == COMMITTING)
             {
@@ -159,23 +163,44 @@
                     if ((__totalTaskCounter + __virtualTaskmeter) > __totNumTask)
                     {
 #if COALESCING
-                        if(__numReboots_fresh > (__numReboots_old + 4) )
-                        {
-                            if(__virtualTaskSize > 1)
-                            {
-                                __virtualTaskSize--;
-                            }
+                        /*
+                         * Notice: Virtual task can be bigger then the total number of real tasks
+                         * Assumption: a uniform distribution of power interrupt during the execution
+                         * Probositon: (#reboots/2) = additional tasks
+                         * initial Observation: The benefit of coalescing is on average 25%
+                         * Results: if #reboots/2 < 0.3 * #ExeutTasks, then ++virtual task size
+                         */
 
+
+                        if(__virtualTaskSize > __totNumTask)
+                        {
+                            __numExeutedTasks = __virtualTaskSize;
                         }else{
-                             __virtualTaskSize++;
-                             __numReboots_old = __numReboots_fresh;
+                            __numExeutedTasks = __totNumTask;
                         }
-                        __numReboots_fresh=0;
+
+                        if( (__numReboots>>1) <= (__numExeutedTasks>>2) )
+                        {
+                            __virtualTaskSize++;
+                         }else{
+                             if(__virtualTaskSize > 1)
+                             {
+                                 __virtualTaskSize--;
+                             }
+                        }
+
                         // To distinguish between consecutive power interrupt
                         // and power interrupt on the same task after a complete round
-                        __reboot_state[0] = 0;
+                        __reboot_state_0 = 0;
 
 #endif
+                        if(vts_d_idx < 50)
+                        {
+                            *vts_debug = __virtualTaskSize;
+                            vts_debug++;
+                            vts_d_idx++;
+                        }
+
                         // reset __virtualTaskmeter, __temp_virtualTaskmeter and  __totalTaskCounter
                         __virtualTaskmeter = 0;
                     }
