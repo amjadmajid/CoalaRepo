@@ -10,11 +10,13 @@ figs:
 	pdflatex texFigCode/taskification_example.tex
 	pdflatex texFigCode/crc_example_war.tex
 	pdflatex texFigCode/dynamic-chain.tex
+	pdflatex texFigCode/sram-buffer.tex
 	cp texFigCode/crc_example.pdf figures/
 	cp texFigCode/dynamic-chain-2.pdf figures/
 	cp texFigCode/taskification_example.pdf figures/
 	cp texFigCode/crc_example_war.pdf figures/
 	cp texFigCode/dynamic-chain.pdf figures/
+	cp texFigCode/sram-buffer.tex figures/
 
 clean:
 	-rm paper.aux paper.bbl paper.blg paper.log paper.out paper.pdf
