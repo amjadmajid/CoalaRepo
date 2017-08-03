@@ -61,34 +61,10 @@ systems~\cite{chain,alpaca}, which we focus on this work and discuss in detail n
 
 %\TODO{This sequential/modular split seems pretty odd to me. I think we can just talk about tasks in the sense of ratchet, alpaca, and chain. Anything with static (programmer-written or compiler inserted) boundaries applies}
 
-Task-based intermittent execution models~\cite{dino,chain,alpaca} ask the
-programmer to decompose their program into a collection tasks. A task is a
-function with no caller that contains arbitrary computation, sensing, and
-communication.  A programmer describes the sequence in which tasks may execute,
-creating a task graph. The flow of control from task to task happens at
-programmer demarcated points and may conditionally depend on program values.
-Task-based programming abstractions guarantee that tasks exhibit behavior as
-though they executed {\em atomically}, regardless of arbitrary power failures.
-Task-based runtime systems tolerate failures by repeatedly attempting to
-execute a task until it completes. Task-based runtime systems ensure
-task-atomic semantics by ensuring that repeated task executions are idempotent
-(i.e., have the same effect when repeatedly executed).  The key to idempotence
-is ensuring that updates to non-volatile state made by an interrupted, partial
-execution of a task are never visible to a subsequent (potentially completing)
-re-execution of the task.  
+Task-based intermittent execution models~\cite{dino,chain,alpaca} ask the programmer to decompose their program into a collection tasks. A task is a function with no caller that contains arbitrary computation, sensing, and communication. A programmer describes the sequence in which tasks may execute,
+creating a task graph. The flow of control from task to task happens at programmer demarcated points and may conditionally depend on program values. Task-based programming abstractions guarantee that tasks exhibit behavior as though they executed {\em atomically}, regardless of arbitrary power failures. Task-based runtime systems tolerate failures by repeatedly attempting to execute a task until it completes. Task-based runtime systems ensure task-atomic semantics by ensuring that repeated task executions are idempotent (i.e., have the same effect when repeatedly executed). The key to idempotence is ensuring that updates to non-volatile state made by an interrupted, partial execution of a task are never visible to a subsequent (potentially completing) re-execution of the task.  
 
-There are several run time strategies to ensuring task idempotence. One
-approach~\cite{alpaca} is to identify non-volatile data involved in WAR
-dependences in a task (like DINO and Ratchet did for
-checkpoints~\cite{dino,ratchet}), execute the task using buffered copies of
-those data, and commit the buffered copies before completing the task. Another
-strategy is to statically create multiple versions of non-volatile data shared
-by tasks and ensure by construction that no task reads and writes the same
-non-volatile memory location~\cite{chain}.  Regardless of the idempotence
-strategy, the key to task-based execution is that fixed, statically defined
-tasks execute as though atomic, completing after zero or more attempts. 
-
-\TODO{Brandon left off here.}
+There are several run time strategies to ensuring task idempotence. One approach, utilized by Alpaca~\cite{alpaca}, is to identify non-volatile data involved in WAR dependences in a task (like DINO~\cite{dino} and Ratchet~\cite{rachet} did for checkpoints), execute the task using buffered copies of those data, and commit the buffered copies before completing the task. Another strategy is to statically create multiple versions of non-volatile data shared by tasks and ensure by construction that no task reads and writes the same non-volatile memory location~\cite{chain}. Regardless of the idempotence strategy, the key to task-based execution is that fixed, statically defined tasks execute as though atomic, completing after zero or more attempts. \TODO{Brandon left off here.}
 
 Despite the benefit of the modular model certain limitations are still present that must be overcome and which inspired us to design \sys. Let us look at these problems in detail.
 
