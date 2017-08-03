@@ -39,7 +39,7 @@
                         __jump_cnt = 0;    \
                     }
 
-#define COALESCING 1
+//#define COALESCING 1
 
 #if COALESCING
 __nv volatile unsigned int __virtualTaskSize = 2;
@@ -209,14 +209,14 @@ void os_scheduler()
         {
             if ((__totalTaskCounter + __taskCounter) > __totNumTask)
             {
-//                if (__maxVirtualTaskSize > __virtualTaskSize)
-//                {
+                if (__maxVirtualTaskSize > __virtualTaskSize)
+                {
                     __virtualTaskSize++;
                     // To distinguish between consecutive power interrupt
                     // and power interrupt on the same task after a complete round
                     __reboot_state[0] = 0;
 
-//                }
+                }
             }
             // virtual progress
             JUMP();
