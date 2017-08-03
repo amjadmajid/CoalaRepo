@@ -16,7 +16,7 @@ figs:
 	cp texFigCode/taskification_example.pdf figures/
 	cp texFigCode/crc_example_war.pdf figures/
 	cp texFigCode/dynamic-chain.pdf figures/
-	cp texFigCode/sram-buffer.tex figures/
+	cp texFigCode/sram-buffer.pdf figures/
 
 clean:
 	-rm paper.aux paper.bbl paper.blg paper.log paper.out paper.pdf
