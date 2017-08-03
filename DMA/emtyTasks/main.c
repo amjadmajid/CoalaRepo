@@ -77,8 +77,6 @@ void task11()
 
 void task12()
 {
-        P3OUT |=BIT5;
-        P3OUT &=~BIT5;
 
 }
 
@@ -128,6 +126,9 @@ void task21()
 }
 void task22()
 {
+    P3OUT |=BIT5;
+    P3OUT &=~BIT5;
+
 
 }
 
