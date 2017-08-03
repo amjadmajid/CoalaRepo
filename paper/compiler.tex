@@ -41,9 +41,9 @@ maximize task size, which minimizes the frequency of task transitions.
 %\item{Task boundary should be visited as least as possible due to overhead on boundaries.}\todo{Define overhead on boundaries}{Kiwan}
 %\end{enumerate} 
 
-\sys meets these correctness and efficiency requirements with a four-part
-analysis composed of (i) \emph{graph construction}, (ii) \emph{loop analysis},
-(iii) \emph{task preparation}, and (iv) \emph{single entry assurance}.
+%\sys meets these correctness and efficiency requirements with a four-part
+%analysis composed of (i) \emph{graph construction}, (ii) \emph{loop analysis},
+%(iii) \emph{task preparation}, and (iv) \emph{single entry assurance}.
 
 \begin{figure}
 	\centering
@@ -54,18 +54,69 @@ analysis composed of (i) \emph{graph construction}, (ii) \emph{loop analysis},
 	\label{fig:compiler_overview}
 \end{figure}
 
-\textbf{Graph Construction:} starting from a plain C code (see example in Figure~\ref{fig:comp_1}) \sys compiler first builds a control flow graph where (i) each vertices is a \emph{basic block} and (ii) each unidirectional edge is a \emph{branch from one basic block to another} (see example in Figure~\ref{fig:comp_2}). All function calls are inlined in the main function prior to building a graph.
+The input to \sys is a standard C program (as shown in Figure~\ref{fig:comp_1})
+and the output of \sys's analysis is the CFG, with some vertices marked as {\em
+task boundaries}. 
+%
+The \sys compiler builds the program's CFG
+(as shown in Figure~\ref{fig:comp_2}).  To simplify interprocedural analysis,
+our prototype of \sys's analysis inlines all function calls into the main
+function before building a graph. 
+%
+\sys uses a cost-based task boundary placement analysis that
+considers per-block energy consumption estimates, inter-task variable liveness,
+and the cost of partitioning loops.  We first describe how \sys measures each of these costs 
+and then describe \sys's procedure for placing boundaries in the CFG.
 
-Each vertex has a {\em cost}, which represents the energy usage of the basic block. We used the number of LLVM IRs inside a vertex as the energy use metric. When forming a task, each task should contain a basic block so that the sum of cost of all blocks within each tasks should be roughly the same (viz. O1) and does not exceed given energy budget (viz. C1). For our implementation, the programmer should provide the energy budget in compile time defined in number of LLVM IR instructions that the hardware can execute safely in one energy cycle. This number must be found experimentally.
 
-Each edge holds the information about the {\em live variables} across the edge, and if the edge is within any loop, the {\em loop count}. By this information, the compiler tries to minimize the number of protected variable (viz. O2), because placing boundary at an edge means the live variables across that edge need to be protected. Also the compiler avoids placing boundaries at an edge that is within a loop whose loop count is big (viz. O3).
+\subsubsection{Task Cost Analysis}
+\sys's task cost analysis considers estimated task energy cost, variable
+liveness, and the impact of splitting loops across tasks.  The result of the
+task cost analysis determines where to place boundaries in the CFG.
+ 
+{\noindent \bf Estimated energy cost.} \sys assigns each basic block in the
+CFG a {\em cost}, which is an estimate of the energy consumption of the block.
+Precisely modeling the energy cost of arbitrary C code is a difficult problem
+and beyond the scope of this work; we used the number of intermediate
+representation (IR) instructions in a block as a proxy for energy because
+energy cost is likely to tightly correspond  to block length.  Moreover, we
+assume as an input to the compiler the maximum number of operations that the
+device can execute without exhausting its buffered energy. This parameter is
+highly device-dependent, and we assume that a developer or device manufacturer
+determines the number empirically, as we did in this work through direct
+measurement.  \sys's analysis tries ensure that the estimated energy cost of different tasks
+is roughly the same and does not exceed given energy budget. 
 
-The compiler also calculates a dominance relation \todo{Define dominance relation}{Kiwan} between vertices. This information is used to ensure task's single-entry property (viz. C2).
+{\noindent \bf Live variable cost.}
+Each CFG edge is associated with a set of {\em live variables} that are
+accessible in both of the blocks that define the edge.  Variables that are live
+across an edge between two tasks must be protected by \sys's memory
+virtualization mechanism and each live, inter-task variable increases the run
+time overhead for a boundary placement.  \sys's analysis tries to minimize the
+overhead of protected variables by placing boundaries to minimize the number of
+inter-task live variables.
 
-\textbf{Loop Analysis:} After constructing the graph and assigning the information on a cost and live variables to each vertex and edge, respectively, the compiler begins with analyzing the program loops. The compiler first identifies all loops and then multiplies the loop count by the cost of a vertices within the loop. The reason is, if the loop is inside a task it will use up energy that is roughly multiplied by the loop count compared to code that is outside of a loop. If the resulting cost of a loop is too large\todo{how do you decide on the acceptable loop cost?}{Kiwan}, the compiler places boundary at the back edge of the loop, and reverts the change to the cost of the vertices inside. It means that if the loop is too large to fit in one task, each iteration should be a separate task execution.
+
+{\noindent \bf Loop splitting cost.}
+and if the edge is within any loop, the {\em loop count}. 
+Also the compiler avoids placing boundaries at an edge that is
+within a loop whose loop count is big.
+
+After constructing the graph and assigning the information on a cost and live
+variables to each vertex and edge, respectively, the compiler begins with
+analyzing the program loops. The compiler first identifies all loops and then
+multiplies the loop count by the cost of a vertices within the loop. The reason
+is, if the loop is inside a task it will use up energy that is roughly
+multiplied by the loop count compared to code that is outside of a loop. If the
+resulting cost of a loop is too large\todo{how do you decide on the acceptable
+loop cost?}{Kiwan}, the compiler places boundary at the back edge of the loop,
+and reverts the change to the cost of the vertices inside. It means that if the
+loop is too large to fit in one task, each iteration should be a separate task
+execution.
 
 If a program has an unbounded loop (such as {\tt while} statement), the compiler conservatively assumes the loop count to be very large. The programmer can prevent this by annotating maximum possible loop count of such unbounded loop if the programmer has the information.\todo{'the' or 'this'? Does it mean programmed still needs to inspect the code?}{Kiwan}
 
+\subsubsection{Task Boundary Placement}
 \textbf{Tasks Preparation:} After initial boundary placemen with loops analysis, the compiler places additional boundaries if some tasks are still too large. The \sys compiler starts from the beginning of the main function and traverse through the graph in a depth-first search manner. If any part of the graph is found that is too long to fit in the energy bound, it means a boundary must be placed somewhere within. The subset of graph that needs boundary placement within is called a {\em boundary-candidate}.
 
 As discussed above, when placing boundary we take three optimization criteria into account: \{O1, O2, O3\}. We now introduce a heuristic that consider all these criteria and choose the local optimum\todo{Optimum of what?}{Kiwan}. The heuristic calculates the {\em score}, $S$, of each edge inside the boundary candidate as
@@ -78,9 +129,17 @@ where $N_{\text{IR}}$ is a normalized IR count that the task will end up having 
 
 Figure~\ref{fig:comp_2} shows example of such boundary placement on graph. The first three vertices will become one task while the rest will become another (see Figure~\ref{fig:comp_3}).
 
-\textbf{Ensuring Single Entry:} After placing a boundary, the compiler ensures that the newly made task is single-entried by checking dominance relation. That is, every vertex within a task should be dominated by the entry vertex of the task. If this rule is violated, the compiler places additional boundaries to make sure that every task is single entried.
+\textbf{Ensuring Single Entry:} 
 
-\subsection{Compiler Transform Pass}
+The compiler also calculates a dominance relation \todo{Define dominance
+relation}{Kiwan} between vertices. This information is used to ensure task's
+single-entry property.  After placing a boundary, the compiler ensures that the
+newly made task is single-entried by checking dominance relation. That is,
+every vertex within a task should be dominated by the entry vertex of the task.
+If this rule is violated, the compiler places additional boundaries to make
+sure that every task is single entried.
+
+\subsection{Task Transformation}
 \label{sec:compiler_transform_pass}
 
 In the compiler transform pass, a complier executes sub-tasks described below.
