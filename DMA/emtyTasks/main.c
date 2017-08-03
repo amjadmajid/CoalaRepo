@@ -133,10 +133,11 @@ void task22()
 }
 
 
-
+__nv volatile uint16_t dummy = 10;
 int main(int argc, char const *argv[])
 {
     init();
+    dummy = 20;
     taskId tasks[] = { {task1,0},
                        {task2,0},
                        {task3,0},
