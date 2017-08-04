@@ -154,11 +154,15 @@ operations along the path.  A boundary candidate's score is computed as:
 where $N_{\text{IR}}$ is the length of the path being traversed up to the
 candidate, $N_{\text{PV}}$ is the number of variables live variables at the
 candidate, and $N_{\text{loop}}$ is the product of the loop bounds of all loops
-(i.e., nested loops) containing the boundary candidate. \sys normalizes $N_{\text{IR}}$ to the
-total number of instructions along the path being traversed. The weights, $w_{0},
-w_{1}$ are between zero and one, and are hand-tuned parameters that define the
-relative importance of $N_{\text{IR}}$, $N_{\text{PV}}$, and $N_{\text{loop}}$.
-We will study the effect of weights in Section~\ref{sec:compiler_heuristics}. 
+(i.e., nested loops) containing the boundary candidate. \sys normalizes
+$N_{\text{IR}}$ to the total number of instructions along the path being
+traversed. The weights, $w_{0}, w_{1}$ are between zero and one, and are
+hand-tuned parameters that define the relative importance of $N_{\text{IR}}$,
+$N_{\text{PV}}$, and $N_{\text{loop}}$.  We empirically determined these weight
+values by measuring the runtime for different weight values across
+applications.  We found that varying weights varies runtime by only around 5\%
+in most cases and in our experimental evaluation, we used $w_{0} = w_{1} =
+0.5$.  
 
 After placing task boundaries, the compiler must ensure that all tasks are
 single-entry.  To do so, \sys computes the dominator tree of the CFG and checks
@@ -208,22 +212,6 @@ because unprotected pointers may point to protected data.  Leveraging LLVM's
 {\tt basic} pointer alias analysis the compiler conservatively re-writes all
 accesses that {\em may} read or write protected data. 
 
-\subsection{Boundary Placement Heuristics}
-\label{sec:compiler_heuristics}
-
-By studing different weights discussed in Section~\ref{sec:compiler_boundary},
-we discovered that there is no one global weights that are optimal for every
-application, and more importantly, the weights do not matter much and
-result in less than 5\% run time difference. The result is mainly because
-no matter what the weight is, we place boundaries at obvious points (such as back-edge of a
-large loop) and we never place boudaries at obviously-bad points (such as
-inside a loop when the loop is not large). Since these obvious decision
-dominates the structure of tasks and heuristics only give minute perturbation,
-the result does not gets affected significantly.
-As an extreme, for small apps like CEM, only placing boundaries at obvious points are enough to
-determine the entire task structure. It never needs any additional heuristics.
-We used weight of 
-$w_{0} = 0.5$ and $w_{1} = 0.5$ for the experiment result in Section~\ref{sec:experiment}.
 
 
 %After task generation is done, the compiler generates new main function and
