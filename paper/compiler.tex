@@ -12,8 +12,6 @@
 \subsection{Task Boundary Identification Analysis}
 \label{sec:compiler_analysis_pass}
 
-\todo{Define single entry}{Kiwan}
-\TODO{Brandon: the term "single-entry" is well-known in the community to mean that there is a single control-flow edge entering the task. Thinking about this a bit, is there a simple reason why we cannot have multiple-entry tasks? A totally plausible task graph could be like A->B B->C C->B C->A; here, B has two predecessors.  Is this fundamental?  Or an analysis convenience? I've left it as "single-entry" for now}
 
 \sys analyzes a program to determine where to put task boundaries to divide the
 program into tasks. A task is a single-entry, multiple-exit region of the CFG

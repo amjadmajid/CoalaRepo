@@ -33,17 +33,17 @@ A complete logical structure of \sys is given in Figure~\ref{fig:system_overview
 		\hline
 		Keyword & Description\\
 		\hline\hline
-		\texttt{RVAR} & Read protected variable\\
-		\texttt{WVAR} & Write protected variable\\
-		\texttt{P()} & ---\\
-		\texttt{\_\_task\_\_ foo(){...}} & ---\\
-		\texttt{PageFault()} & --- \\
-		\texttt{TransitionTo()} & --- \\
-		\texttt{execute\_tasks()} & ---\\
-		\texttt{jump()} & ---\\
+		\texttt{RP} & Read-protected variable\\
+		\texttt{WP} & Write-protected variable\\
+		\texttt{\_\_task\_\_ foo(){...}} & Task declaration\\
+		\texttt{addTask()} & Build internal data structure for executor \\
+		\texttt{run\_tasks()} & Task executor \\ %scheduler
+		\texttt{next\_task()} & Transition to a new task\\
+		%\texttt{PageFault()} & --- \\
+		%\texttt{P()} & ---\\
 		\hline
 	\end{tabular}
-\caption{Summary of \sys syntax}
+\caption{Summary of \sys syntax: top---user-specific variables}
 \label{tab:viper_syntax}
 \end{table}
 
