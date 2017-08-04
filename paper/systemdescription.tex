@@ -26,7 +26,26 @@ A complete logical structure of \sys is given in Figure~\ref{fig:system_overview
 \subsection{Programming Model}
 \label{sec:overview_programming_model}
 
-
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular}{|c|c|}
+		\hline
+		Keyword & Description\\
+		\hline\hline
+		\texttt{RVAR} & Read protected variable\\
+		\texttt{WVAR} & Write protected variable\\
+		\texttt{P()} & ---\\
+		\texttt{\_\_task\_\_ foo(){...}} & ---\\
+		\texttt{PageFault()} & --- \\
+		\texttt{TransitionTo()} & --- \\
+		\texttt{execute\_tasks()} & ---\\
+		\texttt{jump()} & ---\\
+		\hline
+	\end{tabular}
+\caption{Summary of \sys syntax}
+\label{tab:viper_syntax}
+\end{table}
 
 \subsection{Semantics and Execution Model}
 \label{sec:overview_semantics}
