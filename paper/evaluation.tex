@@ -17,6 +17,8 @@ We need to note that although another very relevant task-based runtime has been 
 The applications that were used in the evaluation are given in Table~\ref{table:benchmark_list}. These benchmarks are the same ones as used in~\cite{chain,alpaca}. In addition to Chain benchmark programs new applications were used for benchmarking: \emph{DFT}, \emph{Huffman compressor}, and \emph{selection sort}.
 
 \begin{table}[t]
+	\centering
+	\footnotesize
 	\begin{tabular}{|c|c|c|}
 		\hline
 		Nickname & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
@@ -76,24 +78,20 @@ Expected results:
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/pagSizeOverhead}
-	\caption{Initial figure about page size overhead. \todo{Figure placeholder---will be replaced with final one}{Amjad}}
-	\label{fig:IPOSPerformance}
-\end{figure}
-
-\begin{figure}
-	\centering
 	\includegraphics[width=\columnwidth]{figures/chain_vipe}
 	\caption{Time to complete for a set of testing applications (refer to Table~\ref{table:benchmark_list}) using \sys versus Chain (no coalescing applied, fixed power supply). \todo{Figure placeholder---will be replaced with final one}{Amjad}}
 	\label{fig:IPOSPerformance}
 \end{figure}
 
-Expected results:
-\begin{itemize}
-	\item Sensitivity plot---normalized page swapping cost ("bathtub" curve) in terms of execution time: compare against Chain and full double buffering approach; show number of page swaps---do the experiment for all applications
-\end{itemize} 
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/pagSizeOverhead}
+	\caption{Page size overhead.\todo{Figure placeholder---will be replaced with final one}{Amjad}}
+	\label{fig:IPOSPerformance}
+	\label{fig:page_size}
+\end{figure}
 
-\todo{Provide argument for page swapping using hardware support}{Brandon}
+Figure~\ref{fig:page_size} presents the result on the effect of page swap size on the execution time of the programs executed by \sys. Overhead has been measured in the MCU clock cycles\todo{WISP? EDB? CCS?}{Amjad}. Result has been normalized \todo{To what?}{Amjad}. A subset of applications has been selected for evaluation. Additionally, page faults have been measured. \todo{Comparison with Chain and double buffering?}{Amjad} The result show clearly a bathtub-shape bar plot for each application, demonstrating that for each application there is always a page size that minimizes \emph{both} execution time and page swaps. For all applications (except for Sort) this value equals to 64 pages\todo{And one page is?}{Amjad}. The shape of each figure can be explained as follows. For small page swaps (<64) the execution time is dominated by the \emph{frequency} of page swaps (each swap takes time, as shown in Figure~\ref{fig:dmaTimeEnergy}). On the other hand, in the opposite case execution time is dominated by the time of swapping one large page. Another interesting observation is the non-symmetric shape of the bar plot.\todo{Why do we see non-symmetry}{Amjad}
 
 \subsubsection{Case Study}
 \label{sec:case_study}

@@ -29,7 +29,7 @@ The persistent variables a virtual task operates on should be brought from non-v
 	\label{fig:sram_vs_dma}
 \end{figure}
 
-\textbf{Problem 2---Two Phase Commit Overhead:} For the consistency of the non-volatile memory, the volatile buffer should be committed at the end of each virtual task by means of a \emph{two-phase commit} approach. However, two-phase commit is also very expensive since the committed variables are not \emph{contiguous}---leading the fact that copying or moving of data between/within volatile and non-volatile memory should be always performed with CPU intervention, refer to Fig.~\ref{fig:sram_vs_dma}.
+\textbf{Problem 2---Two Phase Commit Overhead:} For the consistency of the non-volatile memory, the volatile buffer should be committed at the end of each virtual task by means of a \emph{two-phase commit} approach. However, two-phase commit is also very expensive since the committed variables are not \emph{contiguous}---leading the fact that copying or moving of data between/within volatile and non-volatile memory should be always performed with CPU intervention, refer to Fig.~\ref{fig:sram_vs_dma}. 
 
 \begin{figure}[t]
 	\centering
