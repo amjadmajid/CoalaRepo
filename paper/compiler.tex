@@ -54,14 +54,13 @@ maximize task size, which minimizes the frequency of task transitions.
 	\label{fig:compiler_overview}
 \end{figure}
 
-The input to \sys is a standard C program (as shown in Figure~\ref{fig:comp_1})
-and the output of \sys's analysis is the CFG, with some vertices marked as {\em
-task boundaries}. 
+The input to the task boundary identification analysis is a standard C program
+(as shown in Figure~\ref{fig:comp_1}) and the output of \sys's analysis is the
+CFG, with some vertices marked as {\em task boundaries}. 
 %
-The \sys compiler builds the program's CFG
-(as shown in Figure~\ref{fig:comp_2}).  To simplify interprocedural analysis,
-our prototype of \sys's analysis inlines all function calls into the main
-function before building a graph. 
+The \sys compiler builds the program's CFG (as shown in
+Figure~\ref{fig:comp_2}).  To simplify interprocedural analysis, our prototype
+inlines all function calls into the main function in the CFG. 
 %
 \sys uses a cost-based task boundary placement analysis that
 considers per-block energy consumption estimates, inter-task variable liveness,
@@ -79,7 +78,7 @@ CFG a {\em cost}, which is an estimate of the energy consumption of the block.
 Precisely modeling the energy cost of arbitrary C code is a difficult problem
 and beyond the scope of this work; we used the number of intermediate
 representation (IR) instructions in a block as a proxy for energy because
-energy cost is likely to tightly correspond  to block length.  Moreover, we
+energy cost is likely to closely correspond to block length.  Moreover, we
 assume as an input to the compiler the maximum number of operations that the
 device can execute without exhausting its buffered energy. This parameter is
 highly device-dependent, and we assume that a developer or device manufacturer
@@ -89,87 +88,148 @@ is roughly the same and does not exceed given energy budget.
 
 {\noindent \bf Live variable cost.}
 Each CFG edge is associated with a set of {\em live variables} that are
-accessible in both of the blocks that define the edge.  Variables that are live
-across an edge between two tasks must be protected by \sys's memory
-virtualization mechanism and each live, inter-task variable increases the run
-time overhead for a boundary placement.  \sys's analysis tries to minimize the
-overhead of protected variables by placing boundaries to minimize the number of
-inter-task live variables.
+accessible in both of the blocks that define the edge (i.e., predecessor and
+successor).  Variables that live across an edge between two tasks must be
+protected by \sys's memory virtualization mechanism and each live, inter-task
+variable increases the run time overhead for a boundary placement.  \sys's
+analysis tries to minimize the overhead of protected variables by placing
+boundaries to minimize the number of inter-task live variables.
 
 
-{\noindent \bf Loop splitting cost.}
-and if the edge is within any loop, the {\em loop count}. 
-Also the compiler avoids placing boundaries at an edge that is
-within a loop whose loop count is big.
+{\noindent \bf Loop cost.}
+Loops are a challenge for \sys because the analysis must account for the cost
+of multiple iterations of the loop body.  \sys assumes that most loops are
+annotated with a static loop bound, which is common in embedded code.  For
+loops that do not have a static bound, \sys conservatively assumes the maximum
+possible loop bound, based on the type of the loop induction variable.
 
-After constructing the graph and assigning the information on a cost and live
-variables to each vertex and edge, respectively, the compiler begins with
-analyzing the program loops. The compiler first identifies all loops and then
-multiplies the loop count by the cost of a vertices within the loop. The reason
-is, if the loop is inside a task it will use up energy that is roughly
-multiplied by the loop count compared to code that is outside of a loop. If the
-resulting cost of a loop is too large\todo{how do you decide on the acceptable
-loop cost?}{Kiwan}, the compiler places boundary at the back edge of the loop,
-and reverts the change to the cost of the vertices inside. It means that if the
-loop is too large to fit in one task, each iteration should be a separate task
-execution.
+The analysis tries to minimize the dynamic overhead of traversing task
+boundaries by avoiding placing a task boundary on a loop with a large bound,
+when possible. At the same time, the analysis must avoid placing a loop in a
+single task if the total energy cost of all of its iterations is likely to
+exceed the device's energy buffer.  \sys first multiplies the estimated energy
+cost of the blocks in the loop body by the loop bound to determine estimate the
+cost of the loop's execution.  If the loop's cost exceeds the device's energy
+buffer, \sys can place a task boundary on the loop's back-edge, converting each
+iteration into its own task.  
 
-If a program has an unbounded loop (such as {\tt while} statement), the compiler conservatively assumes the loop count to be very large. The programmer can prevent this by annotating maximum possible loop count of such unbounded loop if the programmer has the information.\todo{'the' or 'this'? Does it mean programmed still needs to inspect the code?}{Kiwan}
+%of  The reason
+%is, if the loop is inside a task it will use up energy that is roughly
+%multiplied by the loop count compared to code that is outside of a loop. If the
+%resulting cost of a loop is too large\todo{how do you decide on the acceptable
+%loop cost?}{Kiwan}, the compiler places boundary at the back edge of the loop,
+%and reverts the change to the cost of the vertices inside. It means that if the
+%loop is too large to fit in one task, each iteration should be a separate task
+%execution.
+
+%If a program has an unbounded loop (such as {\tt while} statement), the compiler conservatively assumes the loop count to be very large. The programmer can prevent this by annotating maximum possible loop count of such unbounded loop if the programmer has the information.\todo{'the' or 'this'? Does it mean programmed still needs to inspect the code?}{Kiwan}
 
 \subsubsection{Task Boundary Placement}
-\textbf{Tasks Preparation:} After initial boundary placemen with loops analysis, the compiler places additional boundaries if some tasks are still too large. The \sys compiler starts from the beginning of the main function and traverse through the graph in a depth-first search manner. If any part of the graph is found that is too long to fit in the energy bound, it means a boundary must be placed somewhere within. The subset of graph that needs boundary placement within is called a {\em boundary-candidate}.
 
-As discussed above, when placing boundary we take three optimization criteria into account: \{O1, O2, O3\}. We now introduce a heuristic that consider all these criteria and choose the local optimum\todo{Optimum of what?}{Kiwan}. The heuristic calculates the {\em score}, $S$, of each edge inside the boundary candidate as
+After completing its cost analysis of a program, \sys inserts task boundaries
+into the CFG in two steps.  The first step is to insert task boundaries on the
+back-edges of all loops that have an energy cost greater than the device's
+energy buffer capacity, producing an initial boundary placement. The second
+step is to insert task boundaries at additional points in the code,
+sub-dividing tasks that have an estimated cost that exceeds the energy buffer's
+capacity.
+
+To sub-divide these tasks, \sys does depth-first traversals of all paths in the
+CFG, ignoring back-edges. Traversals start from the beginning of the main
+function, or from an existing task boundary.  \sys accumulates the cost of
+basic blocks during the traversal until reaching another task boundary or an
+exit node in the CFG.   At the end of a traversal, if the accumulated cost
+exceeds to device's energy capacity \sys must split the traversed path with a
+task boundary.  Each edge on the path is a candidate location for a boundary.
+
+The analysis uses a heuristic to compute a score for each candidate and places
+a boundary at the candidate with the highest score. The heuristic tries to
+avoid placing boundaries on loops, to minimize the number of live variables
+that must be protected across the new boundary, and to maximize the number of
+operations along the path.  A boundary candidate's score is computed as:
 %
 \begin{equation}
-S = \frac{w_{0} N_{\text{IR}} - w_{1} N_{\text{PV}}}{N_{\text{loop}}},\nonumber
+\text{score} = \frac{w_{0} N_{\text{IR}} - w_{1} N_{\text{PV}}}{N_{\text{loop}}},\nonumber
 \end{equation}
 %
-where $N_{\text{IR}}$ is a normalized IR count that the task will end up having if the compiler places boundary at the specific edge, $N_{\text{PV}}$ is the number of protected variables that will be newly introduced by placing boundary at the edge, and choose the edge with the highest score, $N_{\text{loop}}$ is the loop count and $w_{0},w_{1}\in [0,1]$ are pre-selected weights before compilation\footnote{Naturally, different $w_{0}, w_{1}$ will have different effect on the compiler result. We will study this effect in Section~\ref{sec:results_compiler}.}. Both $N_{\text{IR}}$ and $N_{\text{PV}}$ are normalized within the boundary candidate, since usually IR count is much larger and has higher variance, thus has dominating effect if not normalized. It is better to have higher IR count within the task since it means the task size is similar to the size given by the programmer (viz. C1). On the other hand, change in protected variable is better to be small (viz. C2), so we penalize it by assigning a negative value to $N_{\text{PV}}$. If the edge is within a loop, the score is divided by $N_{\text{loop}}$. It will result in not placing boundary within loops unless other parts of the formula really pays off (viz. C3)\todo{This sentence is not clear: what "pays off" means in this context?}{Kiwan}. Note that complier never makes a decision that will end up in having more IR count than the programmer specified because at the beginning boundary candidate is chosen to have less IR than the programmer specified number.
+where $N_{\text{IR}}$ is the length of the path being traversed up to the
+candidate, $N_{\text{PV}}$ is the number of variables live variables at the
+candidate, and $N_{\text{loop}}$ is the product of the loop bounds of all loops
+(i.e., nested loops) containing the boundary candidate. \sys normalizes $N_{\text{IR}}$ to the
+total number of instructions along the path being traversed. The weights, $w_{0},
+w_{1}$ are between zero and one, and are hand-tuned parameters that define the
+relative importance of $N_{\text{IR}}$, $N_{\text{PV}}$, and $N_{\text{loop}}$.
+We will study the effect of weights in Section~\ref{sec:results_compiler}. 
 
-Figure~\ref{fig:comp_2} shows example of such boundary placement on graph. The first three vertices will become one task while the rest will become another (see Figure~\ref{fig:comp_3}).
+After placing task boundaries, the compiler must ensure that all tasks are
+single-entry.  To do so, \sys computes the dominator tree of the CFG and checks
+that every vertex within a task is dominated by the entry vertex of the task.
+If this dominance condition is unmet for a CFG node, the compiler places
+an additional task boundary at that node, meeting the condition.
+%
+Figure~\ref{fig:comp_2} illustrates boundary placement: the first three
+vertices make up one task and the remainder become a second task.
 
-\textbf{Ensuring Single Entry:} 
 
-The compiler also calculates a dominance relation \todo{Define dominance
-relation}{Kiwan} between vertices. This information is used to ensure task's
-single-entry property.  After placing a boundary, the compiler ensures that the
-newly made task is single-entried by checking dominance relation. That is,
-every vertex within a task should be dominated by the entry vertex of the task.
-If this rule is violated, the compiler places additional boundaries to make
-sure that every task is single entried.
 
 \subsection{Task Transformation}
 \label{sec:compiler_transform_pass}
 
-In the compiler transform pass, a complier executes sub-tasks described below.
 
-\textbf{Declaring and Migrating Codes to Tasks:} After the boundary placement is finished, the analysis pass passes the information to transform pass. The transform pass makes new task, traverse through the graph, and copies every code within the vertices it encounters to the new task until it meets the task boundary. At the task boundary, it makes another task and starts copying again, and repeat this action until every code is moved to form a task.
+After placing task boundaries during analysis, \sys's transformation analysis
+restructures the code into tasks defined by the placed boundaries. The analysis
+traverses the CFG starting from an arbitrary task boundary.  On reaching a
+subsequent boundary, the transformation analysis identifies all paths between
+the two task boundaries and copies those paths into a new task function.  The
+analysis continues until all paths are contained within a task. 
 
-\textbf{Renaming Variables:} On copying the code, the variables should be renamed. If a variable is alive across multiple tasks, it needs to become a global-protected variable, and every access to the variable should be redirected. If a variable's live range is local to the task, it does not need to go through such renaming. For example, in Figure~\ref{fig:comp_2}, boundary is placed within the live range of variable {\tt b} (Note that the red cross overlaps the blue arrow). Thus variable {\tt b} needs to become a protected variable {\tt p\_b} and every access to {\tt b} should be redirected to {\tt p\_b} (Figure~\ref{fig:comp_3}). On the other hand, {\tt a}'s live range is always local to a single task. In such case, it need not become a protected variable. Note, however, still new declaration of {\tt a} should be inserted in {\tt task1} (Figure~\ref{fig:comp_3}). As an improvement to the complier, constants and read-only variable never becomes protected.
+After forming tasks, variables that are live beyond the end of the task become
+protected, which requires renaming those variables and updating references to
+renamed variable names.  
+%
+For example, Figure~\ref{fig:comp_2} shows a boundary placed within the live
+range of {\tt b}; {\tt b} becomes protected and accesses to {\tt b} should be
+redirected to {\tt p\_b} (as shown in Figure~\ref{fig:comp_3}).  {\tt a} is
+task-local and need not be protected, but only declared in the task. Constants
+and read-only variable are never protected.
+%
+When writes in multiple, newly formed tasks may update the same location (i.e.,
+at a PHI node in the CFG), \sys re-writes the accesses to refer to the same global
+name.   Subsequent reads simply read the protected variable. 
 
-\textbf{Inserting \texttt{os\_jump} Calls:} After renaming is done, the compiler detects the broken {\tt branch} instructions\todo{Define protected branch instruction}{Kiwan} which tries to branch to a basic block that is inside different task and change it to an {\tt os\_jump} call (Figure~\ref{fig:comp_3}).  Note that in this figure we showed the name of the next task to be executed for readability, however {\tt os\_jump} call takes offset number as an argument. In reality the compiler statically calculates and passes the offset.
+After forming tasks, some branches in a task may refer to targets in another
+task. \sys patches the CFG to re-write those branches to instead be \transition
+statements that transition to the entry point of the other task. Such a
+``broken'' branch will always refer to a task's entry node because \sys ensures
+that all tasks have only one entry. 
 
-\textbf{Dealing With PHI Nodes:} Whenever more than two different control flows try to write different value in the same memory location, LLVM makes a unique IR called {\em PHI Node} when reading the memory location~\cite{}. However if there is a boundary between the memory write and the PHI Node, the compiler will not work. Thus, on each of this occurrence, \sys compiler declares a special protected variable and makes the write relocated to the protected variable. Then the PHI Node becomes simply a read to a protected variable.
+The compiler re-writes accesses to protected variables to use \sys's memory
+virtualization API. Pointers pose a challenge to re-writing protected accesses
+because unprotected pointers may point to protected data.  Leveraging LLVM's
+{\tt basic} pointer alias analysis the compiler conservatively re-writes all
+accesses that {\em may} read or write protected data. 
 
-\textbf{Inserting API Call for Paging:} To run \sys, every read or write to a protected variable should call related API for page swapping and dirty page marking. The compiler conservatively inserts such calls before a {\em possible} read or write to the protected variable. We use the basic pointer alias feature provided by the LLVM library. We are being conservative, so it is always correct, albeit not always efficient.\todo{We need to say more about the level of this inefficiency and how it is measured}{Kiwan}
+%After task generation is done, the compiler generates new main function and
+%peppers the system with necessary codes that is needed by \sys (such as code
+%for evoking {\tt os\_sceduler}). Also it removes the code that became stale
+%(such as the body of a function call, for all the function calls are now
+%inlined).
 
-\textbf{Creating New Main Function and Cleaning Unnecessary Codes:} After task generation is done, the compiler generates new main function and peppers the system with necessary codes that is needed by \sys (such as code for evoking {\tt os\_sceduler}). Also it removes the code that became stale (such as the body of a function call, for all the function calls are now inlined).
-
-\subsection{Compiler Design Decisions}
-\label{sec:compiler_limitations}
-
-To be able to implement \sys compiler certain critical assumptions had to be made. 
-
-\begin{enumerate}
-	%
-	\item \textbf{Conservative handling of unbounded code sections:} When a C program contains an unbounded loop, the \sys compiler makes a conservative decision of regarding its loop count to be very large. However, if a programmer annotates the expected loop count manually the overhead can be relieved.
-	%
-	\item \textbf{Conservative handling of pointers:} When a C program contains pointer, due to the limitation of pointer alias, the compiler makes the conservative decision. That is, it may consider a variable's live range longer than actual, or it may insert API call for page swap even when it is unnecessary. However, these overhead can be reduced by better pointer aliasing algorithm.
-	%
-	\item \textbf{Function call inlining:} \sys compiler inlines all function call prior to analysis for simplicity. However it can introduce code bloat. Insted, a better way would be to convert large-frequently visited functions to a separate task and make the function call a jump to the task. However we did not implemented such feature for simplicity of the system.
-	%
-	\item \textbf{LLVM IR instruction count to estimate the energy usage:} The compiler uses the number of LLVM IR count as an indicator for energy usage in trying to meet correctness constraint C1 and optimization constraint O1. Intuitively, the number of LLVM IR correlates with the energy usage since more instructions will lead to more energy usage. However, we need to be aware that is nevertheless a crude approach of estimating energy consumption---actual machine instructions are what counts and they are not exactly equal to the LLVM IR. Also, different instructions have different power usage, and even same instruction has different energy usage from time to time (for example cache hit and miss makes even the same {\tt load} instruction to use different amount of energy). However, the energy usage of each task need not be exactly the same to what programmer indicated, and it is sufficient to make sure that all of the tasks are small enough to fit in to the energy budget. Therefore we conjecture that from the \emph{implementation simplicity perspective} of \sys's compiler counting the LLVM IR instruction is sufficient. The programmer can always ensure correctness constraint C1 by conservatively providing IR count in compile time that is empirically proven to be safe. Also, since the estimation of energy usage of each basic block is perpendicular to the compiler itself, it is simple to plug in a better energy model if there is one.
-	%
-	\item \textbf{Limitation of the boundary placement heuristics:} The boundary placement strategy is a heuristic that chooses the local optimum. However, selecting every local optimum might not be the global optimal solution. We can instead do a random search multiple times to find a global optima. Since current heuristic is already showing good result that is comparable to human-written code, refer to Section~\ref{sec:results_coalescing}, we leave such optimization as a future work.
-\end{enumerate}
+%\subsection{Compiler Design Decisions}
+%\label{sec:compiler_limitations}
+%
+%To be able to implement \sys compiler certain critical assumptions had to be
+%made. 
+%
+%\begin{enumerate}
+%	%
+%	\item \textbf{Conservative handling of unbounded code sections:} When a C program contains an unbounded loop, the \sys compiler makes a conservative decision of regarding its loop count to be very large. However, if a programmer annotates the expected loop count manually the overhead can be relieved.
+%	%
+%	\item \textbf{Conservative handling of pointers:} When a C program contains pointer, due to the limitation of pointer alias, the compiler makes the conservative decision. That is, it may consider a variable's live range longer than actual, or it may insert API call for page swap even when it is unnecessary. However, these overhead can be reduced by better pointer aliasing algorithm.
+%	%
+%	\item \textbf{Function call inlining:} \sys compiler inlines all function call prior to analysis for simplicity. However it can introduce code bloat. Insted, a better way would be to convert large-frequently visited functions to a separate task and make the function call a jump to the task. However we did not implemented such feature for simplicity of the system.
+%	%
+%	\item \textbf{LLVM IR instruction count to estimate the energy usage:} The compiler uses the number of LLVM IR count as an indicator for energy usage in trying to meet correctness constraint C1 and optimization constraint O1. Intuitively, the number of LLVM IR correlates with the energy usage since more instructions will lead to more energy usage. However, we need to be aware that is nevertheless a crude approach of estimating energy consumption---actual machine instructions are what counts and they are not exactly equal to the LLVM IR. Also, different instructions have different power usage, and even same instruction has different energy usage from time to time (for example cache hit and miss makes even the same {\tt load} instruction to use different amount of energy). However, the energy usage of each task need not be exactly the same to what programmer indicated, and it is sufficient to make sure that all of the tasks are small enough to fit in to the energy budget. Therefore we conjecture that from the \emph{implementation simplicity perspective} of \sys's compiler counting the LLVM IR instruction is sufficient. The programmer can always ensure correctness constraint C1 by conservatively providing IR count in compile time that is empirically proven to be safe. Also, since the estimation of energy usage of each basic block is perpendicular to the compiler itself, it is simple to plug in a better energy model if there is one.
+%	%
+%	\item \textbf{Limitation of the boundary placement heuristics:} The boundary placement strategy is a heuristic that chooses the local optimum. However, selecting every local optimum might not be the global optimal solution. We can instead do a random search multiple times to find a global optima. Since current heuristic is already showing good result that is comparable to human-written code, refer to Section~\ref{sec:results_coalescing}, we leave such optimization as a future work.
+%\end{enumerate}

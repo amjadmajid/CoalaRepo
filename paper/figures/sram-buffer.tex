@@ -1,0 +1,78 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning} 
+\usetikzlibrary{fit}
+
+
+
+\tikzset{
+	%Define standard arrow tip
+	>=stealth',
+	%Define style for boxes
+	punkt/.style={
+		rectangle,
+		rounded corners,
+		draw=black, very thick,
+		text width=4.5em,
+		minimum height=1.5em,
+		text centered},
+	% Define arrow style
+	pil/.style={
+		->,
+		thick,
+		shorten <=2pt,
+		shorten >=2pt,}
+}
+
+\begin{document}
+	
+	\begin{tikzpicture}[node distance=1cm, auto,]
+	
+	\node[punkt,minimum height=3em,fill=orange!10] (task1) {y = x+1 
+		\\ z = y+1 \\ x = z+1};
+	\node[below = 0.1cm of task1] () {Task};
+		
+	\node[draw,very thick,dotted,minimum width=7em, fill=blue!5,minimum height=10em, right = 3cm of task1] (sram) {};
+	\node[below = 0.1cm of sram] () {SRAM Cache};
+	
+	\node[punkt, below = -3cm of sram,fill=red!30] (x-sram) {x};
+	\node[punkt, below = 0.3cm of x-sram,fill=blue!30] (y-sram) {y};
+	\node[punkt, below = 0.3cm of y-sram,fill=blue!30] (z-sram) {z};
+
+	\node[right = 4.5cm of sram] (ref) {};
+	\node[draw,very thick,dotted,minimum width=7em, fill=red!5,minimum height=10em, above = 1cm of ref] (fram1) {};
+	\node[below = 0.1cm of fram1] () {FRAM (original)};	
+	
+	\node[draw,very thick,dotted,minimum width=7em, fill=green!5,minimum height=10em, below = 1cm of fram1] (fram2) {};
+	\node[below = 0.1cm of fram2] () {FRAM (versioned)};	
+	
+	\node[punkt, below = -3cm of fram1,fill=red!70] (x1-fram) {x};
+	\node[punkt, below = 0.3cm of x1-fram,fill=blue!50] (y1-fram) {y};
+	\node[punkt, below = 0.3cm of y1-fram,fill=blue!50] (z1-fram) {z};
+	
+	\node[punkt, below = -3cm of fram2,fill=blue!30] (x2-fram) {x};
+	\node[punkt, below = 0.3cm of x2-fram,fill=blue!30] (y2-fram) {y};
+	\node[punkt, below = 0.3cm of y2-fram,fill=blue!30] (z2-fram) {z};
+
+	
+	\path[every node/.style={font=\sffamily\small}]
+	([yshift=0.3cm] task1.east) edge [->, dotted, thick, bend left] node {(1) get x} (x-sram.west)
+	(x-sram.east) edge [->, dotted, thick, bend left] node[xshift=0.5cm] {(2) read x} (x1-fram.west)
+	
+	([yshift=0.3cm]task1.east) edge [->, dotted, thick, bend right] node[xshift=-0.5cm] {(3) set y} (y-sram.west)
+	
+	(task1.east) edge [->, dotted, thick, bend right] node[xshift=-0.4cm] {(4) set z} (z-sram.west)
+	([yshift=-0.4cm]task1.east) edge [->, dotted, thick, bend left] node[xshift=1.3cm,yshift=-0.4cm] {(5) set x} (x-sram.west)
+	
+	(x-sram.east) edge [->, dotted, thick, bend right] node[xshift=-0.4cm] {(6) commit-I x} (x2-fram.west)
+	(z-sram.east) edge [->, dotted, thick, bend right] node[xshift=-0.4cm] {(7) commit-I z} (z2-fram.west)
+	(y-sram.east) edge [->, dotted, thick, bend right] node[xshift=-0.4cm] {(8) commit-I y} (y2-fram.west)
+	
+	(x2-fram.east) edge [->, dotted, thick, bend right] node[xshift=2.5cm] {(9) commit-II x} (x1-fram.east)
+	(y2-fram.east) edge [->, dotted, thick, bend right] node[xshift=2.5cm] {(10) commit-II y} (y1-fram.east)
+	(z2-fram.east) edge [->, dotted, thick, bend right] node[xshift=2.5cm] {(11) commit-II z} (z1-fram.east)
+	;
+	
+	\end{tikzpicture}
+	
+\end{document}
