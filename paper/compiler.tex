@@ -155,8 +155,8 @@ where $N_{\text{IR}}$ is the length of the path being traversed up to the
 candidate, $N_{\text{PV}}$ is the number of variables live variables at the
 candidate, and $N_{\text{loop}}$ is the product of the loop bounds of all loops
 (i.e., nested loops) containing the boundary candidate. \sys normalizes
-$N_{\text{IR}}$ to the total number of instructions along the path being
-traversed. The weights, $w_{0}, w_{1}$ are between zero and one, and are
+$N_{\text{IR}}$ and $N_{\text{PV}}$ to the values among boundary candidates.
+The weights, $w_{0}, w_{1}$ are between zero and one, and are
 hand-tuned parameters that define the relative importance of $N_{\text{IR}}$,
 $N_{\text{PV}}$, and $N_{\text{loop}}$.  We empirically determined these weight
 values by measuring the runtime for different weight values across
