@@ -5,12 +5,12 @@ One of the main objectives of \sys run-time is to restrict virtual tasks to inte
 
 The persistent variables a virtual task operates on should be brought from non-volatile memory to a fixed-sized \emph{volatile buffer}. When the virtual task is finished the modified variables in this buffer should be committed back to their original locations in non-volatile memory. We list three fundamental problems proving that this is however a non-trivial task. 
 
-\begin{figure}
-	\centering
-	%\includegraphics[width=\columnwidth]{figures/}
-	\caption{\sys memory virtualization architecture.\todo{Decide if we really need this figure (we already have a lot of figs)}{Brandon}}
-	\label{fig:virtualization_architecture}
-\end{figure}
+%?\begin{figure}
+%?	\centering
+%?	%\includegraphics[width=\columnwidth]{figures/}
+%?	\caption{\sys memory virtualization architecture.\todo{Decide if we really need this figure (we already have a lot of figs)}{Brandon}}
+%?	\label{fig:virtualization_architecture}
+%?\end{figure}
 
 %\begin{figure}[t]
 %	\centering
@@ -25,7 +25,7 @@ The persistent variables a virtual task operates on should be brought from non-v
 	\centering
 	\subfloat[SRAM Double Buffer Copy]{\includegraphics[width=0.49\columnwidth]{figures/sram-buffer} }
 	\subfloat[DMA Copy]{\includegraphics[width=0.49\columnwidth]{figures/dma}}
-	\caption{.\todo{Explain HW/SW setup; make fonts larger, unify legends and axes}{Amjad}}
+	\caption{.\todo{Explain HW/SW setup; make fonts larger, unify legends and axes.  We only need to show the right side; this figure shows that we operate out of SRAM and page to FRAM; the copying mechanism is peripheral to the main idea.}{Amjad}}
 	\label{fig:sram_vs_dma}
 \end{figure}
 
