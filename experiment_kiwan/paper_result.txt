@@ -1,0 +1,33 @@
+result are in cycle. Cross-compiled with -O0 Clang / -O1 gcc
+8MHz processor.
+
+Continuous Power
+
+Temp-log(CEM)
+plain C	30,819
+chain	355,809
+
+Cuckoo
+plain C	8,362
+chain	91,599
+
+RSA
+plain C	39,724
+chain	309,126
+
+AR
+plain C	790,764
+chain	1,651,908
+
+bitcount
+plain C	29,201
+chain	278,821
+
+
+
+
+DFT
+
+sort
+
+dataDecomp
