@@ -61,33 +61,71 @@ systems~\cite{chain,alpaca}, which we focus on this work and discuss in detail n
 
 %\TODO{This sequential/modular split seems pretty odd to me. I think we can just talk about tasks in the sense of ratchet, alpaca, and chain. Anything with static (programmer-written or compiler inserted) boundaries applies}
 
-Task-based intermittent execution models~\cite{dino,chain,alpaca} ask the programmer to decompose their program into a collection tasks. A task is a function with no caller that contains arbitrary computation, sensing, and communication. A programmer describes the sequence in which tasks may execute,
-creating a task graph. The flow of control from task to task happens at programmer demarcated points and may conditionally depend on program values. Task-based programming abstractions guarantee that tasks exhibit behavior as though they executed {\em atomically}, regardless of arbitrary power failures. Task-based runtime systems tolerate failures by repeatedly attempting to execute a task until it completes. Task-based runtime systems ensure task-atomic semantics by ensuring that repeated task executions are idempotent (i.e., have the same effect when repeatedly executed). The key to idempotence is ensuring that updates to non-volatile state made by an interrupted, partial execution of a task are never visible to a subsequent (potentially completing) re-execution of the task.  
+Task-based intermittent execution models~\cite{dino,chain,alpaca} ask the
+programmer to decompose their program into a collection tasks. A task is a
+function with no caller that contains arbitrary computation, sensing, and
+communication. A programmer describes the sequence in which tasks may execute,
+creating a task graph. The flow of control from task to task happens at
+programmer demarcated points and may conditionally depend on program values.
+Task-based programming abstractions guarantee that tasks exhibit behavior as
+though they executed {\em atomically}, regardless of arbitrary power failures.
+Task-based runtime systems tolerate failures by repeatedly attempting to
+execute a task until it completes. Task-based runtime systems ensure
+task-atomic semantics by ensuring that repeated task executions are idempotent
+(i.e., have the same effect when repeatedly executed). The key to idempotence
+is ensuring that updates to non-volatile state made by an interrupted, partial
+execution of a task are never visible to a subsequent (potentially completing)
+re-execution of the task.  
 
-There are several run time strategies to ensuring task idempotence. One approach, utilized by Alpaca~\cite{alpaca}, is to identify non-volatile data involved in WAR dependences in a task (like DINO~\cite{dino} and Ratchet~\cite{rachet} did for checkpoints), execute the task using buffered copies of those data, and commit the buffered copies before completing the task. Another strategy is to statically create multiple versions of non-volatile data shared by tasks and ensure by construction that no task reads and writes the same non-volatile memory location~\cite{chain}. Regardless of the idempotence strategy, the key to task-based execution is that fixed, statically defined tasks execute as though atomic, completing after zero or more attempts. \TODO{Brandon left off here.}
-
-Despite the benefit of the modular model certain limitations are still present that must be overcome and which inspired us to design \sys. Let us look at these problems in detail.
+There are several run time strategies to ensuring task idempotence. One
+approach, utilized by Alpaca~\cite{alpaca}, is to identify non-volatile data
+involved in WAR dependences in a task (like DINO~\cite{dino} and
+Ratchet~\cite{rachet} did for checkpoints), execute the task using buffered
+copies of those data, and commit the buffered copies before completing the
+task. Another strategy is to statically create multiple versions of
+non-volatile data shared by tasks and ensure by construction that no task reads
+and writes the same non-volatile memory location~\cite{chain}. Regardless of
+the idempotence strategy, the key to task-based execution is that fixed,
+statically defined tasks execute as though atomic, completing after zero or
+more attempts. 
 
 \begin{table}
 	\centering
 	\footnotesize
-	\begin{tabular}{|c|c|c|c|}
+	\begin{tabular}{l|l}
+		Model & Data Copied to/from NVRAM\\
 		\hline
-		{~} & CP & SZ & NV \\
-		\hline\hline
-		\!\!Mementos~\cite{mementos}\!\! & \!\!$N_2\leq N_1$\!\! & \!\!R + S\!\! & \!\!R + S\!\! \\
-		\!\!DINO~\cite{dino}\!\! & $N_2$\!\! & \!\!R + W\!\! & \!\!R + W\!\! \\
-		\!\!Chain~\cite{chain}, Alpaca~\cite{alpaca}\!\! & \!\!$N_2$\!\! & P\!\! & \!\!2W + P\!\!\\
-		\!\!Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017}\!\! & $N_3\geq N_2\geq N_1$\!\! & \!\!R\!\! & R\!\!\\
-		\hline 
+		Mementos~\cite{mementos}                             & Reg. + Stack     \\
+		DINO~\cite{dino}                                     & Reg. + WAR vars. \\
+		Chain~\cite{chain}                                   & PC   + Channel data\\
+		Alpaca~\cite{alpaca}                                 & PC   + WAR vars. \\
+		Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Reg. (requires NV main mem.)             \\
 	\end{tabular}
-	\caption{Cost of various checkpointing methods; Symbols---R: register, S: stack, W: WAR-dependent variables, P: program counter, $N_1, N_2, N_3$: relative number of checkpoints for each method, CP: no. checkpoints, SZ: checkpoint size, NV: copy to non-volatile memory size.}
+	\caption{Memory consistency enforcement overheads of various intermittent execution models. Reg. includes the entire register file, PC is the program counter, Channel data are variables explicitly task-shared by the programmer, and WAR vars. are variables involved in WAR dependences.}
 	\label{table:chechpoint_comparison}
 \end{table}
 
-\paragraph{Problem 1---Idempotent task is also costly}
+\subsubsection{Costs of Task-based Models}
 
-The most important modular and intermittent models are compared in Table~\ref{table:chechpoint_comparison}\footnote{This table generalizes discussion from~\cite[Sec. 2.4]{alpaca}.}. Although we concluded that sequential execution model introduces a significant overhead, a modular approach also introduces certain execution penalty. Whatever the approach, the energy cost of a single checkpoint/idempotent task is $w\text{CP(SZ+NV)}$, where $w$ is the cost of a single word copy into a non-volatile memory. 
+Task-based intermittent execution models ensure that programs execute correctly
+despite arbitrary power failures and in doing so, incur several costs that are
+the motivation for \sys. 
+
+\paragraph{Memory Consistency Enforcement Overhead}
+
+Intermittent execution models incur an overhead because they must checkpoint
+data~\cite{dino,ratchet,quickrecall,mementos}, manage channels~\cite{chain}, or
+privatize and commit data~\cite{alpaca}.
+%
+Table~\ref{table:chechpoint_comparison} compares the overheads for several
+recent intermittent execution models (generalizing discussion from~\cite[Sec.
+2.4]{alpaca}.)  The mechanism responsible for the overhead of each model
+varies, but all the bulk of overhead in all models is a manipulating
+non-volatile memory.  Checkpointing moves volatile memory and registers to and
+from non-volatile memory, channel accesses directly manipulate non-volatile
+data~\cite{chain}, privatization copies data from and commits data to
+non-volatile memory~\cite{alpaca}, and idempotence solutions~\cite{ratchet}
+require all of memory to be non-volatile.  
 
 \begin{figure}
 	\centering
@@ -97,13 +135,44 @@ The most important modular and intermittent models are compared in Table~\ref{ta
 	\label{fig:framEnergy}
 \end{figure}
 
-We have executed an experiment to measure the cost of read/write operations of $w$ to volatile and non-volatile memory. The result is given in Figure~\ref{fig:framEnergy}. Four applications were developed that \emph{access} the FRAM and SRAM of the MSP430FR5969 microcontroller~\cite{msp430datasheet}. The interference free debugger (EDB)~\cite{edb} is used as the energy measurement tool. The EDB probes the energy buffer before and after accessing the FRAM/SRAM 1600 times. This large number of FRAM access is used to increase the reliability of the results generated by the used measurement tool (e.g. reducing the effect of the quantization error). The energy buffer is charged, using the EDB, to $\approx$ 2.45\,V \textbf{only} at the beginning of the execution and of the programs. The write operations were performed by writing literal values, random numbers, to the memory. However, a read operation must be followed by a write operation. Therefore, we chose to write a read value to SRAM. Based on our measurements we conclude that a FRAM access equals $\frac{3}{2}$ SRAM access~\footnote{We remark that TI already mentions~\cite{ti_fram_faq} that FRAM write access is more energy expensive than SRAM write access. However, TI does not quantify this energy overhead.}. Therefore, reducing FRAM access is desirable when developing energy limited software solution---\emph{which is in sharp contrast to the main goal of all checkpoining solutions}.
+To concretely understand the cost of these manipulations of non-volatile
+memory, we directly measured the energy consumption of volatile (SRAM) and
+non-volatile (FRAM) memory operations for the
+MSP430FR5969~\cite{msp430datasheet} microcontroller. We used EDB~\cite{edb} to
+monitor the voltage drop on an enegy buffering capacitor that powers the device
+across 1600 read and write accesses to each type of memory, randomizing
+locations to avoid caching effects.  Figure~\ref{fig:framEnergy} summarizes
+these measurements, illustrating that a non-volatile memory access consumes
+around 1.5x as much energy as a volatile memory access in this device.  In an
+intermittently-powered device, the increased energy corresponds to decreased
+run time between power failures.  The overheads imposed by relying on
+non-volatile memory motivate \sys, which uses memory virtualization to operate
+primarily using volatile SRAM.
 
-The above result reassures the intuitive observation that a decrease of CP (Table~\ref{table:chechpoint_comparison}) decreases the energy cost associated with each state preservation method and reduces operation cost which in most simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$, where PL is the cost of program execution without checkpointing. On the other hand, this increases task/checkpoint re-execution time. The ideal solution is a runtime that \emph{adaptively} changes task size during runtime, which however exposes a second problem.
 
-\paragraph{Problem 2---Modular execution models are not adaptive}
+The above result reassures the intuitive observation that a decrease of CP
+(Table~\ref{table:chechpoint_comparison}) decreases the energy cost associated
+with each state preservation method and reduces operation cost which in most
+simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$,
+where PL is the cost of program execution without checkpointing. On the other
+hand, this increases task/checkpoint re-execution time. The ideal solution is a
+runtime that \emph{adaptively} changes task size during runtime, which however
+exposes a second problem.
 
-A modular intermittent execution model completely depends on a programmer's estimation which mostly results in a sub-optimal code division. Moreover, this model can only consider a single hardware configuration and it does not take environment variability into considerations. Each battery-less platform has different storage sizes, refer to Table~\ref{table:capacitor}, which causes different charge/discharge periods. This result in different execution times. In the worst case the size of the capacitor might be too small to execute one task written by the programmer. This calls for the ability of the modular execution runtimes to \textbf{merge} multiple small tasks into a larger one or \textbf{split} a large task into a set of small ones on the fly (post-compilation time). Unfortunately the following features prevent us to perform this task using existing runtimes~\cite{chain,alpaca}.
+\paragraph{Fixed-size Tasks are Inflexible}
+\TODO{Brandon left off here - I've cut some bullets below that I did not understand.  I think the key point here is that fixed task size only works for one cap size; inefficient with a larger cap, unimplementable with a smaller one.  There might be an efficiency argument, but it's tough to make because we still require some memory consistency mechanism (in our case paged FRAM), which has an overhead.}
+A modular intermittent execution model completely depends on a programmer's
+estimation which mostly results in a sub-optimal code division. Moreover, this
+model can only consider a single hardware configuration and it does not take
+environment variability into considerations. Each battery-less platform has
+different storage sizes, refer to Table~\ref{table:capacitor}, which causes
+different charge/discharge periods. This result in different execution times.
+In the worst case the size of the capacitor might be too small to execute one
+task written by the programmer. This calls for the ability of the modular
+execution runtimes to \textbf{merge} multiple small tasks into a larger one or
+\textbf{split} a large task into a set of small ones on the fly
+(post-compilation time). Unfortunately the following features prevent us to
+perform this task using existing runtimes~\cite{chain,alpaca}.
 
 \begin{figure}
 	\centering
@@ -112,15 +181,10 @@ A modular intermittent execution model completely depends on a programmer's esti
 	\label{fig:DynamicChainSeq}
 \end{figure}
 
-\begin{itemize}
-	\item \textbf{Irreversible tasks transitions} According to both Chain~\cite{chain} and Alpaca~\cite{alpaca} programming models, each task calls the next one. The transition is done through functions calls and manually clearing the stack to prevent the stack overflow problem. This approach makes all the task transitions firm, preventing task merging.
+	\textbf{Irreversible tasks transitions} According to both Chain~\cite{chain} and Alpaca~\cite{alpaca} programming models, each task calls the next one. The transition is done through functions calls and manually clearing the stack to prevent the stack overflow problem. This approach makes all the task transitions firm, preventing task merging.
 
-	\item \textbf{Dependency on privatization} Alpaca~\cite{alpaca} extended Chain~\cite{chain} with a concept of privatization, i.e. it protects task-shared variables from WAR dependency problem \emph{within} the scope of a task. Therefore, if tasks are on-demand merged, the scope of these dependencies are changed and the static analysis to privatize these variables is not valid any more and the data consistency can not be preserved.
+	\textbf{Dependency on privatization} Alpaca~\cite{alpaca} extended Chain~\cite{chain} with a concept of privatization, i.e. it protects task-shared variables from WAR dependency problem \emph{within} the scope of a task. Therefore, if tasks are on-demand merged, the scope of these dependencies are changed and the static analysis to privatize these variables is not valid any more and the data consistency can not be preserved.
 
-	\item \textbf{`All channels' requirement} Fig.~\ref{fig:DynamicChainSeq} shows that if the task control flow is a circular with no branches then task merging is possible. Moreover, all the intra-merged-tasks channel can be committed to SRAM instead of FRAM to save energy. However, this execution path is only a special one. If the general case (see again Fig.~\ref{fig:DynamicChainSeq}) is considered then leaving out the intra-merged-task channels might result in data inconsistency. Than is, if an application tries to access a merged task from the middle after a power interrupt then the input for that task is not ready, which result in an incorrect execution.
-	
-	\item \textbf{Lack of multi-versioning system} All known modular execution models define its own input for each task that is not shared with other tasks. This design decision makes the benefit of merging tasks of less importance since each task is interacting with its own variables. \todo{Rewrite this paragraph: still unclear}{Przemek}
-\end{itemize}
 
 \subsection{Main Idea: Tasks Coalescing}
 
