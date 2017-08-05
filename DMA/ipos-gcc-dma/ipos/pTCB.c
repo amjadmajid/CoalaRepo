@@ -88,5 +88,3 @@ unsigned int * os_search(funcPt func)
 
      return NULL;
 }
-
-

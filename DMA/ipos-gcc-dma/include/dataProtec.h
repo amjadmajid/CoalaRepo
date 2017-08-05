@@ -27,14 +27,14 @@ void __bringPagTemp(unsigned int pagTag);
 void __bringPagROM(unsigned int pagTag);
 void __sendPagROM(unsigned int pagTag);
 unsigned int __pageSwap(unsigned int * varAddr);
-unsigned int __pageSwap_w(unsigned int * varAddr);
+unsigned int __pageSwap_r(unsigned int * varAddr);
 void __bringPersisCrntPag(unsigned int curntPag);
 void __pagsCommit();
 void __bringCrntPagROM();
 
 // Memory access interface
 
-#define DIRTY_PAGE  1      // make it 0 to commit only the dirty pages [This macro does not work with P() ]
+#define DIRTY_PAGE  0      // make it 0 to commit only the dirty pages [This macro does not work with P() ]
 
 #define __VAR_ADDR(var)                 ((unsigned int) (&(var)) )
 
