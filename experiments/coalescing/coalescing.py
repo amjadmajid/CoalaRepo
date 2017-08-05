@@ -57,50 +57,36 @@ def figureSetting():
     plt.rcParams['legend.numpoints'] = 1
 
     
-distances = ['20cm.csv', '40cm.csv', "50cm.csv", "cont_power.csv"]
+distances = ["cont.csv",'20cm.csv', '40cm.csv', "60cm.csv"]
 
 data =[]
 for dis in distances:
     row=[]
-    f_c = open("Sort/"+dis) 
-    f_v = open("temp-log/"+dis) 
+    f_c = open("coalescing/page_128/bc/"+dis) 
+    f_n = open("nocoalescing/page_128/bc/"+dis) 
     row.append( executionTime(f_c) )
-    row.append( executionTime(f_v) )
+    row.append( executionTime(f_n) )
     f_c.close()
-    f_v.close()
+    f_n.close()
     data.append(row)
 
 # print(data)
 # data = np.transpose(data)
 colors = ['0.2', '0.4', '0.6', '0']
-labels = ['20cm', '40cm', '50cm', 'cpwr']
-
-
-num_bars = len(data)
-gap = 0.1   
-bar_width = (1- gap) / num_bars            
+labels = ['20cm', '40cm', '60cm', 'cpwr']
+          
+print(data) 
 
 f = plt.figure(figsize=(8,4))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3]) )
-ax.xaxis.set_major_formatter(ticker.FixedFormatter( ("Sort", "CEM") ))
+ax.xaxis.set_major_locator(ticker.FixedLocator([1,2,3,4]) )
+ax.xaxis.set_major_formatter(ticker.FixedFormatter( ("COAL", "NOCOAL") ))
 
 plt.ylabel('Seconds')
 
-
-for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
-    print('row', row)
-    x = np.arange(len(row))      
-    plt.bar((x-0.35)+i *bar_width, row,    
-            width=bar_width, 
-            color=colors[i % len(colors)], 
-           label = labels[i% len(labels)], 
-           align='center')
-# plt.bar( data)
-# plt.bar(1, chain_dd_time, align='center', color="0.6", hatch='+', label="Chain")
-# plt.bar(2, ipos_dd_time, align='center', color="0.85", hatch='/', label="IPOS")
+plt.bar(np.array([1,2,3,4]) , data)
 
 plt.legend(loc='best')
 f.savefig("../figures/coalescing.eps",format="eps", dpi=1200)

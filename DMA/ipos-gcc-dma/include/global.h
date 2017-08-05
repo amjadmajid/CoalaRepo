@@ -28,7 +28,7 @@
 // function pointer
 typedef void (* funcPt)(void);
 
-extern unsigned int __task_address;
+extern unsigned int __virtualTaskAddr;
 extern volatile unsigned int  __totNumTask;
 extern unsigned int __persis_CrntPagHeader;
 extern unsigned int __pagsInTemp[];

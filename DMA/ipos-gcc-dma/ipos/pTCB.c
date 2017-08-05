@@ -54,7 +54,7 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
         }
         *(__head +(--cnt) ) =  __temp_head;   // link the tail of the linkedlist with the head
 
-        __task_address    =  (unsigned int) __head ;
+        __virtualTaskAddr    =  (unsigned int) __head ;
         funcBlocker = 0xAD;
     }
 }

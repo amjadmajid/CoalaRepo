@@ -77,7 +77,7 @@ void dft_end() ;
 static void blinkLed(uint32_t wait );
 static void burn( uint32_t iters);
 
-#define SIZE 16
+#define SIZE 8
 #define PI2 6.28
 
 __p  float x[SIZE] ={0.0};              // discrete-time signal, x
