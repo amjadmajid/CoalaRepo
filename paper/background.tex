@@ -159,95 +159,56 @@ hand, this increases task/checkpoint re-execution time. The ideal solution is a
 runtime that \emph{adaptively} changes task size during runtime, which however
 exposes a second problem.
 
-\paragraph{Fixed-size Tasks are Inflexible}
-\TODO{Brandon left off here - I've cut some bullets below that I did not understand.  I think the key point here is that fixed task size only works for one cap size; inefficient with a larger cap, unimplementable with a smaller one.  There might be an efficiency argument, but it's tough to make because we still require some memory consistency mechanism (in our case paged FRAM), which has an overhead.}
-A modular intermittent execution model completely depends on a programmer's
-estimation which mostly results in a sub-optimal code division. Moreover, this
-model can only consider a single hardware configuration and it does not take
-environment variability into considerations. Each battery-less platform has
-different storage sizes, refer to Table~\ref{table:capacitor}, which causes
-different charge/discharge periods. This result in different execution times.
-In the worst case the size of the capacitor might be too small to execute one
-task written by the programmer. This calls for the ability of the modular
-execution runtimes to \textbf{merge} multiple small tasks into a larger one or
-\textbf{split} a large task into a set of small ones on the fly
-(post-compilation time). Unfortunately the following features prevent us to
-perform this task using existing runtimes~\cite{chain,alpaca}.
+%\TODO{Brandon left off here - I've cut some bullets below that I did not understand.  I think the key point here is that fixed task size only works for one cap size; inefficient with a larger cap, unimplementable with a smaller one.  There might be an efficiency argument, but it's tough to make because we still require some memory consistency mechanism (in our case paged FRAM), which has an overhead.}
+\paragraph{Fixed-size tasks are inflexible and inefficient} 
+A programmer must write each task with statically defined boundaries, which
+makes statically sized tasks inflexible and non-portable.  The programmer must
+ensure statically that a task's energy requirements match the device's energy
+storage capacity.  If a programmer writes a program that consumes more energy
+than the device can buffer, the task will never be able to complete using the
+buffered energy. The consequence of such tasks is a non-terminating program
+that repeatedly attempts to re-execute the task of excess energy cost.  If a
+programmer writes a program that consumes less energy than the device can
+buffer, the system may operate inefficiently. When a task and its successor
+both complete , the two tasks were interleaved by a task boundary that
+preserves progress and state (i.e., checkpoint or commit).  If the two tasks
+were not also interleaved by a power failure, then the computation done to
+preserve state was {\em unnecessary}, only incurring an overhead on the tasks'
+executions.   
+%
+Avoiding excessively costly, non-terminating tasks and short, high-overhead
+tasks is a programming challenge, given fixed hardware with a fixed energy
+buffering capacity.   Such tasks also make it extremely difficult to {\em port}
+code from  one device to another. A task that is excessively costly on a device
+with a small energy buffer may become a short, high-overhead task  on a device
+with a larger energy buffer and vice versa. The key problem is that the programmer
+writes tasks statically for an energy buffer of a fixed size.
+%
+\sys's {\em task coalescing} mechanism, which we describe in
+Section~\ref{sec:task_coalescing}, is motivated by the observation that systems
+with statically defined tasks may be inflexible and inefficient; \sys addresses
+the problem 
 
-\begin{figure}
-	\centering
-	%\includegraphics[width=\columnwidth]{figures/Dynamic_chain_sequence_example}
-	\caption{Dynamic task merging problem.\todo{Draw merging diagram}{Przemek/Amjad}}
-	\label{fig:DynamicChainSeq}
-\end{figure}
 
-	\textbf{Irreversible tasks transitions} According to both Chain~\cite{chain} and Alpaca~\cite{alpaca} programming models, each task calls the next one. The transition is done through functions calls and manually clearing the stack to prevent the stack overflow problem. This approach makes all the task transitions firm, preventing task merging.
-
-	\textbf{Dependency on privatization} Alpaca~\cite{alpaca} extended Chain~\cite{chain} with a concept of privatization, i.e. it protects task-shared variables from WAR dependency problem \emph{within} the scope of a task. Therefore, if tasks are on-demand merged, the scope of these dependencies are changed and the static analysis to privatize these variables is not valid any more and the data consistency can not be preserved.
-
-
-\subsection{Main Idea: Tasks Coalescing}
-
-To combat the above limitations we propose a new concept of \textbf{virtualization}: a modular execution model with softening a number of transitions, by keeping the state of the execution progress in the volatile memory, to construct a bigger \emph{virtual task} to reduce energy consumption. Ideally, the size of the virtual task should match the length of a continuous interval of the intermittent power supply for the best performance. Another form of virtualization can be achieved by reducing the number of non-volatile memory accesses. This can be done by having a temporary copy of a global variable in the volatile memory (similar to the caching principle) and a task interacts with it and updates it before writing back the most recent value to the non-volatile memory during the commit process.
-
-\subsection{Assumption on the Type of Computing Hardware}
+\subsection{Hardware Assumptions}
 \label{sec:background_hardware}
 
-Before proceeding further with the background we need to make certain assumptions about the underlying hardware. We assume that we operate on the microcontroller (more generally, computing hardware) equipped with a mix of volatile and non-volatile memory, such as FLASH, Ferroelectric RAM or Magnetoresistive RAM. We do not assume to rely on specific memory type (either volatile or non-volatile), in contrary to earlier works targeting non-volatile processors~\cite{su_date_2017,ratchet,quickrecall,nvp}. Actually, we will exploit the properties of both memory types to maximize performance metrics of the program being executed. We enable to I/O operations, however we do not enable the scheduling of operations (which \emph{nota bene} forms a foundation for a simple runtime). All in all, our hardware model follows in assumptions the two most relevant intermittently-powered execution environments~\cite{alpaca,chain}. \todo{Verify if this section is not out of place}{Brandon}
-
-\subsection{Structuring a Task-based Intermittent Computing Program}
-
-\todo{Please check this is the right way for this section: it reads as it should be in Section 3 describing \sys}{Brandon} Task is a programmer (or compiler) defined code that is executed based on consistent set of inputs, i.e. memory fetched from a specified memory location, producing a consistent output stored in a specified (the same or different) memory location. Syntactically, we can treat a task as a continuous sub-section of a large program encapsulated by (i) task specific keywords defining the beginning and the end of a task and (ii) message passing between tasks connected with each other.
-
-\begin{figure}
-	\centering
-	%\includegraphics[width=\columnwidth]{figures/taskification_example}
-	\caption{Task flow example executed by \sys.\todo{Draw an example task diagram}{Przemek}}
-	\label{fig:task_flow_example}
-\end{figure}
-
-Let us look into how task-based programming is performed relying on an example provided in Fig.~\ref{fig:task_flow_example}. Each task is uniquely identified by a keyword. A separate part of code specifies a state machine than governs how tasks are connected with each other. This way a programmer specifies to which other task a current task needs to pass the result of its computation (and it can be either a new task or the task itself). Tasks are executed atomically. That is, task will be executed only once and will be considered as completed only when a task reaches a final instruction line informing a scheduler that a program is ready to enter into a new task.
-
-Just like Chain~\cite{chain} and Alpaca~\cite{alpaca}, \sys does not support concurrent programming, multi-threading (multi-task sequence) and does not consider priorities and on-demand scheduling. These features are extremely important to consider but go beyond the scope of this work. A comparative description of \sys is given in Table~\ref{table:feature_comparison}. \todo{Decide if we need such table}{Brandon}
-
-Important and a strong assumption about task-based programming for intermittently-powered systems is that an energy availability for the largest possible task execution must be guaranteed. Task is an atomic operation and must preserve execution order and memory manipulations. Task that follows such an assumption is equivalent to task being executed on a continuously-powered non-interrupted system. Whenever a task cannot fit into a single energy reservoir, it must be divided into tasks that will be executed within a single discharge cycle.
-
-\begin{table}
-	\centering
-	\footnotesize
-	\begin{tabular}{|c|c|c|c|}
-		\hline
-		{~} & Alpaca~\cite{alpaca} & Chain~\cite{chain} & This work \\
-		\hline\hline
-		Task connections & in-task & in-task & outside \\
-		Task re-use & N & N & Y\\
-		Memory model & globals & globals & globals\\
-		Concurrency & N & N & N \\
-		Task blocking & N & N & Y \\
-		Energy-adaptive & N & N & Y \\
-		\hline
-	\end{tabular}
-	\caption{Comparison of existing task-based execution models against \sys.}
-	\label{table:feature_comparison}
-\end{table}
-
-\todo{Elaborate on the ``key challenge'' paragraphs near the end of the intro}{Przemek}
-
-%We can write the problem of maximizing all task sizes formally as
+\sys is designed for the demands of existing and future energy-harvesting
+platforms based around general purpose, commodity computing
+components~\cite{wisp,msp430datasheet}.  
 %
-%\begin{equation}
-%\underset{i}{\arg\,\max} \sum_{i}m_i+t_i \text{~subject to~} \forall_i mi+t_i>e,
-%\end{equation}
+We assume a device with a memory system that has fast, byte-addressable
+volatile and non-volatile memory; in particular, our target
+platform~\cite{wisp} is equpped with a mixture of SRAM and FRAM.
 %
-%where $e$ is the required minimum energy to perform a task, $i$ is the total number of tasks, $m_i$ and $t_i$ are the cost of task traversal (memory copying time of task variables) and time to complete one task, respectively.
+Our implementation leverages hardware support for fast, bulk-copying between
+memories via DMA~\cite{msp430datasheet}.
+%
+We do not require a particular non-volatile memory technology, nor do we
+require architectural additions commodity
+processors.~\cite{su_date_2017,ratchet,quickrecall,nvp}. 
+%
+\sys supports I/O behavior similar to recent intermittent execution
+models~\cite{alpaca,chain}, allowing safe, synchronous I/O and unsafe,
+asynchronous I/O.
 
-%Two problems with fixed-size task in intermittent execution. (a) task underestimation: task executed at device with capacitor size $X$, will not execute at device with capacitor $X\gg Y$; (b) task overestimation: with stable energy source task tracking causes unnecessary overhead.
-
-%\begin{figure}
-%\centering
-%\includegraphics[width=\columnwidth]{figures/taskification_example}
-%\caption{Program divided into tasks.}
-%\label{fig:taskification_example}
-%\end{figure}
-
-%Other forms of intermittent platforms will share the same problem. One of them considers actuation platforms, which will be powered directly from energy harvesting sources~\cite{}. will share the energy storage with computing platform. However, power supply for actuators is order of magnitude larger than for computation. Therefore, although capacitor is large enough to perform computation alone, energy to power actuators takes precedence leaving not much space for computing.
