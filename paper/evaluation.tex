@@ -10,11 +10,9 @@ In all experiments we used the following computing hardware: WISP\,5.1~\cite{wis
 
 We compare \sys against state of the art intermittent execution approach---Chain~\cite{chain}. We are not comparing \sys against DINO~\cite{dino} or Mementos~\cite{mementos} (Refer to Section~\ref{sec:background_consistency}), as (i) Chain is the only modular execution model available to which we can compare \sys, and (ii) Chain proves already its superiority over sequential model counterparts (i.e. DINO and Mementos).
 
-We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation.
+We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation. \todo{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
 
-\todo{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
-
-The applications that were used in the evaluation are given in Table~\ref{table:benchmark_list}. These benchmarks are the same ones as used in~\cite{chain,alpaca}. In addition to Chain benchmark programs new applications were used for benchmarking: \emph{DFT}, \emph{Huffman compressor}, and \emph{selection sort}.
+The applications that were used in the evaluation are: (i) \textbf{Bitcount}: counts bits in x y byte pseudo-random string using x algorithms. Each result is compared for correctness; (ii) \textbf{Cold chain}: emulates embedded temperature sensing engine: measurements are randomly generated and are compressed using LZW algorithm for x-entry dictionary and y-byte block; (iii) \textbf{Cuckoo}: implements cuckoo filter---x entry filter filled to y of capacity---program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{RSA}: encrypts predefined x byte long string with a y bytes long key\todo{were keys of 64 bytes tested? If yes: d they exhaust energy}{Amjad}. This set of benchmarks is the same as used in~\cite{chain,alpaca}\todo{Fill-in the missing data and verify its correctness}{Przemek/Amjad}. In addition to Chain benchmarks new applications were implemented: (v) \emph{DFT}, (vi)\emph{Huffman compressor}, and (vii) \emph{Selection Sort}. All applications are compared in Table~\ref{table:benchmark_list} in terms of source lines of code against Chain. \todo{finalize describing all applications once all experiments are done}{Przemek}
 
 \begin{table}[t]
 	\centering
@@ -23,20 +21,18 @@ The applications that were used in the evaluation are given in Table~\ref{table:
 		\hline
 		Nickname & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
 		\hline\hline
+		Bitcount & 351 & 588 \\ %59\%
 		Cold chain & 388 & 721 \\ %53\%
 		Cuckoo & 483 & 762 \\ %63\%
 		RSA & 887 & 1233 \\ %71\%
-		Bitcount & 351 & 588 \\ %59\%
-		DFT & --- & --- \\ %Two resolutions: 4 and 8 Bytes
-		Huffman & --- & --- \\ %Data decompression size: 100 bytes
-		Selection sort & --- & --- \\
+		DFT & {} & {} \\ %Two resolutions: 4 and 8 Bytes
+		Huffman & {} & {} \\ %Data decompression size: 100 bytes
+		Selection sort & {} & {} \\
 		\hline
 	\end{tabular}
 \caption{List of benchmark programs used in \sys evaluation; SLOC: source lines of code.}
 \label{table:benchmark_list}
 \end{table}
-
-\todo{finalize describing all applications once all experiments are done}{Przemek}
 
 \subsection{Evaluation Results}
 \label{sec:results_evaluation}
