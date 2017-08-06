@@ -42,7 +42,7 @@
         }
 
 
-#define COALESCING 0
+#define COALESCING 1
 
     unsigned char __jump = 0;
     unsigned int __jump_by = 0;
@@ -59,6 +59,8 @@ __nv unsigned int  __maxVirtualTaskSize = 0x7f;
      unsigned int *__realTask = NULL;
 __nv unsigned int  __realTaskCntr = VERTUTASK;
 
+__nv unsigned char * pers_pt= (unsigned char *)0xB000;
+__nv unsigned int pers_cnt = 0;
 
 void os_enter_critical()
 {
@@ -104,6 +106,12 @@ void os_scheduler()
     {
 
 #if COALESCING
+
+        if(pers_cnt < 1024){
+            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
+            pers_cnt++;
+        }
+
         for(; __virtualTaskCntr; __virtualTaskCntr-- )
         {
 #endif
@@ -117,7 +125,9 @@ void os_scheduler()
             //last execution history (my next virtual task size)
             __realTaskCntr++;
             // set a maximum virtual task size (63)
-            __realTaskCntr = (__realTaskCntr & __maxVirtualTaskSize);
+            if(__realTaskCntr > __maxVirtualTaskSize){
+                __realTaskCntr  = __maxVirtualTaskSize;
+            }
         }
 
 #endif

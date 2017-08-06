@@ -12,6 +12,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
+def autolabel(rects, _):
+    """
+    Attach a text label above each bar displaying its height
+    """
+
+    labels = ["cont", "20cm","40cm","60cm"]
+    for i, rect in enumerate(rects):
+        height = rect.get_height()
+        ax.text(rect.get_x()+0.001 + rect.get_width()/2.,height+0.1,'%s' % (labels[i]),
+                ha='center', va='bottom',  rotation=90, color='0.4')
+
 
 def executionTime(fh):
     """
@@ -59,35 +70,87 @@ def figureSetting():
     
 distances = ["cont.csv",'20cm.csv', '40cm.csv', "60cm.csv"]
 
-data =[]
-for dis in distances:
-    row=[]
-    f_c = open("coalescing/page_128/bc/"+dis) 
-    f_n = open("nocoalescing/page_128/bc/"+dis) 
-    row.append( executionTime(f_c) )
-    row.append( executionTime(f_n) )
-    f_c.close()
-    f_n.close()
-    data.append(row)
-
-# print(data)
-# data = np.transpose(data)
-colors = ['0.2', '0.4', '0.6', '0']
-labels = ['20cm', '40cm', '60cm', 'cpwr']
-          
-print(data) 
+apps = ["bc","cem", "sort"]
+dataSet=[]
+for app in apps:
+    data =[]
+    for dis in distances:
+        row=[]
+        f_c = open("coalescing/page_128/"+app+"/"+dis) 
+        f_n = open("nocoalescing/page_128/"+app+"/"+dis) 
+        row.append( executionTime(f_c) )
+        row.append( executionTime(f_n) )
+        f_c.close()
+        f_n.close()
+        data.append(row)
+    data = np.transpose(data)
+    dataSet.append(data)
 
 f = plt.figure(figsize=(8,4))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([1,2,3,4]) )
-ax.xaxis.set_major_formatter(ticker.FixedFormatter( ("COAL", "NOCOAL") ))
+ax.xaxis.set_major_locator(ticker.FixedLocator([1.75, 1.75+4.5, 1.75+4.5+4.5]) )
+ax.xaxis.set_major_formatter(ticker.FixedFormatter( ["bc","cem", "sort"] ))
+
 
 plt.ylabel('Seconds')
 
-plt.bar(np.array([1,2,3,4]) , data)
 
-plt.legend(loc='best')
+num_bars = len(data)
+# hatches = ['+', '/']
+colors = ['#edf8b1', '#7fcdbb']
+labels = ["Coal", "No-Coal"]
+
+gap = 0.1                         # space each bars group 0.1 from the next group
+bar_width = (1- gap) / num_bars   # divide the remaining distance equally between the bars          
+
+
+bar1=[]
+shift=0
+# to set the labels only for one iteration!!
+data = dataSet[0]
+for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
+    x = np.arange(len(row))   
+
+    plt.bar(x+i *bar_width+shift, row,       # blue starts at x=0, i=0 => 0
+            #                          # green starts at x=0, i=1 => 0.2 
+            #                          # red starts at   x=0, i=2 => 0.4
+            width=bar_width, 
+            # hatch = hatches[i % len(hatches)],
+            color =  colors[i % len(colors)], 
+            label = labels [i % len(labels)]) 
+    shift+=4.5
+
+
+
+shift=0
+for data in dataSet:
+    for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
+        x = np.arange(len(row))   
+
+        bar1.append(plt.bar(x+i *bar_width+shift, row,       # blue starts at x=0, i=0 => 0
+                #                          # green starts at x=0, i=1 => 0.2 
+                #                          # red starts at   x=0, i=2 => 0.4
+                width=bar_width, 
+                # hatch = hatches[i % len(hatches)],
+                color =  colors[i % len(colors)])) 
+    shift+=4.5
+
+# add the page sizes
+for i in range(6):
+    autolabel(bar1[i], i)
+
+plt.legend(loc='upper left')
+plt.ylim(0,3.2) 
 f.savefig("../figures/coalescing.eps",format="eps", dpi=1200)
 plt.show()
+
+
+
+
+
+
+
+
+
