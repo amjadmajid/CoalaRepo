@@ -300,10 +300,10 @@ void __pagsCommit()
 
     unsigned int cnt=0;
     unsigned int page;
-    while ( (page = __persis_pagsInTemp[cnt]) !=0 )
+    while (__persis_pagsInTemp[cnt])
     {
         // send the pages to their final locations in ROM
-            __sendPagROM(page );
+            __sendPagROM(__persis_pagsInTemp[cnt] );
             __pagsInTemp[cnt] = 0; // clear the temp buffer
            cnt++;
     }

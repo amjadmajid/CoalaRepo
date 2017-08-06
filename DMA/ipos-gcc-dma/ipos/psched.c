@@ -42,6 +42,7 @@
         }
 
 
+#define COALESCING 0
 
     unsigned char __jump = 0;
     unsigned int __jump_by = 0;
@@ -53,7 +54,7 @@ __nv unsigned int  __virtualTaskAddr = 0;    // Modified externally
 __nv unsigned int *__temp_virtualTAskAddr = NULL;
 __nv unsigned int  __virtualTaskSize = VERTUTASK;
      unsigned int  __virtualTaskCntr = 0;
-__nv unsigned int  __maxVirtualTaskSize = 0x3f;
+__nv unsigned int  __maxVirtualTaskSize = 0x7f;
 
      unsigned int *__realTask = NULL;
 __nv unsigned int  __realTaskCntr = VERTUTASK;
@@ -79,9 +80,11 @@ void os_jump(unsigned int j)
 void os_scheduler()
 {
 
+# if COALESCING
     __virtualTaskSize = __realTaskCntr;
     __virtualTaskCntr = (__virtualTaskSize >> 1)+1 ;  // make half of the last execution history, your new virtual task size
     __realTaskCntr = 0;
+#endif
 
     if (__commit_flag == COMMITTING)
     {
@@ -100,20 +103,24 @@ void os_scheduler()
     while (1)
     {
 
+#if COALESCING
         for(; __virtualTaskCntr; __virtualTaskCntr-- )
         {
+#endif
             // Accessing a task
             ((funcPt) (*__realTask))();
 
             // virtual progressing
             JUMP();
+
+# if COALESCING
             //last execution history (my next virtual task size)
             __realTaskCntr++;
             // set a maximum virtual task size (63)
             __realTaskCntr = (__realTaskCntr & __maxVirtualTaskSize);
         }
 
-
+#endif
         //At this point a virtual task must be finished
 
 
@@ -140,11 +147,12 @@ commit:
     __pagsCommit();
     __commit_flag = COMMIT_FINISH;
 
-    __virtualTaskCntr =  (__virtualTaskCntr >>  1) ;
+# if COALESCING
     if( !__virtualTaskCntr )
     {
         __virtualTaskCntr = ((__realTaskCntr >>1)+1) ; // the new virtual task is half of the history of execution
     }
+#endif
 
     }
 
