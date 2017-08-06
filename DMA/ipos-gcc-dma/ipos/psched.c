@@ -59,7 +59,7 @@ __nv unsigned int  __maxVirtualTaskSize = 0x7f;
      unsigned int *__realTask = NULL;
 __nv unsigned int  __realTaskCntr = VERTUTASK;
 
-__nv unsigned int pers_pt[1024]={0};
+__nv unsigned char * pers_pt= (unsigned char *)0xB000;
 __nv unsigned int pers_cnt = 0;
 
 void os_enter_critical()
@@ -108,7 +108,7 @@ void os_scheduler()
 #if COALESCING
 
         if(pers_cnt < 1024){
-            pers_pt[pers_cnt] = __virtualTaskCntr;  // Debugging
+            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
             pers_cnt++;
         }
 
