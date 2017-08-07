@@ -1,0 +1,39 @@
+VT  : virtual task
+VTC : VT counter
+VTS : VT size
+mVTS: maximum VTS
+TVT	: temporary VT
+RT 	: Real Task
+RTC : RT Counter (used to predict the size of the next VT)
+
+_nv RTC  = 10
+_nv mVTS = 100 
+	VTC  = 0
+_nv VT   = RT_x 
+_nv TVT  ==
+
+upon reboot :
+	VTC = RTC/2 // Use one step back in history of execution as estimation of the optimal virtual task size
+	RTC = 0    // reset before start executing the real tasks
+	RT = VT    // recover the virtual state
+	if(commit_flag)
+		RT = TVT
+		goto commit
+
+	while True:
+		while(VTC--):
+			execute(RT)
+			if(RTC < mVTS): // allowing the VTS to be infinite will result in a certain loose of the computation progressing 
+				RTC++;
+			RT <- virtualJumptoNextRT()
+
+		// virtual Task is finished
+		// double phase commit process starts
+		TVT = RT
+		Data -> persistent buffer
+
+commit:
+		VT = TVT
+		commit(); 
+		VTC = RTC/2; // 
+

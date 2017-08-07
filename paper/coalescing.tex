@@ -1,38 +1,76 @@
-\sys is able to virtually merge tasks to construct a bigger virtual task and commit the state of the virtual task instead of the individual real tasks to improve execution time at stable energy supply environment. 
+\sys is able to dynamically merge real tasks to construct a bigger virtual task. This enables \sys to reduce the number of commits by a value equals to 
+$\frac{\text{VTS}-1}{\text{VTS}}$, 
+where VTS is virtual task size. Furthermore, \sys trys to estimiate the optimial virtual task size by relying on its recent execution history. The challenge in designing the \sys's coalescing algorithm is in the fact that it should not introduce as less overhread as possible, and able to respond to the changes in the environment. 
 
 \subsection{Task Merging Algorithm}
 
 \begin{algorithm}[t]
 	\caption{\sys task coalescing mechanism}
-	\label{algorithm:coalescing_algorithm}
+	\label{algo:coalescing}
 	\scriptsize
 	\begin{algorithmic}[1]
-		\State $\text{VT} \subset \{\sys~\text{tasks set}\}$  \Comment{Virtual task}
-		\State $|\text{VT}|$ \Comment{VT size \todo{Define unit}{Amjad}}
-		\State $\text{VT}_{\max}$ \Comment{Maximum VT size (With upper bound on coalescing)}
+		\State $\text{p}$  \Comment{ indicates persistent variables, initialized \textbf{only} during divice programming}
+		\State $\text{RT} \in \{\sys~\text{static tasks}\}$  \Comment{Real task}
+		\State $\text{VT} \subset \{~\text{RT's}\}$  \Comment{Virtual task}
+		\State $\text{RTC}$  \Comment{RT counter}
+		\State $\text{VTC}$  \Comment{VT counter}
+		% \State $|\text{VT}|$ \Comment{VT size measured in RT}
+		\State $\text{TVT}$ \Comment{temprary VT}
+		\State $\text{VT}_{\max}$ \Comment{Maximum VT size measured in RT (coalescing upper bound)}
 		\vspace{0.1cm}
 		
-		\While {True}
-		\State $\text{VT} \leftarrow \text{VT}_{\text{next}}$ \Comment{\todo{Define $\text{VT}_{\text{next}}$}{Amjad}}
+		\State $\text{p RTC} = x $ 
+		\State $\text{p VT}_{\max} = y$
+		\State $\text{p VT} = \text{RT}$ 
+		\State $\text{p TVT} = \text{VT} $ 
+		\State $\text{VTC} = 0 $ 
 		\vspace{0.1cm}
-		\While {execute VT} 
-		\If { power failed $n$ times during task execution} \Comment{\todo{Define how it is detected}{Amjad}}				
-		\State $|\text{VT}|:=|\text{VT}|-1$
-		\State $\text{VT}_{\max} := |\text{VT}|$ \Comment{With upper bound on coalescing}
-		\EndIf
-		\EndWhile
-		
-		\vspace{0.1cm}
-		\If {All tasks executed} \Comment{\todo{Define how it is detected and when}{Amjad}}
-		\If{$|\text{VT}| < \text{VT}_{\max}$} \Comment{line added in fixed size approach}
-		\State $|\text{VT}|:=|\text{VT}|+1$
-		\EndIf
-		\EndIf
-		\EndWhile
+
+		\Function{scheduler}{\null}
+
+			\State $\text{VTC} = \text{RTC/2} $  \label{algo:coalescing:executionHistory1}
+			\State $\text{RTC} = 0 $
+			\State $\text{RT} = \text{VT}$ \Comment{recover virtual state} \label{algo:coalescing:virtualProgressing1}
+			\If{commiting}
+				\State $\text{RT}=\text{TVT}$
+				\State $\texttt{goto} \ \ \ref{commitStage}$ \label{algo:coalescing:firmTransition1}
+			\EndIf
+			\vspace{0.1cm}
+
+			\While {True}
+				\While{$\text{VTC}--$}
+					\Function{execute}{$\text{RT}$}
+					\EndFunction
+					\If{$\text{RTC} < \text{VT}_{\max}$}
+						\State $\text{RTC}++$  \label{algo:coalescing:realTaskCounter}
+					\EndIf
+					\State $\text{RT} \leftarrow \text{RT}_{next}$ \Comment{virtual progressing}
+				\EndWhile        \label{algo:coalescing:virtualProgressing2}
+
+				\State \Comment{virtual task is finished}
+				\State $\text{Data} \rightarrow \text{pTempBuf}$ \Comment{pTempBuf: persistent temp. buffer}
+				\State $\text{TVT} = \text{RT}$ 
+				\State $\text{commiting} = \text{True}$ \label{algo:coalescing:firmTransition2}
+				\State 
+				\State $\text{VT} = \text{TVT}$ \label{commitStage}
+				\State $\text{pTempBuf} \rightarrow \text{FRAM}$ 
+				\State $\text{VTC} = \text{RTC/2}$ 		\Comment{Set VT size} \label{algo:coalescing:executionHistory2}
+				\State $\text{commiting} = \text{False}$ 
+
+			\EndWhile
+
+		\EndFunction
+
+
+
+
+	
 	\end{algorithmic}
 \end{algorithm}
 
-The complete algorithm is provided in Algorithm~\ref{algorithm:coalescing_algorithm}. \todo{Fill in with missing information: scheduler description, implementation details, discussion}{Przemek/Amjad}
+\sys's coalescing algorithm uses a single point back in the \sys's execution history to estimate the appropriate virtual task size. However, it takes a conservative approach by making the virtual task size equals to the half of the number of the successfully executed real tasks before the last power interrupt (see lines~\ref{algo:coalescing:executionHistory1},\ref{algo:coalescing:executionHistory2} of algorithm~\ref{algo:coalescing} ). We advocate the algorithm conservative approach by the following two reasons: (i) The power interrupts are not uniformly distributed over the tasks; and (ii) the re-execution penalty, in case of a power interrupt, grows linearly with the size of a virtual task. Furthermore, the algorithm considers the charging rate by allowing the real tasks counter (RTC), which represents the execution history between the last two power interrupts, to increase from one up to multiple virtual tasks (see line~\ref{algo:coalescing:realTaskCounter} of algorithm~\ref{algo:coalescing}). As a consequence, the virtual task size changes rapidly (since it is half of the execution history) in response to the change in the charging rate. However, the algorithm sets a limit to the size of the virtual task for these two reasons: (i) having an infinity virtual task size, results in a certain computation progress loss; and (ii) the benefit of task merging is governed by diminishing return principle.  
+
+The algorithm protects itself from power interrupts by going into three stages: (i) virtual progressing, where the operations are done on the volatile memory (see lines~\ref{algo:coalescing:virtualProgressing1}-\ref{algo:coalescing:virtualProgressing2} of algorithm~\ref{algo:coalescing} ); (ii) transition stage, where the volatile state is moved to a temporary persistent buffer. Until the end of the second stage if power interrupts, then all the virtual progress will be canceled and the virtual task will re-executed and re-initialized from a consistent input (see line~\ref{algo:coalescing:virtualProgressing1} of algorithm~\ref{algo:coalescing}); and (iii) persistent commit stage, upon entering this stage the algorithm will make a firm transition (see lines~\ref{algo:coalescing:firmTransition1},\ref{algo:coalescing:firmTransition2} of algorithm~\ref{algo:coalescing}) and it will not go back to the other stages unless all the data is committed from  the persistent buffer to non-volatile memory. Since the data is being moved in one direction and from a persistent location, power interrupt is tolerable at this stage. 
 
 \subsection{Power Interrupt Immune Scheduler}
 

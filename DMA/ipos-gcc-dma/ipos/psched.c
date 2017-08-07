@@ -41,7 +41,7 @@
             __jump_cnt = 0;    \
         }
 
-
+#define DEBUG
 #define COALESCING 1
 
     unsigned char __jump = 0;
@@ -51,8 +51,9 @@
 __nv unsigned char  __commit_flag = 0;
 
 __nv unsigned int  __virtualTaskAddr = 0;    // Modified externally
-__nv unsigned int *__temp_virtualTAskAddr = NULL;
-__nv unsigned int  __virtualTaskSize = VERTUTASK;
+__nv unsigned int *__temp_virtualTaskAddr = NULL;
+
+//__nv unsigned int  __virtualTaskSize = VERTUTASK;
      unsigned int  __virtualTaskCntr = 0;
 __nv unsigned int  __maxVirtualTaskSize = 0x7f;
 
@@ -83,9 +84,8 @@ void os_scheduler()
 {
 
 # if COALESCING
-    __virtualTaskSize = __realTaskCntr;
-    __virtualTaskCntr = (__virtualTaskSize >> 1)+1 ;  // make half of the last execution history, your new virtual task size
-    __realTaskCntr = 0;
+    __virtualTaskCntr = (__realTaskCntr >> 1)+1 ;  // make half of the last execution history, your new virtual task size
+    __realTaskCntr = 0;    // on a power reboot the __realTaskCntr must be reseted
 #endif
 
     if (__commit_flag == COMMITTING)
@@ -93,7 +93,7 @@ void os_scheduler()
         // we need to do a page swap to bring the correct page from temp  or  ROM
         // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
         __bringPersisCrntPag(__persis_CrntPagHeader );
-        __realTask = __temp_virtualTAskAddr;
+        __realTask = __temp_virtualTaskAddr;
         goto commit;
     }
 
@@ -107,11 +107,13 @@ void os_scheduler()
 
 #if COALESCING
 
+#if DEBUG
         if(pers_cnt < 1024){
             *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
             pers_cnt++;
         }
 
+#endif
         for(; __virtualTaskCntr; __virtualTaskCntr-- )
         {
 #endif
@@ -123,10 +125,9 @@ void os_scheduler()
 
 # if COALESCING
             //last execution history (my next virtual task size)
+            // set a maximum virtual task size (64)
+            if(__realTaskCntr < __maxVirtualTaskSize){
             __realTaskCntr++;
-            // set a maximum virtual task size (63)
-            if(__realTaskCntr > __maxVirtualTaskSize){
-                __realTaskCntr  = __maxVirtualTaskSize;
             }
         }
 
@@ -136,7 +137,7 @@ void os_scheduler()
 
 
         // transition stage (from virtual -> persistent)
-        __temp_virtualTAskAddr = __realTask;
+        __temp_virtualTaskAddr = __realTask;
         __sendPagTemp(CrntPagHeader);
 
         unsigned int p_cnt;
@@ -151,13 +152,15 @@ void os_scheduler()
         __commit_flag = COMMITTING;
 commit:
         // firm transition
-     __virtualTaskAddr = (unsigned int) __temp_virtualTAskAddr;
+     __virtualTaskAddr = (unsigned int) __temp_virtualTaskAddr;
 
      // Commit the dirty pages
     __pagsCommit();
     __commit_flag = COMMIT_FINISH;
 
 # if COALESCING
+    //if you die during the commit stage, the __realTaskCntr will be zero.
+    //However,  __virtualTaskCntr will get a value from __realTaskCntr before the __realTaskCntr is reseted
     if( !__virtualTaskCntr )
     {
         __virtualTaskCntr = ((__realTaskCntr >>1)+1) ; // the new virtual task is half of the history of execution
