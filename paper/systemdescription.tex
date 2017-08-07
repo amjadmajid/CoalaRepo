@@ -57,6 +57,28 @@ overhead.
 \subsection{Programming Model}
 \label{sec:overview_programming_model}
 
+\sys primarily consists of its compiler and the run time software support for
+its execution model, but \sys also includes several lightweight programming
+model extensions that are similar to those in prior work~\cite{chain,alpaca}.
+Table~\ref{tab:viper_syntax} provides an overview of these extensions, which
+can be used manually by a programmer, or can be added to a program
+automatically, using \sys's compiler.  As in prior task-based intermittent
+programming models, a \sys program is decomposed into tasks, which are
+functions that are not allowed to have any direct callers.  The programmer
+identifies a task by adding the {\tt task} keyword to the function's
+declaration.  A programmer invokes one task, {\tt t} from another task {\tt u}
+using {\tt next\_task( t )}, which atomically commits the state of {\tt u} and
+transfers control to the entry point of {\tt t}.   A program has a single {\em
+origin} task that executes first during the program's first execution; after a
+power failure, in subsequent operating periods, \sys restarts from the task
+that was executing just before the failure.
+
+A \sys program manipulates {\em protected} state --- state that is accessed by
+more than one task --- using the {\tt RP} and {\tt WP} operations, which read
+and write (respectively) a protected variable. These operations convey to
+\sys's runtime system which data must be protected through paging by the memory
+manager.   
+
 \begin{table}
 	\centering
 	\footnotesize
@@ -64,16 +86,13 @@ overhead.
 		\hline
 		Keyword & Description\\
 		\hline\hline
+		\texttt{task foo(){...}} & Task declaration\\
+		\texttt{origin task foo(){...}} & Origin task declaration\\
+		\texttt{next\_task()} & Transition to a new task\\
 		\texttt{RP} & Read-protected variable\\
 		\texttt{WP} & Write-protected variable\\
-		\texttt{\_\_task\_\_ foo(){...}} & Task declaration\\
-		\texttt{addTask()} & Build internal data structure for executor \\
-		\texttt{run\_tasks()} & Task executor \\ %scheduler
-		\texttt{next\_task()} & Transition to a new task\\
-		%\texttt{PageFault()} & --- \\
-		%\texttt{P()} & ---\\
 		\hline
 	\end{tabular}
-\caption{Summary of \sys syntax: top---user-specific variables}
+\caption{Summary of \sys's programming model extensions}
 \label{tab:viper_syntax}
 \end{table}
