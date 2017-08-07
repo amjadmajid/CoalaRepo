@@ -1,4 +1,4 @@
-We are now ready to present experimental results of \sys performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
+We present the experimental results of \sys performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
 
 \subsection{Hardware Suite Description}
 \label{sec:results_hardware}
@@ -56,19 +56,29 @@ Expected results:
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalescing}
-	\caption{This figure shows the performance of \sys when it uses the dynamic tasks coalescing mechanism as compared to its performance when the virtual task size is fixed to one, on multiple distances. }
+	\caption{Performance of \sys's  tasks coalescing mechanism compared to virtual task size equal to one (per application) at multiple WISP to RFID reader antenna distances.\todo{Replace "coal" with "coalescing", "No-coal" with "No coalescing"; use markers in addition to color; decide on uniform naming for apps (either all small or capitalized)}{Amjad}}
 	\label{fig:coalescing}
 \end{figure}
+
+Experimental evaluation of task coalescing mechanism under intermittent power of \sys is given in Figure~\ref{fig:coalescing}. For each application we measured execution time (with and without task coalescing) at \{20, 40, 60\}\,cm distance between RFID antenna and WISP and when WISP was powered directly from FET. Each measurement was repeated x times per each distance/application. From the result we clearly see an enormous benefit of coalescing, especially at large WISP to RFID reader antenna distance ($\approx$56\% for cem, 100\% for sort and $\approx$400\% for bc). At each distance, \sys coalescing mechanism provided faster execution times compared to non-coalescing case. \todo{Discuss different shapes per app}{Amjad}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/virtualTaskSize.eps}
+	\caption{Execution time of a dummy application containing twelve empty tasks as a function of coalescing factor. We observe three times improvement from coalescing until four virtual tasks, while we observe a diminishing return from task coalescing beyond four. \todo{Improve the figure: make it narrower, larger font, remove legend, do not capitalize "Task" in X axis, add Y axis label (Execution time (ms))}{Amjad}}
+	\label{fig:virtualTaskSize}
+\end{figure}
+
+The question remains: does coalescing all program's tasks into a singe virtual task (as the energy becomes fully available, i.e. from energy harvesting to continuous power environment) is the best one?. To answer this question we have implemented a simple program composed of $x$ empty tasks. We execute the same program by increasing coalescing factor by one while the device on which the program was executed was running on a stable power supply (refer to Section~\ref{sec:methodology_evaluation} for details). The result is presented in Figure~\ref{fig:virtualTaskSize}. We observe a significant increase in execution time as task are coalescent from one to four (three times execution time improvement). However, as the coalescing increases beyond four, we observe diminishing returns from coalescing in terms of execution time. \todo{Decide whether to place this figure in Evaluation section or leave it here}{Przemek}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/averageVirtualTaskSize}
-	\caption{ This figure shows the average virtual task size (measured in real task unit) of the virtual task sizes that the coalescing algorithm used to accomplished the applications on a distance of 60cm. }
+	\caption{Average virtual task size (measured in real task unit\todo{Define real task unit}{Amjad}) of the virtual task sizes that the coalescing algorithm used to accomplished the applications at a WISP to RFID reader distance of 60\,cm.\todo{Please rewrite this sentence}{Amjad}}
 	\label{fig:aveVirtuTaskSize}
 \end{figure}
 
-
-We now proceed with the evaluation of task coalescing mechanism of \sys.
+Measured size of tasks for each application is given in Figure~\ref{fig:aveVirtuTaskSize}.
 
 Expected results:
 \begin{itemize}
