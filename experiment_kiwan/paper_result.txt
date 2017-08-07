@@ -6,22 +6,27 @@ Continuous Power
 Temp-log(CEM)
 plain C	30,819
 chain	355,809
+delft	982,275 (128)
 
 Cuckoo
 plain C	8,362
 chain	91,599
+delft	74,199 (48)
 
 RSA
 plain C	39,724
 chain	309,126
+delft	310,371 (48)
 
 AR
 plain C	790,764
 chain	1,651,908
+delft	1,764,156 (256)
 
 bitcount
 plain C	29,201
 chain	278,821
+delft	124,502 (32)
 
 
 
