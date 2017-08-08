@@ -1,38 +1,60 @@
-One of the main objectives of \sys run-time is to restrict tasks to interface only with the volatile memory, since volatile memory access is relatively cheaper, as we already have shown experimentally in Section~\ref{section:background_task_computing} (Problem 1, Figure~\ref{fig:framEnergy}). This feature will also provide several advantages during task coalescing, as we will be dealing with in Section \ref{sec:task_coalescing}.
+\sys introduces a dynamic memory virtualization mechanism that allows tasks to
+operate primarily through interaction with efficient, volatile SRAM, rather
+than non-volatile FRAM which, as we showed in Figure~\ref{fig:framEnergy}, is
+more costly to access than SRAM. \sys supports memory virtualization with a
+mechanism that moves pages of the address space from their location in  a
+large, non-volatile memory to a small, volatile memory that tasks use during
+their execution.
+ 
 
-\subsection{Intermittent Volatile-Only Memory Access}
-\label{sec:virtualization_problems}
+\subsection{Paged non-volatile virtual memory} 
 
-In order to enable volatile-only memory access, the persistent variables a task operates on should be brought from non-volatile memory to a fixed-sized \emph{volatile buffer} in the main memory. During its execution, the active task reads and modifies only the contents of this buffer. When the task is finished its execution, the modified variables, i.e. memory locations, in this buffer should be committed back to their original locations in non-volatile memory. We list three fundamental problems proving that this is however a non-trivial task. 
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=\columnwidth]{figures/sram-buffer}
-	\caption{The interaction between the task, volatile buffer and the non-volatile memory (FRAM). Initially, the persistent variable \texttt{x} is not in the volatile buffer but \texttt{y} and \texttt{z} are.}
-	\label{fig:volatile-buffer}
-\end{figure}
-
-\paragraph{Problem 1---Runtime Access Overhead:} The persistent variables read and/or modified by a task might not be known in advance due to the dynamic program flow. Therefore, the volatile buffer should keep track of the persistent variables at runtime, as presented in Figure~\ref{fig:volatile-buffer}. When a persistent variable is read or written (refer to steps 1 and 3--5 in Figure~\ref{fig:volatile-buffer}) first the volatile copy of the corresponding variable is \emph{searched} in this buffer. If it is found, the read or write operation is performed on the volatile copy. Otherwise, the persistent variable is read from the non-volatile memory and inserted in this buffer for future operations (refer step 2 in Figure~\ref{fig:volatile-buffer}). Unfortunately, we observed that \emph{search--bring} operations at each access to the persistent variables introduce considerable overhead (refer to Figure~\ref{fig:dmaTimeEnergy} and pointer-based operation therein) and might nullify the benefit of task coalescing, a cores \sys feature.
-
-\begin{figure}[t]
-	\centering
-	\subfloat[Time needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/dmaSize_time.eps} }
-	\subfloat[Energy needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/energyConsumptionDMA_SW.eps}}
-	\caption{Time and energy consumption of moving a block of data from SRAM to FRAM: CPU intervention versus Direct Memory Access (DMA).\todo{Explain HW/SW setup; make fonts larger, unify legends and axes}{Amjad}}
-	\label{fig:dmaTimeEnergy}
-\end{figure}
-
-\paragraph{Problem 2---Two Phase Commit Overhead:} For the consistency of the non-volatile memory, the volatile buffer should be committed at the end of each task by means of a \emph{two-phase commit}---refer Figure~\ref{fig:volatile-buffer} steps 6--8 for the first phase and 9--11 for the second step of the commit operation. However, two-phase commit is also expensive since the committed variables are not \emph{contiguous}---leading the fact that copying or moving of data between/within volatile and non-volatile memory should be always performed selectively with CPU intervention. Non-selective block memory copy operations using Direct Memory Access (DMA) that eliminates CPU intervention are considerably more efficient, refer again to Figure~\ref{fig:dmaTimeEnergy} for a comparison, but infeasible in this case.
-
-\paragraph{Problem 3---Memory Fit Constraints:} Persistent variables can be allocated \emph{contiguously} in non-volatile memory with compiler support. In order to eliminate run-time buffer \emph{search} overhead (by not relying on specialized hardware such as e.g. in~\cite{hicks_isca_2017}), \emph{all} persistent variables can be brought from non-volatile memory to the volatile buffer at system start-up---very efficiently and faster thanks to DMA for \emph{block} memory-memory copy/move operations. Two-phase commit is also very efficient in this case since DMA can be utilized to move volatile buffer as a block to the corresponding non-volatile locations. However, bringing all persistent variables from non-volatile memory to the volatile buffer suffers from the \emph{memory fit problem}: the volatile memory is a scarce resource and may not be large enough to hold all persistent variables.
-
-\subsection{Software-based Paging Mechanism} 
-
-Considering these facts, \sys implements a \emph{paging-based} virtual memory in software that (i) partitions contiguously allocated persistent variables into pages; (ii) implements the volatile \emph{page buffer} that holds a single page; (iii) swaps the page in volatile memory with a new page in non-volatile memory efficiently by utilizing DMA-based memory block-copy operations; (iv) buffers the swapped volatile page until commit to enable task coalescing which we describe in Section~\ref{sec:task_coalescing}; (v) implements two-phase commit of the modified pages to preserve the consistency of non-volatile memory; and (vi) performs this two-phase commit operations using DMA for the sake of efficiency. We now explain the details of \sys paging mechanism.
+\sys uses a page-based virtual memory scheme that allows tasks to primarily use
+SRAM instead of frequently accessing FRAM.  The paging scheme partitions the
+non-volatile memory address space into pages of {\em protected data}. As they
+are accessed by a task, pages of protected data are swapped into a {\em page
+buffer} that is stored in volatile memory and holds a single page. When a
+modified page is swapped out, it is buffered in a dedicated commit buffer for
+later commit.  \sys uses two-phase commit to write buffered, modifed pages back
+to their original memory locations atomically, ensuring data consistency even
+with power failures.
+%
+\sys's page-based memory model allows moving large blocks of data between
+non-volatile and volatile memory, which \sys does efficiently using common,
+hardware DMA block-copy operations that have higher bandwidth and avoid fixed,
+per-variable data movement costs.  \sys uses efficient DMA block copies when
+paging data in and out, as well as during two-phase commit.  \sys is unlike
+prior work~\cite{chain,alpaca} that moves one variable at a time, prohibiting
+efficient, DMA bulk transfers. 
+%
+Moreover, \sys's paging and buffering scheme is a key enabler of task
+coalescing, which we describe in Section~\ref{sec:task_coalescing}. Paging
+simplifies coalescing because deferring a commit of paged data at a task
+boundary entails leaving paged data buffered only, not requiring
+additional state management logic at task boundaries.
 
 \subsubsection{Address Translation and Variable Access}
 
-\sys virtual memory system provides an interface to the applications which is composed of two C macros: \texttt{RVAR(var)} and \texttt{WVAR(var,val)} that accept the name of the persistent variable \texttt{var} as an input argument. These macros obtain the \emph{physical address} of the corresponding persistent variable in non-volatile memory and translates it into the \emph{virtual address} in page buffer \texttt{pageBuf} in volatile memory, which is composed of a \emph{page tag} and \emph{offset}. For the sake of simplicity and efficiency, we implemented this translation in a trivial way: the first byte of the physical address is considered to be the page tag and the rest is the offset within the corresponding page. 
+\sys virtualizes the protected, non-volatile data that a task can access
+through a modified memory interface.  The interface includes two operations:
+\texttt{RVAR(var)}, which reads the value of the memory location {\tt var} and
+\texttt{WVAR(var,val)}, which writes the value {\tt val} into the memory
+location {\tt var}.  
+%
+{\tt RVAR} and {\tt WVAR} operations translate a variable's physical address in
+non-volatile memory and translates it into a \emph{virtual address} in the page
+buffer \texttt{pageBuf} in volatile memory.  In \sys, a virtual address is
+composed of a \emph{page tag} and a \emph{page offset}.  The page tag
+identifies in which page of non-volatile memory the memory location resides and
+the page offset identifies a particular byte of that page.  
+%
+How an $a$-bit memory address decomposes into a tag and an offset depends on
+the number (and size) of each page of protected memory.  To address {\tt p}
+pages of size {\tt s}, a tag comprises $log(p)$ bits, the offset comprises
+$log(s)$ bits and $log(p) + log(s) = a$.   For example, in a 16-bit address
+space (i.e., 16kB of protected memory) with 512 pages of 128 bytes each, a
+page's tag is the high-order nine bits of the address and a byte's page offset
+is the remaining 7 bits. 
 
 \begin{algorithm}[t]
 	\caption{\texttt{RVAR(var)} pseudo-code}
@@ -49,7 +71,33 @@ Considering these facts, \sys implements a \emph{paging-based} virtual memory in
 	\end{algorithmic}
 \end{algorithm}
 
-After address translation and obtaining the virtual address, it is required to check if the corresponding page is already in volatile page buffer. \sys maintains a \texttt{CrntPagTag} variable that holds the tag of the page currently in the page buffer. If the tag of the virtual address and \texttt{CrntPagTag} are equal, this indicates that page buffer holds the required page and the offset of the virtual address can be used to read from/write to the location in the volatile page buffer immediately. If the required page is not in the page buffer, a \emph{page fault} routine is executed as we discuss in the section below. Observe that the computational complexity of the whole steps pertaining to address translation and variable access is $\mathcal{O}(1)$---introducing minimal overhead to the system to boost up benefits of volatile-only memory interfacing. The pseudo-code of \texttt{RVAR}, which is quite similar to that of \texttt{WVAR}, is presented in Algorithm~\ref{algo:rwar}.
+After address translation, \sys attempts to access the protected variable's
+location in the volatile paging buffer.  \sys keeps track of the page tag for
+the page currently resident in the paging buffer in {\tt CrntPagTag}, which is
+stored in non-volatile memory. When a task accesses a variable, it compares the
+variable's page tag to {\tt CrntPagTag}.  If an accessed variable's page is
+equal to {\tt CrntPagTag} then the accessed variable's page is resident in the
+page buffer.  If the accessed variable's page tag is not equal to {\tt
+CrntPagTag} then the variable's page is not resident in the page buffer.
+%
+If the accessed variable's page is resident in the page buffer, an executing
+memory operation indexes the page buffer using the variable's page offset and
+manipulates that byte (i.e., either reading or writing).
+%
+If the accessed variable's page is not resident in the page buffer, the
+operation incurs a {\em page fault}. At a page fault, \sys must swap out the
+page that is resident int he page buffer and swap in the the variable's page.
+
+Algorithm~\ref{algo:rwar} shows pseudo-code of \texttt{RVAR} and we omit a
+listing for {\tt WVAR} because it is very similar except it writes the memory
+location and returns nothing.  If the page tag of the variable \texttt{var} and
+\texttt{CrntPagTag} are not equal (e.g. Lines 2--3), there is a page fault
+that requires a new page to be swapped in to the page buffer. 
+%Observe that the computational complexity of the whole steps pertaining to
+%address translation and variable access is $\mathcal{O}(1)$---introducing
+%minimal overhead to the system to boost up benefits of volatile-only memory
+%interfacing. 
+
 
 \subsubsection{Page Faults and Page Swapping}
 
@@ -71,18 +119,137 @@ After address translation and obtaining the virtual address, it is required to c
 	\end{algorithmic}
 \end{algorithm}
 
-If the page tag of the variable \texttt{var} and \texttt{CrntPagTag} are not equal (e.g. Lines 2--3 of Algorithm\,\ref{algo:rwar}), the active page, i.e. the contents of the page buffer \texttt{pageBuf}, should be swapped with the page whose tag is equal to the \texttt{var}'s tag. The pseudo-code of the Algorithm \texttt{PageFault} that handles this operation is presented in Algorithm~\ref{algo:pagefault}. This algorithm handles two fundamental cases.
+A page fault on a memory access requires \sys to swap out whatever page of data
+is in the page buffer, preserving updates made to that page, and to copy the
+accessed page of protected data into the page buffer. 
+%
+Algorithm~\ref{algo:pagefault} shows the how \sys handles a page fault.  If
+both the page being swapped out and the page being swapped in are not {\em
+dirty} --- which means that they do not contain bytes modified by the executing
+task --- then handling a page fault simply requires copying the accessed page
+into the page buffer.  If either the {\em resident} page being swapped out or
+the {\em accessed} page being swapped in is dirty, \sys must take extra steps
+when handling a page fault. 
 
-\paragraph{Case 1---Modified Active Page:} If the task performed at least \texttt{WVAR} operation, then the page buffer \texttt{pageBuf} that holds the current active page is modified (Line 1 of Algorithm~\ref{algo:pagefault}). In order to keep the modified values of the variables, the active page is committed to an intermediate page buffer in non-volatile memory, namely to \texttt{pagesTemp}. This operation can be considered as first phase of the commit operation, as we present in the next section. If the active page is not modified, there is no need to commit it to the temporary page buffer.
+\paragraph{Dirty resident page.} If a task modified any byte in the resident
+page (i.e.,  using \texttt{WVAR}), then the page is dirty. Before swapping in
+the accessed page, \sys must first preserve the updated values in the dirty
+page so that they can eventually be committed back to their locations in memory
+when the task ends.  To preserve dirty values, \sys copies the resident page to
+its dedicated memory region called \texttt{pagesTemp}, which is acts as a double buffer
+for each page of protected memory.  Dirty pages copied into {\tt pagesTemp}
+during a task remain there until the task completes, at which point \sys
+commits the modified pages from {\tt pagesTemp} back to memory.  
 
-\paragraph{Case 2---Modified Requested Page:} After committing the active page to its temporary location, Algorithm~\ref{algo:pagefault} checks if the requested page is modified previously by the same task (Line 3). If this is the case, the requested page should be be brought from \texttt{pagesTemp} rather than its original location in non-volatile memory (Line 4), so that the task accesses the modified values of the persistent variables. Otherwise, the requested page is brought from its original location, i.e. \texttt{pagesOrg} (Line 6). After the swapping operation, the \texttt{CrntPagTag} is set to the tag of the requested page (Line 7). It should be noted that DMA is used to memory block copy operations, introducing minimal overhead during page swapping. 
+\paragraph{Dirty accessed page.} If an accessed page is modified, \sys should
+swap it into the page buffer from its location in {\tt pagesTemp}, rather than
+swapping it in from its original location in memory. 
+%
+As Algorithm~\ref{algo:pagefault} shows in Line 3, \sys checks if the requested
+page was previously modified by the executing task. To track whether a page is
+modified, \sys stores a dirty bit with the page that is set when a task
+modifies the page.  If an accessed page's dirty bit is set, the page must be
+swapped in from \texttt{pagesTemp} rather than its original memory location
+(Line 4), furnishing the task with the page's modified values. If the accessed
+page is not dirty, \sys swaps it in from its original location in memory (Line
+6). After swapping the page in, \sys sets \texttt{CrntPagTag} to the tag of the
+accessed page (Line 7). \sys uses DMA block copies for all page swapping
+operations, leveraging the efficiency of hardware support.
 
-\subsubsection{Pages Final Committing}
+\subsubsection{Committing a page}
 
-After a task finishes its execution, all pages committed to \texttt{pagesTemp} should be committed to their original locations in \texttt{pagesOrg}. This is the second phase of the \emph{two-phase commit} operation. As mentioned previously, memory block copy operations for the second phase commit is also utilized by DMA.
+When a task completes, it must {\em commit} all (dirty) pages stored in
+\texttt{pagesTemp} back to their original memory locations. \sys maintains a
+global, non-volatile {\em commit bit} that indicates that a task is committing.  The
+commit bit is set before the first page is committed and the bit is unset after the
+last page is committed.  If power fails during commit, the commit bit remains set and
+\sys resumes committing before moving on to execute the next task.  To commit
+pages from {\tt pagesTemp}, \sys iterates over the pages' dirty bits and for
+each page with its dirty bit set, \sys DMA block-copies the page back to its
+original memory location, then clears its dirty bit.
 
-\subsection{Non-Volatile Memory Consistency Issues}
+\subsection{Paging Example}
+\todo{Redo this figure to actually reflect paging -- right now it isn't clear if x,y,z are in a page or not, it isn't clear when the page gets copied to pagesTemp, it isn't clear what state we add to the system to help with commit, etc (i.e., dirty bits, commit bit).  Make
+this figure's labels consistent with the text: pagesTemp, RVAR, WVAR, explicit
+commit in task, Page Buffer}{whoever} 
+Figure~\ref{fig:volatile-buffer} illustrates the execution of a simple task
+using \sys's paging mechanism.  The task manipulates protected variables
+{\tt x}, {\tt y}, and {\tt z}, which are in the same page.  On accessing {\tt
+x}, its page is swapped into the page buffer.  On accessing {\tt y} and {\tt
+z}, the task need only access the volatile page buffer.  The task updates the
+page, leaving it dirty at the task's completion.  When the task completes, it
+first copies the page from the page buffer into the non-volatile {\tt
+pagesTemp} region before commit.  Then, \sys sets the commit bit, 
+atomically commits the page back to its original memory location, and unsets
+the commit bit.
 
-During the execution of any task, modifications to the persistent variables will not be reflected to the original locations in the non-volatile memory, since the task interfaces with only the volatile page buffer \texttt{pageBuf} and the modifications are temporarily stored in the non-volatile \texttt{pagesTemp} buffer. The changes stored in the \texttt{pagesTmp} is committed to the original locations in \texttt{pagesOrg} after the task is finished its execution. Therefore, any power interruptions within the execution will not lead to inconsistencies in the \texttt{pagesOrg} when the task is re-executed after a power boot. As a consequence, the proposed paging mechanism keeps the consistency of the non-volatile memory thanks to the two-phase commit operation for the modified pages. 
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\columnwidth]{figures/sram-buffer}
+	\caption{The interaction between the task, volatile buffer and the non-volatile memory (FRAM). Initially, the persistent variable \texttt{x} is not in the volatile buffer but \texttt{y} and \texttt{z} are.}
+	\label{fig:volatile-buffer}
+\end{figure}
+
+
+\subsection{Memory Consistency}
+
+\sys's paging mechanism ensures that a task only ever executes using consistent
+protected data.  During task execution, modifications to protected data do not
+affect their original memory locations because a task reads and writes the
+volatile page buffer only, and modified pages are swapped out to
+\texttt{pagesTemp} until commit.  A power failure erases the contents of the
+page buffer, preventing a re-executing task from observing updates in the page
+buffer from a previous execution attempt.  On a reboot after a power failure,
+\sys clears all dirty bits in {\tt pagesTemp} {\em if the commit bit is unset}.
+Clearing these dirty bits ensures that all accesses to protected variables
+correctly access their original memory locations. The non-volatile commit bit
+persists across power failures and \sys repeatedly attempts to commit until it
+succeeds, despite arbitrary power failures.
+
+%One of the main objectives of \sys run-time is to restrict tasks to interface
+%only with the volatile memory, since volatile memory access is relatively
+%cheaper, as we already have shown experimentally in
+%Section~\ref{section:background_task_computing} (Problem 1,
+%Figure~\ref{fig:framEnergy}). This feature will also provide several advantages
+%during task coalescing, as we will be dealing with in Section
+%\ref{sec:task_coalescing}.
+
+%\subsection{Intermittent Volatile-Only Memory Access}
+%\label{sec:virtualization_problems}
+%
+%In order to enable volatile-only memory access, the persistent variables a task
+%operates on should be brought from non-volatile memory to a fixed-sized
+%\emph{volatile buffer} in the main memory. During its execution, the active
+%task reads and modifies only the contents of this buffer. When the task is
+%finished its execution, the modified variables, i.e. memory locations, in this
+%buffer should be committed back to their original locations in non-volatile
+%memory. We list three fundamental problems proving that this is however a
+%non-trivial task. 
+%
+%
+\subsection{Managing paging overhead}
+The efficiency of \sys's paging scheme relies on the fact that data in pages
+are contiguous, which makes them amenable to being manipulated by hardware
+assisted DMA bulk copy operations. To justify this design choice we
+experimentally evaluated the efficiency of using DMA block copies, compared to
+explicit, software copy loops.  We copied blocks of data of different size
+between memory regions on a WISP~\cite{wisp} using a hand-written loop and
+using DMA.  Figure~\ref{fig:dmaTimeEnergy} shows that for moving large blocks
+of data like a page, hardware DMA is considerably better than software in both
+run time and energy efficiency.  \sys's design moves data in pages, not
+individual words, leveraging the increased efficiency of DMA data movement.
+%\paragraph{Problem 1---Runtime Access Overhead:} The persistent variables read and/or modified by a task might not be known in advance due to the dynamic program flow. Therefore, the volatile buffer should keep track of the persistent variables at runtime, as presented in Figure~\ref{fig:volatile-buffer}. When a persistent variable is read or written (refer to steps 1 and 3--5 in Figure~\ref{fig:volatile-buffer}) first the volatile copy of the corresponding variable is \emph{searched} in this buffer. If it is found, the read or write operation is performed on the volatile copy. Otherwise, the persistent variable is read from the non-volatile memory and inserted in this buffer for future operations (refer step 2 in Figure~\ref{fig:volatile-buffer}). Unfortunately, we observed that \emph{search--bring} operations at each access to the persistent variables introduce considerable overhead (refer to Figure~\ref{fig:dmaTimeEnergy} and pointer-based operation therein) and might nullify the benefit of task coalescing, a cores \sys feature.
+%
+\begin{figure}[t]
+	\centering
+	\subfloat[Time needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/dmaSize_time.eps} }
+	\subfloat[Energy needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/energyConsumptionDMA_SW.eps}}
+	\caption{Time and energy consumption of moving a block of data from SRAM to FRAM: CPU intervention versus Direct Memory Access (DMA).\todo{Explain HW/SW setup; make fonts larger, unify legends and axes}{Amjad}}
+	\label{fig:dmaTimeEnergy}
+\end{figure}
+%
+%\paragraph{Problem 2---Two Phase Commit Overhead:} For the consistency of the non-volatile memory, the volatile buffer should be committed at the end of each task by means of a \emph{two-phase commit}---refer Figure~\ref{fig:volatile-buffer} steps 6--8 for the first phase and 9--11 for the second step of the commit operation. However, two-phase commit is also expensive since the committed variables are not \emph{contiguous}---leading the fact that copying or moving of data between/within volatile and non-volatile memory should be always performed selectively with CPU intervention. Non-selective block memory copy operations using Direct Memory Access (DMA) that eliminates CPU intervention are considerably more efficient, refer again to Figure~\ref{fig:dmaTimeEnergy} for a comparison, but infeasible in this case.
+%
+%\paragraph{Problem 3---Memory Fit Constraints:} Persistent variables can be allocated \emph{contiguously} in non-volatile memory with compiler support. In order to eliminate run-time buffer \emph{search} overhead (by not relying on specialized hardware such as e.g. in~\cite{hicks_isca_2017}), \emph{all} persistent variables can be brought from non-volatile memory to the volatile buffer at system start-up---very efficiently and faster thanks to DMA for \emph{block} memory-memory copy/move operations. Two-phase commit is also very efficient in this case since DMA can be utilized to move volatile buffer as a block to the corresponding non-volatile locations. However, bringing all persistent variables from non-volatile memory to the volatile buffer suffers from the \emph{memory fit problem}: the volatile memory is a scarce resource and may not be large enough to hold all persistent variables.
 
 %\todo{Benefits of the paging to the task coalescing should be mentioned in the next section}{Amjad/Przemek/Sinan}
