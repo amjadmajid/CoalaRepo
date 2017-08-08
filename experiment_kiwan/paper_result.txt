@@ -40,8 +40,10 @@ chain	600,697
 delft	230,260 (128)
 compiler	245,992 (128)
 
-
-
 DFT
+plain C	4,786,359
+chain	4,804,098
+delft	4,901,292
+compiler	- (cannot compile)
 
 dataDecomp
