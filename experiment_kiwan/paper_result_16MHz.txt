@@ -1,0 +1,27 @@
+On continuous power, 16MHz.
+Results are slightly worse (almost no difference)
+compared to Chain. I don't think this data is worth mentioning
+
+CEM
+chain	433,251
+delft	1,214,788
+
+cuckoo
+chain	112,760
+delft	92,775
+
+ar
+chain	2,010,389
+delft	2,193,970
+
+rsa
+chain	379,081
+delft	379,552
+
+bc
+chain	346,333
+delft	154,276
+
+sort
+chain	736,364
+delft	295,751

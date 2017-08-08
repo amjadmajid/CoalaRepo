@@ -1,5 +1,6 @@
 result are in cycle. Cross-compiled with -O0 Clang / -O1 gcc
 8MHz processor.
+No coalescing
 
 Continuous Power
 
@@ -7,32 +8,40 @@ Temp-log(CEM)
 plain C	30,819
 chain	355,809
 delft	982,275 (128)
+compiler	782,701 (128)
 
 Cuckoo
 plain C	8,362
 chain	91,599
 delft	74,199 (48)
+compiler	78,538 (48)
 
 RSA
 plain C	39,724
 chain	309,126
 delft	310,371 (48)
+compiler	511,581 (48)
 
 AR
 plain C	790,764
 chain	1,651,908
 delft	1,764,156 (256)
+compiler	3,286,627 (256)
 
 bitcount
 plain C	29,201
 chain	278,821
 delft	124,502 (32)
+compiler	189,305 (32)
 
+sort (50 data)
+plain C	8,939	
+chain	600,697
+delft	230,260 (128)
+compiler	245,992 (128)
 
 
 
 DFT
-
-sort
 
 dataDecomp
