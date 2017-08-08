@@ -1,49 +1,120 @@
 result are in cycle. Cross-compiled with -O0 Clang / -O1 gcc
 8MHz processor.
-No coalescing
+No coalescing / Coalescing
 
-Continuous Power
+Continuous Power (Cycle)
 
 Temp-log(CEM)
 plain C	30,819
 chain	355,809
 delft	982,275 (128)
+delft_coal	748,038 (128)
 compiler	782,701 (128)
+compiler_coal	573,362 (128)
 
 Cuckoo
 plain C	8,362
 chain	91,599
 delft	74,199 (48)
+delft_coal	49,746 (48)
 compiler	78,538 (48)
+compiler_coal	61,497 (48)
 
 RSA
 plain C	39,724
 chain	309,126
 delft	310,371 (48)
+delft_coal	293,449 (48)
 compiler	511,581 (48)
+compiler_coal	491,230 (48)
 
 AR
 plain C	790,764
 chain	1,651,908
 delft	1,764,156 (256)
+delft_coal	1,555,144 (256)
 compiler	3,286,627 (256)
+compiler_coal	2,800,946 (256)
 
 bitcount
 plain C	29,201
 chain	278,821
 delft	124,502 (32)
+delft_coal	89,789 (32)
 compiler	189,305 (32)
+compiler_coal	154,649 (32)
 
 sort (50 data)
 plain C	8,939	
 chain	600,697
 delft	230,260 (128)
+delft_coal	137,456 (128)
 compiler	245,992 (128)
+compiler_coal	149,785 (128)
 
 DFT (gcc only)
 plain C	4,786,359
 chain	4,804,098
 delft	4,901,292 (128)
+delft_coal	4,862,533 (128)
 compiler	- (cannot compile)
+compiler_coal	- (cannot compile)
+
+dataDecomp
+
+
+
+Harvested Energy (Seconds)
+power: -X 50 (dft: -X 100)
+20cm
+
+Temp-log(CEM)
+chain	30.365
+delft	81.614 (128)
+delft_coal	77.142 (128)
+compiler	63.706 (128)
+compiler_coal	57.723 (128)
+
+Cuckoo
+chain	7.606
+delft	6.822 (48)
+delft_coal	5.545 (48)
+compiler	7.38 (48)
+compiler_coal	6.515 (48)
+
+RSA
+chain	23.81
+delft	31.29 (48)
+delft_coal	34.745 (48)
+compiler	49.191 (48)
+compiler_coal	56.505 (48)
+
+AR
+chain	125.747
+delft	191.248 (256)
+delft_coal	168.059 (256)
+compiler	337.621 (256)
+compiler_coal	316.102 (256)
+
+bitcount
+chain	20.966
+delft	11.005 (32)
+delft_coal	10.094 (32)
+compiler	16.867 (32)
+compiler_coal	16.61 (32)
+
+sort (50 data)
+chain	43.888
+delft	19.189 (128)
+delft_coal	13.321 (128)
+compiler	22.024 (128)
+compiler_coal	16.015 (128)
+
+DFT (gcc only)
+chain	10.107
+delft	11.145 (128)
+delft_coal	13.99 (128)
+compiler	- (cannot compile)
+compiler_coal	- (cannot compile)
 
 dataDecomp

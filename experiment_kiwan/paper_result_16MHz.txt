@@ -5,23 +5,29 @@ compared to Chain. I don't think this data is worth mentioning
 CEM
 chain	433,251
 delft	1,214,788
+delft_coal 915,515
 
 cuckoo
 chain	112,760
 delft	92,775
+delft_coal	61,227
 
 ar
 chain	2,010,389
 delft	2,193,970
+delft_coal	1,895,499
 
 rsa
 chain	379,081
 delft	379,552
+delft_coal	358,530
 
 bc
 chain	346,333
 delft	154,276
+delft_coal	109,870
 
 sort
 chain	736,364
 delft	295,751
+delft_coal	168,232
