@@ -5,58 +5,58 @@ No coalescing / Coalescing
 Continuous Power (Cycle)
 
 Temp-log(CEM)
-plain C	30,819
-chain	355,809
-delft	982,275 (128)
-delft_coal	748,038 (128)
-compiler	782,701 (128)
-compiler_coal	573,362 (128)
+plain C	0.030819
+chain	0.355809
+delft	0.982275 (128)
+delft_coal	0.748038 (128)
+compiler	0.782701 (128)
+compiler_coal	0.573362 (128)
 
 Cuckoo
-plain C	8,362
-chain	91,599
-delft	74,199 (48)
-delft_coal	49,746 (48)
-compiler	78,538 (48)
-compiler_coal	61,497 (48)
+plain C	0.008362
+chain	0.091599
+delft	0.074199 (48)
+delft_coal	0.049746 (48)
+compiler	0.078538 (48)
+compiler_coal	0.061497 (48)
 
 RSA
-plain C	39,724
-chain	309,126
-delft	310,371 (48)
-delft_coal	293,449 (48)
-compiler	511,581 (48)
-compiler_coal	491,230 (48)
+plain C	0.039724
+chain	0.309126
+delft	0.310371 (48)
+delft_coal	0.293449 (48)
+compiler	0.511581 (48)
+compiler_coal	0.491230 (48)
 
 AR
-plain C	790,764
-chain	1,651,908
-delft	1,764,156 (256)
-delft_coal	1,555,144 (256)
-compiler	3,286,627 (256)
-compiler_coal	2,800,946 (256)
+plain C	0.790764
+chain	1.651908
+delft	1.764156 (256)
+delft_coal	1.555144 (256)
+compiler	3.286627 (256)
+compiler_coal	2.800946 (256)
 
 bitcount
-plain C	29,201
-chain	278,821
-delft	124,502 (32)
-delft_coal	89,789 (32)
-compiler	143,884 (32)
-compiler_coal	107,460 (32)
+plain C	0.029201
+chain	0.278821
+delft	0.124502 (32)
+delft_coal	0.089789 (32)
+compiler	0.143884 (32)
+compiler_coal	0.107460 (32)
 
 sort (50 data)
-plain C	8,939	
-chain	600,697
-delft	230,260 (128)
-delft_coal	137,456 (128)
-compiler	245,992 (128)
-compiler_coal	149,785 (128)
+plain C	0.008939	
+chain	0.600697
+delft	0.230260 (128)
+delft_coal	0.137456 (128)
+compiler	0.245992 (128)
+compiler_coal	0.149785 (128)
 
 DFT (gcc only)
-plain C	4,786,359
-chain	4,804,098
-delft	4,901,292 (128)
-delft_coal	4,862,533 (128)
+plain C	4.786359
+chain	4.804098
+delft	4.901292 (128)
+delft_coal	4.862533 (128)
 compiler	- (cannot compile)
 compiler_coal	- (cannot compile)
 
