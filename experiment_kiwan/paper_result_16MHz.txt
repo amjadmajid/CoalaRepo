@@ -3,31 +3,31 @@ Results are slightly worse (almost no difference)
 compared to Chain. I don't think this data is worth mentioning
 
 CEM
-chain	433,251
-delft	1,214,788
-delft_coal 915,515
+chain	0.433251
+delft	1.214788
+delft_coal 0.915515
 
 cuckoo
-chain	112,760
-delft	92,775
-delft_coal	61,227
+chain	0.112760
+delft	0.092775
+delft_coal	0.061227
 
 ar
-chain	2,010,389
-delft	2,193,970
-delft_coal	1,895,499
+chain	2.010389
+delft	2.193970
+delft_coal	1.895499
 
 rsa
-chain	379,081
-delft	379,552
-delft_coal	358,530
+chain	0.379081
+delft	0.379552
+delft_coal	0.358530
 
 bc
-chain	346,333
-delft	154,276
-delft_coal	109,870
+chain	0.346333
+delft	0.154276
+delft_coal	0.109870
 
 sort
-chain	736,364
-delft	295,751
-delft_coal	168,232
+chain	0.736364
+delft	0.295751
+delft_coal	0.168232

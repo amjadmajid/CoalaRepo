@@ -2,7 +2,7 @@ result are in cycle. Cross-compiled with -O0 Clang / -O1 gcc
 8MHz processor.
 No coalescing / Coalescing
 
-Continuous Power (Cycle)
+Continuous Power (sec)
 
 Temp-log(CEM)
 plain C	0.030819
