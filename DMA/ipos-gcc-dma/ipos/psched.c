@@ -107,13 +107,13 @@ void os_scheduler()
 
 #if COALESCING
 
-#if DEBUG
-        if(pers_cnt < 1024){
-            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
-            pers_cnt++;
-        }
-
-#endif
+//#if DEBUG
+//        if(pers_cnt < 1024){
+//            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
+//            pers_cnt++;
+//        }
+//
+//#endif
         for(; __virtualTaskCntr; __virtualTaskCntr-- )
         {
 #endif
