@@ -34,10 +34,10 @@ unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
     protect = 1;
-    in_i = RVAR(i);
-    in_j = RVAR( j);
-    arr_i = RVAR( arr[ in_i ]);
-    arr_j = RVAR( arr[ in_j ]);
+    in_i = RP(i);
+    in_j = RP( j);
+    arr_i = RP( arr[ in_i ]);
+    arr_j = RP( arr[ in_j ]);
 
 
     if( arr_i  > arr_j )
@@ -53,10 +53,10 @@ void task_inner_loop()
     }
 
 
-    WVAR( arr[ in_i ] , arr_i);
-    WVAR( arr[ in_j ] , arr_j);
+    WP( arr[ in_i ] )= arr_i;
+    WP( arr[ in_j ]) = arr_j;
     in_j++;
-    WVAR(j , in_j);
+    WP(j) = in_j;
 }
 
 
@@ -67,7 +67,7 @@ void task_outer_loop()
 //    PMMCTL0 = PMMPW|PMMSWBOR;
 
     unsigned int in_i;
-    in_i = RVAR(i);
+    in_i = RP(i);
 //    in_i_pt = PVAR(i);
     in_i++;
 
@@ -76,8 +76,8 @@ void task_outer_loop()
         os_jump(2);
     }
 
-    WVAR(i, in_i);
-    WVAR(j, in_i+1);
+    WP(i)= in_i;
+    WP(j)= in_i+1;
 }
 
 
@@ -154,7 +154,14 @@ void init()
   // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
   PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
   P3DIR |=BIT5;
-  P1DIR |=BIT0;
+
+
+  CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+//    CSCTL1 = DCOFSEL_4 |  DCORSEL;      // Set DCO to 16MHz
+  CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+  CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+  CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+  CSCTL0_H = 0;
 }
 
 int main(void) {
