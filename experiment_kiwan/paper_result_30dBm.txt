@@ -1,0 +1,29 @@
+cem
+coal	1.073
+no coal	1.5
+chain	0.501
+
+cuckoo
+coal	0.097
+no coal	0.136
+chain	0.079
+
+ar
+coal	2.379
+no coal	2.558
+chain	2.4
+
+rsa
+coal	0.322
+no coal	0.326
+chain	0.318
+
+bc
+coal	0.126
+no coal	0.187
+chain	0.297
+
+sort
+coal	0.189
+no coal	0.301
+chain	0.926
