@@ -72,6 +72,24 @@ difference is summarized in Figure~\ref{}. The performance is worse than program
 in overall, meaning the programmer should try to write code manually if performance is critical; otherwise compiler can be
 used to simplify the programmability.
 
+We also evaluated the compile time for automatic task generation. The result are in Table~\ref{table:compile_time}.
+Most of the compile time was due to pointer aliasing. We could not compile DFT application since it was using
+builtins for math functions that weren't provided by Clang MSP430 backend.
+
+\begin{table}[t]
+	\centering
+	\footnotesize
+	\begin{tabular}{|c|c|c|c|c|c|}
+		\hline
+		Bitcount & Cold chain & Cuckoo & RSA & AR & Sort \\
+		\hline\hline
+		3 & 2 & 6 & 86 & 34 & > 1 \\
+		\hline
+	\end{tabular}
+	\caption{Compile time in seconds.}
+\label{table:compile_time}
+\end{table}
+
 \subsubsection{Task Coalescing Performance}
 \label{sec:results_coalescing}
 
