@@ -40,15 +40,37 @@ The applications that were used in the evaluation are: (i) \textbf{Bitcount}: co
 \subsubsection{Compiler Performance}
 \label{sec:results_compiler}
 
-We start with evaluating the efficiency of a \sys compiler. 
+\begin{table}[t]
+	\centering
+	\footnotesize
+	\begin{tabular}{|c|c|c|c|c|c|c|c|}
+		\hline
+		{} & \multicolumn{2}{l|}{{PVAR Size (Byte)}} & \multicolumn{2}{l|}{{\# Tasks}} & \multicolumn{2}{l|}{{\# Paging Code}} \\
+		\hline
+		Nickname & Hand & Comp. & Hand & Comp. & Hand & Comp.\\
+		\hline\hline
+		Bitcount & 22 & 22 & 10 & 15 & 81 & 93 \\
+		Cold chain & 3492 & 3242 & 12 & 9 & 92 & 123\\
+		Cuckoo & 282 & 288 & 15 & 6 & 90 & 76\\
+		RSA & 332 & 250 & 20 & 27 & 130 & 296\\
+		AR & 166 & 218 & 11 & 6 & 112 & 333\\
+		Sort & 104 & 104 & 4 & 2 & 70 & 23\\
+		\hline
+	\end{tabular}
+	\caption{Comparison between compiler-generated code (Comp.) and hand-written \sys code (Hand).}
+\label{table:compiler_result}
+\end{table}
 
-Expected results:
-\begin{itemize}
-	\item comparison between manual (Chain code) and automatic taskification: in terms of code SLOCs, number of tasks, completion time (Chain), memory use (other metrics required?), show number of LLVM instructions per energy cycle
-	\item assessment of correctness (through manual inspection only?).
-\end{itemize}
-
-\todo{Provide results and text to this section}{Kiwan}
+We start with evaluating the efficiency of a \sys compiler. Table~\ref{table:compiler_result} shows
+the difference in size of protected variable (PVAR), number of tasks, and number of inserted paging call in the code between hand-written \sys code
+and compiler-generated \sys code. All three values are better to be small. On average, compiler-generated
+code is only worse by 0.3\% in the size of protected variable. Regarding the number of tasks, compiler-generated code
+is better by roughly 16\%. The result indicate compiler is selecting boundaries better than programmer manually doing it.
+However, compiler should insert paging code conservatively when it {\em may} access protected variable, due to limitation of
+pointer alias. Thus, it results in compiler introducing 48\% more paging code than programmer-written code. The resulting run time
+difference is summarized in Figure~\ref{}. The performance is worse than programmer-written \sys code
+in overall, meaning the programmer should try to write code manually if performance is critical; otherwise compiler can be
+used to simplify the programmability.
 
 \subsubsection{Task Coalescing Performance}
 \label{sec:results_coalescing}
