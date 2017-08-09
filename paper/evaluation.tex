@@ -14,7 +14,7 @@ We compare \sys against state of the art intermittent execution approach---Chain
 
 We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation. \todo{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
 
-The applications that were used in the evaluation are: (i) \textbf{Bitcount}: counts bits in x y byte pseudo-random string using x algorithms. Each result is compared for correctness; (ii) \textbf{Cold chain}: emulates embedded temperature sensing engine: measurements are randomly generated and are compressed using LZW algorithm for x-entry dictionary and y-byte block; (iii) \textbf{Cuckoo}: implements cuckoo filter---x entry filter filled to y of capacity---program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{RSA}: encrypts predefined x byte long string with a y bytes long key\todo{were keys of 64 bytes tested? If yes: d they exhaust energy}{Amjad}. This set of benchmarks is the same as used in~\cite{chain,alpaca}\todo{Fill-in the missing data and verify its correctness}{Przemek/Amjad}. In addition to Chain benchmarks new applications were implemented: (v) \emph{DFT}, (vi)\emph{Huffman compressor}, and (vii) \emph{Selection Sort}. All applications are compared in Table~\ref{table:benchmark_list} in terms of source lines of code against Chain. \todo{finalize describing all applications once all experiments are done}{Przemek}
+The applications that were used in the evaluation are: (i) \textbf{Bitcount}: counts bits in x y byte pseudo-random string using x algorithms. Each result is compared for correctness; (ii) \textbf{Cold chain}: emulates embedded temperature sensing engine: measurements are randomly generated and are compressed using LZW algorithm for x-entry dictionary and y-byte block; (iii) \textbf{Cuckoo}: implements cuckoo filter---x entry filter filled to y of capacity---program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{RSA}: encrypts predefined x byte long string with a y bytes long key\todo{were keys of 64 bytes tested? If yes: d they exhaust energy}{Amjad}. This set of benchmarks is the same as used in~\cite{chain,alpaca}\todo{Fill-in the missing data and verify its correctness}{Przemek/Amjad}. In addition to Chain benchmarks new applications were implemented: (v) \textbf{DFT}, (vi) \textbf{Huffman compressor}, and (vii) \textbf{Selection Sort}. All applications are compared in Table~\ref{table:benchmark_list} in terms of source lines of code against Chain. \todo{finalize describing all applications once all experiments are done}{Przemek}
 
 \begin{table}[t]
 	\centering
@@ -47,36 +47,25 @@ The applications that were used in the evaluation are: (i) \textbf{Bitcount}: co
 	\footnotesize
 	\begin{tabular}{|c|c|c|c|c|c|c|c|}
 		\hline
-		{} & \multicolumn{2}{l|}{{PVAR Size (Byte)}} & \multicolumn{2}{l|}{{\# Tasks}} & \multicolumn{2}{l|}{{\# Paging Code}} \\
+		{} & \multicolumn{2}{l|}{{PVAR size (Byte)}} & \multicolumn{2}{c|}{{No. tasks}} & \multicolumn{2}{c|}{{No. paging code}} \\
 		\hline
-		Nickname & Hand & Comp. & Hand & Comp. & Hand & Comp.\\
+		Nickname & Hand & Comp. & Hand & Comp. & Hand & Comp. \\
 		\hline\hline
 		Bitcount & 22 & 22 & 10 & 15 & 81 & 93 \\
-		Cold chain & 3492 & 3242 & 12 & 9 & 92 & 123\\
-		Cuckoo & 282 & 288 & 15 & 6 & 90 & 76\\
-		RSA & 332 & 250 & 20 & 27 & 130 & 296\\
-		AR & 166 & 218 & 11 & 6 & 112 & 333\\
-		Sort & 104 & 104 & 4 & 2 & 70 & 23\\
+		Cold chain & 3492 & 3242 & 12 & 9 & 92 & 123 \\
+		Cuckoo & 282 & 288 & 15 & 6 & 90 & 76 \\
+		RSA & 332 & 250 & 20 & 27 & 130 & 296 \\
+		AR & 166 & 218 & 11 & 6 & 112 & 333 \\
+		Sort & 104 & 104 & 4 & 2 & 70 & 23 \\
 		\hline
 	\end{tabular}
-	\caption{Comparison between compiler-generated code (Comp.) and hand-written \sys code (Hand).}
+	\caption{Comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Hand).}
 \label{table:compiler_result}
 \end{table}
 
-We start with evaluating the efficiency of a \sys compiler. Table~\ref{table:compiler_result} shows
-the difference in size of protected variable (PVAR), number of tasks, and number of inserted paging call in the code between hand-written \sys code
-and compiler-generated \sys code. All three values are better to be small. On average, compiler-generated
-code is only worse by 0.3\% in the size of protected variable. Regarding the number of tasks, compiler-generated code
-is better by roughly 16\%. The result indicate compiler is selecting boundaries better than programmer manually doing it.
-However, compiler should insert paging code conservatively when it {\em may} access protected variable, due to limitation of
-pointer alias. Thus, it results in compiler introducing 48\% more paging code than programmer-written code. The resulting run time
-difference is summarized in Figure~\ref{}. The performance is worse than programmer-written \sys code
-in overall, meaning the programmer should try to write code manually if performance is critical; otherwise compiler can be
-used to simplify the programmability.
+We start with evaluating the efficiency of a \sys compiler. Table~\ref{table:compiler_result} shows the difference in the number of protected variables (PVAR), number of tasks, and number of inserted paging calls in the code between (i) hand-written \sys and (ii) compiler-generated \sys code. On average, compiler-generated code is only worse by 0.3\% in the number of protected variables. Regarding the number of tasks, compiler-generated code is better by roughly 16\%. The result indicate that \sys compiler is selecting boundaries better than the programmer doing it manually. However, \sys compiler should insert paging code conservatively when it {\em may} access protected variables, due to limitation of pointer alias. Thus, it results in \sys compiler introducing 48\% more paging code than programmer-written code (the results on run time for various \sys code versions is provide in Section~\ref{}). The performance is worse than programmer-written \sys code in overall, meaning the programmer should structure the code manually if the performance is critical; otherwise compiler can be used to simplify the programmability. 
 
-We also evaluated the compile time for automatic task generation. The result are in Table~\ref{table:compile_time}.
-Most of the compile time was due to pointer aliasing. We could not compile DFT application since it was using
-builtins for math functions that weren't provided by Clang MSP430 backend.
+Additionally, we evaluated the compile time for automatic task generation per application\footnote{We could not compile DFT application since it was using built-ins for C math functions (i.e. \texttt{rand()}, \texttt{sinf()}, \texttt{cosf()}) that were not provided by the Clang MSP430 back-end.}. The result are given in Table~\ref{table:compile_time}. Most of the compile time was due to pointer aliasing.\todo{Comment on: whether these times are good or bad; why there is such a difference in time between all applications; how many runs you performed; what PC/OS you used to run the code; how the result was measured; why results are rounded (there are no decimals in your result); what is "Clang MSP430 back-end"}{Kiwan}
 
 \begin{table}[t]
 	\centering
@@ -88,7 +77,7 @@ builtins for math functions that weren't provided by Clang MSP430 backend.
 		3 & 2 & 6 & 86 & 34 & > 1 \\
 		\hline
 	\end{tabular}
-	\caption{Compile time in seconds.}
+	\caption{\sys compile time per application (seconds).\todo{for Sort:">" or "<"?}{Kiwan}}
 \label{table:compile_time}
 \end{table}
 
