@@ -41,8 +41,8 @@ plain C	29,201
 chain	278,821
 delft	124,502 (32)
 delft_coal	89,789 (32)
-compiler	189,305 (32)
-compiler_coal	154,649 (32)
+compiler	143,884 (32)
+compiler_coal	107,460 (32)
 
 sort (50 data)
 plain C	8,939	
@@ -100,8 +100,8 @@ bitcount
 chain	20.966
 delft	11.005 (32)
 delft_coal	10.094 (32)
-compiler	16.867 (32)
-compiler_coal	16.61 (32)
+compiler	13.55 (32)
+compiler_coal	12.19 (32)
 
 sort (50 data)
 chain	43.888
