@@ -5,7 +5,7 @@ We present the experimental results of \sys's performance. We start with describ
 
 In all experiments we used the following computing hardware: WISP\,5.1~\cite{wisp5,wisp} build around MSP430FR5969~\cite{wolverine} 64\,kB FRAM microcontroller. WISP\,5.1 has been re-programmed during experiments using TI's Flash Emulation Tool (FET)~\cite{fet} with TI Code Composer Studio version 7. FET was also used as a power supply in non-intermittent power experiment. To measure energy consumption of all benchmark applications (please refer to Section~\ref{sec:results_software}) Carnegie Mellon's EDB~\cite{edb} was used. In experiments involving wireless power, WISP was powered through an RFID reader (Impinj R1000 with firmware version 3.2.4.240~\cite{r1000_data_sheet}) connected to the Liard RFMAX S9028PCRJ 8\,dBic~\cite{atlas2015}. The RFID reader is controlled by a PC running Ubuntu 10.4 executing open source Python-based \emph{sllurp} library~\cite{sllrp_github}. Transmitted power of the RFID reader was 30\,dBm at 915\,MHz center frequency. For distance-controlled experiments, the WISP was positioned at varying length hollow paper tubes placed directly on a flat lying antenna. Code execution times have been measured using Salea~\cite{saleae} digital logic analyzer.
 
-We also used an alternative setup where the MSP-TS430RGZ48C launchpad was for continuous power experiments. We used internal timer for measuring run time. For harvested energy, we used the ThingMagic Astra-EX RFID reader with power levels in the [17.25,30]\,dBm range. We used EDB~\cite{edb} for execution time measurement. Applications were cross-compiled using GCC and Clang, so that we can use LLVM for \sys compiler.\todo{Report on LLVM version}{Brandon}
+We also used an alternative setup where the MSP-TS430RGZ48C launchpad was for continuous power experiments. We used internal timer for measuring run time. For harvested energy, we used the ThingMagic Astra-EX RFID reader with power levels of 30\,dBm. We used EDB~\cite{edb} for execution time measurement. Applications were cross-compiled using GCC and Clang, so that we can use LLVM for \sys compiler. Both for Clang and LLVM we used version 3.8.0.
 
 \subsection{Software Suite Description}
 \label{sec:results_software}
@@ -65,7 +65,7 @@ The applications that were used in the evaluation are: (i) \textbf{Bitcount}: co
 
 We start with evaluating the efficiency of a \sys compiler. Table~\ref{table:compiler_result} shows the difference in the number of protected variables (PVAR), number of tasks, and number of inserted paging calls in the code between (i) hand-written \sys and (ii) compiler-generated \sys code. On average, compiler-generated code is only worse by 0.3\% in the number of protected variables. Regarding the number of tasks, compiler-generated code is better by roughly 16\%. The result indicate that \sys compiler is selecting boundaries better than the programmer doing it manually. However, \sys compiler should insert paging code conservatively when it {\em may} access protected variables, due to limitation of pointer alias. Thus, it results in \sys compiler introducing 48\% more paging code than programmer-written code (the results on run time for various \sys code versions is provide in Section~\ref{}). The performance is worse than programmer-written \sys code in overall, meaning the programmer should structure the code manually if the performance is critical; otherwise compiler can be used to simplify the programmability. 
 
-Additionally, we evaluated the compile time for automatic task generation per application\footnote{We could not compile DFT application since it was using built-ins for C math functions (i.e. \texttt{rand()}, \texttt{sinf()}, \texttt{cosf()}) that were not provided by the Clang MSP430 back-end.}. The result are given in Table~\ref{table:compile_time}. Most of the compile time was due to pointer aliasing.\todo{Comment on: whether these times are good or bad; why there is such a difference in time between all applications; how many runs you performed; what PC/OS you used to run the code; how the result was measured; why results are rounded (there are no decimals in your result); what is "Clang MSP430 back-end"}{Kiwan}
+Additionally, we evaluated the compile time for automatic task generation per application\footnote{We could not compile DFT application since the LLVM inserts mathematical built-in functions (i.e. \texttt{\_\_muldf3}, \texttt{\_\_floatsidf}, \texttt{\_\_adddf3}) whose implementation were not provided by the LLVM MSP430 back-end.}. We compiled the apps on a 4-core virtual machine with 1GB memory that has Arch Linux, running on Intel Core i5-6200U (2.30GHz) processor. The result are given in Table~\ref{table:compile_time}. We simply used {\em date} command provided by linux to measure the rough time. Most of the compile time was due to pointer aliasing, when calculating possible live range of each variables. Apps such as RSA whose code size is large and uses a lot of variables needed longer compilation time due to larger search space for pointer aliasing.
 
 \begin{table}[t]
 	\centering
@@ -74,10 +74,10 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 		\hline
 		Bitcount & Cold chain & Cuckoo & RSA & AR & Sort \\
 		\hline\hline
-		3 & 2 & 6 & 86 & 34 & > 1 \\
+		3 & 2 & 6 & 86 & 34 & < 1 \\
 		\hline
 	\end{tabular}
-	\caption{\sys compile time per application (seconds).\todo{for Sort:">" or "<"?}{Kiwan}}
+	\caption{\sys compile time per application (seconds).}
 \label{table:compile_time}
 \end{table}
 
