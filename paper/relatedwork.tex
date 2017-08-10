@@ -1,5 +1,95 @@
-\noindent \textbf{Intermittently-Powered Devices:} There is plentiful of research results available on energy harvesting, or more specifically wireless power provision, for embedded devices like sensors or microcontrollers. This paragraph is too short to cover this area extensively and we refer the reader to overview papers~\cite{prasad_comst_2014,sample_procieee_2013,huang:commag:2015,visser_procieee_2013,kamalinejad_commag_2015,ku_cst_2016} for in-depth discussion. With power consumption of electronics going down dramatically with every year, computing systems can be now powered completely from ambient energy. This opens new research areas such as radio frequency-powered computers~\cite{patel_pervasive_2017,rf_powered_computing_gollakota_2014}. Indeed, plenty of new embedded platforms appear that are powered solely from ambient (intentional or non-intentional) energy and include~\cite{wisp5,moo,zhao_rfid_2015,holleman_biocas_2008,thomas_jbcs_2012,naderiparizi_rfid_2015,rodriguez_tbcs_2015,liu_sigcomm_2013,kicksat,nadeau_naturebio_2017}. But there is a price tag associated to them: harvested energy is miniscule, unstable, difficult to predict ergo \emph{intermittent}. Therefore, to guarantee completion of computing, programming and runtime models (and measurement and support systems such as~\cite{hester_sensys_2014,hester_sensys_2015,edb} which are beyond the scope of this paper) are being actively researched that are specifically tailored to these intermittently-powered systems. \todo{Revise this section}{Brandon}
+\noindent \textbf{Intermittently-Powered Devices:} There is a large body of
+research on energy harvesting and wirelessly powered embedded devices like
+sensors or microcontrollers. Several recent reviews provide a broad overview
+papers~\cite{prasad_comst_2014,sample_procieee_2013,huang:commag:2015,visser_procieee_2013,kamalinejad_commag_2015,ku_cst_2016}
+in depth.  As computing power consumption continues to decrease, a new wave of
+{\em ambiently} powered systems is emerging, powered by radio
+waves~\cite{patel_pervasive_2017,rf_powered_computing_gollakota_2014}.
+Radio-powered
+devices~\cite{wisp5,moo,zhao_rfid_2015,holleman_biocas_2008,thomas_jbcs_2012,naderiparizi_rfid_2015,rodriguez_tbcs_2015,liu_sigcomm_2013,kicksat,nadeau_naturebio_2017}
+are realted to \sys because they are the technological foundation of an
+important category of intermittent computing devices. The emergence of
+intermittent computing hardware platforms has led to the development of tooling
+and instrumentation that support using these platforms for system
+building~\cite{hester_sensys_2014,hester_sensys_2015,edb,stork,wisent}.
 
-\noindent \textbf{Intermittent Execution Environments:} Earlier works on runtime environments for energy-harvesting (volatile memory-only) systems include Dewdrop~\cite{dewdrop} and Eon~\cite{sorber_sensys_2007}, in which it is ensured (by a programmer or a scheduler) that task will fit the available remaining energy. No intermittency and data consistency issues are considered. Similar, specific-application tailored system includes Wisent and Stork~\cite{stork,wisent}. DINO~\cite{dino} versions non-volatile memory and checkpoints volatile program state which is memory and energy demanding. Rachet~\cite{ratchet}, implementing checkpointing as well, assumes complete non-volatile hardware. Clang~\cite{hicks_isca_2017} assumes a dedicated hardware for idempotency violation detection. On-demand checkpoint runtimes include Mementos~\cite{mementos}, Quickrecall~\cite{quickrecall}, Hibernus/Hibernus++~\cite{hibernus,hibernusplusplus} and HarvOS~\cite{mottola2017harvos}. They all require hardware support to measure remaining storage energy---a feature prohibitive given typical high energy cost expenditure of such hardware. The only available task-based intermittent runtime systems, free from hardware assumptions or heavy checkpointing, are Chain~\cite{chain} and Alpaca~\cite{alpaca}. \sys goes beyond what any task-based system performed by providing \emph{automatic} task creation and \emph{adaptivity} to energy state and energy storage \emph{obliviousness} of the compiled code. \todo{Revise this section}{Brandon}
+\noindent \textbf{Intermittent Execution Environments:} 
+The proliferation of energy-harvesting hardware led to a need for system
+support.  Early work developed runtime environments for energy-harvesting
+systems assuming simple, small computations that do not exceed a predictable
+burst of energy~\cite{dewdrop} or long power-cycles and priority-based
+scheduling to ensure important tasks execute often
+enough~\cite{sorber_sensys_2007}.  These early efforts did not consider
+intermittence or data consistency issues. 
+%
+Later efforts supported intermittent computing using dynamic, on-demand
+checkpoints include Mementos~\cite{mementos}, Quickrecall~\cite{quickrecall},
+Hibernus/Hibernus++~\cite{hibernus,hibernusplusplus} and
+HarvOS~\cite{mottola2017harvos}. Dynamic checkpointing systems may checkpoint
+at any point, making it difficult to implement application-level atomicity
+requirements, such as collecting correlated sensor samples together.  Moreover,
+some of these systems require hardware support for a device to measure its
+stored energy, which requires additional hardware and may incur an energy cost. 
+Moreover, these systems do not checkpoint non-volatile state, compromising 
+memory consistency.
+%
+DINO~\cite{dino} selectively versions non-volatile memory and checkpoints
+volatile state, ensuring progress and memory consistency.
+Rachet~\cite{ratchet} assumes all memory is non-volatile and checkpoints
+volatile state.  Clang~\cite{hicks_isca_2017} takes a Ratchet-like approach
+that leverages dedicated hardware to eliminate checkpointing and versioning
+overhead. 
 
-\noindent \textbf{Memory Virtualization:} Review of memory virtualization/transactional memory environments (not necessarily for intermittent power devices). \todo{Fill-in this section}{Alexei}
+Two task-based system developed in recent work are Chain~\cite{chain} and
+Alpaca~\cite{alpaca}.  Using static tasks, these systems eliminate the need to
+checkpoint volatile state.  Using novel, channel-based memory
+models~\cite{chain} or automatic privatization and redo-logging~\cite{alpaca}
+these systems avoid checkpointing overheads, do not require fully non-volatile
+memory, and require no special hardware.  Moreover, task-based models
+facilitate specifying application-level atomicity properties.
+
+\sys relates to earlier efforts on intermittent computing in their shared
+purpose of making it simple to write correct programs that run intermittently,
+but is distinct in its approach and mechanism.  \sys relates more closely to
+task-based intermittent programming execution models because \sys also relies
+on statically defined tasks to avoid the need to checkpoint volatile state.
+\sys's automatic compilation spares the programmer the work of writing
+task-based code that prior systems demand.  \sys's memory virtualization
+provides an alternative design for ensuring memory consistency that is
+optimized for bulk accesses to task-shared data with high locality.  \sys's
+task coalescing optimization ameliorates the key overheads associated with
+committing tasks present in these prior systems.  
+
+{\noindent \bf Memory Virtualization}
+
+Prior work on operating system support for embedded systems and sensor motes
+has studied a variety of memory virtualization strategies that relate to \sys's
+memory virtualization mechanism.
+
+Several operating system efforts developed support for memory management.
+TinyOS and nesC support dynamic memory management~\cite{nesc}.  Later work
+extended the memory manager to support memory virtualization backed by flash
+memory~\cite{sensornetvm} and to ensure memory and type
+safety~\cite{tinyosmemorysafety}. SOS~\cite{sos}, Contiki~\cite{contiki}, and
+t-kernel~\cite{tkernel} also developed memory management abstractions that
+virtualize memory size and provide safe and indirect access.
+Mat\'e~\cite{mate} developed full virtual machines support for sensor nodes,
+virtualizing not just memory resources, but other state and peripheral
+resources.  These prior efforts to virtualize memory in embedded and sensor
+node systems are similar in their purpose and mechanism to \sys, but \sys is
+distinct in its goal.  The goal of \sys is to provide consistent, intermittent
+execution, leveraging the performance benefits of efficient bulk copying.  In
+contrast, these prior efforts were focused more on programmability and run time
+reliability properties provided by virtual memory. 
+
+Another prior effort that is related to \sys is work on unbounded, page-based
+transactional memory and deterministic parallel runtime
+systems~\cite{pagebasedtm,grace}.  These prior efforts have a different
+mechanism and purpose than \sys -- ensuring that data are consistent and
+deterministically updated during concurrent executions.  What makes these
+efforts related is that they manage state required to ensure consistency at the
+granularity of pages to amortize checking and tracking costs.  \sys also tracks
+accesses at the granularity of a page and uses its paging mechanism to ensure
+consistency.  Moreover, \sys's paging implementation, which keeps a shadow page
+for each page to use during commit is very similar to the shadow paging scheme
+use for transactional commit~\cite{pagebasedtm}.
