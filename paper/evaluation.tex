@@ -159,18 +159,18 @@ Expected results:
 
 Figure~\ref{fig:page_size} presents the result on the effect of page swap size on the execution time of the programs executed by \sys. Overhead has been measured in the MCU clock cycles with values provided by TI CCS. Result has been normalized per benchmark: for the overhead results---to the minimum obtained value and for page faults---to the third measured maximum value\todo{Check again}{Amjad}. A subset of applications has been selected for evaluation. Additionally, page faults have been measured. The result show clearly a bathtub-shape bar plot for each application, demonstrating that for each application there is always a page size that minimizes \emph{both} execution time and page swaps. For all applications (except for Sort) this value equals roughly to 64 bytes. The shape of each figure can be explained as follows. For small page sizes (<64) the execution time is dominated by the \emph{frequency} of page swaps (each swap takes non-zero time, as shown in Figure~\ref{fig:dmaTimeEnergy}). On the other hand, in the opposite case the execution time is dominated by the time of swapping of one large page from SRAM to FRAM. Another interesting observation is the non-symmetric shape of each bar plot. This is due the size of data manipulated by the program: minimum point of overhead equals roughly to the size of the variables manipulated by each benchmark. Worth noting is also large discrepancy between minimum and maximum overhead for each benchmark (e.g. for Cuckoo 8 (at 16 bytes) to 1 (at 64 bytes), BC: 1 (at 16 bytes) to $\approx$2 (at 1024 bytes)). \todo{Explain this phenomenon}{Amjad}
 
-\subsubsection{Case Study}
-\label{sec:case_study}
+%\subsubsection{Case Study}
+%\label{sec:case_study}
 
-The final experiment assessing usefulness of \sys's use in real application. For this we have a implemented an battery-less wirelessly-powered sound detector as an example. To the best of our knowledge, this is the first case study that demonstrates a intermittently-powered system supplied by harvested energy at runtime, which continuously interacts with real-life signals. 
+%The final experiment assessing usefulness of \sys's use in real application. For this we have a implemented an battery-less wirelessly-powered sound detector as an example. To the best of our knowledge, this is the first case study that demonstrates a intermittently-powered system supplied by harvested energy at runtime, which continuously interacts with real-life signals. 
 
-The application aims at detecting a specific tone in the audio signal (in the implementation: 1\,kHz) based on on-the-fly audio measurement. For this we have connected an analog MEMS microphone~\cite{microphone} output to AUX3 port of WISP\,5.1 (while the microphone was powered directly by WISP, which was then wirelessly power-supplied by the RFID reader). Audio signal is sampled by the microcontroller's ADC and passed to the FFT function (internal function of the TI's Digital Signal Processing library~\cite{ti_dsp}) to find a tone above a predefined threshold. The output of the detection is signalled by the WISP on-board LED. The video of demonstrating the working system is available via \url{https://link_to_a_video}.
+%The application aims at detecting a specific tone in the audio signal (in the implementation: 1\,kHz) based on on-the-fly audio measurement. For this we have connected an analog MEMS microphone~\cite{microphone} output to AUX3 port of WISP\,5.1 (while the microphone was powered directly by WISP, which was then wirelessly power-supplied by the RFID reader). Audio signal is sampled by the microcontroller's ADC and passed to the FFT function (internal function of the TI's Digital Signal Processing library~\cite{ti_dsp}) to find a tone above a predefined threshold. The output of the detection is signalled by the WISP on-board LED. The video of demonstrating the working system is available via \url{https://link_to_a_video}.
 
-Expected results:
-\begin{itemize}
-	\item Compare execution time: \sys against Chain for X\,s long audio signal detection at two antenna distances
-	\item Make a video of the demonstration 
-\end{itemize}
+%Expected results:
+%\begin{itemize}
+%	\item Compare execution time: \sys against Chain for X\,s long audio signal detection at two antenna distances
+%	\item Make a video of the demonstration 
+%\end{itemize}
  
-\todo{Check if we really need this application}{Brandon}
-\todo{Provide results and text to this section---if time allows (this result is not critical)}{Amjad/Przemek}
+%\todo{Check if we really need this application}{Brandon}
+%\todo{Provide results and text to this section---if time allows (this result is not critical)}{Amjad/Przemek}
