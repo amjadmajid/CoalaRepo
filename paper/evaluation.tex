@@ -81,8 +81,22 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 \label{table:compile_time}
 \end{table}
 
-\subsubsection{Task Coalescing Performance}
-\label{sec:results_coalescing}
+%\subsubsection{Task Coalescing Performance}
+%\label{sec:results_coalescing}
+
+\vspace{2cm}
+
+List of figures: 
+\begin{itemize}
+	\item Fig. 1: Viper only/per app/fixed power/(hand/complier)/no coalescing/clang [Resuls are ready by Kiwan]
+	\item Fig. 2: Viper only/per app/per distance (fixed/20/40/60)/(hand/complier)/coalescing [Resuls are ready by Kiwan]
+	\item Fig. 3a: (Viper Coalescing/Chain)/per app/per distance (fixed/20/40/60)/complier/clang [Resuls are ready by Kiwan]
+	\item Fig. 3b: (Viper Coalescing/Chain)/per app/per distance (fixed/20/40/60)/complier/gcc [Resuls are not ready: Kiwan needs to make them]
+	\item Fig. 4: exactly as Fig 12 in the paper (4 apps only)
+	\item Fig. 5: average virtual task size/gcc/fixed distance/per app 
+\end{itemize}
+
+\vspace{2cm}
 
 \begin{figure}
 	\centering
@@ -100,7 +114,7 @@ Experimental evaluation of task coalescing mechanism under intermittent power of
 	\label{fig:virtualTaskSize}
 \end{figure}
 
-The question remains: does coalescing all program's tasks into a singe virtual task (as the energy becomes fully available, i.e. from energy harvesting to continuous power environment) is the best one?. To answer this question we have implemented a simple program composed of $x$ empty tasks. We execute the same program by increasing coalescing factor by one while the device on which the program was executed was running on a stable power supply (refer to Section~\ref{sec:methodology_evaluation} for details). The result is presented in Figure~\ref{fig:virtualTaskSize}. We observe a significant increase in execution time as task are coalescent from one to four (three times execution time improvement). However, as the coalescing increases beyond four, we observe diminishing returns from coalescing in terms of execution time. \todo{Decide whether to place this figure in Evaluation section or leave it here}{Przemek}
+The question remains: does coalescing all program's tasks into a singe virtual task (as the energy becomes fully available, i.e. from energy harvesting to continuous power environment) is the best one? To answer this question we have implemented a simple program composed of $x$ empty tasks. We execute the same program by increasing coalescing factor by one while the device on which the program was executed was running on a stable power supply (refer to Section~\ref{sec:methodology_evaluation} for details). The result is presented in Figure~\ref{fig:virtualTaskSize}. We observe a significant increase in execution time as task are coalescent from one to four (three times execution time improvement). However, as the coalescing increases beyond four, we observe diminishing returns from coalescing in terms of execution time. \todo{Decide whether to place this figure in Evaluation section or leave it here}{Przemek}
 
 \begin{figure}
 	\centering
