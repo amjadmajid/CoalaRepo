@@ -35,6 +35,8 @@ typedef struct _lookup_count {
 
 #define TASK_NUM 15
 
+#define OFFSET(src, dest) src <= dest ? dest - src : TASK_NUM + dest - src
+
 enum task_index {
     t_init,
     t_init_array,
@@ -87,6 +89,8 @@ __p value_t _v_member_count;
 __p bool _v_success;
 __p bool _v_member;
 
+__nv uint8_t pinRaised=0;
+
 static value_t init_key = 0x0001; // seeds the pseudo-random sequence of keys
 
 static hash_t djb_hash(uint8_t* data, unsigned len)
@@ -116,34 +120,32 @@ unsigned i;
 
 void task_init()
 {
+    unsigned i;
+        for (i = 0; i < NUM_BUCKETS ; ++i) {
+            WP(_v_filter[i]) = 0;
+        }
+        WP(_v_insert_count) = 0;
+        WP(_v_lookup_count) = 0;
+        WP(_v_inserted_count) = 0;
+        WP(_v_member_count) = 0;
+        WP(_v_key) = init_key;
+        WP(_v_next_task) = t_insert;
 
-    for (i = 0; i < NUM_BUCKETS ; ++i) {
-        WVAR(_v_filter[i], 0);
-    }
-    WVAR(_v_insert_count, 0);
-    WVAR(_v_lookup_count, 0);
-    WVAR(_v_inserted_count, 0);
-    WVAR(_v_member_count, 0);
-    WVAR(_v_key, init_key);
-    WVAR(_v_next_task, t_insert);
-
-    os_jump(2);
+        os_jump(OFFSET(t_init, t_generate_key));
 }
 
 void task_init_array() {
     unsigned i;
-    uint16_t __cry =  RVAR(_v_index);
-    for (i = 0; i < BUFFER_SIZE - 1; ++i) {
-        WVAR(_v_filter[i +__cry*(BUFFER_SIZE-1)], 0);
-    }
-    ++__cry;
-    if (__cry== NUM_BUCKETS/(BUFFER_SIZE-1)) {
-        os_jump(1);
-    }
-    else {
-        os_jump(0);
-    }
-    WVAR(_v_index, __cry);
+        for (i = 0; i < BUFFER_SIZE - 1; ++i) {
+            WP(_v_filter[i + P(_v_index)*(BUFFER_SIZE-1)]) = 0;
+        }
+        ++WP(_v_index);
+        if (RP(_v_index) == NUM_BUCKETS/(BUFFER_SIZE-1)) {
+//            os_jump(1);
+        }
+        else {
+            os_jump(0);
+        }
 }
 
 void task_generate_key()
@@ -152,45 +154,50 @@ void task_generate_key()
     // If we use consecutive ints, they hash to consecutive DJB hashes...
     // NOTE: we are not using rand(), to have the sequence available to verify
     // that that are no false negatives (and avoid having to save the values).
-    uint16_t * ppt = PVAR(_v_key);
-    (*ppt) = ( (*ppt) + 1) * 17;
 
-    if (RVAR(_v_next_task) >= t_generate_key) {
-        os_jump(RVAR(_v_next_task) - t_generate_key);
+    uint16_t __cry;
+
+    __cry = (RP(_v_key) + 1) * 17;
+    WP(_v_key) = __cry;
+
+    if (P(_v_next_task) >= t_generate_key) {
+        os_jump(P(_v_next_task) - t_generate_key);
     }
     else {
-        os_jump(TASK_NUM - RVAR(_v_next_task) + t_generate_key);
+        os_jump(TASK_NUM - RP(_v_next_task) + t_generate_key);
     }
 }
 
 void task_calc_indexes()
 {
-    uint16_t __cry = hash_to_fingerprint(RVAR(_v_key));
-    P(_v_fingerprint) = __cry;
+    uint16_t __cry;
+    __cry = hash_to_fingerprint(RP(_v_key));
+    WP(_v_fingerprint) = __cry;
 
     os_jump(1);
 }
 
 void task_calc_indexes_index_1()
 {
-     uint16_t __cry = hash_to_index(RVAR(_v_key));
-     WVAR(_v_index1, __cry);
+    uint16_t __cry;
+    __cry = hash_to_index(RP(_v_key));
+    WP(_v_index1) = __cry;
+
     os_jump(1);
 }
 
 void task_calc_indexes_index_2()
 {
-    index_t fp_hash = hash_to_index(RVAR(_v_fingerprint));
+    index_t fp_hash = hash_to_index(RP(_v_fingerprint));
     uint16_t __cry;
-     __cry = RVAR(_v_index1) ^ fp_hash;
-     WVAR(_v_index2, __cry);
+     __cry = RP(_v_index1) ^ fp_hash;
+     WP(_v_index2) = __cry;
 
-     uint16_t * ppt = PVAR(_v_next_task);
-    if ( (*ppt) >= t_calc_indexes_index_2) {
-        os_jump((*ppt) - t_calc_indexes_index_2);
+    if (P(_v_next_task) >= t_calc_indexes_index_2) {
+        os_jump(RP(_v_next_task) - t_calc_indexes_index_2);
     }
     else {
-        os_jump(TASK_NUM - (*ppt) + t_calc_indexes_index_2);
+        os_jump(TASK_NUM - RP(_v_next_task) + t_calc_indexes_index_2);
     }
 }
 
@@ -200,7 +207,7 @@ void task_calc_indexes_index_2()
 // Alpaca never needs this but since Chain code had it, leaving it for fair comparison.
 void task_insert()
 {
-    WVAR(_v_next_task, t_add);
+    WP(_v_next_task) = t_add;
     os_jump(12);
 }
 
@@ -208,21 +215,21 @@ void task_insert()
 void task_add()
 {
     uint16_t __cry;
-    uint16_t __cry_idx = RVAR(_v_index1);
-    uint16_t __cry_idx2 = RVAR(_v_index2);
-    if (!RVAR(_v_filter[__cry_idx])) {
+    uint16_t __cry_idx = RP(_v_index1);
+    uint16_t __cry_idx2 = RP(_v_index2);
+    if (!P(_v_filter[__cry_idx])) {
 
-        WVAR(_v_success, true);
-        __cry = RVAR(_v_fingerprint);
-        WVAR(_v_filter[__cry_idx], __cry);
+        WP(_v_success) = true;
+        __cry = RP(_v_fingerprint);
+        WP(_v_filter[__cry_idx]) = __cry;
         os_jump(2);
         return;
     } else {
-        if (!RVAR(_v_filter[__cry_idx2])) {
+        if (!P(_v_filter[__cry_idx2])) {
 
-            WVAR(_v_success, true);
-            __cry = RVAR(_v_fingerprint);
-            WVAR(_v_filter[__cry_idx2],__cry);
+            WP(_v_success) = true;
+            __cry = RP(_v_fingerprint);
+            WP(_v_filter[__cry_idx2])  = __cry;
             os_jump(2);
             return;
         } else { // evict one of the two entries
@@ -231,20 +238,20 @@ void task_add()
 
             if (rand() % 2) {
                 index_victim = __cry_idx;
-                fp_victim = RVAR(_v_filter[__cry_idx]);
+                fp_victim = RP(_v_filter[__cry_idx]);
             } else {
                 index_victim = __cry_idx2;
-                fp_victim = RVAR(_v_filter[__cry_idx2]);
+                fp_victim = RP(_v_filter[__cry_idx2]);
             }
 
             // Evict the victim
-            __cry = RVAR(_v_fingerprint);
-            WVAR(_v_filter[P(index_victim)], __cry);
-            WVAR(_v_index1, index_victim);
-            WVAR(_v_fingerprint,fp_victim);
-            WVAR(_v_relocation_count, 0);
+            __cry = RP(_v_fingerprint);
+            WP(_v_filter[RP(index_victim)])  = __cry;
+            WP(_v_index1) = index_victim;
+            WP(_v_fingerprint) = fp_victim;
+            WP(_v_relocation_count) = 0;
 
-            os_jump(1);
+//            os_jump(1);
             return;
         }
     }
@@ -255,29 +262,28 @@ void task_add()
 void task_relocate()
 {
     uint16_t __cry;
-    fingerprint_t fp_victim = RVAR(_v_fingerprint);
+    fingerprint_t fp_victim = RP(_v_fingerprint);
     index_t fp_hash_victim = hash_to_index(fp_victim);
-    index_t index2_victim = RVAR(_v_index1) ^ fp_hash_victim;
+    index_t index2_victim = RP(_v_index1) ^ fp_hash_victim;
 
-    if (!RVAR(_v_filter[index2_victim])) { // slot was free
-        WVAR(_v_success, true);
-        WVAR(_v_filter[index2_victim],fp_victim);
-        os_jump(1);
+    if (!RP(_v_filter[index2_victim])) { // slot was free
+        WP(_v_success) = true;
+        WP(_v_filter[index2_victim]) = fp_victim;
+//        os_jump(1);
         return;
     } else { // slot was occupied, rellocate the next victim
 
-        if (RVAR(_v_relocation_count) >= MAX_RELOCATIONS) { // insert failed
-            WVAR(_v_success, false);
-            os_jump(1);
+        if (RP(_v_relocation_count) >= MAX_RELOCATIONS) { // insert failed
+            WP(_v_success) = false;
+//            os_jump(1);
             return;
         }
-        __cry = _v_relocation_count;
-        __cry++;
-        WVAR(_v_relocation_count, __cry);
-        WVAR(_v_index1, index2_victim);
-        __cry = RVAR(_v_filter[index2_victim]);
-        WVAR(_v_fingerprint, __cry);
-        WVAR(_v_filter[index2_victim], fp_victim);
+
+        ++WP(_v_relocation_count);
+        WP(_v_index1) = index2_victim;
+        __cry = RP(_v_filter[index2_victim]);
+        WP(_v_fingerprint) = __cry;
+        WP(_v_filter[index2_victim]) = fp_victim;
         os_jump(0);
         return;
     }
@@ -289,21 +295,19 @@ void task_relocate()
 void task_insert_done()
 {
     uint16_t __cry;
-    __cry = _v_insert_count;
-    ++__cry;
-    WVAR(_v_insert_count, __cry);
-    __cry = RVAR(_v_inserted_count);
-    __cry+= RVAR(_v_success);
-    WVAR(_v_inserted_count, __cry);
+    ++WP(_v_insert_count);
+    __cry = RP(_v_inserted_count);
+    __cry+= RP(_v_success);
+    WP(_v_inserted_count) = __cry;
 
 
-    if (RVAR(_v_insert_count) < NUM_INSERTS) {
-        WVAR(_v_next_task, t_insert);
+    if (P(_v_insert_count) < NUM_INSERTS) {
+        WP(_v_next_task) = t_insert;
         os_jump(8);
         return;
     } else {
-        WVAR(_v_next_task, t_lookup);
-        WVAR(_v_key,init_key);
+        WP(_v_next_task) = t_lookup;
+        WP(_v_key) = init_key;
         os_jump(8);
         return;
     }
@@ -312,58 +316,62 @@ void task_insert_done()
 void task_lookup()
 {
 
-    WVAR(_v_next_task, t_lookup_search);
+    WP(_v_next_task) = t_lookup_search;
     os_jump(8);
 }
 
 void task_lookup_search()
 {
 
-    if (RVAR(_v_filter[RVAR(_v_index1)]) == RVAR(_v_fingerprint)) {
-        WVAR(_v_member, true);
+    if (RP(_v_filter[RP(_v_index1)]) == RP(_v_fingerprint)) {
+        WP(_v_member) = true;
     } else {
 
-        if (RVAR(_v_filter[P(_v_index2)]) == RVAR(_v_fingerprint)) {
-            WVAR(_v_member, true);
+        if (RP(_v_filter[RP(_v_index2)]) == RP(_v_fingerprint)) {
+            WP(_v_member) = true;
         }
         else {
-            WVAR(_v_member, false);
+            WP(_v_member) = false;
         }
     }
 
-    os_jump(1);
+//    os_jump(1);
 }
 
 void task_lookup_done()
 {
     uint16_t __cry;
-    __cry = RVAR(_v_lookup_count);
-    __cry++;
-    WVAR(_v_lookup_count, __cry);
-    __cry = RVAR(_v_member_count) ;
-    __cry+= RVAR(_v_member);
-    WVAR(_v_member_count, __cry);
+    ++WP(_v_lookup_count);
+    __cry = P(_v_member_count) ;
+    __cry+= P(_v_member);
+    WP(_v_member_count)  = __cry;
 
-    if (RVAR(_v_lookup_count) < NUM_LOOKUPS) {
-        WVAR(_v_next_task, t_lookup);
+    if (P(_v_lookup_count) < NUM_LOOKUPS) {
+        WP(_v_next_task) = t_lookup;
         os_jump(5);
         return;
     } else {
-        os_jump(1);
+//        os_jump(1);
         return;
     }
 }
 
 void task_print_stats()
 {
-    __no_operation();
-;
+//    __no_operation();
+    pinRaised=1;
+
+//    FLASH();
 }
 
 void task_done()
 {
 
-;
+    if(pinRaised){
+        P3OUT |= BIT5;
+        P3OUT &= ~BIT5;
+    }
+    pinRaised=0;
 
 }
 
@@ -371,6 +379,9 @@ void task_done()
 
 void init()
 {
+    P3OUT &= ~BIT5;
+    P3DIR |=BIT5;
+
     WDTCTL = WDTPW | WDTHOLD;
     PM5CTL0 &= ~LOCKLPM5;
 
@@ -381,29 +392,27 @@ void init()
     CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
     CSCTL0_H = 0;
 
-    srand(0);
 
-    __enable_interrupt();
 
 }
 int main(void) {
     init();
 
-    taskId tasks[] = {{task_init, 1},
-        {task_init_array, 2} ,
-        {task_generate_key, 3},
-        {task_calc_indexes, 4},
-        {task_calc_indexes_index_1, 5},
-        {task_calc_indexes_index_2, 6},
-        {task_insert, 7},
-        {task_add, 8},
-        {task_relocate, 9},
-        {task_insert_done, 10},
-        {task_lookup, 11},
-        {task_lookup_search, 12},
-        {task_lookup_done, 13},
-        {task_print_stats, 14},
-        {task_done, 15}
+    taskId tasks[] = {{task_init, 0},
+        {task_init_array, 0} ,
+        {task_generate_key, 0},
+        {task_calc_indexes, 0},
+        {task_calc_indexes_index_1, 0},
+        {task_calc_indexes_index_2, 0},
+        {task_insert, 0},
+        {task_add, 0},
+        {task_relocate, 0},
+        {task_insert_done, 0},
+        {task_lookup, 0},
+        {task_lookup_search, 0},
+        {task_lookup_done, 0},
+        {task_print_stats, 0},
+        {task_done, 0}
     };
 
     os_addTasks(TASK_NUM, tasks );

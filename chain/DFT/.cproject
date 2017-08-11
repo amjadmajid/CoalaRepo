@@ -38,10 +38,7 @@
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE.1107817169" name="Optimize for space rather than speed (-Os)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS.1047163230" name="Other flags" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS" useByScannerDiscovery="false" valueType="stringList">
-									<listOptionValue builtIn="false" value="-mlarge"/>
-									<listOptionValue builtIn="false" value="-mhwmult=f5series"/>
-									<listOptionValue builtIn="false" value="-mcode-region=none"/>
-									<listOptionValue builtIn="false" value="-mdata-region=none"/>
+									<listOptionValue builtIn="false" value="-mhwmult=none"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG.1069738551" name="Generate debug information (-g)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF.1086334576" name="Do not emit DWARF additions beyond selected version (-gstrict-dwarf)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF" useByScannerDiscovery="false" value="true" valueType="boolean"/>

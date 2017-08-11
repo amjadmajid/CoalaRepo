@@ -36,6 +36,7 @@ extern unsigned int __persis_pagsInTemp[];
 extern volatile uint8_t dirtyPag ;
 extern uint32_t __temp_temp;
 extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
+extern unsigned int __virtualTaskCntr;
 
 //This is a task interface. It is shared between the user and IPOS
 typedef struct _taskId{
@@ -48,5 +49,8 @@ typedef struct _taskId{
 
 #define BLOCK_OFFSET        2
 #define NEXT_OFFSET         4
+
+
+#define FLASH() __virtualTaskCntr=1
 
 #endif /* INCLUDE_GLOBAL_H_ */
