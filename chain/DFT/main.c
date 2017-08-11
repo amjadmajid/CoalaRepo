@@ -9,11 +9,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
-
+#include <stdarg.h>
 #include <math.h>
 
 #include <stdlib.h>
-#include "../chain_ccs/old_include/chain.h"
+#include "chain.h"
 
 #define SIZE 8
 #define PI2 6.28
@@ -69,7 +69,7 @@ void init()
 
 }
 
-
+extern  uint16_t g_field =NULL;
 /*******Declare Channel fields **********/
 struct msg_n {
     CHAN_FIELD(unsigned, n);
@@ -162,7 +162,7 @@ CHANNEL(dft_power           , dft_init              , msg_p_arr);
 void dft_init() {
 //    task_prologue();
 
-    unsigned n = 0xabab;
+    unsigned n = 0;
     unsigned k = 0;
 
     CHAN_OUT1(uint16_t, k, k, CH(dft_init, dft_outer_loop));

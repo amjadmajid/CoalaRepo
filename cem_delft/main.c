@@ -2,6 +2,7 @@
 #include <ipos.h>
 
 
+__nv uint8_t pinCont = 0;
 #define NIL 0 // like NULL, but for indexes, not real pointers
 
 #define DICT_SIZE         512
@@ -39,7 +40,8 @@ void task_print();
 void task_done();
 
 
-__p node_t _v_compressed_data[BLOCK_SIZE];
+
+__p node_t _v_dict[DICT_SIZE];
 __p letter_t _v_letter;
 __p unsigned _v_letter_idx;
 __p sample_t _v_prev_sample;
@@ -54,7 +56,7 @@ __p index_t _v_parent_next;
 __p node_t _v_parent_node;
 __p node_t _v_sibling_node;
 __p index_t _v_symbol;
-__p node_t _v_dict[DICT_SIZE];
+__p node_t _v_compressed_data[BLOCK_SIZE];
 
 static sample_t acquire_sample(letter_t prev_sample)
 {
@@ -64,6 +66,7 @@ static sample_t acquire_sample(letter_t prev_sample)
 
 void task_init()
 {
+    pinCont=1;
     WVAR(_v_parent_next, 0);
     WVAR(_v_out_len,0);
     WVAR(_v_letter, 0);
@@ -71,7 +74,7 @@ void task_init()
     WVAR(_v_letter_idx, 0);
     WVAR(_v_sample_count,1);
 
-    os_jump(1);
+//    os_jump(1);
 }
 
 void task_init_dict()
@@ -87,7 +90,8 @@ void task_init_dict()
         os_jump(0);
     } else {
         WVAR(_v_node_count, NUM_LETTERS);
-        os_jump(1);
+//        os_jump(1);
+        ;
     }
 }
 
@@ -99,7 +103,8 @@ void task_sample()
 
     WVAR(_v_letter_idx,next_letter_idx);
     if (RVAR(_v_letter_idx) == 0) {
-        os_jump(1);
+//        os_jump(1);
+        ;
     } else {
         os_jump(2);
     }
@@ -114,7 +119,7 @@ void task_measure_temp()
     prev_sample = sample;
     WVAR(_v_prev_sample, prev_sample);
     WVAR(_v_sample, sample);
-    os_jump(1);
+//    os_jump(1);
 }
 
 void task_letterize()
@@ -128,7 +133,7 @@ void task_letterize()
     letter_t letter = (RVAR(_v_sample) & (LETTER_MASK << letter_shift)) >> letter_shift;
 
     WVAR(_v_letter, letter);
-    os_jump(1);
+//    os_jump(1);
 }
 
 void task_compress()
@@ -150,7 +155,7 @@ void task_compress()
     WVAR(_v_child, __cry);
     (RVAR(_v_sample_count))++;
 
-    os_jump(1);
+//    os_jump(1);
 }
 
 void task_find_sibling()
@@ -182,9 +187,10 @@ void task_find_sibling()
 
     if (RVAR(_v_child) == NIL) {
         os_jump(2);
-    } else {
-        os_jump(1);
     }
+//    else {
+//        os_jump(1);
+//    }
 }
 
 void task_add_node()
@@ -209,7 +215,7 @@ void task_add_node()
         __cry = RVAR(_v_dict[i].child);
         WVAR(_v_sibling_node.child, __cry);
 
-        os_jump(1);
+//        os_jump(1);
     }
 }
 
@@ -254,7 +260,7 @@ void task_add_insert()
     WVAR(_v_symbol, __cry);
     (RVAR(_v_node_count))++;
 
-    os_jump(1);
+//    os_jump(1);
 }
 
 void task_append_compressed()
@@ -265,7 +271,8 @@ void task_append_compressed()
     WVAR(_v_compressed_data[i].letter, __cry);
 
     if ( (++(RVAR(_v_out_len))) == BLOCK_SIZE) {
-        os_jump(1);
+//        os_jump(1);
+        ;
     } else {
         os_jump(5);
     }
@@ -283,9 +290,11 @@ void task_print()
 
 void task_done()
 {
-//    while (1);
-    P3OUT |=BIT5;
-    P3OUT &=~BIT5;
+    if (pinCont){
+        P3OUT |=BIT5;
+        P3OUT &=~BIT5;
+    }
+    pinCont=0;
 }
 
 
@@ -297,6 +306,7 @@ void init()
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
       PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
+      P3OUT &=~BIT5;
       P3DIR |=BIT5;
 
       CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
@@ -306,7 +316,7 @@ void init()
       CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
       CSCTL0_H = 0;
 
-    __enable_interrupt();
+//    __enable_interrupt();
 }
 
 int main(void) {

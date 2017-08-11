@@ -1,45 +1,44 @@
-We present the experimental results of \sys's performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
+%We present the experimental results of \sys's performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
 
 \subsection{Hardware Suite Description}
 \label{sec:results_hardware}
 
-In all experiments we used the following computing hardware: WISP\,5.1~\cite{wisp5,wisp} build around MSP430FR5969~\cite{wolverine} 64\,kB FRAM microcontroller. WISP\,5.1 has been re-programmed during experiments using TI's Flash Emulation Tool (FET)~\cite{fet} with TI Code Composer Studio version 7. FET was also used as a power supply in non-intermittent power experiment. To measure energy consumption of all benchmark applications (please refer to Section~\ref{sec:results_software}) Carnegie Mellon's EDB~\cite{edb} was used. In experiments involving wireless power, WISP was powered through an RFID reader (Impinj R1000 with firmware version 3.2.4.240~\cite{r1000_data_sheet}) connected to the Liard RFMAX S9028PCRJ 8\,dBic~\cite{atlas2015}. The RFID reader is controlled by a PC running Ubuntu 10.4 executing open source Python-based \emph{sllurp} library~\cite{sllrp_github}. Transmitted power of the RFID reader was 30\,dBm at 915\,MHz center frequency. For distance-controlled experiments, the WISP was positioned at varying length hollow paper tubes placed directly on a flat lying antenna. Code execution times have been measured using Salea~\cite{saleae} digital logic analyzer.
+In all experiments we used the following computing hardware: WISP\,5.1~\cite{wisp5,wisp} build around MSP430FR5969~\cite{wolverine} 64\,kB FRAM microcontroller. WISP\,5.1 has been re-programmed during experiments using TI's Flash Emulation Tool (FET)~\cite{fet} with TI Code Composer Studio version 7. FET was also used as a power supply in non-intermittent power experiments. Energy consumption measurements provided in eariler sections were done with Carnegie Mellon's EDB~\cite{edb}. In experiments involving wireless power, the WISP was powered through an RFID reader (Impinj R1000 with firmware version 3.2.4.240~\cite{r1000_data_sheet}) connected to the Liard RFMAX S9028PCRJ 8\,dBic~\cite{atlas2015}. The RFID reader is controlled by a PC running Ubuntu 10.4 executing an open source Python-based \emph{sllurp} library~\cite{sllrp_github}. Transmitted power of the RFID reader was 30\,dBm at 915\,MHz center frequency. For distance-controlled experiments, the WISP was positioned at varying length hollow paper tubes placed directly on a flat lying antenna. Code execution times were measured using Salea~\cite{saleae} logic analyzer.
 
-We also used an alternative setup where the MSP-TS430RGZ48C launchpad was for continuous power experiments. We used internal timer for measuring run time. For harvested energy, we used the ThingMagic Astra-EX RFID reader with power levels of 30\,dBm. We used EDB~\cite{edb} for execution time measurement. Applications were cross-compiled using GCC and Clang, so that we can use LLVM for \sys compiler. Both for Clang and LLVM we used version 3.8.0.
+We also used an alternative setup where the MSP-TS430RGZ48C launchpad was used for continuous power experiments. We used internal timer for measuring run time\todo{how about EDB?}{Kiwan}. For harvested energy, we used the ThingMagic Astra-EX RFID reader set at 30\,dBm transmission power\todo{say what antenna are you using with what gain}{Kiwan}. Applications were cross-compiled using GCC and Clang, so that we can use LLVM for \sys compiler. Version 3.8.0 was used for both Clang and LLVM.
 
 \subsection{Software Suite Description}
 \label{sec:results_software}
 
-We compare \sys against state of the art intermittent execution approach---Chain~\cite{chain}. We are not comparing \sys against DINO~\cite{dino} or Mementos~\cite{mementos} (Refer to Section~\ref{sec:background_consistency}), as (i) Chain is the only modular execution model available to which we can compare \sys, and (ii) Chain proves already its superiority over sequential model counterparts (i.e. DINO and Mementos).
+We compare \sys against state-of-the-art task-based runtime Chain~\cite{chain}. We are not comparing \sys against DINO~\cite{dino} or Mementos~\cite{mementos} (Refer to Section~\ref{sec:background_consistency}), as (i) Chain is the only modular execution model available to which we can compare \sys, and (ii) Chain proved already its superiority over sequential model counterparts (i.e. DINO and Mementos)\footnote{We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation.}.
 
-We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation. \todo{Check if the line of argument is solid for the above paragraphs about not selecting DINO, Memenos and Aplaca}{Brandon}
-
-The applications that were used in the evaluation are: (i) \textbf{Bitcount}: counts bits in x y byte pseudo-random string using x algorithms. Each result is compared for correctness; (ii) \textbf{Cold chain}: emulates embedded temperature sensing engine: measurements are randomly generated and are compressed using LZW algorithm for x-entry dictionary and y-byte block; (iii) \textbf{Cuckoo}: implements cuckoo filter---x entry filter filled to y of capacity---program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{RSA}: encrypts predefined x byte long string with a y bytes long key\todo{were keys of 64 bytes tested? If yes: d they exhaust energy}{Amjad}. This set of benchmarks is the same as used in~\cite{chain,alpaca}\todo{Fill-in the missing data and verify its correctness}{Przemek/Amjad}. In addition to Chain benchmarks new applications were implemented: (v) \textbf{DFT}, (vi) \textbf{Huffman compressor}, and (vii) \textbf{Selection Sort}. All applications are compared in Table~\ref{table:benchmark_list} in terms of source lines of code against Chain. \todo{finalize describing all applications once all experiments are done}{Przemek}
+The applications that were used in the evaluation are: (i) \textbf{bc}: counts bits in byte pseudo-random string using varying algorithms. Each result is compared for correctness; (ii) \textbf{cem}: emulates an embedded temperature sensing engine: measurements are randomly generated and are compressed using a LZW algorithm for  fixed entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: implements Cuckoo filter---the program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{rsa}: encrypts predefined string with a predefined key; (v) \textbf{ar} performs nearest neighbour classification using randomly generated sequence of three-axes accelerometer data. This set of benchmarks is the same as used in~\cite{chain,alpaca}. In addition to Chain benchmarks new applications were implemented: (vi) \textbf{dft}: discreet Fourier transform, (vii) \textbf{dd}: Huffman-based data decompression, and (viii) \textbf{sort}: selection sort algorithm. All applications are compared in Table~\ref{table:benchmark_list} in terms of source lines of code against Chain.
 
 \begin{table}[t]
 	\centering
 	\footnotesize
 	\begin{tabular}{|c|c|c|}
 		\hline
-		Nickname & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
+		Application & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
 		\hline\hline
-		Bitcount & 351 & 588 \\ %59\%
-		Cold chain & 388 & 721 \\ %53\%
-		Cuckoo & 483 & 762 \\ %63\%
-		RSA & 887 & 1233 \\ %71\%
-		DFT & {} & {} \\ %Two resolutions: 4 and 8 Bytes
-		Huffman & {} & {} \\ %Data decompression size: 100 bytes
-		Selection sort & {} & {} \\
+		{bc} & 351 & 588 \\ %59\%
+		{cem} & 388 & 721 \\ %53\%
+		{cuckoo} & 483 & 762 \\ %63\%
+		{rsa} & 887 & 1233 \\ %71\%
+		{ar} & 483 & 762 \\ %63\%
+		{dft} & {} & {} \\ %Two resolutions: 4 and 8 Bytes
+		{dd} & {} & {} \\ %Data decompression size: 100 bytes
+		{sort} & {} & {} \\
 		\hline
 	\end{tabular}
 \caption{List of benchmark programs used in \sys evaluation; SLOC: source lines of code.}
 \label{table:benchmark_list}
 \end{table}
 
-\subsection{Evaluation Results}
+\subsection{\sys Evaluation Results}
 \label{sec:results_evaluation}
 
-\subsubsection{Compiler Performance}
+\subsubsection{\sys Compiler Performance}
 \label{sec:results_compiler}
 
 \begin{table}[t]
@@ -51,28 +50,28 @@ The applications that were used in the evaluation are: (i) \textbf{Bitcount}: co
 		\hline
 		Nickname & Hand & Comp. & Hand & Comp. & Hand & Comp. \\
 		\hline\hline
-		Bitcount & 22 & 22 & 10 & 15 & 81 & 93 \\
-		Cold chain & 3492 & 3242 & 12 & 9 & 92 & 123 \\
-		Cuckoo & 282 & 288 & 15 & 6 & 90 & 76 \\
-		RSA & 332 & 250 & 20 & 27 & 130 & 296 \\
-		AR & 166 & 218 & 11 & 6 & 112 & 333 \\
-		Sort & 104 & 104 & 4 & 2 & 70 & 23 \\
+		bc & 22 & 22 & 10 & 15 & 81 & 93 \\
+		cem & 3492 & 3242 & 12 & 9 & 92 & 123 \\
+		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 \\
+		rsa & 332 & 250 & 20 & 27 & 130 & 296 \\
+		ar & 166 & 218 & 11 & 6 & 112 & 333 \\
+		sort & 104 & 104 & 4 & 2 & 70 & 23 \\
 		\hline
 	\end{tabular}
-	\caption{Comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Hand).}
+	\caption{Comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Hand).\todo{Data for Huffman in Table 5 and 6 is missing}{Kiwan}}
 \label{table:compiler_result}
 \end{table}
 
-We start with evaluating the efficiency of a \sys compiler. Table~\ref{table:compiler_result} shows the difference in the number of protected variables (PVAR), number of tasks, and number of inserted paging calls in the code between (i) hand-written \sys and (ii) compiler-generated \sys code. On average, compiler-generated code is only worse by 0.3\% in the number of protected variables. Regarding the number of tasks, compiler-generated code is better by roughly 16\%. The result indicate that \sys compiler is selecting boundaries better than the programmer doing it manually. However, \sys compiler should insert paging code conservatively when it {\em may} access protected variables, due to limitation of pointer alias. Thus, it results in \sys compiler introducing 48\% more paging code than programmer-written code (the results on run time for various \sys code versions is provide in Section~\ref{}). The performance is worse than programmer-written \sys code in overall, meaning the programmer should structure the code manually if the performance is critical; otherwise compiler can be used to simplify the programmability. 
+We start with evaluating the efficiency of the \sys compiler Table~\ref{table:compiler_result} shows the difference in the number of protected variables (PVAR), number of tasks, and number of inserted paging calls\todo{calls or code? what is paging call?}{Kiwan} in the code between (i) hand-written \sys and (ii) compiler-generated \sys code. On average, compiler-generated code is only worse by 0.3\% in the number of protected variables. Regarding the number of tasks, compiler-generated code is better by roughly 16\%\todo{except for cc and ar---why?}{Kiwan}. The result indicate that \sys compiler is selecting boundaries better than the programmer doing it manually. However, the \sys compiler should insert paging code conservatively when it {\em may} access protected variables, due to limitation of pointer aliasing. Thus, it results in the \sys compiler introducing 48\% more paging code than programmer-written code (the results on run time for various \sys code versions is provided in Section~\ref{sec:result_compiler_time}). The performance is worse than programmer-written \sys code in overall, meaning the programmer should structure the code manually if the performance is critical; otherwise the compiler can be used to simplify the programmability. 
 
-Additionally, we evaluated the compile time for automatic task generation per application\footnote{We could not compile DFT application since the LLVM inserts mathematical built-in functions (i.e. \texttt{\_\_muldf3}, \texttt{\_\_floatsidf}, \texttt{\_\_adddf3}) whose implementation were not provided by the LLVM MSP430 back-end.}. We compiled the apps on a 4-core virtual machine with 1GB memory that has Arch Linux, running on Intel Core i5-6200U (2.30GHz) processor. The result are given in Table~\ref{table:compile_time}. We simply used {\em date} command provided by linux to measure the rough time. Most of the compile time was due to pointer aliasing, when calculating possible live range of each variables. Apps such as RSA whose code size is large and uses a lot of variables needed longer compilation time due to larger search space for pointer aliasing.
+Additionally, we evaluated the compile time for automatic task generation per application\footnote{We could not compile the DFT application since LLVM inserts mathematical built-in functions (i.e. \texttt{\_\_muldf3}, \texttt{\_\_floatsidf}, \texttt{\_\_adddf3}) whose implementation were not provided by the LLVM MSP430 back-end.}. We compiled the apps on a 4-core virtual machine with 1\,GB memory with Arch Linux, running on Intel Core i5-6200U (2.30\,GHz) processor. The result are given in Table~\ref{table:compile_time}. We used a {\em date}\todo{date or time?}{Kiwan} linux command to measure the rough time. Most of the compile time was due to pointer aliasing, when calculating possible live ranges of variables. Apps such as RSA whose code size is large and uses a lot of variables, need longer compilation time due to a larger search space for pointer aliasing.
 
 \begin{table}[t]
 	\centering
 	\footnotesize
 	\begin{tabular}{|c|c|c|c|c|c|}
 		\hline
-		Bitcount & Cold chain & Cuckoo & RSA & AR & Sort \\
+		bc & cem & cuckoo & rsa & ar & sort \\
 		\hline\hline
 		3 & 2 & 6 & 86 & 34 & < 1 \\
 		\hline
@@ -84,8 +83,6 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 %\subsubsection{Task Coalescing Performance}
 %\label{sec:results_coalescing}
 
-%\vspace{2cm}
-
 %List of figures: 
 %\begin{itemize}
 %	\item Fig. 1: Viper only/per app/fixed power/(hand/complier)/no coalescing/clang [Resuls are ready by Kiwan]
@@ -96,19 +93,17 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 %	\item Fig. 5: average virtual task size/gcc/fixed distance/per app 
 %\end{itemize}
 
-%\vspace{2cm}
-
-\subsubsection{\sys Performance}
+\subsubsection{\sys Runtime Performance}
 \label{sec:result_coalescing}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/coalescing}
-	\caption{Performance of \sys's  tasks coalescing mechanism compared to virtual task size equal to one (per application) at multiple WISP to RFID reader antenna distances.\todo{Replace "coal" with "coalescing", "No-coal" with "No coalescing"; use markers in addition to color; decide on uniform naming for apps (either all small or capitalized)}{Amjad}}
+	\includegraphics[width=\columnwidth]{figures/coala_chain}
+	\caption{Performance of \sys's fixed power and at multiple WISP to RFID reader antenna distances, \{20, 40, 60\}\,cm, compared against Chain.}
 	\label{fig:coalescing}
 \end{figure}
 
-Experimental evaluation of task coalescing mechanism under intermittent power of \sys is given in Figure~\ref{fig:coalescing}. For each application we measured execution time (with and without task coalescing) at \{20, 40, 60\}\,cm distance between RFID antenna and WISP and when WISP was powered directly from FET. Each measurement was repeated x times per each distance/application. From the result we clearly see an enormous benefit of coalescing, especially at large WISP to RFID reader antenna distance ($\approx$56\% for cem, 100\% for sort and $\approx$400\% for bc). At each distance, \sys coalescing mechanism provided faster execution times compared to non-coalescing case. \todo{Discuss different shapes per app}{Amjad}
+Experimental evaluation of task coalescing mechanism under intermittent power of \sys is given in Figure~\ref{fig:coalescing}. For each application we measured execution time (with and without task coalescing) at \{20, 40, 60\}\,cm distance between RFID antenna and WISP and when WISP was powered directly from FET. Each measurement was repeated x times per each distance/application. From the result we clearly see an enormous benefit of coalescing, especially at large WISP to RFID reader antenna distance ($\approx$56\% for cem, 100\% for sort and $\approx$400\% for bc). At each distance, \sys coalescing mechanism provided faster execution times compared to the non-coalescing case. \todo{Discuss different shapes per app}{Amjad}
 
 %\begin{figure}
 %	\centering
@@ -120,52 +115,39 @@ Experimental evaluation of task coalescing mechanism under intermittent power of
 %The question remains: does coalescing all program's tasks into a singe virtual task (as the energy becomes fully available, i.e. from energy harvesting to continuous power environment) is the best one? To answer this question we have implemented a simple program composed of $x$ empty tasks. We execute the same program by increasing coalescing factor by one while the device on which the program was executed was running on a stable power supply (refer to Section~\ref{sec:methodology_evaluation} for details). The result is presented in Figure~\ref{fig:virtualTaskSize}. We observe a significant increase in execution time as task are coalescent from one to four (three times execution time improvement). However, as the coalescing increases beyond four, we observe diminishing returns from coalescing in terms of execution time. \todo{Decide whether to place this figure in Evaluation section or leave it here}{Przemek}
 
 \subsubsection{\sys Compiler Overhead}
-\label{sec:result_compiler time}
+\label{sec:result_compiler_time}
 
 \begin{figure}
 	\centering
-	%\includegraphics[width=\columnwidth]{figures/}
-	\caption{\sys compiler overhead.}
+	\includegraphics[width=\columnwidth]{figures/comp_user}
+	\caption{\sys compiler overhead measured per application.}
+	\label{fig:comp_user}
+\end{figure}
+
+Result is provided in Figure~\ref{fig:comp_user}.
+
+\subsubsection{\sys Coalescing Overhead}
+\label{sec:result_compiler_time}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coalescing}
+	\caption{\sys coalescing overhead measured per application.}
 	\label{fig:coalescing}
 \end{figure}
 
-\subsubsection{Virtual Task Size}
-\label{sec:result_task_size}
+Result is provided in Figure~\ref{fig:coalescing}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/averageVirtualTaskSize}
-	\caption{Average virtual task size (measured in real task unit\todo{Define real task unit}{Amjad}) of the virtual task sizes that the coalescing algorithm used to accomplished the applications at a WISP to RFID reader distance of 60\,cm.\todo{Please rewrite this sentence}{Amjad}}
+	\caption{Average virtual task size.}
 	\label{fig:aveVirtuTaskSize}
 \end{figure}
 
 Measured size of tasks for each application is given in Figure~\ref{fig:aveVirtuTaskSize}.
 
-%\subsubsection{Completion Time}
-%\label{sec:result_completion}
-
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\columnwidth]{figures/chain_vipe}
-%	\caption{Time to complete for a set of testing applications (refer to Table~\ref{table:benchmark_list}) using \sys versus Chain (no coalescing applied, fixed power supply). \todo{Figure placeholder---will be replaced with final one}{Amjad}}
-%	\label{fig:IPOSPerformance}
-%\end{figure}
-
-%Expected results:
-%\begin{itemize}
-%	\item performance for each application comparing bars for Chain, no coalescing/hand-tasked, coalescing/hand-tasked, no-coalescing/compiler, coalescing/compiler. Performance depicted, normalized to one of the configurations (probably Chain). This plot will cover most of the eval dimensions that we care about.
-%	\item Sensitivity plot---show amount of task merged, time to completion, overhead (in terms of task-size/cap-size sweep (remember we can vary either with approximately the same effect)), energy consumed. All experiments for fixed power, at 3 distances with wireless power, compared against Chain for 3 task/cap size configurations
-%\end{itemize} 
-
-%Point for decision after main figure is ready
-
-%Pull the compiler stuff into its own plot that compares compiler to hand-tasked, maybe only for the coalescing fig.  This reduces bars in plot 1, but runs the risk of making the compiler sound secondary, which we do not want to do.
-
-%*Report only Chain, coalescing/hand-tasked, coalescing/compiler in the main plot.  This says that coalescing is the "default configuration" for VIPER. Later, in a second figure, we compare coalescing to no coalescing for hand-tasked and compiler as a characterization plot.
-
-%\todo{Provide results and text to this section}{Amjad}
-
-\subsubsection{Memory Management Performance}
+\subsubsection{\sys Paging Performance}
 \label{sec:results_memory_management}
 
 \begin{figure}

@@ -14,148 +14,110 @@
 @STRING{IEEE_J_PROC = "Proc. {IEEE}"}
 @STRING{IEEE_M_PVC = "{IEEE} Pervasive Comput."}
 
-@inproceedings{sos,
- author = {Han, Chih-Chieh and Kumar, Ram and Shea, Roy and Kohler, Eddie and Srivastava, Mani},
- title = {A Dynamic Operating System for Sensor Nodes},
- booktitle = {Proceedings of the 3rd International Conference on Mobile Systems, Applications, and Services},
- series = {MobiSys '05},
- year = {2005},
- isbn = {1-931971-31-5},
- location = {Seattle, Washington},
- pages = {163--176},
- numpages = {14},
- url = {http://doi.acm.org/10.1145/1067170.1067188},
- doi = {10.1145/1067170.1067188},
- acmid = {1067188},
- publisher = {ACM},
- address = {New York, NY, USA},
-} 
-
-@inproceedings{tkernel,
- author = {Gu, Lin and Stankovic, John A.},
- title = {T-kernel: Providing Reliable OS Support to Wireless Sensor Networks},
- booktitle = {Proceedings of the 4th International Conference on Embedded Networked Sensor Systems},
- series = {SenSys '06},
- year = {2006},
- isbn = {1-59593-343-3},
- location = {Boulder, Colorado, USA},
- pages = {1--14},
- numpages = {14},
- url = {http://doi.acm.org/10.1145/1182807.1182809},
- doi = {10.1145/1182807.1182809},
- acmid = {1182809},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {OS protection, binary translation, low-power systems, virtual memory, wireless sensor networks},
-} 
-
-
-
-@inproceedings{sensornetvm,
- author = {Lachenmann, Andreas and Marr\'{o}n, Pedro Jos{\'e} and Gauger, Matthias and Minder, Daniel and Saukh, Olga and Rothermel, Kurt},
- title = {Removing the Memory Limitations of Sensor Networks with Flash-based Virtual Memory},
- booktitle = {Proceedings of the 2Nd ACM SIGOPS/EuroSys European Conference on Computer Systems 2007},
- series = {EuroSys '07},
- year = {2007},
- isbn = {978-1-59593-636-3},
- location = {Lisbon, Portugal},
- pages = {131--144},
- numpages = {14},
- url = {http://doi.acm.org/10.1145/1272996.1273012},
- doi = {10.1145/1272996.1273012},
- acmid = {1273012},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {flash memory, memory layout, virtual memory, wireless sensor networks},
-} 
+@incollection{levis2005tinyos,
+	title = "{TinyOS}: An operating system for sensor networks",
+	author = "Philip {Levis} and Sam {Madden} and Joseph {Polastre} and Rober {Szewczyk} and Kamin {Whitehouse} and Alec {Woo} and David {Gay} and Jason {Hill} and Matt {Welsh} and Eric {Brewer} and David {Culler}",
+	editor = "Werner {Weber} and Jan M. {Rabaey} and Emile {Aarts}",
+	booktitle = {Ambient intelligence},
+	pages = {115--148},
+	year = {2005},
+	publisher = {Springer},
+	address = "Berlin, Germany"
+}
 
 @inproceedings{grace,
- author = {Berger, Emery D. and Yang, Ting and Liu, Tongping and Novark, Gene},
- title = {Grace: Safe Multithreaded Programming for C/C++},
- booktitle = {Proceedings of the 24th ACM SIGPLAN Conference on Object Oriented Programming Systems Languages and Applications},
- series = {OOPSLA '09},
- year = {2009},
- isbn = {978-1-60558-766-0},
- location = {Orlando, Florida, USA},
- pages = {81--96},
- numpages = {16},
- url = {http://doi.acm.org/10.1145/1640089.1640096},
- doi = {10.1145/1640089.1640096},
- acmid = {1640096},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {concurrency, determinism, deterministic concurrency, fork-join, sequential semantics},
+	author = "Emery D. {Berger} and Ting {Yang} and Tongping {Liu} and Gene {Novark}",
+	title = "Grace: Safe Multithreaded Programming for {C/C++}",
+	booktitle = {Proc. OOPSLA},
+	year = {2009},
+	month = oct # " 25--29,", 
+	address = {Orlando, FL, USA},
+	publisher = {ACM}
 } 
 
 @inproceedings{pagebasedtm,
- author = {Chuang, Weihaw and Narayanasamy, Satish and Venkatesh, Ganesh and Sampson, Jack and Van Biesbrouck, Michael and Pokam, Gilles and Calder, Brad and Colavin, Osvaldo},
- title = {Unbounded Page-based Transactional Memory},
- booktitle = {Proceedings of the 12th International Conference on Architectural Support for Programming Languages and Operating Systems},
- series = {ASPLOS XII},
- year = {2006},
- isbn = {1-59593-451-0},
- location = {San Jose, California, USA},
- pages = {347--358},
- numpages = {12},
- url = {http://doi.acm.org/10.1145/1168857.1168901},
- doi = {10.1145/1168857.1168901},
- acmid = {1168901},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {concurrency, parallel programming, transactional memory, transactions, virtual memory},
-} 
-
-@inproceedings{nesc,
- author = {Gay, David and Levis, Philip and von Behren, Robert and Welsh, Matt and Brewer, Eric and Culler, David},
- title = {The nesC Language: A Holistic Approach to Networked Embedded Systems},
- booktitle = {Proceedings of the ACM SIGPLAN 2003 Conference on Programming Language Design and Implementation},
- series = {PLDI '03},
- year = {2003},
- isbn = {1-58113-662-5},
- location = {San Diego, California, USA},
- pages = {1--11},
- numpages = {11},
- url = {http://doi.acm.org/10.1145/781131.781133},
- doi = {10.1145/781131.781133},
- acmid = {781133},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {C, TinyOS, components, concurrency, data races, first-order, modules, nesC, programming languages},
-} 
-
-@inproceedings{tinyosmemorysafety,
- author = {Cooprider, Nathan and Archer, Will and Eide, Eric and Gay, David and Regehr, John},
- title = {Efficient Memory Safety for TinyOS},
- booktitle = {Proceedings of the 5th International Conference on Embedded Networked Sensor Systems},
- series = {SenSys '07},
- year = {2007},
- isbn = {978-1-59593-763-6},
- location = {Sydney, Australia},
- pages = {205--218},
- numpages = {14},
- url = {http://doi.acm.org/10.1145/1322263.1322283},
- doi = {10.1145/1322263.1322283},
- acmid = {1322283},
- publisher = {ACM},
- address = {New York, NY, USA},
- keywords = {TinyOS, cXprop, deputy, memory safety, nesC, safe TinyOS, type safety, wireless sensor networks},
+	author = "Weihaw {Chuang} and Satish {Narayanasamy} and Ganesh {Venkatesh} and Jack {Sampson} and Michael {Van Biesbrouck} and Gilles {Pokam} and Brad {Calder} and Osvaldo {Colavin}",
+	title = {Unbounded Page-based Transactional Memory},
+	booktitle = {Proc. ASPLOS},
+	month = oct # " 21--25,", 
+	year = {2006},
+	address = {San Jose, CA, USA},
+	publisher = {ACM}
 } 
 
 @inproceedings{mate,
- author = {Levis, Philip and Culler, David},
- title = {Mat\'{E}: A Tiny Virtual Machine for Sensor Networks},
- booktitle = {Proceedings of the 10th International Conference on Architectural Support for Programming Languages and Operating Systems},
- series = {ASPLOS X},
- year = {2002},
- isbn = {1-58113-574-2},
- location = {San Jose, California},
- pages = {85--95},
- numpages = {11},
- url = {http://doi.acm.org/10.1145/605397.605407},
- doi = {10.1145/605397.605407},
- acmid = {605407},
- publisher = {ACM},
- address = {New York, NY, USA},
+	author = "Philip {Levis} and David {Culler}",
+	title = "{Mat\'{E}}: A Tiny Virtual Machine for Sensor Networks",
+	booktitle = {Proc. ASPLOS},
+	year = {2002},
+	month = oct # " 5--9,", 
+	address = {San Jose, CA, USA},
+	pages = {85--95},
+	publisher = {ACM}
+} 
+
+@inproceedings{contiki,
+	author = "Adam {Dunkels} and Bj{\"{o}}rn {Gr\"{o}nvall} and Thiemo {Voigt}",
+	title = "Contiki - a Lightweight and Flexible Operating System for Tiny Networked
+	Sensors",
+	address = "Tampa, FL, USA",
+	booktitle = "Proc. LCN",
+	year = "2004",
+	month = nov # " 16--18,", 
+	publisher = "IEEE"
+}
+
+@inproceedings{sos,
+	author = "Chih-Chieh {Han} and Ram {Kumar} and Roy {Shea} and Eddie {Kohler} and Mani {Srivastava}",
+ 	title = {A Dynamic Operating System for Sensor Nodes},
+ 	booktitle = "Proc. MobiSys",
+ 	year = {2005},
+ 	month = jun # " 6--8,", 
+ 	address = {Seattle, WA, USA},
+ 	pages = {163--176},
+ 	publisher = {ACM}
+} 
+
+@inproceedings{tkernel,
+	author = "Lin {Gu} and John A. {Stankovic}",
+	title = "T-kernel: Providing Reliable {OS} Support to Wireless Sensor Networks",
+	booktitle = {Proc. SenSys},
+	year = {2006},
+	month = nov # " 1--3,", 
+	address = {Boulder, CO, USA},	
+	publisher = {ACM}
+} 
+
+@inproceedings{sensornetvm,
+ 	author = "Andreas {Lachenmann} and Pedro Jos{\'e} {Marr\'{o}n} and Matthias {Gauger} and Daniel {Minder} and Olga {Saukh} and Kurt {Rothermel}",
+ 	title = "Removing the Memory Limitations of Sensor Networks with Flash-based Virtual Memory",
+	booktitle = {Proc. EuroSys},
+ 	year = {2007},
+	month = mar # " 21--23,",
+	address = {Lisbon, Portugal},
+	publisher = {ACM}
+} 
+
+@inproceedings{nesc,
+	title = {The {nesC} Language: A Holistic Approach to Networked Embedded Systems},
+	author = "David {Gay} and Philip {Levis} and Robert {Von Behren} and Matt {Welsh} and Eric {Brewer} and David {Culler}",
+	booktitle = {Proc. PLDI},
+	month = jun # " 8--11,",
+	pages = {1--11},
+	year = {2003},
+	address = "San Diego, CA, USA",
+	publisher = {ACM}
+}
+
+@inproceedings{tinyosmemorysafety,
+	author = "Nathan {Cooprider} and Will {Archer} and Eric {Eide} and David {Gay} and  John {Regehr}",
+	title = "Efficient Memory Safety for {TinyOS}",
+	booktitle = {Proc. SenSys},
+ 	year = {2007},
+	month = nov # " 6--9,",
+ 	address = {Sydney, Australia},
+ 	pages = {205--218},
+ 	publisher = {ACM}
 } 
 
 @inproceedings{pageoverlays,
@@ -1145,17 +1107,6 @@
 	booktitle = {Workshop on Hot Topics in Operating Systems (HotOS)},
 	month = May,
 	year = 2011
-}
-
-@inproceedings{contiki,
-	author    = {Adam Dunkels and Bj\"orn Gr\"onvall and Thiemo Voigt},
-	title     = {Contiki---a Lightweight and Flexible Operating System for Tiny
-		Networked Sensors},
-	booktitle = {Proc. First IEEE Workshop on Embedded Networked Sensors
-		(Emnets-I)},
-	year      = 2004,
-	month     = Nov,
-	ee        = {\url{http://www.sics.se/~adam/dunkels04contiki.pdf}}
 }
 
 @inproceedings{czeskis:handshakes,

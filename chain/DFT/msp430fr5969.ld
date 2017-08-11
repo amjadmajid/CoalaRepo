@@ -200,7 +200,7 @@ SECTIONS
     PROVIDE (__fini_array_end = .);
   } > ROM
 
-    .nv_vars :
+    .nv :
   {
     . = ALIGN(2);
     PROVIDE (__fram_vars_start = .);

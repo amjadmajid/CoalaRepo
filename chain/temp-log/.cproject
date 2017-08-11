@@ -15,7 +15,7 @@
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactExtension="out" artifactName="${ProjName}" buildProperties="" cleanCommand="${CG_CLEAN_CMD}" description="" id="com.ti.ccstudio.buildDefinitions.MSP430.Debug.1226273911" name="Debug" parent="com.ti.ccstudio.buildDefinitions.MSP430.Debug">
 					<folderInfo id="com.ti.ccstudio.buildDefinitions.MSP430.Debug.1226273911." name="/" resourcePath="">
-						<toolChain id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.DebugToolchain.1545016" name="TI Build Tools" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.DebugToolchain" targetTool="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.1106383276">
+						<toolChain id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.DebugToolchain.1545016" name="TI Build Tools" secondaryOutputs="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.outputType__BIN" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.DebugToolchain" targetTool="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.1106383276">
 							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS.873850798" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_TAGS" valueType="stringList">
 								<listOptionValue builtIn="false" value="DEVICE_CONFIGURATION_ID=MSP430FR5969"/>
 								<listOptionValue builtIn="false" value="DEVICE_ENDIANNESS=little"/>
@@ -67,7 +67,10 @@
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__CMD2_SRCS.1914487179" name="Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__CMD2_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__GEN_CMDS.2075199840" name="Generated Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__GEN_CMDS"/>
 							</tool>
-							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.2111688063" name="GNU Objcopy Utility" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex"/>
+							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.2111688063" name="GNU Objcopy Utility" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex">
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.TOOL_ENABLE.1218570451" name="Enable tool" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.TOOL_ENABLE" value="true" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.INPUT_TARGET.2075718306" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.INPUT_TARGET" value="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.hex.INPUT_TARGET.IHEX" valueType="enumerated"/>
+							</tool>
 						</toolChain>
 					</folderInfo>
 				</configuration>

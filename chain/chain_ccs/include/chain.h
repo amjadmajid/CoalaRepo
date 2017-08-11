@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <libmsp/mem.h>
+#include <mem.h>
 
 #include "repeat.h"
 
@@ -209,6 +209,7 @@ void _init();
 void task_prologue();
 void transition_to(task_t *task);
 void *chan_in(const char *field_name, size_t var_size, int count, ...);
+void *chan_in2(const char *field_name, size_t var_size,int count, uint8_t* chans, size_t field_offset);
 void chan_out(const char *field_name, const void *value,
               size_t var_size, int count, ...);
 
@@ -408,4 +409,38 @@ void chan_out(const char *field_name, const void *value,
  *  */
 #define TRANSITION_TO(task) transition_to(TASK_REF(task))
 
+
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>| |<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
+
+#define CHAN_IN1_2(type, field, chan0) \
+    ((type*)((unsigned char *)chan_in2(#field, sizeof(VAR_TYPE(type)), 1, chan0, offsetof(__typeof__(chan0->data), field) )))
+
+
+
+
+
+
+
+
+
 #endif // CHAIN_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

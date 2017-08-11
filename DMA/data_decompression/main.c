@@ -6,7 +6,7 @@
 /************************************
  *            constants             *
 *************************************/
-#define WRITE_ADDR 0x6600u
+#define WRITE_ADDR 0x7000u
 #define  READ_ADDR 0x8400
 #define   DATA_LEN 255
 #define   DATA_LEN_LOC 0x1840u
@@ -403,8 +403,8 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
-    __enable_interrupt();
-    P4DIR |= BIT0; // make Port 4 pin 0 an output
+//    __enable_interrupt();
+//    P4DIR |= BIT0; // make Port 4 pin 0 an output
     P3DIR |=BIT5;
 }
 
@@ -500,10 +500,10 @@ void task_write()
             P3OUT &=~BIT5;
 //            os_unblock(init_task);
 //            blinkLed(2500 );
-            break;
-
-        }else{
             os_jump(2);  // jump the init_task
+            break;
+        }else{
+            os_jump(3);  // jump the init_task
         }
 
     }
@@ -514,14 +514,13 @@ int main(int argc, char const *argv[])
 {
     init();
 
-    funcPt init_tasks[] = {init_task0};
-    os_initTasks(1, init_tasks);
 
-    taskId tasks[] = {  {init_task,0},
+    taskId tasks[] = {  {init_task0,0},
+                        {init_task,0},
                         {task_read,0},
                         {task_write,0 }};
     //This function should be called only once
-    os_addTasks(3, tasks );
+    os_addTasks(4, tasks );
 
     os_scheduler();
     return 0;

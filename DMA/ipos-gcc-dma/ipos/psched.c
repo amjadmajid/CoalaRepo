@@ -8,9 +8,9 @@
 
 #define JUMP2()  if(!__jump)  \
                     {   \
-                            __current_task_virtual = (unsigned int *) *(__current_task_virtual + NEXT_OFFSET_PT) ;     /* soft transition */  \
+                            __realTask = (unsigned int *) *(__realTask + NEXT_OFFSET_PT) ;     /* soft transition */  \
                     }else{  \
-                        unsigned int totJumpSize = (*(__current_task_virtual + BLOCK_OFFSET_PT) + __jump_by);   \
+                        unsigned int totJumpSize = (*(__realTask + BLOCK_OFFSET_PT) + __jump_by);   \
                             if(totJumpSize > __totNumTask)  \
                             {   \
                                 int dis  = totJumpSize - __totNumTask;  \
@@ -19,9 +19,9 @@
                                     dis = dis - __totNumTask;   \
                                 }   \
                                 dis = dis - (totJumpSize - __jump_by);  \
-                                __current_task_virtual  += (dis + dis + dis) ;  \
+                                __realTask  += (dis + dis + dis) ;  \
                             }else{  \
-                                __current_task_virtual  += ( __jump_by+__jump_by  + __jump_by )  ;  \
+                                __realTask  += ( __jump_by+__jump_by  + __jump_by )  ;  \
                                 }   \
                             __jump = 0; \
                         }
@@ -114,7 +114,7 @@ void os_scheduler()
 //        }
 //
 //#endif
-        for(; __virtualTaskCntr; __virtualTaskCntr-- )
+        for(; __virtualTaskCntr > 0 ; __virtualTaskCntr-- )
         {
 #endif
             // Accessing a task

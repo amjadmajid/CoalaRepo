@@ -1,4 +1,4 @@
-#include <stdarg.h>
+#include <args/stdarg.h>
 #include <string.h>
 #include <msp430.h>
 
@@ -9,7 +9,7 @@
 #define LIBCHAIN_PRINTF printf
 #endif
 
-#include <old_include/chain.h>
+#include <chain.h>
 
 /* Dummy types for offset calculations */
 struct _void_type_t {
@@ -153,6 +153,8 @@ void transition_to(task_t *next_task)
  *  @param ...          channel ptr, field offset in corresponding message type
  *  @return Pointer to the value, ready to be cast to final value type pointer
  */
+uint16_t g_field, chk=0;
+
 void *chan_in(const char *field_name, size_t var_size, int count, ...)
 {
     va_list ap;
@@ -167,11 +169,13 @@ void *chan_in(const char *field_name, size_t var_size, int count, ...)
 
     va_start(ap, count);
 
-    for (i = 0; i < count; ++i) {
+    while( chk < count) {
         uint8_t *chan = va_arg(ap, uint8_t *);
+        g_field = chan ;
         size_t field_offset = va_arg(ap, unsigned);
 
-        uint8_t *chan_data = chan + offsetof(CH_TYPE(_sa, _da, _void_type_t), data);
+        uint8_t *chan_data = offsetof(CH_TYPE(_sa, _da, _void_type_t), data);
+        g_field = chan_data;
         chan_meta_t *chan_meta = (chan_meta_t *)(chan +
                                     offsetof(CH_TYPE(_sb, _db, _void_type_t), meta));
         uint8_t *field = chan_data + field_offset;
@@ -189,8 +193,11 @@ void *chan_in(const char *field_name, size_t var_size, int count, ...)
                 break;
             }
             default:
+                *(uint16_t *) 0x1980 =field;
+
                 var = (var_meta_t *)(field +
                         offsetof(FIELD_TYPE(void_type_t), var));
+                g_field = var;
         }
 
     //    LIBCHAIN_PRINTF(" {%u} %s->%s:%c c%04x:off%u:v%04x [%u],", i,
@@ -198,17 +205,88 @@ void *chan_in(const char *field_name, size_t var_size, int count, ...)
     //           curidx, (uint16_t)chan, field_offset,
     //           (uint16_t)var, var->timestamp);
 
+
         if (var->timestamp > latest_update) {
             latest_update = var->timestamp;
             latest_var = var;
         }
+        chk++;
     }
     va_end(ap);
 
 //    LIBCHAIN_PRINTF(": {latest %u}: ", latest_chan_idx);
 
     uint8_t *value = (uint8_t *)latest_var + offsetof(VAR_TYPE(void_type_t), value);
+    g_field = value;
 
+    // TODO: No two timestamps compared above can be equal.
+    //       How can two different sources (i.e. different tasks) write to
+    //       this destination at the same logical time? Pretty sure, this is
+    //       impossible.
+    // ASSERT(latest_field != NULL);
+
+    return (void *)value;
+}
+
+void *chan_in2(const char *field_name, size_t var_size,int count, uint8_t* chans, size_t field_offset)
+{
+
+    unsigned i;
+    unsigned latest_update = 0;
+
+    var_meta_t *var;
+    var_meta_t *latest_var = NULL;
+
+//    LIBCHAIN_PRINTF("[%u] %s: in: '%s':", curctx->time,
+//                    curctx->task->name, field_name);
+
+    for (i = 0; i < count; ++i) {
+        uint8_t *chan = chans;
+        g_field = chan ;
+        size_t field_offset = field_offset;
+
+        uint8_t *chan_data = offsetof(CH_TYPE(_sa, _da, _void_type_t), data);
+        g_field = chan_data;
+        chan_meta_t *chan_meta = (chan_meta_t *)(chan +
+                                    offsetof(CH_TYPE(_sb, _db, _void_type_t), meta));
+        uint8_t *field = chan_data + field_offset;
+
+        switch (chan_meta->type) {
+            case CHAN_TYPE_SELF: {
+                self_field_meta_t *self_field = (self_field_meta_t *)field;
+
+                unsigned var_offset =
+                    (self_field->idx_pair & SELF_CHAN_IDX_BIT_CURRENT) ? var_size : 0;
+
+                var = (var_meta_t *)(field +
+                        offsetof(SELF_FIELD_TYPE(void_type_t), var) + var_offset);
+
+                break;
+            }
+            default:
+                *(uint16_t *) 0x1980 =field;
+
+                var = (var_meta_t *)(field +
+                        offsetof(FIELD_TYPE(void_type_t), var));
+                g_field = var;
+        }
+
+    //    LIBCHAIN_PRINTF(" {%u} %s->%s:%c c%04x:off%u:v%04x [%u],", i,
+    //           chan_meta->diag.source_name, chan_meta->diag.dest_name,
+    //           curidx, (uint16_t)chan, field_offset,
+    //           (uint16_t)var, var->timestamp);
+
+
+        if (var->timestamp > latest_update) {
+            latest_update = var->timestamp;
+            latest_var = var;
+        }
+    }
+
+//    LIBCHAIN_PRINTF(": {latest %u}: ", latest_chan_idx);
+
+    uint8_t *value = (uint8_t *)latest_var + offsetof(VAR_TYPE(void_type_t), value);
+    g_field = value;
 
     // TODO: No two timestamps compared above can be equal.
     //       How can two different sources (i.e. different tasks) write to
