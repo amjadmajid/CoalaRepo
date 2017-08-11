@@ -57,6 +57,7 @@ def figureSetting():
     #set size of markers, e.g., circles representing points
     #set numpoints for legend
     plt.rcParams['legend.numpoints'] = 1
+    plt.rcParams['legend.fontsize'] = 14
 
 ################# Ploting ######################
 
@@ -80,13 +81,15 @@ ax = plt.axes()
 ax.xaxis.set_major_locator(ticker.FixedLocator([1,2,3]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( ('BC', 'DFT', 'CEM') ))
 
-plt.ylabel('Real Task')
+# plt.ylabel('Real Task')
 
-plt.bar([1,2,3], [np.mean(data_bc), np.mean(data_dft), np.mean(data_cem)], align='center', color='g'  )
+plt.bar([1,2,3], [np.mean(data_bc), np.mean(data_dft), np.mean(data_cem)], width=1, align='center', color='g', label='Ave. coalesced task' )
+plt.bar([1,2,3], [-657/1000, -9680/1000, -722/1000], align='center', width=1, color='r', label='Ave. task size (MCU cycles)' )
 
 # plt.hist(data_pdf,normed=True)      
-# plt.hist(data_bc,normed=True)    
-
+# plt.hist(data_bc,normed=True)  
+plt.yticks([-10, 0, 10,20,30, 40, 50,60], ['10e4', '0', '10','20','30', '40', '50', '60'])  
+plt.legend(loc='best')
 f.savefig("../figures/virtualTaskSize.eps",format="eps", dpi=1200)
 
 plt.show()
