@@ -123,5 +123,6 @@ plt.annotate('Page faults', fontsize=14,
             )
 plt.tight_layout()
 plt.ylim(-4,11)    
+plt.yticks([-4, -2, 0,3, 6,9,12,15], ['10e4', '10e2', '0','5','10', '15',  '20', '25'])  
 f.savefig("../figures/pagSizeOverhead.eps",format="eps", dpi=1200)
 plt.show()

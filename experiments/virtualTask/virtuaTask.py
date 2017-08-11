@@ -79,12 +79,12 @@ figureSetting()                        # Set figure layout
 
 ax = plt.axes()
 ax.xaxis.set_major_locator(ticker.FixedLocator([1,2,3]) )
-ax.xaxis.set_major_formatter(ticker.FixedFormatter( ('BC', 'DFT', 'CEM') ))
+ax.xaxis.set_major_formatter(ticker.FixedFormatter( ('bc', 'dft', 'cem') ))
 
 # plt.ylabel('Real Task')
 
-plt.bar([1,2,3], [np.mean(data_bc), np.mean(data_dft), np.mean(data_cem)], width=1, align='center', color='g', label='Ave. coalesced task' )
-plt.bar([1,2,3], [-657/1000, -9680/1000, -722/1000], align='center', width=1, color='r', label='Ave. task size (MCU cycles)' )
+plt.bar([1,2,3], [np.mean(data_bc), np.mean(data_dft), np.mean(data_cem)], width=1, align='center', color='g', label='Avg. coalesced task' )
+plt.bar([1,2,3], [-657/1000, -9680/1000, -722/1000], align='center', width=1, color='r', label='Avg. task size (MCU cycles)' )
 
 # plt.hist(data_pdf,normed=True)      
 # plt.hist(data_bc,normed=True)  
