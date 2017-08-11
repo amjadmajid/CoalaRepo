@@ -63,14 +63,11 @@ original memory location, then clears its dirty bit.
 
 \subsection{Paging Example}
 
-\todo{Redo this figure to actually reflect paging -- right now it isn't clear if x,y,z are in a page or not, it isn't clear when the page gets copied to pagesTemp, it isn't clear what state we add to the system to help with commit, etc (i.e., dirty bits, commit bit).  Make this figure's labels consistent with the text: pagesTemp, RVAR, WVAR, explicit
-commit in task, Page Buffer}{whoever}
-
 Figure~\ref{fig:volatile-buffer} illustrates the execution of a simple task using \sys's paging mechanism. The task manipulates protected variables {\tt x}, {\tt y}, and {\tt z}, which are in the same page. On accessing {\tt x}, its page is swapped into the page buffer. On accessing {\tt y} and {\tt z}, the task need only access the volatile page buffer. The task updates the page, leaving it dirty at the task's completion. When the task completes, \sys first copies the page from the page buffer into the non-volatile {\tt pagesTemp} region before commit. Then, \sys sets the commit bit, atomically commits the page back to its original memory location, and unsets the commit bit.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\columnwidth]{figures/sram-buffer}
+	\includegraphics[width=0.75\columnwidth]{figures/sram-buffer}
 	\caption{The interaction between the task, volatile buffer and the non-volatile memory (FRAM). Initially, the persistent variable \texttt{x} is not in the volatile buffer but \texttt{y} and \texttt{z} are.}
 	\label{fig:volatile-buffer}
 \end{figure}
