@@ -76,48 +76,41 @@ def figureSetting():
     #set numpoints for legend
     plt.rcParams['legend.numpoints'] = 1
 
-    
-distances = ["cont.csv",'20cm.csv', '40cm.csv']
+apps        =["cem",    "cuckoo",   "ar",       "rsa",      "bc",       "sort"]   
+user        =[0.709372,  0.074199 ,   1.764156,    0.310371,    0.124502,    0.23026]
+comp        =[0.632916,  0.078538,    3.286627,    0.511581,    0.143884,    0.245992]
+# user_coal   =[0.56662   0.049746    1.555144    0.293449    0.089789    0.137456]
+# comp_coal   =[0.475009  0.061497    2.800946    0.49123     0.10746     0.149785]
 
-apps = ["bc", "sort", "cuckoo", "dd", "cem", "dft"]
-ol = ["-O0", "-O0", "-O1", "-O0", "-O0", "-O0"]
+data = [user,  comp] #  user_coal  comp_coal ]
+
+data =  np.transpose(data)
 
 f = plt.figure(figsize=(8,2.6))
 figureSetting()    
 
 s=0
-for j, app in enumerate(apps):
+for i, row in enumerate(data):
 
-    for i, dis in enumerate(distances):
-        row=[]
-        f_v = open("coala_coal/"+ol[j]+"/"+app+"/"+dis) 
-        f_n = open("chain/"+ol[j]+"/"+app+"/"+dis) 
-        row.append( executionTime(f_v) )
-        if(app =="cuckoo"):
-            row.append(executionTimeCuckoo(f_n))
-        else:
-            row.append( executionTime(f_n) )
-        f_v.close()
-        f_n.close()
-        [CA, CH] = plt.bar( np.array([0,0.5])+i+j*len(distances)+s, 
+        [us, co] = plt.bar( np.array([0,0.5]) +i+s, 
             np.array(row)/float(row[0]), 
             width=0.5, 
             color=['#7fcdbb','#2c7fb8'], 
              linewidth=0.5)
+        s+=0.3
 
-    s+=0.5;
-plt.legend([CA, CH], ["Coala", "Chain"])
+plt.legend([us, co], ["User", "Compiler"])
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator(  (np.arange(len(apps)) * len(distances)) + np.arange(len(distances) , len(apps)+len(distances) ) * 0.5  ))
+ax.xaxis.set_major_locator(ticker.FixedLocator(  [0.5, 1.8, 3.1, 4.4, 5.7, 7 ] ))
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
-plt.xlim(0,20.5)
-plt.ylabel("Normalized runtime")
+plt.xlim(0,7.5)
+plt.ylabel("Norma. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 # # plt.ylim(0,3.2) 
-f.savefig("../figures/CoalaChain.eps",format="eps", dpi=1200)
+f.savefig("../../figures/CompUser.eps",format="eps", dpi=1200)
 plt.show()
 
 
