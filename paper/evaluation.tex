@@ -46,10 +46,10 @@ The applications that were used in the evaluation are: (i) \textbf{bc}: counts b
 	\footnotesize
         \renewcommand{\tabcolsep}{1pt}
 	\begin{tabular}{|l|cc|cc|cc|cc|c|}
-		\hline\hline
-		{} & \multicolumn{2}{l|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
-		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
 		\hline
+		{} & \multicolumn{2}{c|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
+		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
+		\hline\hline
 		bc & 22 & 22 & 10 & 15 & 81 & 93 & 351 &588 & 3\\
 		cem & 3492 & 3242 & 12 & 9 & 92 & 123 & 388 &721 & 2\\
 		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 & 483 &762 & 6\\
@@ -132,11 +132,11 @@ Result is provided in Figure~\ref{fig:comp_user}.
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalescing}
-	\caption{\sys coalescing performance measured per application at fixed power and various WISP to RFID antenna distances, \{20, 40, 60\}\,cm, assessed against non-coalescing \sys.}
+	\caption{\sys coalescing performance measured per application at fixed power and various WISP to RFID antenna distances (\{20, 40, 60\}\,cm) assessed against non-coalescing \sys.}
 	\label{fig:coalescing}
 \end{figure}
 
-We measured \sys coalescing performance. Result is provided in Figure~\ref{fig:coalescing}. Result clearly show that coalescing provides a benefit for all applications, providing even seven times improvement for bc application at 40\,cm. 
+An important benchmark is to measured the effectiveness of \sys coalescing. At fixed power and varying WISP to RFID antenna distances we compared \sys execution time per each application (tasked manually). Result, given in Figure~\ref{fig:coalescing}, clearly illustrates that coalescing provides a benefit for all the applications, providing even seven times improvement (bc application at 40\,cm). bc application is composed of small tasks, see Figure~\ref{fig:aveVirtuTaskSize}, which \sys can easily coalesce. On the other hand, for certain applications, e.g. cem, coalescing improvement is not significant. cem uses large data structure that expands over multiple pages, which does not leave room for other variables. Any interaction will induce large page swap which cause little improvement in \sys performance against non-coalescing case. 
 
 \begin{figure}
 	\centering
@@ -145,7 +145,7 @@ We measured \sys coalescing performance. Result is provided in Figure~\ref{fig:c
 	\label{fig:aveVirtuTaskSize}
 \end{figure}
 
-We need to know how many tasks \sys can coalesce. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and amount of tasks coalesced. Result is given in Figure~\ref{fig:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. 
+Then, we need to know how many tasks \sys can coalesce within a given execution scenario. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and the amount of tasks coalesced. Result is given in Figure~\ref{fig:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. This will help \sys to find the best possible virtual task size to maximize its runtime.
 
 \subsubsection{\sys Paging Performance}
 \label{sec:results_memory_management}
