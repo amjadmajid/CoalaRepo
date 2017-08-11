@@ -77,14 +77,14 @@ Figure~\ref{fig:volatile-buffer} illustrates the execution of a simple task usin
 \sys's paging mechanism ensures that a task only ever executes using consistent protected data. During task execution, modifications to protected data do not affect their original memory locations because a task reads and writes the volatile page buffer only, and modified pages are swapped out to \texttt{pagesTemp} until commit. A power failure erases the contents of the page buffer, preventing a re-executing task from observing updates in the page buffer from a previous execution attempt. On a reboot after a power failure,
 \sys clears all dirty bits in {\tt pagesTemp} {\em if the commit bit is unset}. Clearing these dirty bits ensures that all accesses to protected variables correctly access their original memory locations. The non-volatile commit bit persists across power failures and \sys repeatedly attempts to commit until it succeeds, despite arbitrary power failures.
 
-\subsection{Managing Paging Overhead}
-
-The efficiency of \sys's paging scheme relies on the fact that data in pages are contiguous, which makes them amenable to being manipulated by hardware assisted DMA bulk copy operations. To justify this design choice we experimentally evaluated the efficiency of using DMA block copies, compared to explicit, software copy loops. We copied blocks of data of different size between memory regions on a WISP~\cite{wisp} using a hand-written loop and using DMA (refer to Section~\ref{sec:results_hardware} for hardware setup details). Figure~\ref{fig:dmaTimeEnergy} shows that for moving large blocks of data like a page, hardware DMA is considerably better than software in both run time and energy efficiency. \sys's design moves data in pages, not individual words, leveraging the increased efficiency of DMA data movement.
-
-\begin{figure}[t]
-	\centering
-	\subfloat[Time needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/dmaSize_time.eps} }
-	\subfloat[Energy needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/energyConsumptionDMA_SW.eps}}
-	\caption{Time and energy consumption of moving a block of data from SRAM to FRAM: CPU intervention versus Direct Memory Access (DMA).\todo{Explain HW/SW setup; make fonts larger, unify legends and axes}{Amjad}}
-	\label{fig:dmaTimeEnergy}
-\end{figure}
+%\subsection{Managing Paging Overhead}
+%
+%The efficiency of \sys's paging scheme relies on the fact that data in pages are contiguous, which makes them amenable to being manipulated by hardware assisted DMA bulk copy operations. To justify this design choice we experimentally evaluated the efficiency of using DMA block copies, compared to explicit, software copy loops. We copied blocks of data of different size between memory regions on a WISP~\cite{wisp} using a hand-written loop and using DMA (refer to Section~\ref{sec:results_hardware} for hardware setup details). Figure~\ref{fig:dmaTimeEnergy} shows that for moving large blocks of data like a page, hardware DMA is considerably better than software in both run time and energy efficiency. \sys's design moves data in pages, not individual words, leveraging the increased efficiency of DMA data movement.
+%
+%\begin{figure}[t]
+%	\centering
+%	\subfloat[Time needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/dmaSize_time.eps} }
+%	\subfloat[Energy needed to transfer a block of data]{\includegraphics[width=0.49\columnwidth]{figures/energyConsumptionDMA_SW.eps}}
+%	\caption{Time and energy consumption of moving a block of data from SRAM to FRAM: CPU intervention versus Direct Memory Access (DMA).\todo{Explain HW/SW setup; make fonts larger, unify legends and axes}{Amjad}}
+%	\label{fig:dmaTimeEnergy}
+%\end{figure}
