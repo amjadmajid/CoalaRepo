@@ -22,15 +22,13 @@
 
 \begin{figure}
 	\centering
-	\subfloat[Plain C code]{\includegraphics[width=0.3\columnwidth]{figures/compiler1.pdf}\label{fig:comp_1}}
-	\subfloat[Boundary placement]{\includegraphics[width=0.3\columnwidth]{figures/compiler2.pdf}\label{fig:comp_2}}
-	\subfloat[Code Transformation]{\includegraphics[width=0.3\columnwidth]{figures/compiler3.pdf}\label{fig:comp_3}}
-	\caption{Illustration of \sys compiler task division operation.\todo{Make figures of the same readable size}{Przemek}}
+	\includegraphics[width=.85\columnwidth]{figures/compiler.pdf}
+	\caption{\sys compiles code to use tasks.}
 	\label{fig:compiler_overview}
 \end{figure}
 
-The input to the task boundary identification analysis is a standard C program (as shown in Figure~\ref{fig:comp_1}) and the output of \sys's analysis is the CFG, with some vertices marked as {\em task boundaries}. The \sys compiler builds the program's CFG (as shown in
-Figure~\ref{fig:comp_2}). To simplify inter-procedural analysis, our prototype inlines all function calls into the main function in the CFG. Recursive function call cannot be handled, so the programmer has to rewrite it into a non-recursive call if there is one. The approach of always inlining function calls will introduce code duplication. If the code size is problematic, alternative approach is to make each function call a task boundary. We leave implementation of such alternative strategy as a future work.
+The input to the task boundary identification analysis is a standard C program (as shown in Figure~\ref{fig:compiler_overview}) and the output of \sys's analysis is the CFG, with some vertices marked as {\em task boundaries}. The \sys compiler builds the program's CFG (as shown in
+Figure~\ref{fig:compiler_overview}). To simplify inter-procedural analysis, our prototype inlines all function calls into the main function in the CFG. Recursive function call cannot be handled, so the programmer has to rewrite it into a non-recursive call if there is one. The approach of always inlining function calls will introduce code duplication. If the code size is problematic, alternative approach is to make each function call a task boundary. We leave implementation of such alternative strategy as a future work.
 %
 %\sys uses a cost-based task boundary placement analysis that considers per-block energy consumption estimates, inter-task variable liveness, and the cost of partitioning loops.
 %
@@ -78,14 +76,14 @@ To sub-divide these tasks, \sys does depth-first traversals of all paths in the 
 where $N_{\text{IR}}$ is the length of the path being traversed up to the candidate, $N_{\text{PV}}$ is the number of protected variables that will be newly introduced by placing boundary at the candidate, and $N_{\text{loop}}$ is the product of the loop bounds of all loops (i.e., nested loops) containing the boundary candidate. \sys normalizes $N_{\text{IR}}$ and $N_{\text{PV}}$ to the values among boundary candidates. The weights, $w_{0}, w_{1}$ are between zero and one, and are hand-tuned parameters that define the relative importance of $N_{\text{IR}}$,
 $N_{\text{PV}}$, and $N_{\text{loop}}$. We empirically determined these weight values by measuring the runtime for different weight values across applications. We found that varying weights varies runtime by only around 5\% in most cases and in our experimental evaluation, we used $w_{0} = w_{1} = 0.5$.
 
-After placing task boundaries, the compiler must ensure that all tasks are single-entry. To do so, \sys computes the dominator tree of the CFG and checks that every vertex within a task is dominated by the entry vertex of the task. If this dominance condition is unmet for a CFG node, the compiler places an additional task boundary at that node, meeting the condition. Figure~\ref{fig:comp_2} illustrates boundary placement: the first three vertices make up one task and the remainder become a second task.
+After placing task boundaries, the compiler must ensure that all tasks are single-entry. To do so, \sys computes the dominator tree of the CFG and checks that every vertex within a task is dominated by the entry vertex of the task. If this dominance condition is unmet for a CFG node, the compiler places an additional task boundary at that node, meeting the condition. Figure~\ref{fig:compiler_overview} illustrates boundary placement: the first three vertices make up one task and the remainder become a second task.
 
 \subsection{Task Transformation}
 \label{sec:compiler_transform_pass}
 
 After placing task boundaries during analysis, \sys's transformation analysis restructures the code into tasks defined by the placed boundaries. The analysis traverses the CFG starting from an arbitrary task boundary. On reaching a subsequent boundary, the transformation analysis identifies all paths between the two task boundaries and copies those paths into a new task function. The analysis continues until all paths are contained within a task. 
 
-After forming tasks, variables that are live beyond the end of the task become protected, which requires renaming those variables and updating references to renamed variable names. For example, Figure~\ref{fig:comp_2} shows a boundary placed within the live range of {\tt b}; {\tt b} becomes protected and accesses to {\tt b} should be redirected to {\tt p\_b} (as shown in Figure~\ref{fig:comp_3}). {\tt a} is task-local and need not be protected, but only declared in the task. Constants and read-only variable are never protected. When writes in multiple, newly formed tasks may update the same location (i.e., at a PHI node in the CFG), \sys re-writes the accesses to refer to the same global name. Subsequent reads simply read the protected variable.
+After forming tasks, variables that are live beyond the end of the task become protected, which requires renaming those variables and updating references to renamed variable names. For example, Figure~\ref{fig:compiler_overview} shows a boundary placed within the live range of {\tt b}; {\tt b} becomes protected and accesses to {\tt b} should be redirected to {\tt p\_b} (as shown in Figure~\ref{fig:compiler_overview}). {\tt a} is task-local and need not be protected, but only declared in the task. Constants and read-only variable are never protected. When writes in multiple, newly formed tasks may update the same location (i.e., at a PHI node in the CFG), \sys re-writes the accesses to refer to the same global name. Subsequent reads simply read the protected variable.
 
 After forming tasks, some branches in a task may refer to targets in another task. \sys patches the CFG to re-write those branches to instead be \transition statements that transition to the entry point of the other task. Such a ``broken'' branch will always refer to a task's entry node because \sys ensures that all tasks have only one entry. 
 
