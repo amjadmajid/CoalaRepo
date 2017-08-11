@@ -79,9 +79,9 @@ def figureSetting():
     
 distances = ["cont.csv",'20cm.csv', '40cm.csv']
 
-apps = ["bc", "sort", "cuckoo", "dd", "cem", "dft"]
-ol = ["-O0", "-O0", "-O1", "-O0", "-O0", "-O0"]
-
+apps = ["bc", "sort", "cuckoo", "cem", "dft"]
+ol = ["-O0", "-O0", "-O1",  "-O0", "-O0"]
+data=[]
 f = plt.figure(figsize=(8,2.6))
 figureSetting()    
 
@@ -99,6 +99,9 @@ for j, app in enumerate(apps):
             row.append( executionTime(f_n) )
         f_v.close()
         f_n.close()
+        
+        data.append(row)
+
         [CA, CH] = plt.bar( np.array([0,0.5])+i+j*len(distances)+s, 
             np.array(row)/float(row[0]), 
             width=0.5, 
@@ -106,6 +109,10 @@ for j, app in enumerate(apps):
              linewidth=0.5)
 
     s+=0.5;
+
+print(data)
+
+
 plt.legend([CA, CH], ["Coala", "Chain"])
 
 ax = plt.axes()
