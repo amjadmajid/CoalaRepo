@@ -117,7 +117,7 @@ plt.ylabel("Norm. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 # # plt.ylim(0,3.2) 
-f.savefig("../figures/CoalaChain.eps",format="eps", dpi=1200)
+f.savefig("../figures/coala_chain.pdf",format="pdf", dpi=1200)
 plt.show()
 
 
