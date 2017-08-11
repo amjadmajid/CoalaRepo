@@ -1,4 +1,4 @@
-We present the experimental results of \sys's performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
+%We present the experimental results of \sys's performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
 
 \subsection{Hardware Suite Description}
 \label{sec:results_hardware}
@@ -23,13 +23,14 @@ The applications that were used in the evaluation are: (i) \textbf{Bitcount}: co
 		\hline
 		Nickname & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
 		\hline\hline
-		Bitcount & 351 & 588 \\ %59\%
-		Cold chain & 388 & 721 \\ %53\%
-		Cuckoo & 483 & 762 \\ %63\%
-		RSA & 887 & 1233 \\ %71\%
-		DFT & {} & {} \\ %Two resolutions: 4 and 8 Bytes
-		Huffman & {} & {} \\ %Data decompression size: 100 bytes
-		Selection sort & {} & {} \\
+		Bitcount (bc) & 351 & 588 \\ %59\%
+		Cold chain (cem) & 388 & 721 \\ %53\%
+		Cuckoo (cuckoo) & 483 & 762 \\ %63\%
+		RSA (rsa) & 887 & 1233 \\ %71\%
+		Activity (ar) & 483 & 762 \\ %63\%
+		DFT (dft) & {} & {} \\ %Two resolutions: 4 and 8 Bytes
+		Huffman (dd) & {} & {} \\ %Data decompression size: 100 bytes
+		Selection sort (sort) & {} & {} \\
 		\hline
 	\end{tabular}
 \caption{List of benchmark programs used in \sys evaluation; SLOC: source lines of code.}
@@ -84,8 +85,6 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 %\subsubsection{Task Coalescing Performance}
 %\label{sec:results_coalescing}
 
-%\vspace{2cm}
-
 %List of figures: 
 %\begin{itemize}
 %	\item Fig. 1: Viper only/per app/fixed power/(hand/complier)/no coalescing/clang [Resuls are ready by Kiwan]
@@ -96,15 +95,13 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 %	\item Fig. 5: average virtual task size/gcc/fixed distance/per app 
 %\end{itemize}
 
-%\vspace{2cm}
-
 \subsubsection{\sys Performance}
 \label{sec:result_coalescing}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/coalescing}
-	\caption{Performance of \sys's  tasks coalescing mechanism compared to virtual task size equal to one (per application) at multiple WISP to RFID reader antenna distances.\todo{Replace "coal" with "coalescing", "No-coal" with "No coalescing"; use markers in addition to color; decide on uniform naming for apps (either all small or capitalized)}{Amjad}}
+	\includegraphics[width=\columnwidth]{figures/coala_chain}
+	\caption{Performance of \sys's fixed power and at multiple WISP to RFID reader antenna distances, \{20, 40, 60\}\,cm, compared against Chain.}
 	\label{fig:coalescing}
 \end{figure}
 
@@ -120,52 +117,39 @@ Experimental evaluation of task coalescing mechanism under intermittent power of
 %The question remains: does coalescing all program's tasks into a singe virtual task (as the energy becomes fully available, i.e. from energy harvesting to continuous power environment) is the best one? To answer this question we have implemented a simple program composed of $x$ empty tasks. We execute the same program by increasing coalescing factor by one while the device on which the program was executed was running on a stable power supply (refer to Section~\ref{sec:methodology_evaluation} for details). The result is presented in Figure~\ref{fig:virtualTaskSize}. We observe a significant increase in execution time as task are coalescent from one to four (three times execution time improvement). However, as the coalescing increases beyond four, we observe diminishing returns from coalescing in terms of execution time. \todo{Decide whether to place this figure in Evaluation section or leave it here}{Przemek}
 
 \subsubsection{\sys Compiler Overhead}
-\label{sec:result_compiler time}
+\label{sec:result_compiler_time}
 
 \begin{figure}
 	\centering
-	%\includegraphics[width=\columnwidth]{figures/}
-	\caption{\sys compiler overhead.}
+	\includegraphics[width=\columnwidth]{figures/comp_user}
+	\caption{\sys compiler overhead measured per application.}
+	\label{fig:comp_user}
+\end{figure}
+
+Result is provided in Figure~\ref{fig:comp_user}.
+
+\subsubsection{\sys Coalescing Overhead}
+\label{sec:result_compiler_time}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coalescing}
+	\caption{\sys coalescing overhead measured per application.}
 	\label{fig:coalescing}
 \end{figure}
 
-\subsubsection{Virtual Task Size}
-\label{sec:result_task_size}
+Result is provided in Figure~\ref{fig:coalescing}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/averageVirtualTaskSize}
-	\caption{Average virtual task size (measured in real task unit\todo{Define real task unit}{Amjad}) of the virtual task sizes that the coalescing algorithm used to accomplished the applications at a WISP to RFID reader distance of 60\,cm.\todo{Please rewrite this sentence}{Amjad}}
+	\caption{Average virtual task size.}
 	\label{fig:aveVirtuTaskSize}
 \end{figure}
 
 Measured size of tasks for each application is given in Figure~\ref{fig:aveVirtuTaskSize}.
 
-%\subsubsection{Completion Time}
-%\label{sec:result_completion}
-
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\columnwidth]{figures/chain_vipe}
-%	\caption{Time to complete for a set of testing applications (refer to Table~\ref{table:benchmark_list}) using \sys versus Chain (no coalescing applied, fixed power supply). \todo{Figure placeholder---will be replaced with final one}{Amjad}}
-%	\label{fig:IPOSPerformance}
-%\end{figure}
-
-%Expected results:
-%\begin{itemize}
-%	\item performance for each application comparing bars for Chain, no coalescing/hand-tasked, coalescing/hand-tasked, no-coalescing/compiler, coalescing/compiler. Performance depicted, normalized to one of the configurations (probably Chain). This plot will cover most of the eval dimensions that we care about.
-%	\item Sensitivity plot---show amount of task merged, time to completion, overhead (in terms of task-size/cap-size sweep (remember we can vary either with approximately the same effect)), energy consumed. All experiments for fixed power, at 3 distances with wireless power, compared against Chain for 3 task/cap size configurations
-%\end{itemize} 
-
-%Point for decision after main figure is ready
-
-%Pull the compiler stuff into its own plot that compares compiler to hand-tasked, maybe only for the coalescing fig.  This reduces bars in plot 1, but runs the risk of making the compiler sound secondary, which we do not want to do.
-
-%*Report only Chain, coalescing/hand-tasked, coalescing/compiler in the main plot.  This says that coalescing is the "default configuration" for VIPER. Later, in a second figure, we compare coalescing to no coalescing for hand-tasked and compiler as a characterization plot.
-
-%\todo{Provide results and text to this section}{Amjad}
-
-\subsubsection{Memory Management Performance}
+\subsubsection{\sys Paging Performance}
 \label{sec:results_memory_management}
 
 \begin{figure}
