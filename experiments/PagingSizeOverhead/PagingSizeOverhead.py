@@ -82,8 +82,6 @@ ax = plt.axes()
 ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(apps_names ) )
 
-plt.ylabel('Normalized')
-
 dataSet = [np.transpose(data_muc), -np.transpose(data_page) ]
 
 num_bars = 8
@@ -106,7 +104,7 @@ for i in range(8):
     autolabel(bar1[i], i)
 
     
-plt.annotate('normalized overhead', fontsize=14,
+plt.annotate('norm. overhead', fontsize=14,
              xytext = (2,6),  # text location
              xy=(1.5,3.5),        # arrows points to 
              ha = 'left',    # horizontal alignment 
@@ -114,7 +112,7 @@ plt.annotate('normalized overhead', fontsize=14,
              arrowprops={'facecolor': '0.8', 'shrink' : 0.1}, 
             )
 
-plt.annotate('Page faults', fontsize=14,
+plt.annotate('norm. page faults', fontsize=14,
              xytext = (1.9,-2.9),  # text location
              xy=(1.7,-0.9),        # arrows points to 
              ha = 'left',    # horizontal alignment 
