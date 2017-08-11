@@ -11,7 +11,7 @@ Recent work~\cite{alpaca,chain} proposed {\em task-based} programming and execut
 
 The key research question addressed here is how to define and execute tasks efficiently and ensure non-termination, with an unknown energy buffer size and energy arrival process. In particular, we ask (i) how to use software support to \emph{dynamically adapt} the effective size of a task, while respecting programmer-specified task atomicity, and (ii) how to minimize run time and energy consumption while \emph{automatically maintaining memory consistency} during execution?
 
-In this work we develop {\bf \sys}: a new programming and execution model efficiently executing tasks which avoids non-termination across a range of energy buffer sizes, without burdening the programmer. To accomplish this, \sys introduces new capabilities: 
+In this work we develop {\bf \sys}: a new programming and execution model efficiently executing tasks which avoids non-termination across a range of energy buffer sizes, without burdening the programmer\footnote{Available via \href{http://anonymized.link}{http://anonymized.link}.}. To accomplish this, \sys introduces new capabilities: 
 
 \begin{itemize}
 	\item {\bf Automatic task compilation:} \sys's compiler transforms arbitrary C code into a graph of tasks that reflects the original program's control- and data-flow constraints. The compiler identifies data shared by multiple of the newly created tasks and instruments reads and writes of those data so that \sys's memory virtualization mechanism keeps those data consistent. \sys's complier the labour-intensive process of writing tasks~\cite{chain,alpaca} (i.e., hours of programmer time).
