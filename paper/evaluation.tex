@@ -45,8 +45,8 @@ The applications that were used in the evaluation are: (i) \textbf{bc}: counts b
 	\centering
 	\footnotesize
         \renewcommand{\tabcolsep}{1pt}
-	\begin{tabular}{l|cc|cc|cc|cc|c}
-		\hline
+	\begin{tabular}{|l|cc|cc|cc|cc|c|}
+		\hline\hline
 		{} & \multicolumn{2}{l|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
 		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
 		\hline
@@ -126,26 +126,26 @@ Experimental evaluation of task coalescing mechanism under intermittent power of
 
 Result is provided in Figure~\ref{fig:comp_user}.
 
-\subsubsection{\sys Coalescing Overhead}
+\subsubsection{\sys Coalescing Performance}
 \label{sec:result_compiler_time}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalescing}
-	\caption{\sys coalescing overhead measured per application.}
+	\caption{\sys coalescing performance measured per application at fixed power and various WISP to RFID antenna distances, \{20, 40, 60\}\,cm, assessed against non-coalescing \sys.}
 	\label{fig:coalescing}
 \end{figure}
 
-Result is provided in Figure~\ref{fig:coalescing}.
+We measured \sys coalescing performance. Result is provided in Figure~\ref{fig:coalescing}. Result clearly show that coalescing provides a benefit for all applications, providing even seven times improvement for bc application at 40\,cm. 
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/averageVirtualTaskSize}
-	\caption{Average virtual task size.}
+	\caption{Average \sys virtual task size at fixed power per application. Top (green): number of coalesced tasks; bottom (red): average size of real task.}
 	\label{fig:aveVirtuTaskSize}
 \end{figure}
 
-Measured size of tasks for each application is given in Figure~\ref{fig:aveVirtuTaskSize}.
+We need to know how many tasks \sys can coalesce. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and amount of tasks coalesced. Result is given in Figure~\ref{fig:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. 
 
 \subsubsection{\sys Paging Performance}
 \label{sec:results_memory_management}
