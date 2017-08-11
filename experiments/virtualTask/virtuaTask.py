@@ -91,6 +91,7 @@ plt.bar([1,2,3], [-657/1000, -9680/1000, -722/1000], align='center', width=1, co
 plt.yticks([-10, 0, 10,20,30, 40, 50,60], ['10e4', '0', '10','20','30', '40', '50', '60'])  
 plt.legend(loc='best')
 f.savefig("../figures/virtualTaskSize.eps",format="eps", dpi=1200)
+f.savefig("../figures/virtualTaskSize.pdf",format="pdf", dpi=1200)
 
 plt.show()
 
