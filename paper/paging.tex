@@ -42,9 +42,9 @@ Algorithm~\ref{algo:rwar} shows pseudo-code of \texttt{RVAR} and we omit a listi
 		\State \texttt{pageCommit(pagesTemp)} \Comment{Phase I commit the active page}
 		\EndIf
 		\If {\texttt{isDirty(tag)}} \Comment{Check if the requested page has been modified}
-		\State {\texttt{getPage(tag,pagesTemp)}=false} \Comment{Get page from the temporary buffer}
+		\State {\texttt{getPage(tag,pagesTemp)}} \Comment{Get page from the temporary buffer}
 		\Else
-		\State \texttt{getPage(tag,pagesOrg)}=false \Comment{Get page from the original location}
+		\State \texttt{getPage(tag,pagesOrg)} \Comment{Get page from the original location}
 		\EndIf 
 		\State \texttt{CrntPagTag} = \texttt{tag} \Comment{Update tag}
 	\end{algorithmic}
@@ -63,7 +63,7 @@ original memory location, then clears its dirty bit.
 
 \subsection{Paging Example}
 
-Figure~\ref{fig:volatile-buffer} illustrates the execution of a simple task using \sys's paging mechanism. The task manipulates protected variables {\tt x}, {\tt y}, and {\tt z}, which are in the same page. On accessing {\tt x}, its page is swapped into the page buffer. On accessing {\tt y} and {\tt z}, the task need only access the volatile page buffer. The task updates the page, leaving it dirty at the task's completion. When the task completes, \sys first copies the page from the page buffer into the non-volatile {\tt pagesTemp} region before commit. Then, \sys sets the commit bit, atomically commits the page back to its original memory location, and unsets the commit bit.
+Figure~\ref{fig:volatile-buffer} illustrates the execution of a simple task using \sys's paging mechanism. The task manipulates the protected variables {\tt x}, {\tt y}, and {\tt z}. The variables {\tt y} and {\tt z} are in the same page and they are currently in the volatile page buffer---on accessing {\tt y} and {\tt z}, the task needs only to access \texttt{pageBuf}. Since variable \texttt{x} is kept in a different page in \texttt{pagesOrg}, accessing it creates a page fault. At this point, \sys swaps the active page in \texttt{pageBuf} by committing it into the non-volatile {\tt pagesTemp} region and copying the corresponding page from \texttt{pagesOrg} to \texttt{pageBuf}. When the task completes, \sys sets the commit bit, copies the dirty page from \texttt{pagesTmp} to its original location in \texttt{pagesOrg} and unsets the commit bit.
 
 \begin{figure}[t]
 	\centering
