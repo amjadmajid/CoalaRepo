@@ -42,7 +42,7 @@
         }
 
 #define DEBUG
-#define COALESCING 1
+//#define COALESCING 1
 
     unsigned char __jump = 0;
     unsigned int __jump_by = 0;

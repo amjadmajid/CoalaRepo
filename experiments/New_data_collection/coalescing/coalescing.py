@@ -68,8 +68,8 @@ def figureSetting():
     plt.rcParams['legend.numpoints'] = 1
 
     
-distances = ["cont.csv",'20cm.csv', '40cm.csv', "60cm.csv"]
-apps = ["bc","cem", "sort"]
+distances = ["cont.csv",'20cm.csv', '40cm.csv']
+apps = ["bc","cem", "sort", 'ar', 'rsa', 'dft']
 
 f = plt.figure(figsize=(8,2.6))
 figureSetting()    
@@ -77,8 +77,19 @@ figureSetting()
 
 
 
+
+
+
+
+
+
+ar = [1.213208,  1.422938, 1.70852173913043, 1.78106060606061, 2.46094117647059 ,3.50057894736842]
+rsa = [0.235423, 0.252849, 0.345225, 0.352205882352941, 0.785947368421053, 0.579828571428571]   
+dft = [0.7795645673, 0.87543120, 0.78435398, 0.92709883,  4.063, 3.967868623 ]
+
+
 s=0
-for j, app in enumerate(apps):
+for j, app in enumerate(apps[0:3]):
 
     for i, dis in enumerate(distances):
         row=[]
@@ -93,8 +104,44 @@ for j, app in enumerate(apps):
             width=0.5, 
             color=['#f7fcb9', '#addd8e'], 
              linewidth=0.5)
-
     s+=0.5;
+
+for i in [0,2,4]:
+    row=[]
+    row.append(ar[i])
+    row.append(ar[i+1])
+    [CA, NO] = plt.bar( np.array([0,0.5])+i/2+9+s, 
+    np.array(row)/float(row[0]), 
+    width=0.5, 
+    color=['#f7fcb9', '#addd8e'], 
+     linewidth=0.5)
+
+s+=0.5;
+
+for i in [0,2,4]:
+    row=[]
+    row.append(rsa[i])
+    row.append(rsa[i+1])
+    [CA, NO] = plt.bar( np.array([0,0.5])+i/2+12+s, 
+    np.array(row)/float(row[0]), 
+    width=0.5, 
+    color=['#f7fcb9', '#addd8e'], 
+     linewidth=0.5)
+
+s+=0.5;
+
+for i in [0,2,4]:
+    row=[]
+    row.append(dft[i])
+    row.append(dft[i+1])
+    [CA, NO] = plt.bar( np.array([0,0.5])+i/2+15+s, 
+    np.array(row)/float(row[0]), 
+    width=0.5, 
+    color=['#f7fcb9', '#addd8e'], 
+     linewidth=0.5)
+
+s+=0.5;
+
 plt.legend([CA, NO], ["Coalescing", "No coalescing"])
 
 
@@ -103,12 +150,13 @@ ax.xaxis.set_major_locator(ticker.FixedLocator(  (np.arange(len(apps)) * len(dis
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
 
-plt.xlim(0,13)
+plt.xlim(0,20.5)
 plt.ylabel("Norm. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 
 f.savefig("../../figures/coalescing.pdf",format="pdf", dpi=1200)
+f.savefig("../../figures/coalescing.eps",format="eps", dpi=1200)
 plt.show()
 
 
