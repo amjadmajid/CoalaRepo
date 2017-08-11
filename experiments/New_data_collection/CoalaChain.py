@@ -11,7 +11,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import matplotlib.patches as mpatches
 
 def executionTimeCuckoo(fh):
     """
@@ -83,7 +82,7 @@ distances = ["cont.csv",'20cm.csv', '40cm.csv']
 apps = ["bc", "sort", "cuckoo", "dd", "cem", "dft"]
 ol = ["-O0", "-O0", "-O1", "-O0", "-O0", "-O0"]
 
-f = plt.figure(figsize=(8,3.5))
+f = plt.figure(figsize=(8,2.6))
 figureSetting()    
 
 s=0
@@ -114,7 +113,7 @@ ax.xaxis.set_major_locator(ticker.FixedLocator(  (np.arange(len(apps)) * len(dis
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
 plt.xlim(0,20.5)
-plt.ylabel("Normalized Runtime")
+plt.ylabel("Normalized runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 # # plt.ylim(0,3.2) 

@@ -69,8 +69,55 @@ def figureSetting():
 
     
 distances = ["cont.csv",'20cm.csv', '40cm.csv', "60cm.csv"]
-
 apps = ["bc","cem", "sort"]
+
+f = plt.figure(figsize=(8,2.6))
+figureSetting()    
+
+
+
+
+s=0
+for j, app in enumerate(apps):
+
+    for i, dis in enumerate(distances):
+        row=[]
+        f_v = open("coalescing/page_128/"+app+"/"+dis) 
+        f_n = open("nocoalescing/page_128/"+app+"/"+dis) 
+        row.append( executionTime(f_v) )
+        row.append( executionTime(f_n) )
+        f_v.close()
+        f_n.close()
+        [CA, NO] = plt.bar( np.array([0,0.5])+i+j*len(distances)+s, 
+            np.array(row)/float(row[0]), 
+            width=0.5, 
+            color=['#edf8b1', '#7fcdbb'], 
+             linewidth=0.5)
+
+    s+=0.5;
+plt.legend([CA, NO], ["Coalescing", "No coalescing"])
+
+
+ax = plt.axes()
+ax.xaxis.set_major_locator(ticker.FixedLocator(  (np.arange(len(apps)) * len(distances)) + np.arange(len(distances) , len(apps)+len(distances) ) * 0.5  ))
+ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
+
+
+plt.xlim(0,13)
+plt.ylabel("Norm. runtime")
+plt.tight_layout()
+plt.legend(loc='upper left')
+
+f.savefig("../figures/coalescing.eps",format="eps", dpi=1200)
+plt.show()
+
+
+
+exit()
+
+
+
+
 dataSet=[]
 for app in apps:
     data =[]
@@ -113,7 +160,7 @@ data = dataSet[0]
 for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
     x = np.arange(len(row))   
 
-    plt.bar(x+i *bar_width+shift, row,       # blue starts at x=0, i=0 => 0
+    plt.bar(x+i *bar_width+shift,  np.array(row)/float(row[0]),       # blue starts at x=0, i=0 => 0
             #                          # green starts at x=0, i=1 => 0.2 
             #                          # red starts at   x=0, i=2 => 0.4
             width=bar_width, 
@@ -129,7 +176,7 @@ for data in dataSet:
     for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
         x = np.arange(len(row))   
 
-        bar1.append(plt.bar(x+i *bar_width+shift, row,       # blue starts at x=0, i=0 => 0
+        bar1.append(plt.bar(x+i *bar_width+shift,  np.array(row)/float(row[0]),       # blue starts at x=0, i=0 => 0
                 #                          # green starts at x=0, i=1 => 0.2 
                 #                          # red starts at   x=0, i=2 => 0.4
                 width=bar_width, 
