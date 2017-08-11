@@ -12,7 +12,7 @@ We also used an alternative setup where the MSP-TS430RGZ48C launchpad was used f
 
 We compare \sys against state-of-the-art task-based runtime Chain~\cite{chain}. We are not comparing \sys against DINO~\cite{dino} or Mementos~\cite{mementos} (Refer to Section~\ref{sec:background_consistency}), as (i) Chain is the only modular execution model available to which we can compare \sys, and (ii) Chain proved already its superiority over sequential model counterparts (i.e. DINO and Mementos)\footnote{We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation.}.
 
-The applications that were used in the evaluation are: (i) \textbf{bc}: counts bits in byte pseudo-random string using varying algorithms. Each result is compared for correctness; (ii) \textbf{cem}: emulates an embedded temperature sensing engine: measurements are randomly generated and are compressed using a LZW algorithm for  fixed entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: implements Cuckoo filter---the program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{rsa}: encrypts predefined string with a predefined key; (v) \textbf{ar} performs nearest neighbour classification using randomly generated sequence of three-axes accelerometer data. This set of benchmarks is the same as used in~\cite{chain,alpaca}. In addition to Chain benchmarks new applications were implemented: (vi) \textbf{dft}: discreet Fourier transform, (vii) \textbf{dd}: Huffman-based data decompression, and (viii) \textbf{sort}: selection sort algorithm. All applications are compared in Table~\ref{table:benchmark_list} in terms of source lines of code against Chain.
+The applications that were used in the evaluation are: (i) \textbf{bc}: counts bits in byte pseudo-random string using varying algorithms. Each result is compared for correctness; (ii) \textbf{cem}: emulates an embedded temperature sensing engine: measurements are randomly generated and are compressed using a LZW algorithm for  fixed entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: implements Cuckoo filter---the program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{rsa}: encrypts predefined string with a predefined key; (v) \textbf{ar} performs nearest neighbour classification using randomly generated sequence of three-axes accelerometer data. This set of benchmarks is the same as used in~\cite{chain,alpaca}. In addition to Chain benchmarks new applications were implemented: (vi) \textbf{dft}: discreet Fourier transform, and (vii) \textbf{sort}: selection sort algorithm. All applications are compared in Table~\ref{table:compiler_result} in terms of source lines of code against Chain.
 
 %\begin{table}[t]
 %	\centering
@@ -56,11 +56,11 @@ The applications that were used in the evaluation are: (i) \textbf{bc}: counts b
 		rsa & 332 & 250 & 20 & 27 & 130 & 296 & 887 &1233 & 86\\
 		ar & 166 & 218 & 11 & 6 & 112 & 333 & 483 &762 & 34\\
 		sort & 104 & 104 & 4 & 2 & 70 & 23 & 180 & 287 & $<$1\\
-		dft* & - & - & - & - & - & - & 222 & 293 & -\\
-		dd &  &  &  &  &  &  &  & 287 &  \\
+		dft$^\dagger$ & --- & --- & --- & --- & --- & --- & 222 & 293 & ---\\
+		%dd &  &  &  &  &  &  &  & 287 &  \\
 		\hline
 	\end{tabular}
-	\caption{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns). *DFT does not compile with Clang\todo{incomplete table}{Responsible:Kiwan}}
+	\caption{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns). $^\dagger$dft does not compile with Clang}
 \label{table:compiler_result}
 \end{table}
 
@@ -101,11 +101,12 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coala_chain}
-	\caption{Performance of \sys's fixed power and at multiple WISP to RFID reader antenna distances, \{20, 40, 60\}\,cm, compared against Chain (results are normalized).}
+	\caption{Performance of \sys applications (divided manually into tasks) at fixed power and at multiple WISP to RFID reader antenna distances, \{20, 40, 60\}\,cm, compared against Chain (results are normalized).}
 	\label{fig:coalescing}
 \end{figure}
 
-We evaluate \sys experimentally to see its performance compared against Chain. Result is given in Figure~\ref{fig:coalescing}. For each application we measured execution time (with and without task coalescing) at \{20, 40, 60\}\,cm distance between RFID antenna and WISP and when WISP was powered directly from FET. Each measurement was for a predefined duration (each application was looping continuously) each distance/application case. From the result we clearly see an enormous benefit of \sys, especially at large WISP to RFID reader antenna distance. At each distance, \sys coalescing mechanism provided faster execution times compared to Chain.
+We evaluate \sys experimentally to see its performance compared against Chain. Result is given in Figure~\ref{fig:coalescing}. For each application we measured execution time (with and without task coalescing) at \{20, 40, 60\}\,cm distance between RFID antenna and WISP and when WISP was powered directly from FET. Each measurement was for a predefined duration (each application was looping continuously) each distance/application case. From the result we clearly see an enormous benefit of \sys, for applications composed of small tasks (bc, sort, cuckoo)---at all distances and at fixed power. As the individual task become larger (e.g. dft) or program uses large memory pages (e.g. cem, refer to Section~
+\ref{sec:result_compiler_time} for further explanation) \sys incurs overhead from memory virtualization that cause its performance to be comparable (or in a single cases, cem, worse) to Chain. 
 
 \subsubsection{\sys Compiler Overhead}
 \label{sec:result_compiler_time}
@@ -113,11 +114,11 @@ We evaluate \sys experimentally to see its performance compared against Chain. R
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/comp_user}
-	\caption{\sys compiler overhead measured per application.}
+	\caption{\sys compiler code overhead measured in terms of execution time per application; WISP was powered continuously.}
 	\label{fig:comp_user}
 \end{figure}
 
-Result is provided in Figure~\ref{fig:comp_user}.
+In Table~\ref{table:compiler_result} we have assessed the overhead induced by the \sys compiler. It is, nonetheless, important to find out how much does this overhead translates to increased execution time for each \sys application. The result of this investigation is provided in Figure~\ref{fig:comp_user}. We conclude that in most of the cases \sys compiler code provided comparable execution time to 
 
 \subsubsection{\sys Coalescing Performance}
 \label{sec:result_compiler_time}
