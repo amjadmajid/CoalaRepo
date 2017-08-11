@@ -75,7 +75,7 @@ def autolabel(rects, i):
 
           
 
-f = plt.figure(figsize=(8,4))
+f = plt.figure(figsize=(8,3.5))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
@@ -122,8 +122,9 @@ plt.annotate('Page faults', fontsize=14,
              arrowprops={'facecolor': '0.8', 'shrink' : 0.1}, 
             )
 plt.tight_layout()
-plt.ylim(-4,11)    
-plt.yticks([-4, -2, 0,3, 6,9,12,15], ['10e4', '10e2', '0','5','10', '15',  '20', '25'])  
+# plt.ylim(-4,3)    
+plt.yticks([-4, -2, 1, 4,7,10], ['10e4', '10e2', '0','5','10', '15',  '20'])  
 f.savefig("../figures/pagSizeOverhead.eps",format="eps", dpi=1200)
 f.savefig("../figures/pagSizeOverhead.pdf",format="pdf", dpi=1200)
+plt.tight_layout()
 plt.show()
