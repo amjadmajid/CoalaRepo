@@ -42,9 +42,9 @@ Algorithm~\ref{algo:rwar} shows pseudo-code of \texttt{RVAR} and we omit a listi
 		\State \texttt{pageCommit(pagesTemp)} \Comment{Phase I commit the active page}
 		\EndIf
 		\If {\texttt{isDirty(tag)}} \Comment{Check if the requested page has been modified}
-		\State {\texttt{getPage(tag,pagesTemp)}=false} \Comment{Get page from the temporary buffer}
+		\State {\texttt{getPage(tag,pagesTemp)}} \Comment{Get page from the temporary buffer}
 		\Else
-		\State \texttt{getPage(tag,pagesOrg)}=false \Comment{Get page from the original location}
+		\State \texttt{getPage(tag,pagesOrg)} \Comment{Get page from the original location}
 		\EndIf 
 		\State \texttt{CrntPagTag} = \texttt{tag} \Comment{Update tag}
 	\end{algorithmic}
