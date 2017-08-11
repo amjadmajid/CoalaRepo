@@ -95,7 +95,7 @@ for i, row in enumerate(data):
         [us, co] = plt.bar( np.array([0,0.5]) +i+s, 
             np.array(row)/float(row[0]), 
             width=0.5, 
-            color=['#7fcdbb','#2c7fb8'], 
+            color=['#addd8e','#31a354'], 
              linewidth=0.5)
         s+=0.3
 
@@ -106,7 +106,7 @@ ax.xaxis.set_major_locator(ticker.FixedLocator(  [0.5, 1.8, 3.1, 4.4, 5.7, 7 ] )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
 plt.xlim(0,7.5)
-plt.ylabel("Norma. runtime")
+plt.ylabel("Norm. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 # # plt.ylim(0,3.2) 

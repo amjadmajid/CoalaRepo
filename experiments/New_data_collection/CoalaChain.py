@@ -102,7 +102,7 @@ for j, app in enumerate(apps):
         [CA, CH] = plt.bar( np.array([0,0.5])+i+j*len(distances)+s, 
             np.array(row)/float(row[0]), 
             width=0.5, 
-            color=['#7fcdbb','#2c7fb8'], 
+            color=['#f7fcb9','#2c7fb8'], 
              linewidth=0.5)
 
     s+=0.5;
@@ -113,7 +113,7 @@ ax.xaxis.set_major_locator(ticker.FixedLocator(  (np.arange(len(apps)) * len(dis
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
 plt.xlim(0,20.5)
-plt.ylabel("Normalized runtime")
+plt.ylabel("Norm. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 # # plt.ylim(0,3.2) 

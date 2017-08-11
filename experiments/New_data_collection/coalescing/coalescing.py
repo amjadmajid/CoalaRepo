@@ -91,7 +91,7 @@ for j, app in enumerate(apps):
         [CA, NO] = plt.bar( np.array([0,0.5])+i+j*len(distances)+s, 
             np.array(row)/float(row[0]), 
             width=0.5, 
-            color=['#edf8b1', '#7fcdbb'], 
+            color=['#f7fcb9', '#addd8e'], 
              linewidth=0.5)
 
     s+=0.5;
@@ -108,96 +108,11 @@ plt.ylabel("Norm. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
 
-f.savefig("../figures/coalescing.eps",format="eps", dpi=1200)
+f.savefig("../../figures/coalescing.eps",format="eps", dpi=1200)
 plt.show()
 
 
 
 exit()
-
-
-
-
-dataSet=[]
-for app in apps:
-    data =[]
-    for dis in distances:
-        row=[]
-        f_c = open("coalescing/page_128/"+app+"/"+dis) 
-        f_n = open("nocoalescing/page_128/"+app+"/"+dis) 
-        row.append( executionTime(f_c) )
-        row.append( executionTime(f_n) )
-        f_c.close()
-        f_n.close()
-        data.append(row)
-    data = np.transpose(data)
-    dataSet.append(data)
-
-f = plt.figure(figsize=(8,4))
-figureSetting()                        # Set figure layout
-
-ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([1.75, 1.75+4.5, 1.75+4.5+4.5]) )
-ax.xaxis.set_major_formatter(ticker.FixedFormatter( ["bc","cem", "sort"] ))
-
-
-plt.ylabel('Seconds')
-
-
-num_bars = len(data)
-# hatches = ['+', '/']
-colors = ['#edf8b1', '#7fcdbb']
-labels = ["Coal", "No-Coal"]
-
-gap = 0.1                         # space each bars group 0.1 from the next group
-bar_width = (1- gap) / num_bars   # divide the remaining distance equally between the bars          
-
-
-bar1=[]
-shift=0
-# to set the labels only for one iteration!!
-data = dataSet[0]
-for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
-    x = np.arange(len(row))   
-
-    plt.bar(x+i *bar_width+shift,  np.array(row)/float(row[0]),       # blue starts at x=0, i=0 => 0
-            #                          # green starts at x=0, i=1 => 0.2 
-            #                          # red starts at   x=0, i=2 => 0.4
-            width=bar_width, 
-            # hatch = hatches[i % len(hatches)],
-            color =  colors[i % len(colors)], 
-            label = labels [i % len(labels)]) 
-    shift+=4.5
-
-
-
-shift=0
-for data in dataSet:
-    for i, row in enumerate(data):    # enumerate returns a data unit (a row) and its index
-        x = np.arange(len(row))   
-
-        bar1.append(plt.bar(x+i *bar_width+shift,  np.array(row)/float(row[0]),       # blue starts at x=0, i=0 => 0
-                #                          # green starts at x=0, i=1 => 0.2 
-                #                          # red starts at   x=0, i=2 => 0.4
-                width=bar_width, 
-                # hatch = hatches[i % len(hatches)],
-                color =  colors[i % len(colors)])) 
-    shift+=4.5
-
-# add the page sizes
-for i in range(6):
-    autolabel(bar1[i], i)
-
-plt.legend(loc='upper left')
-plt.ylim(0,3.2) 
-f.savefig("../figures/coalescing.eps",format="eps", dpi=1200)
-plt.show()
-
-
-
-
-
-
-
 
 
