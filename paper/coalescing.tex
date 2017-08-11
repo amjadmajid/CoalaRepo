@@ -8,9 +8,9 @@ The challenge to coalescing tasks is determining how many tasks to coalesce befo
 
 \begin{figure}
 	\centering
-	\subfloat[Core of task coalescing: commit postponing]{\includegraphics[width=\columnwidth]{figures/coalescing_states}\label{fig:coalescing_example_states}}\\
-	\subfloat[Adaptive task coalescing based on task failure history]{\includegraphics[width=\columnwidth]{figures/coalescing_flowchart}\label{fig:coalescing_example_flowchart}}
-	\caption{\sys task coalescing process.}
+	\subfloat[\sys coalesces consecutive tasks.]{\includegraphics[width=\columnwidth]{figures/coalescing_states}\label{fig:coalescing_example_states}}\\
+	\subfloat[\sys dynamically adapts the amount of coalescing.]{\includegraphics[width=\columnwidth]{figures/coalescing_timeline}\label{fig:coalescing_example_flowchart}}
+	\caption{\sys coalesces tasks to avoid overheads.}
 	\label{fig:coalescing_example}
 \end{figure}
 
