@@ -156,6 +156,7 @@ plt.tight_layout()
 plt.legend(loc='upper left')
 
 f.savefig("../../figures/coalescing.pdf",format="pdf", dpi=1200)
+f.savefig("../../figures/coalescing.eps",format="eps", dpi=1200)
 plt.show()
 
 
