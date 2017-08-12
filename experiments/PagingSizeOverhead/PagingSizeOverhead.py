@@ -81,14 +81,31 @@ figureSetting()
 
 
 s=0
+b1=[]
+
 for d in data_muc:
-  plt.bar( np.arange(len(d)) + s, d, color='y')
-  s+=8.5 
+  b1.append( plt.bar( np.arange(len(d)) + s, d, color='y') )
+  s+=8.5
+
 
 ax = plt.axes()
 ax.xaxis.set_major_locator(ticker.FixedLocator([4,12.2,21,29,37.5, 46.5, 54.5]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(apps_names ) )
 
+
+def autolabel(rects):
+    """
+    Attach a text label above each bar displaying its height
+    """
+
+    labels = ['16','32','48', '64','128', '256', '512', '1024']
+    for i, rect in enumerate(rects):
+        height = rect.get_height()
+        ax.text(rect.get_x()+0.1 + rect.get_width()/2.,height+0.1,'%s' % (labels[i]), fontsize=10,
+                ha='center', va='bottom',  rotation=90, color='0.4')
+
+
+autolabel(b1[0]);
 
 plt.yticks([0, 2, 4,6,8])  
 

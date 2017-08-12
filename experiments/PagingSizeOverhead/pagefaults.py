@@ -62,10 +62,10 @@ data_page = [
 f = plt.figure(figsize=(8,2))
 figureSetting()   
 
-
+b1=[]
 s=0
 for d in data_page:
-  plt.bar( np.arange(len(d)) + s, d, color='r')
+  b1.append( plt.bar( np.arange(len(d)) + s, d, color='r'))
   s+=8.5 
 
 ax = plt.axes()
@@ -73,13 +73,29 @@ ax.xaxis.set_major_locator(ticker.FixedLocator([4,12.5,21,29.5,38, 47, 57]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(apps_names ) )
 
 
+def autolabel(rects):
+    """
+    Attach a text label above each bar displaying its height
+    """
+
+    labels = ['16','32','48', '64','128', '256', '512', '1024']
+    for i, rect in enumerate(rects):
+        height = rect.get_height()
+        ax.text(rect.get_x()+0.1 + rect.get_width()/2.,height+0.1,'%s' % (labels[i]), fontsize=10,
+                ha='center', va='bottom',  rotation=90, color='0.4')
+
+
+autolabel(b1[0]);
+
+
+
 plt.yticks([0, 2, 4])  
 
-plt.ylabel('Norm. page faults')
+plt.ylabel('Norm. page fault')
 
 plt.tight_layout()
-f.savefig("../figures/pagSizeOverhead.eps",format="eps", dpi=1200)
-f.savefig("../figures/pagSizeOverhead.pdf",format="pdf", dpi=1200)
+f.savefig("../figures/pagefault.eps",format="eps", dpi=1200)
+f.savefig("../figures/pagefault.pdf",format="pdf", dpi=1200)
 plt.show()
 
 
