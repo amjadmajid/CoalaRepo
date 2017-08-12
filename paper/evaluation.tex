@@ -26,7 +26,7 @@ to measure run time. Applications were cross-compiled using GCC and Clang,
 allowing us to use LLVM for the \sys compiler. We used version 3.8.0 of both
 Clang and LLVM.
 
-\subsection{Software Suite Description}
+\subsection{Benchmarks and Baseline}
 \label{sec:results_software}
 
 We compare \sys against state-of-the-art task-based runtime Chain~\cite{chain}.
@@ -83,36 +83,6 @@ performance to Chain.  We characterize \sys by studying how its performance
 varies due to coalescing and when using automatic task compilation versus
 manual task compilation.
 
-\subsubsection{\sys Compiler Performance}
-\label{sec:results_compiler}
-
-\begin{table}[t]
-	\centering
-	\footnotesize
-        \renewcommand{\tabcolsep}{1pt}
-	\begin{tabular}{|l|cc|cc|cc|cc|c|}
-		\hline
-		{} & \multicolumn{2}{c|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
-		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
-		\hline\hline
-		bc & 22 & 22 & 10 & 15 & 81 & 93 & 351 &588 & 3\\
-		cem & 3492 & 3242 & 12 & 9 & 92 & 123 & 388 &721 & 2\\
-		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 & 483 &762 & 6\\
-		rsa & 332 & 250 & 20 & 27 & 130 & 296 & 887 &1233 & 86\\
-		ar & 166 & 218 & 11 & 6 & 112 & 333 & 483 &762 & 34\\
-		sort & 104 & 104 & 4 & 2 & 70 & 23 & 180 & 287 & $<$1\\
-		dft$^\dagger$ & --- & --- & --- & --- & --- & --- & 222 & 293 & ---\\
-		%dd &  &  &  &  &  &  &  & 287 &  \\
-		\hline
-	\end{tabular}
-	\caption{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns). $^\dagger$dft does not compile with Clang}
-\label{table:compiler_result}
-\end{table}
-
-We start with evaluating the efficiency of the \sys compiler. Table~\ref{table:compiler_result} shows the difference in the number of protected variables (PVAR), number of tasks, and number of inserted paging macro ({\tt RVAR} and {\tt WVAR}) in the code between (i) hand-written \sys and (ii) compiler-generated \sys code. On average, compiler-generated code is only worse by 0.3\% in the number of protected variables. Regarding the number of tasks, compiler-generated code is better by roughly 16\%. The results indicate that \sys compiler is selecting boundaries better than the programmer doing it manually. However, the \sys compiler should insert paging code conservatively when it {\em may} access protected variables, due to limitation of pointer aliasing. Thus, it results in the \sys compiler introducing 48\% more paging code than programmer-written code (the results on run time for various \sys code versions is provided in Section~\ref{sec:result_compiler_time}). The performance is worse than programmer-written \sys code in overall, meaning the programmer should structure the code manually if the performance is critical; otherwise the compiler can be used to simplify the programmability. 
-
-Additionally, we evaluated the compile time for automatic task generation per application\footnote{We could not compile the dft application since LLVM inserts mathematical built-in functions (i.e. \texttt{\_\_muldf3}, \texttt{\_\_floatsidf}, \texttt{\_\_adddf3}) whose implementation were not provided by the LLVM MSP430 back-end.}. We compiled the apps on a 4-core virtual machine with 1\,GB memory with Arch Linux, running on Intel Core i5-6200U (2.30\,GHz) processor. The result in seconds are given in Table~\ref{table:compiler_result}. We used the {\tt time} linux command to measure the rough time. Most of the compile time was due to pointer aliasing, when calculating possible live ranges of variables. Apps such as RSA whose code size is large and uses a lot of variables, need longer compilation time due to a larger search space for pointer aliasing. Nonetheless, the compile time is orders of magnitude shorter than manual task splitting by a programmer (in  order of hours). For this reason we believe that \sys complier will be a major step in enabling computing community to enter the intermittent-power domain without big time investments.
-
 %\begin{table}[t]
 %	\centering
 %	\footnotesize
@@ -150,11 +120,138 @@ Additionally, we evaluated the compile time for automatic task generation per ap
 	\label{fig:runtime}
 \end{figure}
 
-We evaluate \sys experimentally and compare its performance against Chain. Result is given in Figure~\ref{fig:runtime}. For each application we measured execution time (with and without task coalescing) at \{20, 40\}\,cm distance between RFID antenna and WISP, and when WISP was powered directly from FET. Each measurement was for a predefined duration (each application was looping continuously) each distance/application case. From the result we clearly see an enormous benefit of \sys, for applications composed of small tasks (bc, sort, cuckoo)---at all distances and at fixed power. As the individual task become larger (e.g. dft) or program uses large memory pages (e.g. cem, refer to Section~
-\ref{sec:result_compiler_time} for further explanation) \sys incurs overhead from memory virtualization that cause its performance to be comparable (or in a single cases, cem, worse) to Chain. 
+We evaluate \sys's run time performance and compare the results to the run time
+performance of Chain.  We show the results in Figure~\ref{fig:runtime}. For
+each application we measured its execution time on continuous power (the first
+two bars of each group) and on intermittent power at 20cm and 40 cm from the
+RFID antenna (the second two and third two bars of each group, respectively).
+The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average.
+The results show that \sys provides 
+a performance benefit compared to Chain for most applications.  The performance benefit
+is greatest for applications that have small tasks (bc,
+sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that  
+have larger tasks (e.g. dft) or access more different pages of memory, \sys incurs
+overhead from memory virtualization that cause its performance to be comparable to
+(or in the single case of cem, worse than) Chain. 
 
-\subsubsection{\sys Compiler Overhead}
+
+We evaluated the impact that \sys's dynamic task coalescing had on run time
+performance.  Figure~\ref{fig:coalescing} shows the run time performance of
+\sys's coalescing, compared to \sys running without coalescing enabled with
+data normalized to the run time performance of \sys with coalescing.  We show
+data from experiments with continuous power (the first two bars in each bar
+group), and with intermittent power, with the WISP at 20 cm and 40cm from the
+RFID reader (the second and third groups of two bars in each group).
+%
+The data illustrate that coalescing improves \sys's performance by eliminating
+the overhead of committing after each task.  The performance benefit varies,
+providing up to 4.5x performance improvement (for cuckoo filtering, at 40cm).
+The cuckoo application (like other top-performers, bc and sort) has small tasks
+that \sys can easily coalesce to eliminate many commits. In contrast, for some
+applications, e.g. cem, coalescing does not improve performance. The reason for
+cem's poor performance is that cem uses a large LZW dictionary structure that
+spans multiple pages, but has very little {\em locality}.  The absence of
+locality means that coalesced tasks do not access the same pages, and as a
+result, do not amortize commit overhead. The lack of locality causes
+performance to regress to be similar to the non-coalescing case. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coalescing}
+	\caption{\sys coalescing performance measured per application on fixed power (left-most bar per application) and at 20 cm and 40 cm from the RFID reader (center and right-most two bars per application) compared to \sys without coalescing.}
+	\label{fig:coalescing}
+\end{figure}
+
+
+\subsubsection{Evaluating \sys's Compiler}
 \label{sec:result_compiler_time}
+\label{sec:results_compiler}
+
+We characterized the behavior of, and evaluated the efficiency of the \sys
+compiler.  Table~\ref{table:compiler_result} shows, for each application, for
+manually written benchmarks (Man.) and automatically compiled benchmarks
+(Comp.) the difference in the number of bytes of protected data (columns 2 and
+3), the number of tasks (columns 4 and 5), the number of \sys protected data
+API access calls (columns 6 and 7), the lines of code in each application for
+\sys and Chain (columns 8 and 9), and compilation time using \sys's compiler
+(column 10). 
+
+\begin{table}[t]
+	\centering
+	\footnotesize
+        \renewcommand{\tabcolsep}{1pt}
+	\begin{tabular}{|l|cc|cc|cc|cc|c|}
+		\hline
+		{} & \multicolumn{2}{c|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
+		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
+		\hline\hline
+		bc & 22 & 22 & 10 & 15 & 81 & 93 & 351 &588 & 3\\
+		cem & 3492 & 3242 & 12 & 9 & 92 & 123 & 388 &721 & 2\\
+		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 & 483 &762 & 6\\
+		rsa & 332 & 250 & 20 & 27 & 130 & 296 & 887 &1233 & 86\\
+		ar & 166 & 218 & 11 & 6 & 112 & 333 & 483 &762 & 34\\
+		sort & 104 & 104 & 4 & 2 & 70 & 23 & 180 & 287 & $<$1\\
+		dft$^\dagger$ & --- & --- & --- & --- & --- & --- & 222 & 293 & ---\\
+		%dd &  &  &  &  &  &  &  & 287 &  \\
+		\hline
+	\end{tabular}
+	\caption{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns). $^\dagger$dft does not compile with Clang}
+\label{table:compiler_result}
+\end{table}
+
+On average, compiler-generated code introduces about 0.3\% more bytes of
+protected data, suggesting that liveness analysis captures natural boundaries
+in the use of variables also caught by a manual implementation.
+Compiler-generated code generates about 16\% fewer tasks for applications, on
+average.  The results indicate that the \sys compiler selects task boundaries
+differently than a programmer would manually, favoring fewer, larger tasks.
+The \sys compiler inserts protected data access operations conservatively when
+a variable {\em may} alias a protected variables, due to the limitations of
+pointer aliasing. Consequently, the \sys compiler introduces 48\% more
+protected data accesses than programmer-written code. The run time results in
+Section~\ref{sec:result_compiler_time} show that the increase in protected data
+accesses sometimes degrades performance. Overall, the data show that the
+compiler automatically generates tasks similarly to manually written tasks.
+Doing so, \sys's compiler reaps the static task benefits of \sys, but
+simplifies programming by sparing the programmer the job of task decomposition. 
+
+We measured compile time for \sys's compiler's automatic task generation for
+each application\footnote{We could not compile the dft application since LLVM
+inserts mathematical built-in functions (i.e. \texttt{\_\_muldf3},
+\texttt{\_\_floatsidf}, \texttt{\_\_adddf3}) whose implementation were not
+provided by the LLVM MSP430 back-end.}. We compiled the applications on a
+4-core virtual machine with 1\,GB of memory running Arch Linux on an Intel Core
+i5-6200U at 2.30\,GHz. We collected results using the Linux system time
+collected in seconds. Most of the compile time was spent computing pointer
+alias analysis, while calculating the possible live ranges of variables.
+Applications such as RSA that have a larger code size and that manipulate more
+variables have a longer compilation time, due to a larger search space for
+pointer aliasing. Nonetheless, the compile time is orders of magnitude shorter
+than manually defining tasks, which requires hours of programmer time. The
+characterization of \sys's compiler suggests that the \sys compiler enables
+simpler task-based intermittent programmer for \sys.
+
+
+In addition to the characterization of the \sys compiler in Table~\ref{table:compiler_result},  
+we experimentally assessed the performance of the \sys compiler, compared to the performance
+of the manually written benchmarks, as written in prior work~\cite{alpaca,chain}. 
+%
+Figure~\ref{fig:comp_user} compares the performance of manually written
+benchmark code to the performance of code automatically compiled using \sys.
+The figure shows run time for both cases, normalized to the run time of the
+manually written program, running on continuous power.
+%
+The data show that in all cases except for ar and rsa, the run time performance
+of compiled code generated by the \sys compiler has comparable performance to
+manually written code.  With comparable performance in most cases, the data
+suggest that the \sys compiler not only makes programming simpler, but does so,
+in most cases, without a high run time overhead.  In the cases of both ar and
+rsa, the code manipulates a large amount of data that is stored in an array and
+passed into functions by reference.   We expect that the data being manipulated
+by reference is leading to a large amount of may-alias references in the
+compiler's analysis, which leads to a larger number of accesses to protected
+data in the automatically compiled code, compared to the manually written code.
+
 
 \begin{figure}
 	\centering
@@ -163,19 +260,9 @@ We evaluate \sys experimentally and compare its performance against Chain. Resul
 	\label{fig:comp_user}
 \end{figure}
 
-In Table~\ref{table:compiler_result} we have assessed the overhead induced by the \sys compiler. It is, nonetheless, important to find out how much does this overhead translates to increased execution time for each \sys application. The result of this investigation is provided in Figure~\ref{fig:comp_user}. We conclude that in most of the cases \sys compiler code provided comparable execution time to code split into tasks manually (except for ar and rsa applications). 
 
-\subsubsection{\sys Coalescing Performance}
-\label{sec:result_compiler_time}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/coalescing}
-	\caption{\sys coalescing performance measured per application (left-most bar per application) and at multiple WISP to RFID reader antenna distances, \{20, 40\}\,cm (center and right-most bar per application) assessed against non-coalescing \sys.}
-	\label{fig:coalescing}
-\end{figure}
 
-An important benchmark is to measured the effectiveness of \sys coalescing. At fixed power and varying WISP to RFID antenna distances we compared \sys execution time per each application (tasked manually). Result, given in Figure~\ref{fig:coalescing}, clearly illustrates that coalescing provides a benefit for all the applications, providing even seven times improvement (bc application at 40\,cm). bc application is composed of small tasks, which \sys can easily coalesce. On the other hand, for certain applications, e.g. cem, coalescing improvement is not significant. cem uses large data structure that expands over multiple pages, which does not leave room for other variables. Any interaction will induce large page swap which cause little improvement in \sys performance against non-coalescing case. 
 
 %\begin{table}
 %	\centering
