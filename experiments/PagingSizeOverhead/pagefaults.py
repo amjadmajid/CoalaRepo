@@ -38,16 +38,21 @@ def figureSetting():
 apps_names=[
     "cem",
     "cuckoo",
+    'ar',
     "dft",
+    'rsa',
     "bc",
-    "sort"
+    "sort", 
+
 ]
 
 
 data_page = [
     np.array([8498,7354,5367,5379,5344,5295,5237,5236])/(8498/3),
     np.array([759, 137, 130,49,39,36,0,0]) /(759/3)  ,
+    np.array([15528, 9388,  8825,  8549,  5141,  0, 0, 0])/(15528/3) ,
     np.array([3249,3225,3201,3177,1953,100,0,0])/(3249/3),
+    np.array([4671,  4575,  4288,  4486,  3488,  2895,  0, 0])/(4671/3),
     np.array([602, 0, 0,0,0,0,0,0])/(602/3),
     np.array([5350,4430,3510,2782,0,0,0,0])/(5350/3) 
 ]
@@ -64,13 +69,13 @@ for d in data_page:
   s+=8.5 
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([4,12.5,21,29.5,38]) )
+ax.xaxis.set_major_locator(ticker.FixedLocator([4,12.5,21,29.5,38, 47, 57]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(apps_names ) )
 
 
 plt.yticks([0, 2, 4])  
 
-plt.ylabel('Norm. runtime')
+plt.ylabel('Norm. page faults')
 
 plt.tight_layout()
 f.savefig("../figures/pagSizeOverhead.eps",format="eps", dpi=1200)

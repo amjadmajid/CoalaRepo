@@ -38,7 +38,9 @@ def figureSetting():
 apps_names=[
     "cem",
     "cuckoo",
+    'ar',
     "dft",
+    'rsa',
     "bc",
     "sort"
 ]
@@ -49,17 +51,28 @@ row_cuc_norm = row_cuc / np.min(row_cuc)
 row_cem = np.array([8549451,5388765,3626039,3814352,4608503, 6421565, 10096537,17589788])
 row_cem_norm = row_cem / np.min(row_cem)
 
+
+row_ar = np.array([ 188089,  152107,  139285,  146280,  134494,  162834,  139537,  179792])
+row_ar_norm = row_ar / np.min(row_ar)
+
+row_dft = np.array( [28438580,28458614,28511341,28572634,28464076,28075348,28308658,28880930])
+row_dft_norm = row_dft / np.min(row_dft)
+
+row_rsa = np.array( [514148, 318774 , 309972,  301252 , 207486 , 1412470 ,1540923 ,1797342])
+row_rsa_norm = row_rsa / np.min(row_rsa)
+
+
+
 row_bc = np.array([788926, 615698, 638402, 660397,732470, 911575, 1274839, 1961663])
 row_bc_norm = row_bc / np.min(row_bc)
 
 row_sort = np.array( [2937186,2734324,2495083,2317925,1243372,1566328,2219896,3460253])
 row_sort_norm = row_sort / np.min(row_sort)
 
-row_dft = np.array( [28438580,28458614,28511341,28572634,28464076,28075348,28308658,28880930])
-row_dft_norm = row_dft / np.min(row_dft)
 
 
-data_muc = [row_cem_norm, row_cuc_norm, row_dft_norm, row_bc_norm,row_sort_norm]
+
+data_muc = [row_cem_norm, row_cuc_norm, row_ar_norm, row_dft_norm, row_rsa_norm,  row_bc_norm,row_sort_norm]
 
 
 
@@ -73,7 +86,7 @@ for d in data_muc:
   s+=8.5 
 
 ax = plt.axes()
-ax.xaxis.set_major_locator(ticker.FixedLocator([4,12.5,21,29.5,38]) )
+ax.xaxis.set_major_locator(ticker.FixedLocator([4,12.2,21,29,37.5, 46.5, 54.5]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(apps_names ) )
 
 
