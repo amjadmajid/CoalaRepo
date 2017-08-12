@@ -69,7 +69,7 @@ def figureSetting():
 
     
 distances = ["cont.csv",'20cm.csv', '40cm.csv']
-apps = ["bc","cem", "sort", 'ar', 'rsa', 'dft']
+apps = ["cem", "cuckoo", 'ar', 'dft','rsa', "bc", "sort"]
 
 f = plt.figure(figsize=(8,2.6))
 figureSetting()    
@@ -89,7 +89,7 @@ dft = [0.7795645673, 0.87543120, 0.78435398, 0.92709883,  4.063, 3.967868623 ]
 
 
 s=0
-for j, app in enumerate(apps[0:3]):
+for j, app in enumerate(apps[0:2]):
 
     for i, dis in enumerate(distances):
         row=[]
@@ -110,6 +110,18 @@ for i in [0,2,4]:
     row=[]
     row.append(ar[i])
     row.append(ar[i+1])
+    [CA, NO] = plt.bar( np.array([0,0.5])+i/2+6+s, 
+    np.array(row)/float(row[0]), 
+    width=0.5, 
+    color=['#f7fcb9', '#addd8e'], 
+     linewidth=0.5)
+
+s+=0.5;
+
+for i in [0,2,4]:
+    row=[]
+    row.append(dft[i])
+    row.append(dft[i+1])
     [CA, NO] = plt.bar( np.array([0,0.5])+i/2+9+s, 
     np.array(row)/float(row[0]), 
     width=0.5, 
@@ -130,17 +142,24 @@ for i in [0,2,4]:
 
 s+=0.5;
 
-for i in [0,2,4]:
-    row=[]
-    row.append(dft[i])
-    row.append(dft[i+1])
-    [CA, NO] = plt.bar( np.array([0,0.5])+i/2+15+s, 
-    np.array(row)/float(row[0]), 
-    width=0.5, 
-    color=['#f7fcb9', '#addd8e'], 
-     linewidth=0.5)
+for j, app in enumerate(apps[5:7]):
 
-s+=0.5;
+    for i, dis in enumerate(distances):
+        row=[]
+        f_v = open("coalescing/page_128/"+app+"/"+dis) 
+        f_n = open("nocoalescing/page_128/"+app+"/"+dis) 
+        row.append( executionTime(f_v) )
+        row.append( executionTime(f_n) )
+        f_v.close()
+        f_n.close()
+        [CA, NO] = plt.bar( 15 + np.array([0,0.5])+i+j*len(distances)+s, 
+            np.array(row)/float(row[0]), 
+            width=0.5, 
+            color=['#f7fcb9', '#addd8e'], 
+             linewidth=0.5)
+    s+=0.5;
+
+
 
 plt.legend([CA, NO], ["Coalescing", "No coalescing"])
 
@@ -150,7 +169,7 @@ ax.xaxis.set_major_locator(ticker.FixedLocator(  (np.arange(len(apps)) * len(dis
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
 
-plt.xlim(0,20.5)
+plt.xlim(0,24)
 plt.ylabel("Norm. runtime")
 plt.tight_layout()
 plt.legend(loc='upper left')
