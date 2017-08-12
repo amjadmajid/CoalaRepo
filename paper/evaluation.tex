@@ -303,7 +303,7 @@ The results show a clear ``bathtub curve'' in the performance of each
 application, as the number of page faults varies. The data show that across
 application there is a page size that minimizes \emph{both} execution time.  We
 observe that the page size is not the same for each application, although 64
-byte pages perform well for all applications except sort. The increased rate of
+byte pages perform well for all applications. The increased rate of
 page faults is responsible for the overhead with small page sizes; smaller
 pages require accessing more different pages, leading to higher paging costs.
 With larger page sizes, the overhead is higher than with moderate pages, too.
