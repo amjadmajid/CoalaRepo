@@ -14,10 +14,10 @@ import matplotlib.ticker as ticker
 
 
 apps_names=[
-    "Cuckoo",
-    "CEM",
-    "BC",
-    "Sort"
+    "cuckoo",
+    "cem",
+    "bc",
+    "sort"
 ]
 
 row_cuc = np.array([1203109, 420241, 380692,147507, 148331, 513967, 805221,1257204])
@@ -75,14 +75,12 @@ def autolabel(rects, i):
 
           
 
-f = plt.figure(figsize=(8,4))
+f = plt.figure(figsize=(8,3.5))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
 ax.xaxis.set_major_locator(ticker.FixedLocator([0,1,2,3]) )
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(apps_names ) )
-
-plt.ylabel('Normalized')
 
 dataSet = [np.transpose(data_muc), -np.transpose(data_page) ]
 
@@ -104,9 +102,9 @@ for data in dataSet:
 # add the page sizes
 for i in range(8):
     autolabel(bar1[i], i)
-
+plt.ylabel(' ')
     
-plt.annotate('normalized overhead', fontsize=14,
+plt.annotate('norm. overhead', fontsize=14,
              xytext = (2,6),  # text location
              xy=(1.5,3.5),        # arrows points to 
              ha = 'left',    # horizontal alignment 
@@ -114,16 +112,18 @@ plt.annotate('normalized overhead', fontsize=14,
              arrowprops={'facecolor': '0.8', 'shrink' : 0.1}, 
             )
 
-plt.annotate('Page faults', fontsize=14,
+plt.annotate('norm. page faults', fontsize=14,
              xytext = (1.9,-2.9),  # text location
              xy=(1.7,-0.9),        # arrows points to 
              ha = 'left',    # horizontal alignment 
              va = 'top',    # vertical alignment
              arrowprops={'facecolor': '0.8', 'shrink' : 0.1}, 
             )
+
+# plt.ylim(-4,3)    
+plt.yticks([-4, -2, 1, 4,7,10], ['10e4', '10e2', '0','5','10', '15',  '20'])  
 plt.tight_layout()
-plt.ylim(-4,11)    
-plt.yticks([-4, -2, 0,3, 6,9,12,15], ['10e4', '10e2', '0','5','10', '15',  '20', '25'])  
 f.savefig("../figures/pagSizeOverhead.eps",format="eps", dpi=1200)
 f.savefig("../figures/pagSizeOverhead.pdf",format="pdf", dpi=1200)
+# plt.tight_layout()
 plt.show()

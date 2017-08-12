@@ -74,7 +74,7 @@ data_dft = dataMiner(filePath_DFT, 0xB000000, 0xB400000, 2)
 data_cem = dataMiner(filePath_cem, 0xB000000, 0xB400000, 2)
 
 ## Plot settings
-f = plt.figure(figsize=(8,4))
+f = plt.figure(figsize=(8,2.5))
 figureSetting()                        # Set figure layout
 
 ax = plt.axes()
