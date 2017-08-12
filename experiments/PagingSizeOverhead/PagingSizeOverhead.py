@@ -14,10 +14,10 @@ import matplotlib.ticker as ticker
 
 
 apps_names=[
-    "Cuckoo",
-    "CEM",
-    "BC",
-    "Sort"
+    "cuckoo",
+    "cem",
+    "bc",
+    "sort"
 ]
 
 row_cuc = np.array([1203109, 420241, 380692,147507, 148331, 513967, 805221,1257204])
@@ -102,7 +102,7 @@ for data in dataSet:
 # add the page sizes
 for i in range(8):
     autolabel(bar1[i], i)
-
+plt.ylabel(' ')
     
 plt.annotate('norm. overhead', fontsize=14,
              xytext = (2,6),  # text location
@@ -119,10 +119,11 @@ plt.annotate('norm. page faults', fontsize=14,
              va = 'top',    # vertical alignment
              arrowprops={'facecolor': '0.8', 'shrink' : 0.1}, 
             )
-plt.tight_layout()
+
 # plt.ylim(-4,3)    
 plt.yticks([-4, -2, 1, 4,7,10], ['10e4', '10e2', '0','5','10', '15',  '20'])  
+plt.tight_layout()
 f.savefig("../figures/pagSizeOverhead.eps",format="eps", dpi=1200)
 f.savefig("../figures/pagSizeOverhead.pdf",format="pdf", dpi=1200)
-plt.tight_layout()
+# plt.tight_layout()
 plt.show()
