@@ -17,20 +17,40 @@ For distance-controlled experiments, we affixed the WISP at varying lengths to
 hollow paper tubes placed flat on a lying antenna. We did timing measurements
 using the Salea~\cite{saleae} logic analyzer.
 
-We also used an alternative setup where the MSP-TS430RGZ48C launchpad was used
-for continuous power experiments. We used internal timer for measuring run
-time. For harvested energy, we used WISP\,5.0~\cite{wisp5,wisp} hardware and
-ThingMagic Astra-EX integrated RFID reader set at 30\,dBm transmission power.
-We used EDB~\cite{edb} to measure run time. Applications were cross-compiled
-using GCC and Clang, so that we can use LLVM for \sys compiler. Version 3.8.0
-was used for both Clang and LLVM.
+For some experiments (noted below) we used an alternative setup where the
+MSP-TS430RGZ48C launchpad was used for continuous power experiments. We used
+internal timer for measuring run time. For harvested energy, we used
+WISP\,5.0~\cite{wisp5,wisp} hardware and ThingMagic Astra-EX integrated RFID
+reader set at 30\,dBm transmission power at 915\,MHz.  We used EDB~\cite{edb}
+to measure run time. Applications were cross-compiled using GCC and Clang,
+allowing us to use LLVM for the \sys compiler. We used version 3.8.0 of both
+Clang and LLVM.
 
 \subsection{Software Suite Description}
 \label{sec:results_software}
 
-We compare \sys against state-of-the-art task-based runtime Chain~\cite{chain}. We are not comparing \sys against DINO~\cite{dino} or Mementos~\cite{mementos} (Refer to Section~\ref{sec:background_consistency}), as (i) Chain is the only modular execution model available to which we can compare \sys, and (ii) Chain proved already its superiority over sequential model counterparts (i.e. DINO and Mementos)\footnote{We need to note that although another very relevant task-based runtime has been recently presented and referenced many times throughout this paper---Alpaca~\cite{alpaca} (written by the same group as Chain)---except the recently accepted manuscript we did not have the access to Alpaca's code during the preparation of this paper. Therefore Alpaca was excluded from the evaluation.}.
+We compare \sys against state-of-the-art task-based runtime Chain~\cite{chain}.
+We do not compare \sys to other, earlier systems, such as DINO~\cite{dino} or
+Mementos~\cite{mementos} (cf. Section~\ref{sec:background_consistency}), as
+Chain is the only task-based execution model available to which we can compare
+\sys. 
 
-The applications that were used in the evaluation are: (i) \textbf{bc}: counts bits in byte pseudo-random string using varying algorithms. Each result is compared for correctness; (ii) \textbf{cem}: emulates an embedded temperature sensing engine: measurements are randomly generated and are compressed using a LZW algorithm for  fixed entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: implements Cuckoo filter---the program first stores a sequence of pseudo-random numbers, then queries the filter to recover it; (iv) \textbf{rsa}: encrypts predefined string with a predefined key; (v) \textbf{ar} performs nearest neighbour classification using randomly generated sequence of three-axes accelerometer data. This set of benchmarks is the same as used in~\cite{chain,alpaca}. In addition to Chain benchmarks new applications were implemented: (vi) \textbf{sort}: selection sort algorithm, and (vii) \textbf{dft}: discreet Fourier transform. All applications are compared in Table~\ref{table:compiler_result} in terms of source lines of code against Chain.
+We evaluated \sys using benchmarks from the literature~\cite{chain,alpaca} and
+several new programs: (i) \textbf{bc}: counts bits in byte pseudo-random string
+using several algorithms, and compares results for correctness; (ii)
+\textbf{cem}, which emulates an embedded temperature sensing engine and in
+which measurements are randomly generated and compressed using LZW with a fixed
+entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: which implements
+a Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random
+numbers, then queries the filter to recover the sequence; (iv) \textbf{rsa}:
+which encrypts a fixed string with a stored key; (v) \textbf{ar}: which
+performs nearest neighbour classification of randomly generated data modeling a
+three-axis accelerometer.  This set of benchmarks overlaps with those used
+in~\cite{chain,alpaca}. We implemented several new applications: (vi)
+\textbf{sort}: selection sort algorithm on a fixed sequence of numbers, and
+(vii) \textbf{dft}: discrete Fourier transform. All applications are compared
+in columns eight and nine of Table~\ref{table:compiler_result} showing the
+number of source lines of code compared to Chain.
 
 %\begin{table}[t]
 %	\centering
@@ -55,6 +75,13 @@ The applications that were used in the evaluation are: (i) \textbf{bc}: counts b
 
 \subsection{\sys Evaluation Results}
 \label{sec:results_evaluation}
+
+We evaluated \sys to show that it is easy to use and efficient across our
+benchmarks.  We evaluate \sys's ease of use by characterizing \sys's automatic
+task compiler.  We evaluate \sys efficiency by comparing its runtime
+performance to Chain.  We characterize \sys by studying how its performance
+varies due to coalescing and when using automatic task compilation versus
+manual task compilation.
 
 \subsubsection{\sys Compiler Performance}
 \label{sec:results_compiler}
