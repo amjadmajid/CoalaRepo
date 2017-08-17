@@ -1,1 +1,0 @@
-#define KEY_SIZE_BITS 32
