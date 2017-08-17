@@ -1,0 +1,1 @@
+"./main.o" -T"../msp430fr5969.ld" -Wl,--start-group -lgcc -lmspmath -lipos-gcc-dma -lc -Wl,--end-group 
