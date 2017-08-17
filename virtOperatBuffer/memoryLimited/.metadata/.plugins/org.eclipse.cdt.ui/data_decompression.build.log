@@ -1,7 +1,0 @@
-
-**** Build of configuration Debug for project data_decompression ****
-
-/Applications/ti/ccsv7/utils/bin/gmake -k -j 3 all -O 
-gmake[1]: 'data_decompression.out' is up to date.
-
-**** Build Finished ****
