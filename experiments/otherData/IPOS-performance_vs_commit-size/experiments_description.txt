@@ -1,0 +1,20 @@
+This experiment is used to measure the performance of IPOS versions.
+
+The measurement metric:
+	time-to-compelation. 
+
+The measurement tool: 
+	Logic 16 (a logic analyzer from www.saleae.com)
+
+The hardware to be used:
+	TI launchpad MSP430FR5969 (mcu: MSP430FR5969)
+
+The applications to be tested are: 
+	1- largeDataCommit: 
+		In each iteration the app manipulate a certain number (2^0 -> 2^7) of variables and commit them. 
+		The DMA approach always commit 2^7 variables.  The ipos performance limitted version could not 
+		manipulate 128 variables. It raises a "heap, stack collision problem". 
+
+
+
+
