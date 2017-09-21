@@ -1,167 +1,241 @@
-//https://proprogramming.org/program-to-implement-rsa-algorithm-in-c/
-
-// #include<stdio.h>
 #include <msp430.h>
-#include <stdlib.h>
 #include <math.h>
 #include <uart-debugger.h>
-// #include<string.h>
+#include <ipos.h>
+
+#define DEBUG 1
 
 #define MSG "hello"
-#define MSG_LEN 6
+#define MSG_LEN 5
 
- int p,q,n,t,flag,e[50],d[50],temp[50],j,m[50],en[50],i;
+long int p,q, n, t, k,j, i, flag, e[10], d[10], m[10], temp[10], en[10];
+char * msgPt = MSG;
 
-char * msg = MSG;
-
-int prime( int);
-void ce();
- int cd( int);
-
+// Prototypes
+void initTask();
+void ce_1();
+void ce_2();
+void is_i_prime();
+void ce_3();
+void cd();
+void ce_4();
 void encrypt();
 void decrypt();
+void init();
 
-int main()
+
+int main(void )
+{
+    init();
+
+    taskId tasks[] = {
+        {initTask, 1},
+        {ce_1, 2},
+        {ce_2, 3},
+        {is_i_prime, 4},
+        {ce_3, 5},
+        {cd, 6},
+        {ce_4, 7},
+        {encrypt, 8},
+        {decrypt, 9}
+    };
+
+    //This function should be called only once
+    os_addTasks(9, tasks );
+    os_scheduler();
+
+  return 0;
+}
+
+void init()
 {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    PM5CTL0 &= ~LOCKLPM5;
+    // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
+    PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+
+    P3OUT &=~BIT5;
+    P3DIR |=BIT5;
+
+#if 0
+    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+    //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+    CSCTL0_H = 0;
+#endif
+
+#ifdef DEBUG
     uart_init();
+#endif
+}
 
+void initTask()
+{
+#ifdef DEBUG
+    uart_sendText("Start\n\r", 7);
+    uart_sendText("\n\r", 2);
+#endif
 
-    uart_sendText("START\n\r", 7);
-    // first prime number
-    p =  5;
-    flag=prime(p);
-    if(flag==0)
-    {
-        exit(1);
-    }
-
-    // second prime number
-    q = 7;
-    flag=prime(q);
-    if(flag==0||p==q)
-    {
-        exit(1);
-    }
-
-    // plain text messege
-    for(i=0; i < MSG_LEN  ;i++)
-    {
-        m[i]= * msg;
-        msg++;
-    }
-
+    p= 7;
+    q= 17;
     n=p*q;
     t=(p-1)*(q-1);
-
-    ce();
-    // printf("\nPOSSIBLE VALUES OF e AND d ARE\n");
-    // for(i=0;i<j-1;i++)
-    //     printf("\n%ld\t%ld",e[i],d[i]);
-    encrypt();
-    decrypt();
-
-    while(1);
-
-    return 0;
-}
-
-int prime( int pr)
-{
-    int i;
-    j=sqrtf(pr);
-    for(i=2;i<=j;i++)
-    {
-        if(pr%i==0)
-            return 0;
-    }
-    return 1;
-}
-void ce()
-{
-    int k;
+    i=1;
     k=0;
-    for(i=2;i<t;i++)
+    flag=0;
+    for (int ii = 0; ii < MSG_LEN; ii++)
     {
-        if(t%i==0)
-            {
-                uart_sendHex16(i);
-                uart_sendText("\n\r", 2);
-                continue;
-            }
-        flag=prime(i);
-        if(flag==1&&i!=p&&i!=q)
+        m[ii] = *(msgPt+ii);
+    }
+}
+
+void ce_1()
+{
+    i++; // start with i=2
+
+    if(i >= t)
+    {
+        os_jump(6);  // go to encryption
+    }
+}
+
+void ce_2()
+{
+    if(t % i == 0)
+    {
+        os_jump(8); // go to ce_1
+    }
+}
+
+void  is_i_prime()
+{
+    int c;
+    j=sqrt(i);
+    for(c=2;c<=j;c++)
+    {
+        if(i%c==0)
         {
-            e[k]=i; flag=cd(e[k]);
-            if(flag>0)
-            {
-                d[k]=flag;
-                k++;
-            }
-            if(k==99)
-                break;
+            flag=0;
+            os_jump(7); // go to ce_1
+            return;
         }
     }
+    flag = 1;
 }
- int cd( int x)
+
+void ce_3()
 {
-     int k=1;
+    if(flag==1&&i!=p&&i!=q)
+    {
+        e[k]=i;
+    }else{
+        os_jump(6); // go to ce_1
+    }
+}
+
+void cd()
+{
+    long int kk=1;
     while(1)
     {
-        k=k+t;
-        uart_sendHex16(k);
-        uart_sendText("\n\r", 2);
-        if(k%x==0)
-            return(k/x);
+        kk=kk+t;
+        if(kk % e[k]==0){
+            flag = (kk/ e[k] );
+            break;
+        }
     }
 }
+
+void ce_4()
+{
+
+    if(flag>0)
+    {
+        d[k]=flag;
+        k++;
+    }
+    if(k > 9)
+    {
+        os_jump( 1 );  // go to encrypt ( this function call is not needed)
+    }else{
+        os_jump(4); // go to ce_1
+    }
+
+}
+
 void encrypt()
 {
-     int pt,ct,key=e[0],k,len;
-    i=0;
-    len= MSG_LEN;
-    while(i!=len)
+    long int pt,ct,key=e[0], kk;
+
+    int cnt=0;
+    while(cnt < MSG_LEN)
     {
-        pt=m[i];
+        pt=m[cnt];
         pt=pt-96;
-        k=1;
+        kk=1;
         for(j=0;j<key;j++)
         {
-            k=k*pt;
-            k=k%n;
+            kk=kk*pt;
+            kk=kk%n;
         }
-        temp[i]=k;
-        ct=k+96;
-        en[i]=ct;
-        i++;
+        temp[cnt]=kk;
+        ct=kk+96;
+        en[cnt]=ct;
+        cnt++;
     }
-    en[i]=-1;
-    uart_sendText("THE ENCRYPTED MESSAGE IS\n\r", 26);
-     for(i=0;en[i]!=-1;i++)
-         uart_sendText(en[i], 1);
-     uart_sendText('\n\r', 2);
+    en[cnt]=-1;
+
+#ifdef DEBUG
+    uart_sendText("THE_ENCRYPTED_MESSAGE_IS\n\r", 26);
+     for(cnt=0;cnt < MSG_LEN;cnt++){
+         uart_sendChar(en[cnt]);
+     }
+     uart_sendText("\n\r", 2);
+#endif
+
+__delay_cycles(500000);
 }
+
 void decrypt()
 {
-     int pt,ct,key=d[0],k;
-    i=0;
-    while(en[i]!=-1)
+    long int pt,ct,kk, key=d[0], cnt=0;
+
+    while(en[cnt]!=-1)
     {
-        ct=temp[i];
-        k=1;
+        ct=temp[cnt];
+        kk=1;
         for(j=0;j<key;j++)
         {
-            k=k*ct;
-            k=k%n;
+            kk=kk*ct;
+            kk=kk%n;
         }
-        pt=k+96;
-        m[i]=pt;
-        i++;
+        pt=kk+96;
+        m[cnt]=pt;
+        cnt++;
     }
-    m[i]=-1;
-    uart_sendText("THE DECRYPTED MESSAGE IS\n\r", 26);
-     for(i=0;m[i]!=-1;i++)
-         uart_sendText(en[i], 1);
-    uart_sendText('\n\r', 2);
+    m[cnt]=-1;
+
+#ifdef DEBUG
+
+    uart_sendText("THE_DECRYPTED_MESSAGE_IS\n\r", 26);
+     for(cnt=0;cnt < MSG_LEN ;cnt++){
+         uart_sendChar(m[cnt]);
+     }
+    uart_sendText("\n\r", 2);
+
+#endif
+
+__delay_cycles(500000);
+
 }
+
+
+
+
+
+
+
+
+
+
