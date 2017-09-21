@@ -8,7 +8,9 @@
 #define MSG "hello"
 #define MSG_LEN 5
 
-long int p,q, n, t, k,j, i, flag, e[10], d[10], m[10], temp[10], en[10];
+long int p,q, n, t, k,j, i, flag, e[10], d[10], m[10], temp[10], en[10],
+        en_pt,en_ct=0,en_key, en_k, en_cnt, en_j=0,
+        de_pt,de_ct=0,de_key, de_k, de_cnt, de_j=0;
 char * msgPt = MSG;
 
 // Prototypes
@@ -19,8 +21,14 @@ void is_i_prime();
 void ce_3();
 void cd();
 void ce_4();
-void encrypt();
-void decrypt();
+void encrypt_init();
+void encrypt_inner_loop();
+void encrypt_finish();
+void encrypt_print();
+void decrypt_init();
+void decrypt_inner_loop();
+void decrypt_finish();
+void decrypt_print();
 void init();
 
 
@@ -36,12 +44,18 @@ int main(void )
         {ce_3, 5},
         {cd, 6},
         {ce_4, 7},
-        {encrypt, 8},
-        {decrypt, 9}
+        {encrypt_init, 8},
+        {encrypt_inner_loop, 9},
+        {encrypt_finish, 10},
+        {encrypt_print, 11},
+        {decrypt_init, 12},
+        {decrypt_inner_loop, 13},
+        {decrypt_finish, 14},
+        {decrypt_print, 15},
     };
 
     //This function should be called only once
-    os_addTasks(9, tasks );
+    os_addTasks(15, tasks );
     os_scheduler();
 
   return 0;
@@ -104,7 +118,7 @@ void ce_2()
 {
     if(t % i == 0)
     {
-        os_jump(8); // go to ce_1
+        os_jump(14); // go to ce_1
     }
 }
 
@@ -117,7 +131,7 @@ void  is_i_prime()
         if(i%c==0)
         {
             flag=0;
-            os_jump(7); // go to ce_1
+            os_jump(13); // go to ce_1
             return;
         }
     }
@@ -130,7 +144,7 @@ void ce_3()
     {
         e[k]=i;
     }else{
-        os_jump(6); // go to ce_1
+        os_jump(12); // go to ce_1
     }
 }
 
@@ -155,81 +169,101 @@ void ce_4()
         d[k]=flag;
         k++;
     }
-    if(k > 9)
+    if(k < 9)
     {
-        os_jump( 1 );  // go to encrypt ( this function call is not needed)
-    }else{
-        os_jump(4); // go to ce_1
+        os_jump(10); // go to ce_1
     }
-
 }
 
-void encrypt()
+void encrypt_init()
 {
-    long int pt,ct,key=e[0], kk;
-
-    int cnt=0;
-    while(cnt < MSG_LEN)
-    {
-        pt=m[cnt];
-        pt=pt-96;
-        kk=1;
-        for(j=0;j<key;j++)
-        {
-            kk=kk*pt;
-            kk=kk%n;
-        }
-        temp[cnt]=kk;
-        ct=kk+96;
-        en[cnt]=ct;
-        cnt++;
-    }
-    en[cnt]=-1;
-
-#ifdef DEBUG
-    uart_sendText("THE_ENCRYPTED_MESSAGE_IS\n\r", 26);
-     for(cnt=0;cnt < MSG_LEN;cnt++){
-         uart_sendChar(en[cnt]);
-     }
-     uart_sendText("\n\r", 2);
-#endif
-
-__delay_cycles(500000);
+   en_pt = m[en_cnt];
+   en_pt -=96;
+   en_k  = 1;
+   en_j  = 0;
+   en_key=e[0];
 }
 
-void decrypt()
+void encrypt_inner_loop()
 {
-    long int pt,ct,kk, key=d[0], cnt=0;
+   if(en_j < en_key)
+   {
+       en_k *= en_pt;
+       en_k %= n;
+       en_j++;
+       os_jump(0);
+   }
+}
 
-    while(en[cnt]!=-1)
-    {
-        ct=temp[cnt];
-        kk=1;
-        for(j=0;j<key;j++)
-        {
-            kk=kk*ct;
-            kk=kk%n;
-        }
-        pt=kk+96;
-        m[cnt]=pt;
-        cnt++;
-    }
-    m[cnt]=-1;
+void encrypt_finish()
+{
+   temp[en_cnt] = en_k;
+   en_ct = en_k + 96;
+   en[en_cnt] = en_ct;
 
+    if( en_cnt < MSG_LEN)
+   {
+       en_cnt++;
+       os_jump(13); // go to encrypt_init
+   }else{
+      en[en_cnt] = -1;
+   }
+}
+
+void encrypt_print()
+{
 #ifdef DEBUG
-
-    uart_sendText("THE_DECRYPTED_MESSAGE_IS\n\r", 26);
-     for(cnt=0;cnt < MSG_LEN ;cnt++){
-         uart_sendChar(m[cnt]);
-     }
+   uart_sendText("THE_ENCRYPTED_MESSAGE_IS\n\r", 26);
+    for(en_cnt=0;en_cnt < MSG_LEN;en_cnt++){
+        uart_sendChar(en[en_cnt]);
+    }
     uart_sendText("\n\r", 2);
-
 #endif
 
-__delay_cycles(500000);
-
+}
+void decrypt_init()
+{
+   de_k  = 1;
+   de_j  = 0;
+   de_key=d[0];
 }
 
+void decrypt_inner_loop()
+{
+   de_ct =  temp[de_cnt];
+   if(de_j < de_key)
+   {
+       de_k *= de_ct;
+       de_k %= n;
+       de_j++;
+       os_jump(0);
+   }
+}
+
+void decrypt_finish()
+{
+
+   de_pt = de_k + 96;
+   m[de_cnt] = de_pt;
+
+    if( en[de_cnt] != -1)
+   {
+       de_cnt++;
+       os_jump(13); // go to decrypt_1
+   }
+}
+
+void decrypt_print()
+{
+#ifdef DEBUG
+   uart_sendText("THE_DECRYPTED_MESSAGE_IS\n\r", 26);
+    for(de_cnt=0;de_cnt < MSG_LEN ;de_cnt++){
+        uart_sendChar(m[de_cnt]);
+    }
+   uart_sendText("\n\r", 2);
+#endif
+
+}
 
 
 
