@@ -5,18 +5,19 @@ from csf import *
 import scipy.stats as stats
 import numpy as np
 import math
+from collections import defaultdict
 
-def dataMiner( paths ):
+
+def dataMiner( apps, paths ):
 	"""
 	@input: relative paths to data files extracted from 
 			codeProfiler library
-	@output: a list of dictionaries for all the apps. 
-			 each dict entry has a task id and its size 
+	@output: { app:{task:values, ....}, .... } 
 	"""
-	data = []
-	for path in paths:
-		counter =  dict();
-		size =  dict();
+	task_sizes= defaultdict(list)
+	apps_size={}
+	for app, path in zip(apps, paths):
+
 		file = "../data/user/"+path[0]  # first path
 		for line in open(file):
 			try:
@@ -24,35 +25,59 @@ def dataMiner( paths ):
 			except:
 				continue
 
-			counter[taskId] =  counter.get(taskId, 0) + 1
-			size[taskId] = size.get(taskId,0) + int(value[:-1], 16)
+			task_sizes[app+'_'+taskId].append( int(value[:-1], 16) ) # lists of a task sizes for repeated executions
+		apps_size[app] = task_sizes.copy()
+		task_sizes.clear()
+	return apps_size
 
-		codeBlockDis= dict()
-		for key in counter:
-			codeBlockDis[key] = (size[key] / counter[key])
-		data.append(codeBlockDis)
-	return (data)
+
+
+def list_flatter(l):
+	"""
+	flatter to levels nested lists
+	"""
+	fl=[]
+	for sl in l:
+		for el in sl:
+			fl.append(el)
+	return(fl)
 
 
 def main():
-
+	
 	apps, paths = filesFinder('realTaskSize/*.txt')
+	d = dataMiner(apps, paths)
+	apps_names = d.keys() 
 
-	codeBlockDis = dataMiner(paths)
-	All_values = []
-	for i in range(len(apps)):
-		normPlotting(codeBlockDis[i].values())
 
-		All_values+=codeBlockDis[i].values()
 
-	f = plt.figure()
-	plt.hist(All_values, bins=25)
-	plt.xlabel("Task size in MCU cycles")
-	plt.tight_layout()
-	f.savefig("../figures/realTaskSize.pdf",format="pdf", dpi=1200)
-	plt.show()  
-	# print(codeBlockDis)
+	# task based processing/plotting
 
+	plt.figure("tasks distributions")
+	for app in apps_names:
+		tasks_names = d[app].keys()
+		# print(tasks_names)
+		c = generateRandomColor()
+		# print("task c", c)
+		for task_name in tasks_names:
+			if not normPlotting(d[app][task_name], c):
+				print(task_name)
+
+		plt.show()
+
+
+	apps_dict={}
+	for app in apps_names :
+		appVals = list_flatter( d[app].values() )
+		apps_dict[app] = appVals
+
+	# Plotting apps distributions
+	plt.figure("Apps distributions")
+	for app in apps_names :
+		c = generateRandomColor()
+		if not normPlotting( apps_dict[app], c  ): 
+			print(apps)
+		plt.show()
 
 
 if __name__ == '__main__':

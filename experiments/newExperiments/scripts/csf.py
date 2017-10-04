@@ -4,6 +4,18 @@ import matplotlib.mlab as mlab
 import matplotlib.ticker as ticker
 import os 
 import glob
+import random
+import colors
+
+colorCnts=0
+
+def generateRandomColor():
+	global colorCnts
+	c  = colors.colors[colorCnts]
+	colorCnts+=1
+	colorCnts %=len(colors.colors)
+	return (c)
+
 
 dataUser = '../data/user/'
 
@@ -53,11 +65,17 @@ def dataMiner(fileName, memStart, memEnd, wordSize):
 		
 	return(data)
 
-def normPlotting(d):
+def normPlotting(d, c):
+	if len(d) < 1:
+		return
 	mu = np.mean(d)
 	sigma = np.std(d)
 	x = np.linspace(mu-4*sigma,mu+4*sigma, 100)
-	plt.plot(x,mlab.normpdf(x, mu, sigma))
+	
+	if sigma ==0 :
+		return False
+	plt.plot(x,mlab.normpdf(x, mu, sigma), color=c, lw=1.5)
+	return True
 
 def figureSetting():
     """
