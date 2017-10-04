@@ -32,6 +32,8 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.930285174" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" value="msp430fr5969" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.1567120351" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/codeProfiler-repo/codeProfiler/include"/>
+									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/uart-debugger-repo/uart-debugger/include"/>
 									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/include"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
@@ -46,8 +48,8 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG.1970459064" name="Generate debug information (-g)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DEBUG" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION.343937228" name="Generate debug information in DWARF version (-gdwarf-)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION" value="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.DWARF_VERSION.3" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF.737550197" name="Do not emit DWARF additions beyond selected version (-gstrict-dwarf)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.STRICT_DWARF" value="true" valueType="boolean"/>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_LEVEL.2118056625" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_LEVEL" value="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_LEVEL.1" valueType="enumerated"/>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED.1926531083" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED" value="true" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_LEVEL.2118056625" name="Optimization Level" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_LEVEL" value="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_LEVEL.1" valueType="enumerated"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED.1926531083" name="Optimize for speed disregarding exact standards compliance (-Ofast)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPEED" value="true" valueType="boolean"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__C_SRCS.60487901" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__CPP_SRCS.747945160" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__CPP_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM_SRCS.1902335641" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM_SRCS"/>
@@ -56,11 +58,15 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.826112469" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.296636728" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
+									<listOptionValue builtIn="false" value="uart-debugger"/>
+									<listOptionValue builtIn="false" value="codeProfiler"/>
 									<listOptionValue builtIn="false" value="&quot;ipos-gcc-dma&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.159596829" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
+									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/uart-debugger-repo/uart-debugger/Debug"/>
+									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/codeProfiler-repo/codeProfiler/Debug"/>
 									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/Debug"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1389981532" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" value="&quot;${ProjName}.out&quot;" valueType="string"/>

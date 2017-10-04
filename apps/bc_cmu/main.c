@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include <ipos.h>
-#include <msp-math.h>
 
 #define SEED 4L
 #define ITER 100
@@ -284,6 +283,8 @@ void task_bit_shifter() {
     else{
         os_jump(OFFSET(t_bit_shifter, t_select_func));
     }
+
+//    PAGCMT(); // force page commit on the next task switch
 }
 
 void task_end() {

@@ -109,11 +109,11 @@ void __bringCrntPagROM();
                         ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
-#define __WP(var)   (\
-                        ( ( dirtyPag |= __IS_VAR_IN_CRNT_PAG(var) ) ==1 ) ? \
-                        ( (__VAR_PT_IN_RAM(var)) ):\
-                        ( (  (__typeof__(var)*) ( (( __pageSwap_w(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-                    )
+//#define __WP(var)   (\
+//                        ( ( dirtyPag |= __IS_VAR_IN_CRNT_PAG(var) ) == 1 ) ? \
+//                        ( (__VAR_PT_IN_RAM(var)) ):\
+//                        ( (  (__typeof__(var)*) ( (( __pageSwap_w(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
+//                    )
 
 
 #define __PP(wvar, rvar)  __temp_temp = RP(rvar) ; \
@@ -123,8 +123,10 @@ void __bringCrntPagROM();
  *        User Memory Interface
  ******************************************/
 
-#define WP(var)         ( *__WP(var))
-#define RP(var)         ( *__RP(var))
+//#define WP(var)         ( *__WP(var))
+#define WP(var)         ( *VARW(var) )
+//#define RP(var)         ( *__RP(var))
+#define RP(var)         ( *VAR(var) )
 #define PP(wvar, rvar)  ( __PP(wvar, rvar) )
 
 /******************************************

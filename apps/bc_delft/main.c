@@ -1,8 +1,7 @@
 #include <msp430.h>
 #include <stdlib.h>
-
+#include <codeProfiler.h>
 #include <ipos.h>
-#include <msp-math.h>
 
 #define SEED 4L
 #define ITER 100
@@ -76,16 +75,22 @@ void init() {
 
     P3DIR = BIT5;
 
+#if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
     CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
     CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
     CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
     CSCTL0_H = 0;
+#endif
+
+    cp_init();
 
 }
 
 void task_init() {
+    cp_reset();
+
     pinCont=1;
     WP(_v_func) = 0;
     WP(_v_n_0) = 0;
@@ -97,9 +102,12 @@ void task_init() {
     WP(_v_n_6) = 0;
 
     os_jump(OFFSET(t_init, t_select_func));
+
+    cp_sendRes("task_init \0");
 }
 
 void task_select_func() {
+    cp_reset();
 
     WP(_v_seed) = (uint32_t)SEED; // for test, seed is always the same
     WP(_v_iter) = 0;
@@ -134,8 +142,12 @@ void task_select_func() {
     else{
         os_jump(OFFSET(t_select_func, t_end));
     }
+
+    cp_sendRes("task_select_func \0");
 }
 void task_bit_count() {
+    cp_reset();
+
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
     unsigned temp = 0;
@@ -151,8 +163,12 @@ void task_bit_count() {
     else{
         os_jump(OFFSET(t_bit_count, t_select_func));
     }
+
+    cp_sendRes("task_bit_count \0");
 }
 void task_bitcount() {
+    cp_reset();
+
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
     tmp_seed = ((tmp_seed & 0xAAAAAAAAL) >>  1) + (tmp_seed & 0x55555555L);
@@ -169,6 +185,8 @@ void task_bitcount() {
     else{
         os_jump(OFFSET(t_bitcount, t_select_func));
     }
+
+    cp_sendRes("task_bitcount \0");
 }
 int recursive_cnt(uint32_t x){
     int cnt = bits[(int)(x & 0x0000000FL)];
@@ -188,6 +206,8 @@ int non_recursive_cnt(uint32_t x){
     return cnt;
 }
 void task_ntbl_bitcnt() {
+    cp_reset();
+
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_n_2) += non_recursive_cnt(tmp_seed);
     WP(_v_seed) = tmp_seed + 13;
@@ -199,8 +219,12 @@ void task_ntbl_bitcnt() {
     else{
         os_jump(OFFSET(t_ntbl_bitcnt, t_select_func));
     }
+
+    cp_sendRes("task_ntbl_bitcnt \0");
 }
 void task_ntbl_bitcount() {
+    cp_reset();
+
     uint16_t __cry = RP(_v_seed);
     WP(_v_n_3) += bits[ (int) (__cry & 0x0000000FUL)       ] +
         bits[ (int)((__cry & 0x000000F0UL) >> 4) ] +
@@ -220,8 +244,12 @@ void task_ntbl_bitcount() {
     else{
         os_jump(OFFSET(t_ntbl_bitcount, t_select_func));
     }
+
+    cp_sendRes("task_ntbl_bitcount \0");
 }
 void task_BW_btbl_bitcount() {
+    cp_reset();
+
     union
     {
         unsigned char ch[4];
@@ -242,8 +270,12 @@ void task_BW_btbl_bitcount() {
     else{
         os_jump(OFFSET(t_BW_btbl_bitcount, t_select_func));
     }
+
+    cp_sendRes("task_BW_btbl_bitcount \0");
 }
 void task_AR_btbl_bitcount() {
+    cp_reset();
+
     unsigned char * Ptr = (unsigned char *) &P(_v_seed) ;
     int Accu ;
 
@@ -262,8 +294,12 @@ void task_AR_btbl_bitcount() {
     else{
         os_jump(OFFSET(t_AR_btbl_bitcount, t_select_func));
     }
+
+    cp_sendRes("task_AR_btbl_bitcount \0");
 }
 void task_bit_shifter() {
+    cp_reset();
+
     unsigned i, nn;
     uint32_t tmp_seed = RP(_v_seed);
     for (i = nn = 0; tmp_seed && (i < (sizeof(long) * CHAR_BIT)); ++i, tmp_seed >>= 1)
@@ -281,9 +317,12 @@ void task_bit_shifter() {
     else{
         os_jump(OFFSET(t_bit_shifter, t_select_func));
     }
+
+    cp_sendRes("task_bit_shifter \0");
 }
 
 void task_end() {
+
 //    __no_operation();
 
     if (pinCont){

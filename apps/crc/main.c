@@ -1,8 +1,15 @@
 #include <msp430.h>
 #include <ipos.h>
-#include "uart-src.h"
+#include <codeProfiler.h>
+
 #define DATA_LEN 48
-#define DEBUG 1
+//#define DEBUG 1
+
+#ifdef DEBUG
+#include <uart-debugger.h>
+#endif
+
+__nv uint8_t pinCont = 0;
 
 const unsigned int CRC_Init = 0xFFFF;
 
@@ -43,6 +50,20 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;                 // Stop WDT
     PM5CTL0 &= ~LOCKLPM5;
 
+    P3OUT &=~BIT5;
+    P3DIR |=BIT5;
+
+#if 0
+    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+//    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+    CSCTL0_H = 0;
+#endif
+
+    cp_init();
+
     //Configure the UART
 #ifdef DEBUG
     // uart init
@@ -53,19 +74,29 @@ void init()
 
 void initTask()
 {
+    cp_reset();
+    pinCont=1;
     WP(cnt) = 0;
     WP(SW_Results) = CRC_Init;
 
+    cp_sendRes("initTask \0");
 }
 
 void firstByte()
 {
+    cp_reset();
+
     // First input lower byte
     WP(SW_Results) = CCITT_Update(RP(SW_Results), CRC_Input[RP(cnt)] & 0xFF);
+
+    cp_sendRes("firstByte \0");
+
 }
 
 void secondByte()
 {
+    cp_reset();
+
     // Then input upper byte
     WP(SW_Results) = CCITT_Update(RP(SW_Results), (CRC_Input[RP(cnt)] >> 8) & 0xFF);
 
@@ -74,11 +105,21 @@ void secondByte()
     {
         os_jump(3);
     }
+
+    cp_sendRes("secondByte \0");
+
 }
 
 void task_finish()
 {
-    FLASH(); // force a commit after this task
+
+    PAGCMT(); // force a commit after this task
+
+    if (pinCont){
+        P3OUT |=BIT5;
+        P3OUT &=~BIT5;
+    }
+    pinCont=0;
 
 #ifdef DEBUG
 

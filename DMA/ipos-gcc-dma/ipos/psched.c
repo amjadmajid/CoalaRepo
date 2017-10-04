@@ -5,6 +5,8 @@
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 #define VERTUTASK       10
+#define __numbPwrInt (*(uint16_t*)(0x1990))
+#define __PI_overflow (*(uint16_t*)(0x1992))
 
 #define JUMP2()  if(!__jump)  \
                     {   \
@@ -41,8 +43,8 @@
             __jump_cnt = 0;    \
         }
 
-#define DEBUG
-//#define COALESCING 1
+#define DEBUG 1
+#define COALESCING 1
 
     unsigned char __jump = 0;
     unsigned int __jump_by = 0;
@@ -82,6 +84,12 @@ void os_jump(unsigned int j)
 
 void os_scheduler()
 {
+    __numbPwrInt++;
+    if(__numbPwrInt >= 0xffff)
+    {
+        __PI_overflow++;
+        __numbPwrInt=0;
+    }
 
 # if COALESCING
     __virtualTaskCntr = (__realTaskCntr >> 1)+1 ;  // make half of the last execution history, your new virtual task size
@@ -107,13 +115,13 @@ void os_scheduler()
 
 #if COALESCING
 
-//#if DEBUG
-//        if(pers_cnt < 1024){
-//            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
-//            pers_cnt++;
-//        }
-//
-//#endif
+#if DEBUG
+        if(pers_cnt < 1024){
+            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
+            pers_cnt++;
+        }
+
+#endif
         for(; __virtualTaskCntr > 0 ; __virtualTaskCntr-- )
         {
 #endif

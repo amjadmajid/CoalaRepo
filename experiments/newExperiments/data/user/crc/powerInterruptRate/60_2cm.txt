@@ -1,0 +1,101 @@
+2017-10-02 13:34:59,101 sllurp: INFO: log level: INFO
+2017-10-02 13:34:59,101 sllurp: INFO: selected recommended Tari of 7140 for WISP5
+2017-10-02 13:34:59,102 sllurp.llrp: INFO: connecting...
+2017-10-02 13:34:59,104 sllurp.llrp: INFO: will reset reader state on connect
+2017-10-02 13:34:59,104 sllurp.llrp: INFO: will start inventory on connect
+2017-10-02 13:34:59,105 sllurp.llrp: INFO: using antennas: [1]
+2017-10-02 13:34:59,105 sllurp.llrp: INFO: connected to ('192.168.10.103', 5084)
+2017-10-02 13:35:01,124 sllurp.llrp: INFO: requested modulation: WISP5
+2017-10-02 13:35:01,124 sllurp.llrp: INFO: using reader mode: {'C': 0, 'MaxTari': 7140, 'M': 2, 'PIE': 1500, 'StepTari': 0, 'R': 1, 'FLM': 0, 'MinTari': 7140, 'ModeIdentifier': 0, 'BDR': 640000, 'Mod': 0}
+2017-10-02 13:35:01,124 sllurp.llrp: INFO: stopping politely
+2017-10-02 13:35:01,138 sllurp.llrp: INFO: reader finished inventory
+2017-10-02 13:35:01,139 sllurp.llrp: INFO: starting inventory
+2017-10-02 13:35:01,662 sllurp: INFO: no tags seen
+2017-10-02 13:35:02,173 sllurp: INFO: no tags seen
+2017-10-02 13:35:02,685 sllurp: INFO: no tags seen
+2017-10-02 13:35:03,194 sllurp: INFO: no tags seen
+2017-10-02 13:35:03,705 sllurp: INFO: no tags seen
+2017-10-02 13:35:04,215 sllurp: INFO: no tags seen
+2017-10-02 13:35:04,727 sllurp: INFO: no tags seen
+2017-10-02 13:35:05,233 sllurp: INFO: no tags seen
+2017-10-02 13:35:05,744 sllurp: INFO: no tags seen
+2017-10-02 13:35:06,256 sllurp: INFO: no tags seen
+2017-10-02 13:35:06,762 sllurp: INFO: no tags seen
+2017-10-02 13:35:07,273 sllurp: INFO: no tags seen
+2017-10-02 13:35:07,784 sllurp: INFO: no tags seen
+2017-10-02 13:35:08,295 sllurp: INFO: no tags seen
+2017-10-02 13:35:08,804 sllurp: INFO: no tags seen
+2017-10-02 13:35:09,313 sllurp: INFO: no tags seen
+2017-10-02 13:35:09,824 sllurp: INFO: no tags seen
+2017-10-02 13:35:10,336 sllurp: INFO: no tags seen
+2017-10-02 13:35:10,846 sllurp: INFO: no tags seen
+2017-10-02 13:35:11,357 sllurp: INFO: no tags seen
+2017-10-02 13:35:11,862 sllurp: INFO: no tags seen
+2017-10-02 13:35:12,373 sllurp: INFO: no tags seen
+2017-10-02 13:35:12,881 sllurp: INFO: no tags seen
+2017-10-02 13:35:13,394 sllurp: INFO: no tags seen
+2017-10-02 13:35:13,904 sllurp: INFO: no tags seen
+2017-10-02 13:35:14,415 sllurp: INFO: no tags seen
+2017-10-02 13:35:14,925 sllurp: INFO: no tags seen
+2017-10-02 13:35:15,433 sllurp: INFO: no tags seen
+2017-10-02 13:35:15,945 sllurp: INFO: no tags seen
+2017-10-02 13:35:16,453 sllurp: INFO: no tags seen
+2017-10-02 13:35:16,966 sllurp: INFO: no tags seen
+2017-10-02 13:35:17,477 sllurp: INFO: no tags seen
+2017-10-02 13:35:17,983 sllurp: INFO: no tags seen
+2017-10-02 13:35:18,494 sllurp: INFO: no tags seen
+2017-10-02 13:35:19,001 sllurp: INFO: no tags seen
+2017-10-02 13:35:19,512 sllurp: INFO: no tags seen
+2017-10-02 13:35:20,026 sllurp: INFO: no tags seen
+2017-10-02 13:35:20,533 sllurp: INFO: no tags seen
+2017-10-02 13:35:21,042 sllurp: INFO: no tags seen
+2017-10-02 13:35:21,555 sllurp: INFO: no tags seen
+2017-10-02 13:35:22,067 sllurp: INFO: no tags seen
+2017-10-02 13:35:22,577 sllurp: INFO: no tags seen
+2017-10-02 13:35:23,084 sllurp: INFO: no tags seen
+2017-10-02 13:35:23,585 sllurp: INFO: no tags seen
+2017-10-02 13:35:24,096 sllurp: INFO: no tags seen
+2017-10-02 13:35:24,606 sllurp: INFO: no tags seen
+2017-10-02 13:35:25,114 sllurp: INFO: no tags seen
+2017-10-02 13:35:25,626 sllurp: INFO: no tags seen
+2017-10-02 13:35:26,137 sllurp: INFO: no tags seen
+2017-10-02 13:35:26,643 sllurp: INFO: no tags seen
+2017-10-02 13:35:27,155 sllurp: INFO: no tags seen
+2017-10-02 13:35:27,665 sllurp: INFO: no tags seen
+2017-10-02 13:35:28,174 sllurp: INFO: no tags seen
+2017-10-02 13:35:28,687 sllurp: INFO: no tags seen
+2017-10-02 13:35:29,198 sllurp: INFO: no tags seen
+2017-10-02 13:35:29,705 sllurp: INFO: no tags seen
+2017-10-02 13:35:30,217 sllurp: INFO: no tags seen
+2017-10-02 13:35:30,725 sllurp: INFO: no tags seen
+2017-10-02 13:35:31,236 sllurp: INFO: no tags seen
+2017-10-02 13:35:31,745 sllurp: INFO: no tags seen
+2017-10-02 13:35:32,257 sllurp: INFO: no tags seen
+2017-10-02 13:35:32,766 sllurp: INFO: no tags seen
+2017-10-02 13:35:33,277 sllurp: INFO: no tags seen
+2017-10-02 13:35:33,787 sllurp: INFO: no tags seen
+2017-10-02 13:35:34,297 sllurp: INFO: no tags seen
+2017-10-02 13:35:34,806 sllurp: INFO: no tags seen
+2017-10-02 13:35:35,313 sllurp: INFO: no tags seen
+2017-10-02 13:35:35,824 sllurp: INFO: no tags seen
+2017-10-02 13:35:36,335 sllurp: INFO: no tags seen
+2017-10-02 13:35:36,847 sllurp: INFO: no tags seen
+2017-10-02 13:35:37,354 sllurp: INFO: no tags seen
+2017-10-02 13:35:37,865 sllurp: INFO: no tags seen
+2017-10-02 13:35:38,376 sllurp: INFO: no tags seen
+2017-10-02 13:35:38,885 sllurp: INFO: no tags seen
+2017-10-02 13:35:39,394 sllurp: INFO: no tags seen
+2017-10-02 13:35:39,908 sllurp: INFO: no tags seen
+2017-10-02 13:35:40,417 sllurp: INFO: no tags seen
+2017-10-02 13:35:40,929 sllurp: INFO: no tags seen
+2017-10-02 13:35:41,436 sllurp: INFO: no tags seen
+2017-10-02 13:35:41,947 sllurp: INFO: no tags seen
+2017-10-02 13:35:42,458 sllurp: INFO: no tags seen
+2017-10-02 13:35:42,763 sllurp.llrp: INFO: stopping politely
+2017-10-02 13:35:42,764 sllurp.llrp: INFO: will disconnect when stopped
+2017-10-02 13:35:42,781 sllurp: INFO: no tags seen
+2017-10-02 13:35:42,788 sllurp.llrp: INFO: reader finished inventory
+2017-10-02 13:35:42,788 sllurp.llrp: INFO: lost connection: Connection to the other side was lost in a non-clean fashion: Connection lost.
+2017-10-02 13:35:42,788 sllurp: INFO: total # of tags seen: 0
+2017-10-02 13:35:42,788 sllurp.llrp: INFO: disconnecting
+number of power interrupts is: 247

@@ -7,6 +7,8 @@
 #include "ipos.h"
 #include <stdint.h>
 
+#include "codeProfiler.h"
+#include "uart-debugger.h"
 
 #if 0
 
@@ -89,6 +91,8 @@ __p unsigned int n =0, k = 0;
 
 void discTimeSign()
 {
+    uart_sendText("discTimeSign ", 13);
+    cp_reset();
     // Get the input for the task
     unsigned int in_n = RVAR(n);
     float in_x_n = RVAR(x[in_n]);
@@ -108,6 +112,8 @@ void discTimeSign()
 
     // commit the output of the task
     WVAR(n, in_n);
+
+    cp_getResult(1);
 }
 
 // Calculate DFT of x using brute force
@@ -118,6 +124,8 @@ void dft_outer_loop() {
 }
 
 void dft_real() {
+    uart_sendText("dft_real ", 9);
+    cp_reset();
     // Get the input for the task
     unsigned int in_k = RVAR(k);
     unsigned int in_n = RVAR(n);
@@ -136,9 +144,12 @@ void dft_real() {
 
     // commit the output of the task
     WVAR(n, in_n);
+
+    cp_getResult(1 );
 }
 
 void dft_im() {
+    uart_sendText("dft_im ", 7);
     // Get the input for the task
     unsigned int in_k = RVAR(k);
     unsigned int in_n = RVAR(n);
@@ -156,9 +167,12 @@ void dft_im() {
 
     // commit the output of the task
     WVAR(n, in_n);
+
+    cp_getResult(1 );
 }
 
 void  dft_power(){
+    uart_sendText("dft_power ", 10);
     // Get the input for the task
     unsigned int in_k = RVAR(k);
     float in_Xim_k = RVAR(Xim[in_k]);
@@ -178,10 +192,13 @@ void  dft_power(){
     WVAR(k, in_k);
     WVAR(P[in_k], in_p_k);
 
+    cp_getResult(1 );
+
 }
 
 
 void dft_end() {
+    uart_sendText("dft_end ", 8);
     // Get the input for the task
     unsigned int in_k = RVAR(k);
 
@@ -192,6 +209,10 @@ void dft_end() {
     // commit the output of the task
     WVAR(k, in_k);
 
+    cp_getResult(1 );
+
+    uart_sendText("End\n\r", 5);
+
 }
 
 void init()
@@ -200,15 +221,20 @@ void init()
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
+#if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
     CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
     CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
     CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
     CSCTL0_H = 0;
+#endif
 
     P3OUT &= ~BIT5;
     P3DIR |=BIT5;
+
+    cp_init(); // initialized the code profiler library
+
 }
 
 //delay
@@ -229,11 +255,14 @@ static void blinkLed(uint32_t wait )
     burn(wait); // wait
     P4OUT &= ~BIT0; // dim the LED
     burn(wait); // wait
+
 }
 
 
 int main(void) {
     init();
+
+    uart_sendText("Start\n\r", 7);
 
 
        taskId tasks[] = {  {discTimeSign,1},

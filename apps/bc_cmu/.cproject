@@ -55,13 +55,11 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.407549553" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.137789944" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
-									<listOptionValue builtIn="false" value="mspmath"/>
 									<listOptionValue builtIn="false" value="ipos-gcc-dma"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.54806661" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/chain/mspmath/Debug"/>
 									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/Debug"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1612596939" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.out&quot;" valueType="string"/>
@@ -101,18 +99,18 @@
 								<listOptionValue builtIn="false" value="RUNTIME_SUPPORT_LIBRARY=libc.a"/>
 								<listOptionValue builtIn="false" value="OUTPUT_TYPE=executable"/>
 							</option>
-							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION.603122959" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION" value="GNU_6.2.1.16:SOMNIUM Technologies Limited" valueType="string"/>
+							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION.603122959" name="Compiler version" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION" value="GNU_6.2.1.16:SOMNIUM Technologies Limited" valueType="string"/>
 							<targetPlatform id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.targetPlatformRelease.746030718" name="Platform" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.targetPlatformRelease"/>
-							<builder buildPath="${BuildDirectory}" id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.builderRelease.277668443" name="GNU Make.Release" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.builderRelease"/>
+							<builder buildPath="${BuildDirectory}" id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.builderRelease.277668443" keepEnvironmentInBuildfile="false" name="GNU Make" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.builderRelease"/>
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.compilerRelease.2065386743" name="GNU Compiler" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.compilerRelease">
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.103461787" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" useByScannerDiscovery="false" value="msp430fr5969" valueType="string"/>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.1086607317" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.103461787" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" useByScannerDiscovery="false" value="msp430fr5969" valueType="string"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.1086607317" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
 								</option>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE.1659270235" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS.1352081410" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS" useByScannerDiscovery="false" valueType="stringList">
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE.1659270235" name="Optimize for space rather than speed (-Os)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS.1352081410" name="Other flags" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS" useByScannerDiscovery="false" valueType="stringList">
 									<listOptionValue builtIn="false" value="-mlarge"/>
 									<listOptionValue builtIn="false" value="-mhwmult=f5series"/>
 									<listOptionValue builtIn="false" value="-mcode-region=none"/>
@@ -124,15 +122,15 @@
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM2_SRCS.906659945" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compiler.inputType__ASM2_SRCS"/>
 							</tool>
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerRelease.220131956" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerRelease">
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.1453337013" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" useByScannerDiscovery="false" valueType="libs">
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.1453337013" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.1030727542" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.1030727542" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
 								</option>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.489449057" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.out&quot;" valueType="string"/>
-								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE.1296194266" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.map&quot;" valueType="string"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.489449057" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.out&quot;" valueType="string"/>
+								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE.1296194266" name="Write a map file (-Map)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.map&quot;" valueType="string"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__CMD_SRCS.1576501721" name="Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__CMD_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__CMD2_SRCS.1129846996" name="Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__CMD2_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__GEN_CMDS.308213582" name="Generated Linker Command Files" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exeLinker.inputType__GEN_CMDS"/>

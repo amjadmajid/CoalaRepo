@@ -1,6 +1,6 @@
 #include <msp430.h> 
 #include <ipos.h>
-
+#include <codeProfiler.h>
 
 __nv uint8_t pinCont = 0;
 #define NIL 0 // like NULL, but for indexes, not real pointers
@@ -66,6 +66,7 @@ static sample_t acquire_sample(letter_t prev_sample)
 
 void task_init()
 {
+    cp_reset();
     pinCont=1;
     WVAR(_v_parent_next, 0);
     WVAR(_v_out_len,0);
@@ -74,12 +75,14 @@ void task_init()
     WVAR(_v_letter_idx, 0);
     WVAR(_v_sample_count,1);
 
+    cp_sendRes("task_init \0");
+
 //    os_jump(1);
 }
 
 void task_init_dict()
 {
-
+    cp_reset();
     int i = RVAR(_v_letter);
     WVAR(_v_dict[i].letter,i);
     WVAR(_v_dict[i].sibling, NIL);
@@ -93,10 +96,13 @@ void task_init_dict()
 //        os_jump(1);
         ;
     }
+
+    cp_sendRes("task_init_dict \0");
 }
 
 void task_sample()
 {
+    cp_reset();
     unsigned next_letter_idx = RVAR(_v_letter_idx) + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
         next_letter_idx = 0;
@@ -108,10 +114,13 @@ void task_sample()
     } else {
         os_jump(2);
     }
+
+    cp_sendRes("task_sample \0");
 }
 
 void task_measure_temp()
 {
+    cp_reset();
     sample_t prev_sample;
     prev_sample = RVAR(_v_prev_sample);
 
@@ -120,10 +129,13 @@ void task_measure_temp()
     WVAR(_v_prev_sample, prev_sample);
     WVAR(_v_sample, sample);
 //    os_jump(1);
+
+    cp_sendRes("task_measure_temp \0");
 }
 
 void task_letterize()
 {
+    cp_reset();
     unsigned letter_idx = RVAR(_v_letter_idx);
     if (letter_idx == 0)
         letter_idx = NUM_LETTERS_IN_SAMPLE;
@@ -134,10 +146,13 @@ void task_letterize()
 
     WVAR(_v_letter, letter);
 //    os_jump(1);
+
+    cp_sendRes("task_letterize \0");
 }
 
 void task_compress()
 {
+    cp_reset();
     // pointer into the dictionary tree; starts at a root's child
     index_t parent = RVAR(_v_parent_next);
 
@@ -156,10 +171,13 @@ void task_compress()
     (RVAR(_v_sample_count))++;
 
 //    os_jump(1);
+
+    cp_sendRes("task_compress \0");
 }
 
 void task_find_sibling()
 {
+    cp_reset();
     if (RVAR(_v_sibling) != NIL) {
         int i = RVAR(_v_sibling);
 
@@ -191,10 +209,14 @@ void task_find_sibling()
 //    else {
 //        os_jump(1);
 //    }
+
+    cp_sendRes("task_find_sibling \0");
+
 }
 
 void task_add_node()
 {
+    cp_reset();
     int i = RVAR(_v_sibling);
 
 
@@ -217,10 +239,14 @@ void task_add_node()
 
 //        os_jump(1);
     }
+
+    cp_sendRes("task_add_node \0");
+
 }
 
 void task_add_insert()
 {
+    cp_reset();
     if (RVAR(_v_node_count) == DICT_SIZE) { // wipe the table if full
         while (1);
     }
@@ -260,11 +286,14 @@ void task_add_insert()
     WVAR(_v_symbol, __cry);
     (RVAR(_v_node_count))++;
 
+    cp_sendRes("task_add_insert \0");
+
 //    os_jump(1);
 }
 
 void task_append_compressed()
 {
+    cp_reset();
     uint16_t __cry;
     int i = RVAR(_v_out_len);
     __cry = RVAR(_v_symbol);
@@ -276,15 +305,23 @@ void task_append_compressed()
     } else {
         os_jump(5);
     }
+
+    cp_sendRes("task_append_compressed \0");
+
 }
 
 void task_print()
 {
+    cp_reset();
+
     unsigned i;
 
     for (i = 0; i < BLOCK_SIZE; ++i) {
         index_t index = RVAR(_v_compressed_data[i].letter);
     }
+
+    cp_sendRes("task_print \0");
+
 //    os_jump(0);
 }
 
@@ -309,14 +346,16 @@ void init()
       P3OUT &=~BIT5;
       P3DIR |=BIT5;
 
+#if 0
       CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
   //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
       CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
       CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
       CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
       CSCTL0_H = 0;
+#endif
 
-//    __enable_interrupt();
+      cp_init();
 }
 
 int main(void) {

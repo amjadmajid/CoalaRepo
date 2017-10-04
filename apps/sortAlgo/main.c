@@ -1,5 +1,6 @@
 #include <msp430.h> 
 #include <ipos.h>
+#include "codeProfiler.h"
 
 /*
 void sortAlgo(int arr[], int arrLen){
@@ -34,6 +35,7 @@ __nv unsigned protect = 0;
 unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
+    cp_reset();
     protect = 1;
     in_i = RP(i);
     in_j = RP( j);
@@ -58,6 +60,8 @@ void task_inner_loop()
     WP( arr[ in_j ]) = arr_j;
     in_j++;
     WP(j) = in_j;
+
+    cp_sendRes("task_inner_loop \0");
 }
 
 
@@ -66,7 +70,7 @@ void task_outer_loop()
 //    PMMCTL0|= PMMSWBOR;
 
 //    PMMCTL0 = PMMPW|PMMSWBOR;
-
+    cp_reset();
     unsigned int in_i;
     in_i = RP(i);
 //    in_i_pt = PVAR(i);
@@ -79,12 +83,14 @@ void task_outer_loop()
 
     WP(i)= in_i;
     WP(j)= in_i+1;
+    cp_sendRes( "task_outer_loop \0");
 }
 
 
 
 void task_finish()
 {
+    cp_reset();
     if(protect){
     P3OUT |=BIT5;
     P3OUT &=~BIT5;
@@ -100,6 +106,7 @@ void task_finish()
 
     WVAR(i, 0) ;
     WVAR(j, 1);
+    cp_sendRes("task_finish \0");
 
 }
 
@@ -111,12 +118,16 @@ void init()
   P3DIR |=BIT5;
 
 
+#if 0
   CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //    CSCTL1 = DCOFSEL_4 |  DCORSEL;      // Set DCO to 16MHz
   CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
   CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
   CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
   CSCTL0_H = 0;
+#endif
+
+  cp_init();
 }
 
 int main(void) {

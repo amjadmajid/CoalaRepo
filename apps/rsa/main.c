@@ -1,17 +1,20 @@
 #include <msp430.h>
 #include <math.h>
-#include <uart-debugger.h>
+//#include <uart-debugger.h>
+#include <codeProfiler.h>
 #include <ipos.h>
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #define MSG "hello"
 #define MSG_LEN 5
 
-long int p,q, n, t, k,j, i, flag, e[10], d[10], m[10], temp[10], en[10],
+__p long int p,q, n, t, k,j, i, flag, e[10], d[10], m[10], temp[10], en[10],
         en_pt,en_ct=0,en_key, en_k, en_cnt, en_j=0,
         de_pt,de_ct=0,de_key, de_k, de_cnt, de_j=0;
 char * msgPt = MSG;
+
+__nv unsigned protect = 0;
 
 // Prototypes
 void initTask();
@@ -82,132 +85,182 @@ void init()
 #ifdef DEBUG
     uart_init();
 #endif
+
+    cp_init();
 }
 
 void initTask()
 {
+    cp_reset();
+
+    protect = 1;
+
 #ifdef DEBUG
     uart_sendText("Start\n\r", 7);
     uart_sendText("\n\r", 2);
 #endif
 
-    p= 7;
-    q= 17;
-    n=p*q;
-    t=(p-1)*(q-1);
-    i=1;
-    k=0;
-    flag=0;
+    int in_p = 7;
+    int in_q = 17;
+
+    WP(p)= in_p;
+    WP(q)= in_q;
+    WP(n)= in_p * in_q;
+    WP(t)= (in_p-1) * (in_q-1);
+    WP(i)=1;
+    WP(k)=0;
+    WP(flag)=0;
     for (int ii = 0; ii < MSG_LEN; ii++)
     {
-        m[ii] = *(msgPt+ii);
+        WP(m[ii]) = *(msgPt+ii);
     }
+
+    cp_sendRes("initTask \0");
 }
 
 void ce_1()
 {
-    i++; // start with i=2
+    cp_reset();
+    WP(i)++; // start with i=2
 
-    if(i >= t)
+    if(RP(i) >= RP(t) )
     {
         os_jump(6);  // go to encryption
     }
+    cp_sendRes("ce_1 \0");
 }
 
 void ce_2()
 {
-    if(t % i == 0)
+    cp_reset();
+    if( RP(t) % RP(i) == 0)
     {
         os_jump(14); // go to ce_1
     }
+    cp_sendRes("ce_2 \0");
 }
 
 void  is_i_prime()
 {
+    cp_reset();
     int c;
-    j=sqrt(i);
-    for(c=2;c<=j;c++)
+    c=sqrt(RP(i));
+    WP(j) = c;
+    for(c=2; c <= RP( j) ;c++)
     {
-        if(i%c==0)
+        if( RP(i) % c==0)
         {
-            flag=0;
+            WP(flag)=0;
             os_jump(13); // go to ce_1
             return;
         }
     }
-    flag = 1;
+    WP(flag) = 1;
+    cp_sendRes("is_i_prime \0");
+
 }
 
 void ce_3()
 {
-    if(flag==1&&i!=p&&i!=q)
+    cp_reset();
+    long int in_i = RP(i);
+    if( RP(flag) == 1 && in_i != RP(p) && in_i != RP(q) )
     {
-        e[k]=i;
+        WP(e[RP(k)]) = in_i ;
     }else{
         os_jump(12); // go to ce_1
     }
+
+    cp_sendRes("ce_3 \0");
 }
 
 void cd()
 {
-    long int kk=1;
+    cp_reset();
+    long int kk=1, __cry;
     while(1)
     {
-        kk=kk+t;
-        if(kk % e[k]==0){
-            flag = (kk/ e[k] );
+        kk=kk +  RP(t);
+        if(kk % RP( e[RP(k)] ) ==0){
+            __cry = (kk/ RP( e[ RP(k) ]) );
+            WP(flag) = __cry;
             break;
         }
     }
+
+    cp_sendRes("cd \0");
 }
 
 void ce_4()
 {
-
-    if(flag>0)
+    cp_reset();
+    int __cry = RP(flag);
+    if(__cry > 0)
     {
-        d[k]=flag;
-        k++;
+        WP(d[ RP(k) ]) =__cry;
+        WP(k)++;
     }
-    if(k < 9)
+    if( RP(k) < 9)
     {
         os_jump(10); // go to ce_1
     }
+    cp_sendRes("ce_4 \0");
+
 }
 
 void encrypt_init()
 {
-   en_pt = m[en_cnt];
-   en_pt -=96;
-   en_k  = 1;
-   en_j  = 0;
-   en_key=e[0];
+  cp_reset();
+  long int __cry;
+   __cry = RP(m[ RP(en_cnt) ]) ;
+   WP(en_pt) = __cry;
+   WP(en_pt) -=96;
+   WP(en_k)  = 1;
+   WP(en_j)  = 0;
+   __cry = RP(e[0]) ;
+   WP(en_key) = __cry;
+
+   cp_sendRes("encrypt_init \0");
 }
 
 void encrypt_inner_loop()
 {
-   if(en_j < en_key)
+   cp_reset();
+   long int __cry;
+   if( RP(en_j) < RP(en_key) )
    {
-       en_k *= en_pt;
-       en_k %= n;
-       en_j++;
+       __cry = RP(en_k) * RP(en_pt);
+       WP(en_k) = __cry;
+       __cry = RP(en_k) % RP(n);
+       WP(en_k) = __cry;
+       WP(en_j)++;
        os_jump(0);
    }
+
+   cp_sendRes("encrypt_inner_loop \0");
 }
 
 void encrypt_finish()
 {
-   temp[en_cnt] = en_k;
-   en_ct = en_k + 96;
-   en[en_cnt] = en_ct;
+   cp_reset();
+   long int __cry;
+   __cry = RP(en_k);
+   WP(temp[ RP(en_cnt) ]) = __cry;
+   __cry = RP(en_k) + 96;
+   WP(en_ct) = __cry;
+   __cry = RP(en_ct);
+   WP(en[ RP(en_cnt) ]) = __cry;
 
-    if( en_cnt < MSG_LEN)
+    if( RP(en_cnt) < MSG_LEN)
    {
-       en_cnt++;
+       WP(en_cnt)++;
        os_jump(13); // go to encrypt_init
    }else{
-      en[en_cnt] = -1;
+      WP(en[ RP(en_cnt) ]) = -1;
    }
+
+    cp_sendRes("encrypt_finish \0");
+
 }
 
 void encrypt_print()
@@ -223,38 +276,64 @@ void encrypt_print()
 }
 void decrypt_init()
 {
-   de_k  = 1;
-   de_j  = 0;
-   de_key=d[0];
+   cp_reset();
+   long int __cry;
+   WP(de_k)  = 1;
+   WP(de_j)  = 0;
+   __cry =d[0];
+   WP(de_key) = __cry;
+
+   cp_sendRes("decrypt_init \0");
 }
 
 void decrypt_inner_loop()
 {
-   de_ct =  temp[de_cnt];
-   if(de_j < de_key)
+   cp_reset();
+   long int __cry;
+   __cry =  RP(temp[ RP(de_cnt) ]);
+   WP(de_ct) = __cry;
+
+   if( RP(de_j) < RP(de_key) )
    {
-       de_k *= de_ct;
-       de_k %= n;
-       de_j++;
+       __cry = RP(de_k) * RP(de_ct);
+       WP(de_k) = __cry;
+       __cry = RP(de_k) % RP(n);
+       WP(de_k) = __cry;
+       WP(de_j)++;
        os_jump(0);
    }
+
+   cp_sendRes("decrypt_inner_loop \0");
 }
 
 void decrypt_finish()
 {
+   cp_reset();
+   long int __cry;
+   __cry = RP(de_k) + 96;
+   WP(de_pt) = __cry;
+   WP(m[ RP(de_cnt) ]) = __cry;
 
-   de_pt = de_k + 96;
-   m[de_cnt] = de_pt;
-
-    if( en[de_cnt] != -1)
+    if( RP(en[ RP(de_cnt) ]) != -1)
    {
-       de_cnt++;
-       os_jump(13); // go to decrypt_1
+       WP(de_cnt)++;
+       os_jump(13); // go to decrypt_init
    }
+
+    cp_sendRes("decrypt_print \0");
 }
 
 void decrypt_print()
 {
+    cp_reset();
+    if(protect){
+        P3OUT |=BIT5;
+        P3OUT &=~BIT5;
+    }
+    protect=0;
+
+    cp_sendRes("decrypt_finish \0");
+
 #ifdef DEBUG
    uart_sendText("THE_DECRYPTED_MESSAGE_IS\n\r", 26);
     for(de_cnt=0;de_cnt < MSG_LEN ;de_cnt++){

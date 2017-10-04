@@ -32,6 +32,8 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.889009288" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" value="msp430fr5969" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.448980633" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/uart-debugger/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/codeProfiler/include}&quot;"/>
 									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/include"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
@@ -56,11 +58,15 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.1853353014" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.10983152" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
+									<listOptionValue builtIn="false" value="uart-debugger"/>
+									<listOptionValue builtIn="false" value="codeProfiler"/>
 									<listOptionValue builtIn="false" value="ipos-gcc-dma"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.665107931" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/codeProfiler/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/uart-debugger/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/Debug"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1997956903" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" value="&quot;${ProjName}.out&quot;" valueType="string"/>
