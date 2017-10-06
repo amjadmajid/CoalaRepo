@@ -63,7 +63,7 @@ def main():
 			if not normPlotting(d[app][task_name], c):
 				print(task_name)
 
-		plt.show()
+	plt.show()
 
 
 	apps_dict={}
@@ -77,7 +77,7 @@ def main():
 		c = generateRandomColor()
 		if not normPlotting( apps_dict[app], c  ): 
 			print(apps)
-		plt.show()
+	plt.show()
 
 
 if __name__ == '__main__':
