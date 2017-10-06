@@ -13,6 +13,8 @@ __nv uint8_t pinCont = 0;
 #define LETTER_SIZE_BITS             8
 #define NUM_LETTERS (LETTER_MASK + 1)
 
+#define CODEPROFILE 0
+
 typedef uint16_t index_t;
 typedef uint16_t letter_t;
 typedef uint16_t sample_t;
@@ -66,7 +68,10 @@ static sample_t acquire_sample(letter_t prev_sample)
 
 void task_init()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     pinCont=1;
     WVAR(_v_parent_next, 0);
     WVAR(_v_out_len,0);
@@ -75,14 +80,19 @@ void task_init()
     WVAR(_v_letter_idx, 0);
     WVAR(_v_sample_count,1);
 
+#if CODEPROFILE
     cp_sendRes("task_init \0");
+#endif
 
 //    os_jump(1);
 }
 
 void task_init_dict()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     int i = RVAR(_v_letter);
     WVAR(_v_dict[i].letter,i);
     WVAR(_v_dict[i].sibling, NIL);
@@ -96,13 +106,17 @@ void task_init_dict()
 //        os_jump(1);
         ;
     }
-
+#if CODEPROFILE
     cp_sendRes("task_init_dict \0");
+#endif
 }
 
 void task_sample()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     unsigned next_letter_idx = RVAR(_v_letter_idx) + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
         next_letter_idx = 0;
@@ -114,13 +128,17 @@ void task_sample()
     } else {
         os_jump(2);
     }
-
+#if CODEPROFILE
     cp_sendRes("task_sample \0");
+#endif
 }
 
 void task_measure_temp()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     sample_t prev_sample;
     prev_sample = RVAR(_v_prev_sample);
 
@@ -130,12 +148,17 @@ void task_measure_temp()
     WVAR(_v_sample, sample);
 //    os_jump(1);
 
+#if CODEPROFILE
     cp_sendRes("task_measure_temp \0");
+#endif
 }
 
 void task_letterize()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     unsigned letter_idx = RVAR(_v_letter_idx);
     if (letter_idx == 0)
         letter_idx = NUM_LETTERS_IN_SAMPLE;
@@ -146,13 +169,17 @@ void task_letterize()
 
     WVAR(_v_letter, letter);
 //    os_jump(1);
-
+#if CODEPROFILE
     cp_sendRes("task_letterize \0");
+#endif
 }
 
 void task_compress()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     // pointer into the dictionary tree; starts at a root's child
     index_t parent = RVAR(_v_parent_next);
 
@@ -171,13 +198,17 @@ void task_compress()
     (RVAR(_v_sample_count))++;
 
 //    os_jump(1);
-
+#if CODEPROFILE
     cp_sendRes("task_compress \0");
+#endif
 }
 
 void task_find_sibling()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     if (RVAR(_v_sibling) != NIL) {
         int i = RVAR(_v_sibling);
 
@@ -210,13 +241,17 @@ void task_find_sibling()
 //        os_jump(1);
 //    }
 
+#if CODEPROFILE
     cp_sendRes("task_find_sibling \0");
-
+#endif
 }
 
 void task_add_node()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     int i = RVAR(_v_sibling);
 
 
@@ -240,13 +275,18 @@ void task_add_node()
 //        os_jump(1);
     }
 
+#if CODEPROFILE
     cp_sendRes("task_add_node \0");
+#endif
 
 }
 
 void task_add_insert()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     if (RVAR(_v_node_count) == DICT_SIZE) { // wipe the table if full
         while (1);
     }
@@ -285,15 +325,19 @@ void task_add_insert()
     __cry = RVAR(_v_parent);
     WVAR(_v_symbol, __cry);
     (RVAR(_v_node_count))++;
-
+#if CODEPROFILE
     cp_sendRes("task_add_insert \0");
+#endif
 
 //    os_jump(1);
 }
 
 void task_append_compressed()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     uint16_t __cry;
     int i = RVAR(_v_out_len);
     __cry = RVAR(_v_symbol);
@@ -305,14 +349,18 @@ void task_append_compressed()
     } else {
         os_jump(5);
     }
-
+#if CODEPROFILE
     cp_sendRes("task_append_compressed \0");
+#endif
 
 }
 
 void task_print()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
 
     unsigned i;
 
@@ -320,7 +368,9 @@ void task_print()
         index_t index = RVAR(_v_compressed_data[i].letter);
     }
 
+#if CODEPROFILE
     cp_sendRes("task_print \0");
+#endif
 
 //    os_jump(0);
 }
@@ -355,7 +405,10 @@ void init()
       CSCTL0_H = 0;
 #endif
 
+#if CODEPROFILE
       cp_init();
+#endif
+
 }
 
 int main(void) {

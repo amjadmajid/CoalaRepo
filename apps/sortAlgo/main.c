@@ -2,6 +2,8 @@
 #include <ipos.h>
 #include "codeProfiler.h"
 
+#define CODEPROFILE 0
+
 /*
 void sortAlgo(int arr[], int arrLen){
     for (int i=0; i< arrLen-1;i++){
@@ -35,7 +37,9 @@ __nv unsigned protect = 0;
 unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
     protect = 1;
     in_i = RP(i);
     in_j = RP( j);
@@ -60,8 +64,9 @@ void task_inner_loop()
     WP( arr[ in_j ]) = arr_j;
     in_j++;
     WP(j) = in_j;
-
+#if CODEPROFILE
     cp_sendRes("task_inner_loop \0");
+#endif
 }
 
 
@@ -70,7 +75,9 @@ void task_outer_loop()
 //    PMMCTL0|= PMMSWBOR;
 
 //    PMMCTL0 = PMMPW|PMMSWBOR;
+#if CODEPROFILE
     cp_reset();
+#endif
     unsigned int in_i;
     in_i = RP(i);
 //    in_i_pt = PVAR(i);
@@ -83,14 +90,20 @@ void task_outer_loop()
 
     WP(i)= in_i;
     WP(j)= in_i+1;
+
+#if CODEPROFILE
     cp_sendRes( "task_outer_loop \0");
+#endif
 }
 
 
 
 void task_finish()
 {
+#if CODEPROFILE
     cp_reset();
+#endif
+
     if(protect){
     P3OUT |=BIT5;
     P3OUT &=~BIT5;
@@ -106,8 +119,9 @@ void task_finish()
 
     WVAR(i, 0) ;
     WVAR(j, 1);
+#if CODEPROFILE
     cp_sendRes("task_finish \0");
-
+#endif
 }
 
 void init()
@@ -115,6 +129,7 @@ void init()
   WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
   // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
   PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+  P3OUT &=~BIT5;
   P3DIR |=BIT5;
 
 
@@ -127,7 +142,9 @@ void init()
   CSCTL0_H = 0;
 #endif
 
+#if CODEPROFILE
   cp_init();
+#endif
 }
 
 int main(void) {
