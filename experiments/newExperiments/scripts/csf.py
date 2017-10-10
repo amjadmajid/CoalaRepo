@@ -23,9 +23,8 @@ def filesFinder(path):
 	filesPaths = []
 	os.chdir( dataUser )
 	appsMainFolders = glob.glob('*')  # grep all apps folders
-
 	for appFolder in appsMainFolders:
-		filesPaths.append( glob.glob( os.path.join(appFolder,path)) ) # grep all .hex files
+		filesPaths.append( glob.glob( os.path.join(appFolder,path)) )
 	os.chdir('../../scripts/')
 
 	validPaths=[]

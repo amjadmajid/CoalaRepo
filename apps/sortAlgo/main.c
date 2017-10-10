@@ -152,7 +152,7 @@ void init()
 #endif
 
   uart_init();
-  mr_auto_rand_reseter(12000); // every 12 msec the MCU will be reseted
+  mr_auto_rand_reseter(15000); // every 12 msec the MCU will be reseted
 
 }
 

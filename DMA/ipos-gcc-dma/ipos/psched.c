@@ -118,7 +118,7 @@ void os_scheduler()
 #if COALESCING
 
 #if DEBUG
-        uart_sendHex16(__virtualTaskCntr);
+        uart_sendHex8(__virtualTaskCntr);
         uart_sendStr("\n\r\0");
 
 #endif
