@@ -1,5 +1,7 @@
 #include <psched.h>
 #include <msp430fr5969.h>
+#include <uart-debugger.h>
+
 
 //#define __KEY  0xAD
 #define COMMITTING      1
@@ -62,8 +64,8 @@ __nv unsigned int  __maxVirtualTaskSize = 0x7f;
      unsigned int *__realTask = NULL;
 __nv unsigned int  __realTaskCntr = VERTUTASK;
 
-__nv unsigned char * pers_pt= (unsigned char *)0xB000;
-__nv unsigned int pers_cnt = 0;
+//__nv unsigned char * pers_pt= (unsigned char *)0xB000;
+//__nv unsigned int pers_cnt = 0;
 
 void os_enter_critical()
 {
@@ -116,10 +118,8 @@ void os_scheduler()
 #if COALESCING
 
 #if DEBUG
-        if(pers_cnt < 1024){
-            *(pers_pt+pers_cnt) = __virtualTaskCntr;  // Debugging
-            pers_cnt++;
-        }
+        uart_sendHex16(__virtualTaskCntr);
+        uart_sendStr("\n\r\0");
 
 #endif
         for(; __virtualTaskCntr > 0 ; __virtualTaskCntr-- )

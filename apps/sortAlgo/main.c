@@ -1,6 +1,8 @@
 #include <msp430.h> 
 #include <ipos.h>
+#include <mr-reseter.h>
 #include "codeProfiler.h"
+#include "uart-debugger.h"
 
 #define CODEPROFILE 0
 
@@ -72,9 +74,8 @@ void task_inner_loop()
 
 void task_outer_loop()
 {
-//    PMMCTL0|= PMMSWBOR;
+//    mr_reseter_confirm();
 
-//    PMMCTL0 = PMMPW|PMMSWBOR;
 #if CODEPROFILE
     cp_reset();
 #endif
@@ -113,6 +114,10 @@ void task_finish()
     unsigned cct;
     for(cct=0; cct< arr_len; cct++)
     {
+#if CODEPROFILE
+        uart_sendHex8( arr[cct] );
+#endif
+
         arr[cct] =  arr2[cct];
     }
 
@@ -120,7 +125,7 @@ void task_finish()
     WVAR(i, 0) ;
     WVAR(j, 1);
 #if CODEPROFILE
-    cp_sendRes("task_finish \0");
+    cp_sendRes("\ntask_finish \0");
 #endif
 }
 
@@ -145,6 +150,10 @@ void init()
 #if CODEPROFILE
   cp_init();
 #endif
+
+  uart_init();
+  mr_auto_rand_reseter(12000); // every 12 msec the MCU will be reseted
+
 }
 
 int main(void) {
