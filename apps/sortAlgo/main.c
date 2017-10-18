@@ -1,10 +1,12 @@
 #include <msp430.h> 
 #include <ipos.h>
-#include <mr-reseter.h>
-#include "codeProfiler.h"
-#include "uart-debugger.h"
+#include <mspReseter.h>
+#include "mspProfiler.h"
+#include "mspDebugger.h"
 
 #define CODEPROFILE 0
+#define RAISE_PIN 1
+#define PWR_INT_SIM 1
 
 /*
 void sortAlgo(int arr[], int arrLen){
@@ -25,7 +27,6 @@ void task_outer_loop();
 void task_inner_loop();
 
 ////// Global variables
-//DVAR( unsigned int arr[], ={3,1,4,6,9,5,10,8,16,20} );
 __p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
     unsigned int arr2[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
 
@@ -42,7 +43,11 @@ void task_inner_loop()
 #if CODEPROFILE
     cp_reset();
 #endif
+
+#if RAISE_PIN
     protect = 1;
+#endif
+
     in_i = RP(i);
     in_j = RP( j);
     arr_i = RP( arr[ in_i ]);
@@ -74,14 +79,12 @@ void task_inner_loop()
 
 void task_outer_loop()
 {
-//    mr_reseter_confirm();
 
 #if CODEPROFILE
     cp_reset();
 #endif
     unsigned int in_i;
     in_i = RP(i);
-//    in_i_pt = PVAR(i);
     in_i++;
 
     if(in_i < arr_len)
@@ -105,25 +108,24 @@ void task_finish()
     cp_reset();
 #endif
 
+#if RAISE_PIN
     if(protect){
     P3OUT |=BIT5;
     P3OUT &=~BIT5;
     }
     protect=0;
+#endif
 
     unsigned cct;
     for(cct=0; cct< arr_len; cct++)
     {
-#if CODEPROFILE
-        uart_sendHex8( arr[cct] );
-#endif
-
         arr[cct] =  arr2[cct];
     }
 
 
     WVAR(i, 0) ;
     WVAR(j, 1);
+
 #if CODEPROFILE
     cp_sendRes("\ntask_finish \0");
 #endif
@@ -134,9 +136,11 @@ void init()
   WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
   // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
   PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+
+#if RAISE_PIN
   P3OUT &=~BIT5;
   P3DIR |=BIT5;
-
+#endif
 
 #if 0
   CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
@@ -151,8 +155,12 @@ void init()
   cp_init();
 #endif
 
+#if PWR_INT_SIM
+
   uart_init();
-  mr_auto_rand_reseter(15000); // every 12 msec the MCU will be reseted
+  mr_auto_rand_reseter(13000); // every 13 msec the MCU will be reseted
+
+#endif
 
 }
 

@@ -1,3 +1,7 @@
+"""
+This module is supporting library for other scripts
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.mlab as mlab
@@ -103,3 +107,51 @@ def figureSetting():
 def set_xaxis(ax, xLocs, labels):
 	ax.xaxis.set_major_locator(ticker.FixedLocator( xLocs ))
 	ax.xaxis.set_major_formatter(ticker.FixedFormatter( labels ))
+
+
+def executionTime(fh):
+    """
+    Input: .csv file handler of saleae.com logic analyzer 
+    return: the average execution time of a program
+    """
+    numbers = []
+    for num in fh:
+        if num[-2:-1] == '1':
+            #print(num)
+            numbers.append( float(num.split(',')[0] ) )
+    aDiff = 0
+    for i in range(0, len(numbers)-1, 2):
+        aDiff += (numbers[i+1] - numbers[i])
+#     aDiff *=1000  # make the diff in milliseconds
+
+    time = (aDiff / int(len(numbers)/2) )
+    fh.close()
+    return time
+
+
+def labelMaker(s):
+	if 'fast' in s:
+		label = 'fast'
+	if 'slow' in s:
+		label = 'slow'
+	return label
+
+def nameMaker(s):
+	name = s.split("/")[0]
+	return name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

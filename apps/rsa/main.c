@@ -1,7 +1,8 @@
 #include <msp430.h>
 #include <math.h>
-//#include <uart-debugger.h>
-#include <codeProfiler.h>
+#include <mspReseter.h>
+#include "mspProfiler.h"
+#include "mspDebugger.h"
 #include <ipos.h>
 
 //#define DEBUG 1
@@ -82,17 +83,13 @@ void init()
     CSCTL0_H = 0;
 #endif
 
-#ifdef DEBUG
+//    cp_init();
     uart_init();
-#endif
-
-    cp_init();
+    mr_auto_rand_reseter(50000); // every 12 msec the MCU will be reseted
 }
 
 void initTask()
 {
-    cp_reset();
-
     protect = 1;
 
 #ifdef DEBUG
@@ -115,34 +112,34 @@ void initTask()
         WP(m[ii]) = *(msgPt+ii);
     }
 
-    cp_sendRes("initTask \0");
+    // cp_sendRes ("initTask \0");
 }
 
 void ce_1()
 {
-    cp_reset();
+    // cp_reset ();
     WP(i)++; // start with i=2
 
     if(RP(i) >= RP(t) )
     {
         os_jump(6);  // go to encryption
     }
-    cp_sendRes("ce_1 \0");
+    // cp_sendRes ("ce_1 \0");
 }
 
 void ce_2()
 {
-    cp_reset();
+    // cp_reset ();
     if( RP(t) % RP(i) == 0)
     {
         os_jump(14); // go to ce_1
     }
-    cp_sendRes("ce_2 \0");
+    // cp_sendRes ("ce_2 \0");
 }
 
 void  is_i_prime()
 {
-    cp_reset();
+    // cp_reset ();
     int c;
     c=sqrt(RP(i));
     WP(j) = c;
@@ -156,13 +153,13 @@ void  is_i_prime()
         }
     }
     WP(flag) = 1;
-    cp_sendRes("is_i_prime \0");
+    // cp_sendRes ("is_i_prime \0");
 
 }
 
 void ce_3()
 {
-    cp_reset();
+    // cp_reset ();
     long int in_i = RP(i);
     if( RP(flag) == 1 && in_i != RP(p) && in_i != RP(q) )
     {
@@ -171,12 +168,12 @@ void ce_3()
         os_jump(12); // go to ce_1
     }
 
-    cp_sendRes("ce_3 \0");
+    // cp_sendRes ("ce_3 \0");
 }
 
 void cd()
 {
-    cp_reset();
+    // cp_reset ();
     long int kk=1, __cry;
     while(1)
     {
@@ -188,12 +185,12 @@ void cd()
         }
     }
 
-    cp_sendRes("cd \0");
+    // cp_sendRes ("cd \0");
 }
 
 void ce_4()
 {
-    cp_reset();
+    // cp_reset ();
     int __cry = RP(flag);
     if(__cry > 0)
     {
@@ -204,13 +201,13 @@ void ce_4()
     {
         os_jump(10); // go to ce_1
     }
-    cp_sendRes("ce_4 \0");
+    // cp_sendRes ("ce_4 \0");
 
 }
 
 void encrypt_init()
 {
-  cp_reset();
+  // cp_reset ();
   long int __cry;
    __cry = RP(m[ RP(en_cnt) ]) ;
    WP(en_pt) = __cry;
@@ -220,12 +217,12 @@ void encrypt_init()
    __cry = RP(e[0]) ;
    WP(en_key) = __cry;
 
-   cp_sendRes("encrypt_init \0");
+   // cp_sendRes ("encrypt_init \0");
 }
 
 void encrypt_inner_loop()
 {
-   cp_reset();
+   // cp_reset ();
    long int __cry;
    if( RP(en_j) < RP(en_key) )
    {
@@ -237,12 +234,12 @@ void encrypt_inner_loop()
        os_jump(0);
    }
 
-   cp_sendRes("encrypt_inner_loop \0");
+   // cp_sendRes ("encrypt_inner_loop \0");
 }
 
 void encrypt_finish()
 {
-   cp_reset();
+   // cp_reset ();
    long int __cry;
    __cry = RP(en_k);
    WP(temp[ RP(en_cnt) ]) = __cry;
@@ -259,7 +256,7 @@ void encrypt_finish()
       WP(en[ RP(en_cnt) ]) = -1;
    }
 
-    cp_sendRes("encrypt_finish \0");
+    // cp_sendRes ("encrypt_finish \0");
 
 }
 
@@ -276,19 +273,19 @@ void encrypt_print()
 }
 void decrypt_init()
 {
-   cp_reset();
+   // cp_reset ();
    long int __cry;
    WP(de_k)  = 1;
    WP(de_j)  = 0;
    __cry =d[0];
    WP(de_key) = __cry;
 
-   cp_sendRes("decrypt_init \0");
+   // cp_sendRes ("decrypt_init \0");
 }
 
 void decrypt_inner_loop()
 {
-   cp_reset();
+   // cp_reset ();
    long int __cry;
    __cry =  RP(temp[ RP(de_cnt) ]);
    WP(de_ct) = __cry;
@@ -303,12 +300,12 @@ void decrypt_inner_loop()
        os_jump(0);
    }
 
-   cp_sendRes("decrypt_inner_loop \0");
+//   // cp_sendRes ("decrypt_inner_loop \0");
 }
 
 void decrypt_finish()
 {
-   cp_reset();
+//   // cp_reset ();
    long int __cry;
    __cry = RP(de_k) + 96;
    WP(de_pt) = __cry;
@@ -320,19 +317,22 @@ void decrypt_finish()
        os_jump(13); // go to decrypt_init
    }
 
-    cp_sendRes("decrypt_print \0");
+//    // cp_sendRes ("decrypt_print \0");
 }
 
 void decrypt_print()
 {
-    cp_reset();
+    __disable_interrupt();
+//    // cp_reset ();
     if(protect){
         P3OUT |=BIT5;
         P3OUT &=~BIT5;
     }
     protect=0;
 
-    cp_sendRes("decrypt_finish \0");
+    __enable_interrupt();
+
+//    // cp_sendRes ("decrypt_finish \0");
 
 #ifdef DEBUG
    uart_sendText("THE_DECRYPTED_MESSAGE_IS\n\r", 26);

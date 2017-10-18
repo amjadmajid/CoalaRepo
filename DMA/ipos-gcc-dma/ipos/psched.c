@@ -1,12 +1,14 @@
 #include <psched.h>
 #include <msp430fr5969.h>
-#include <uart-debugger.h>
+#include <mspDebugger.h>
 
+#define DEBUG 1
+#define COALESCING 1
 
-//#define __KEY  0xAD
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 #define VERTUTASK       10
+
 #define __numbPwrInt (*(uint16_t*)(0x1990))
 #define __PI_overflow (*(uint16_t*)(0x1992))
 
@@ -45,8 +47,7 @@
             __jump_cnt = 0;    \
         }
 
-#define DEBUG 1
-#define COALESCING 1
+
 
     unsigned char __jump = 0;
     unsigned int __jump_by = 0;
@@ -86,12 +87,12 @@ void os_jump(unsigned int j)
 
 void os_scheduler()
 {
-    __numbPwrInt++;
-    if(__numbPwrInt >= 0xffff)
-    {
-        __PI_overflow++;
-        __numbPwrInt=0;
-    }
+//    __numbPwrInt++;
+//    if(__numbPwrInt >= 0xffff)
+//    {
+//        __PI_overflow++;
+//        __numbPwrInt=0;
+//    }
 
 # if COALESCING
     __virtualTaskCntr = (__realTaskCntr >> 1)+1 ;  // make half of the last execution history, your new virtual task size
@@ -118,10 +119,13 @@ void os_scheduler()
 #if COALESCING
 
 #if DEBUG
+        __disable_interrupt();
         uart_sendHex8(__virtualTaskCntr);
         uart_sendStr("\n\r\0");
+        __enable_interrupt();
 
 #endif
+
         for(; __virtualTaskCntr > 0 ; __virtualTaskCntr-- )
         {
 #endif

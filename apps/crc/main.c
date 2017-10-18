@@ -1,13 +1,12 @@
 #include <msp430.h>
+#include <mspReseter.h>
+#include "mspProfiler.h"
+#include "mspDebugger.h"
 #include <ipos.h>
-#include <codeProfiler.h>
+
 
 #define DATA_LEN 48
 //#define DEBUG 1
-
-#ifdef DEBUG
-#include <uart-debugger.h>
-#endif
 
 __nv uint8_t pinCont = 0;
 
@@ -53,6 +52,7 @@ void init()
     P3OUT &=~BIT5;
     P3DIR |=BIT5;
 
+
 #if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
@@ -62,40 +62,37 @@ void init()
     CSCTL0_H = 0;
 #endif
 
-    cp_init();
 
-    //Configure the UART
-#ifdef DEBUG
-    // uart init
-    uart_init();
-#endif
+//    cp_init();
+//    uart_init();
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
 
 }
 
 void initTask()
 {
-    cp_reset();
+    // cp_reset();
     pinCont=1;
     WP(cnt) = 0;
     WP(SW_Results) = CRC_Init;
 
-    cp_sendRes("initTask \0");
+    // cp_sendRes("initTask \0");
 }
 
 void firstByte()
 {
-    cp_reset();
+    // cp_reset();
 
     // First input lower byte
     WP(SW_Results) = CCITT_Update(RP(SW_Results), CRC_Input[RP(cnt)] & 0xFF);
 
-    cp_sendRes("firstByte \0");
+    // cp_sendRes("firstByte \0");
 
 }
 
 void secondByte()
 {
-    cp_reset();
+    // cp_reset();
 
     // Then input upper byte
     WP(SW_Results) = CCITT_Update(RP(SW_Results), (CRC_Input[RP(cnt)] >> 8) & 0xFF);
@@ -106,20 +103,23 @@ void secondByte()
         os_jump(3);
     }
 
-    cp_sendRes("secondByte \0");
+    // cp_sendRes("secondByte \0");
 
 }
 
 void task_finish()
 {
 
-    PAGCMT(); // force a commit after this task
+//    PAGCMT(); // force a commit after this task
+
 
     if (pinCont){
+        __disable_interrupt();
         P3OUT |=BIT5;
         P3OUT &=~BIT5;
     }
     pinCont=0;
+    __enable_interrupt();
 
 #ifdef DEBUG
 

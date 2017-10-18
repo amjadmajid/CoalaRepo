@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <codeProfiler.h>
+#include <mspReseter.h>
+#include "mspProfiler.h"
+#include "mspDebugger.h"
 
 #include <ipos.h>
 
@@ -117,7 +119,7 @@ unsigned i;
 
 void task_init()
 {
-    cp_reset();
+    //     cp_reset();
     unsigned i;
         for (i = 0; i < NUM_BUCKETS ; ++i) {
             WP(_v_filter[i]) = 0;
@@ -131,11 +133,11 @@ void task_init()
 
         os_jump(OFFSET(t_init, t_generate_key));
 
-        cp_sendRes("task_init \0");
+        //     cp_sendRes("task_init \0");
 }
 
 void task_init_array() {
-    cp_reset();
+    //     cp_reset();
     unsigned i;
         for (i = 0; i < BUFFER_SIZE - 1; ++i) {
             WP(_v_filter[i + P(_v_index)*(BUFFER_SIZE-1)]) = 0;
@@ -148,12 +150,12 @@ void task_init_array() {
             os_jump(0);
         }
 
-        cp_sendRes("task_init_array \0");
+        //     cp_sendRes("task_init_array \0");
 }
 
 void task_generate_key()
 {
-    cp_reset();
+    //     cp_reset();
     // insert pseufo-random integers, for testing
     // If we use consecutive ints, they hash to consecutive DJB hashes...
     // NOTE: we are not using rand(), to have the sequence available to verify
@@ -171,12 +173,12 @@ void task_generate_key()
         os_jump(TASK_NUM - RP(_v_next_task) + t_generate_key);
     }
 
-    cp_sendRes("task_generate_key \0");
+    //     cp_sendRes("task_generate_key \0");
 }
 
 void task_calc_indexes()
 {
-    cp_reset();
+    //     cp_reset();
 
     uint16_t __cry;
     __cry = hash_to_fingerprint(RP(_v_key));
@@ -184,12 +186,12 @@ void task_calc_indexes()
 
     os_jump(1);
 
-    cp_sendRes("task_calc_indexes \0");
+    //     cp_sendRes("task_calc_indexes \0");
 }
 
 void task_calc_indexes_index_1()
 {
-    cp_reset();
+    //     cp_reset();
 
     uint16_t __cry;
     __cry = hash_to_index(RP(_v_key));
@@ -197,12 +199,12 @@ void task_calc_indexes_index_1()
 
     os_jump(1);
 
-    cp_sendRes("task_calc_indexes_index_1 \0");
+    //     cp_sendRes("task_calc_indexes_index_1 \0");
 }
 
 void task_calc_indexes_index_2()
 {
-    cp_reset();
+    //     cp_reset();
     index_t fp_hash = hash_to_index(RP(_v_fingerprint));
     uint16_t __cry;
      __cry = RP(_v_index1) ^ fp_hash;
@@ -215,7 +217,7 @@ void task_calc_indexes_index_2()
         os_jump(TASK_NUM - RP(_v_next_task) + t_calc_indexes_index_2);
     }
 
-    cp_sendRes("task_calc_indexes_index_2 \0");
+    //     cp_sendRes("task_calc_indexes_index_2 \0");
 }
 
 
@@ -224,17 +226,17 @@ void task_calc_indexes_index_2()
 // Alpaca never needs this but since Chain code had it, leaving it for fair comparison.
 void task_insert()
 {
-    cp_reset();
+    //     cp_reset();
     WP(_v_next_task) = t_add;
     os_jump(12);
 
-    cp_sendRes("task_insert \0");
+    //     cp_sendRes("task_insert \0");
 }
 
 
 void task_add()
 {
-    cp_reset();
+    //     cp_reset();
     uint16_t __cry;
     uint16_t __cry_idx = RP(_v_index1);
     uint16_t __cry_idx2 = RP(_v_index2);
@@ -277,14 +279,14 @@ void task_add()
         }
     }
 
-    cp_sendRes("task_add \0");
+    //     cp_sendRes("task_add \0");
 }
 
 
 
 void task_relocate()
 {
-    cp_reset();
+    //     cp_reset();
     uint16_t __cry;
     fingerprint_t fp_victim = RP(_v_fingerprint);
     index_t fp_hash_victim = hash_to_index(fp_victim);
@@ -312,7 +314,7 @@ void task_relocate()
         return;
     }
 
-    cp_sendRes("task_relocate \0");
+    //     cp_sendRes("task_relocate \0");
 }
 
 
@@ -320,7 +322,7 @@ void task_relocate()
 
 void task_insert_done()
 {
-    cp_reset();
+    //     cp_reset();
     uint16_t __cry;
     ++WP(_v_insert_count);
     __cry = RP(_v_inserted_count);
@@ -339,21 +341,21 @@ void task_insert_done()
         return;
     }
 
-    cp_sendRes("task_insert_done \0");
+    //     cp_sendRes("task_insert_done \0");
 }
 
 void task_lookup()
 {
-    cp_reset();
+    //     cp_reset();
     WP(_v_next_task) = t_lookup_search;
     os_jump(8);
 
-    cp_sendRes("task_lookup \0");
+    //     cp_sendRes("task_lookup \0");
 }
 
 void task_lookup_search()
 {
-    cp_reset();
+    //     cp_reset();
     if (RP(_v_filter[RP(_v_index1)]) == RP(_v_fingerprint)) {
         WP(_v_member) = true;
     } else {
@@ -367,12 +369,12 @@ void task_lookup_search()
     }
 
 //    os_jump(1);
-    cp_sendRes("task_lookup_search \0");
+    //     cp_sendRes("task_lookup_search \0");
 }
 
 void task_lookup_done()
 {
-    cp_reset();
+    //     cp_reset();
     uint16_t __cry;
     ++WP(_v_lookup_count);
     __cry = P(_v_member_count) ;
@@ -388,7 +390,7 @@ void task_lookup_done()
         return;
     }
 
-    cp_sendRes("task_lookup_done \0");
+    //     cp_sendRes("task_lookup_done \0");
 }
 
 void task_print_stats()
@@ -429,7 +431,9 @@ void init()
     CSCTL0_H = 0;
 #endif
 
-    cp_init();
+//    cp_init();
+    uart_init();
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
 }
 int main(void) {
     init();

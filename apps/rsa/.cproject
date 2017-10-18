@@ -32,9 +32,10 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.283806024" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" useByScannerDiscovery="false" value="msp430fr5969" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.944173098" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;/Applications/ti/ccsv7/ccs_base/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/codeProfiler-repo/codeProfiler/include"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/uart-debugger-repo/uart-debugger/include"/>
-									<listOptionValue builtIn="false" value="&quot;/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ipos-gcc-dma/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;/Users/amjad/Documents/github/IPOS/apps/DFT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;/Applications/ti/ccsv7/tools/compiler/msp430-gcc-6.2.1.16_osx/msp430-elf/include&quot;"/>
 								</option>
@@ -53,17 +54,19 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.1740208157" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.849333671" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" useByScannerDiscovery="false" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
+									<listOptionValue builtIn="false" value="mspDebugger"/>
+									<listOptionValue builtIn="false" value="mspReseter"/>
+									<listOptionValue builtIn="false" value="mspProfiler"/>
 									<listOptionValue builtIn="false" value="ipos-gcc-dma"/>
-									<listOptionValue builtIn="false" value="uart-debugger"/>
 									<listOptionValue builtIn="false" value="m"/>
-									<listOptionValue builtIn="false" value="codeProfiler"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.596203815" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/codeProfiler-repo/codeProfiler/Debug"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/IPOS/DMA/ipos-gcc-dma/Debug"/>
-									<listOptionValue builtIn="false" value="/Users/amjad/Documents/github/uart-debugger-repo/uart-debugger/Debug"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ipos-gcc-dma/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/Debug}&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1187932453" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.out&quot;" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE.690385558" name="Write a map file (-Map)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE" useByScannerDiscovery="false" value="&quot;${ProjName}.map&quot;" valueType="string"/>

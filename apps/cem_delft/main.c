@@ -1,6 +1,9 @@
 #include <msp430.h> 
+#include <mspReseter.h>
+#include "mspProfiler.h"
+#include "mspDebugger.h"
 #include <ipos.h>
-#include <codeProfiler.h>
+
 
 __nv uint8_t pinCont = 0;
 #define NIL 0 // like NULL, but for indexes, not real pointers
@@ -68,6 +71,7 @@ static sample_t acquire_sample(letter_t prev_sample)
 
 void task_init()
 {
+
 #if CODEPROFILE
     cp_reset();
 #endif
@@ -408,6 +412,9 @@ void init()
 #if CODEPROFILE
       cp_init();
 #endif
+
+//    uart_init();
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
 
 }
 

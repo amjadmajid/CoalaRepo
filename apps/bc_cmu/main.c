@@ -1,6 +1,8 @@
 #include <msp430.h>
 #include <stdlib.h>
-
+#include <mspReseter.h>
+#include "mspProfiler.h"
+#include "mspDebugger.h"
 #include <ipos.h>
 
 #define SEED 4L
@@ -76,17 +78,22 @@ void init() {
 
     P3DIR = BIT5;
 
-    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-//  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
-    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-    CSCTL0_H = 0;
+//    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+////  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+//    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+//    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+//    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+//    CSCTL0_H = 0;
+//
+//  __enable_interrupt();
 
-  __enable_interrupt();
+//    cp_init();
+    uart_init();
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
 }
 
 void task_init() {
+
     pinCont=1;
 
     PW(_v_func) = 0;
@@ -295,6 +302,7 @@ void task_end() {
         P3OUT &=~BIT5;
     }
     pinCont=0;
+
 }
 
 int main(void) {

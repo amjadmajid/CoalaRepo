@@ -53,17 +53,18 @@ def main():
 
 	# task based processing/plotting
 
-	plt.figure("tasks distributions")
-	for app in apps_names:
-		tasks_names = d[app].keys()
+	# plt.figure("tasks distributions")
+	# for app in apps_names:
+		# tasks_names = d[app].keys()
 		# print(tasks_names)
-		c = generateRandomColor()
+		# c = generateRandomColor()
 		# print("task c", c)
-		for task_name in tasks_names:
-			if not normPlotting(d[app][task_name], c):
-				print(task_name)
 
-	plt.show()
+		# for task_name in tasks_names:
+		# 	if not normPlotting(d[app][task_name], c):
+		# 		print(task_name)
+
+	# plt.show()
 
 
 	apps_dict={}
@@ -72,11 +73,21 @@ def main():
 		apps_dict[app] = appVals
 
 	# Plotting apps distributions
-	plt.figure("Apps distributions")
+	figureSetting()
+	f = plt.figure("Apps distributions", figsize=(8,3))
+	ax = plt.axes()
+	ax.set_xscale('log')
 	for app in apps_names :
 		c = generateRandomColor()
-		if not normPlotting( apps_dict[app], c  ): 
-			print(apps)
+		# if not normPlotting( apps_dict[app], c  ): 
+		# 	print(apps)
+
+		plt.plot( np.array(sorted(apps_dict[app])), np.arange(1,len( apps_dict[app])+1) / float(len(apps_dict[app]) ),label=app, lw=1.5 )
+
+	plt.ylabel("Task Size Dist.")
+	plt.tight_layout()
+	plt.legend(loc='best')
+	f.savefig("../figures/TskDist.pdf", format="pdf", dpi=1200)
 	plt.show()
 
 
