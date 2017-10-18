@@ -14,7 +14,7 @@ else:
 
 # check if the required directory exist
 basePath= '../data/user/'
-tailPath = 'simulatedPwrInter_1500/CoalescedTaskSize'
+tailPath = 'simulatedPwrInter_1500/CoalescedTaskSize/camelPowerPattern/'
 
 dirPath = os.path.join(os.path.join(basePath,appName), tailPath)
 
@@ -28,7 +28,7 @@ if not os.path.isdir(dirPath) :
 
 cp = os.getcwd()
 
-fname =  open( os.path.join(dirPath,'fastChange_2.txt') , 'w')
+fname =  open( os.path.join(dirPath,'slowChange_2.txt') , 'w')
 
 portName = "/dev/cu.usbmodem1413"
 baudRate = 115200

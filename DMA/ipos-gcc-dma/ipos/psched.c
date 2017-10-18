@@ -1,16 +1,12 @@
-#include <psched.h>
+   #include <psched.h>
 #include <msp430fr5969.h>
 #include <mspDebugger.h>
 
 #define DEBUG 1
-#define COALESCING 1
+
 
 #define COMMITTING      1
 #define COMMIT_FINISH   0
-#define VERTUTASK       10
-
-#define __numbPwrInt (*(uint16_t*)(0x1990))
-#define __PI_overflow (*(uint16_t*)(0x1992))
 
 #define JUMP2()  if(!__jump)  \
                     {   \
@@ -47,36 +43,25 @@
             __jump_cnt = 0;    \
         }
 
-
-
-    unsigned char __jump = 0;
-    unsigned int __jump_by = 0;
-    unsigned int __jump_cnt = 0;
+unsigned char __jump = 0;
+unsigned int __jump_by = 0;
+unsigned int __jump_cnt = 0;
 
 __nv unsigned char  __commit_flag = 0;
 
-__nv unsigned int  __virtualTaskAddr = 0;    // Modified externally
+// __virtualTaskAddr holds persistently the address of the last executed task
+// Initially __virtualTaskAddr will be initialized to the fist task in the taskId array
+// __virtualTaskAddr is modified externally
+
+__nv unsigned int  __virtualTaskAddr = 0;
 __nv unsigned int *__temp_virtualTaskAddr = NULL;
 
-//__nv unsigned int  __virtualTaskSize = VERTUTASK;
-     unsigned int  __virtualTaskCntr = 0;
-__nv unsigned int  __maxVirtualTaskSize = 0x7f;
+    unsigned int *__realTask = NULL;
 
-     unsigned int *__realTask = NULL;
-__nv unsigned int  __realTaskCntr = VERTUTASK;
+// Coalescing params
+__nv unsigned int __coalTskSize = 2;    // start with 2 because we will directly decrease it in the os_scheduler
+__nv unsigned int __max_coalTskSize = 64;
 
-//__nv unsigned char * pers_pt= (unsigned char *)0xB000;
-//__nv unsigned int pers_cnt = 0;
-
-void os_enter_critical()
-{
-    __bis_SR_register(GIE);
-}
-
-void os_exit_critical()
-{
-    __bic_SR_register(GIE);
-}
 
 
 void os_jump(unsigned int j)
@@ -87,19 +72,18 @@ void os_jump(unsigned int j)
 
 void os_scheduler()
 {
-//    __numbPwrInt++;
-//    if(__numbPwrInt >= 0xffff)
-//    {
-//        __PI_overflow++;
-//        __numbPwrInt=0;
-//    }
+    // Coalescing
+    if(__coalTskSize > 1)
+    {
+        __coalTskSize--;  // on a power interrupt decrease the coalesced task size
+    }
 
-# if COALESCING
-    __virtualTaskCntr = (__realTaskCntr >> 1)+1 ;  // make half of the last execution history, your new virtual task size
-    __realTaskCntr = 0;    // on a power reboot the __realTaskCntr must be reseted
-#endif
 
-    if (__commit_flag == COMMITTING)
+ /******************************************************
+  *  Does power interrupted execution or commit stage
+  ******************************************************/
+
+    if (__commit_flag)
     {
         // we need to do a page swap to bring the correct page from temp  or  ROM
         // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
@@ -108,47 +92,42 @@ void os_scheduler()
         goto commit;
     }
 
-    // Recover the virtual state
+
+/******************************************************
+ * Recover the virtual state
+ ******************************************************/
     __bringCrntPagROM();
     __realTask = (unsigned int *) __virtualTaskAddr;
-
+    unsigned int __coalTskCntr = 0;
 
     while (1)
     {
-
-#if COALESCING
-
-#if DEBUG
-        __disable_interrupt();
-        uart_sendHex8(__virtualTaskCntr);
-        uart_sendStr("\n\r\0");
-        __enable_interrupt();
-
-#endif
-
-        for(; __virtualTaskCntr > 0 ; __virtualTaskCntr-- )
+        /*********************************************
+         * Task execuiton and virtual progressing
+         ********************************************/
+        // Coalescing
+while(__coalTskCntr < __coalTskSize)
         {
-#endif
-            // Accessing a task
-            ((funcPt) (*__realTask))();
-
-            // virtual progressing
-            JUMP();
-
-# if COALESCING
-            //last execution history (my next virtual task size)
-            // set a maximum virtual task size (64)
-            if(__realTaskCntr < __maxVirtualTaskSize){
-            __realTaskCntr++;
-            }
+             ((funcPt) (*__realTask))();
+            JUMP();  // virtual progressing
+            __coalTskCntr++;
         }
 
+#if DEBUG
+      uart_sendHex8(__coalTskSize);
+      uart_sendStr("\n\r\0");
 #endif
-        //At this point a virtual task must be finished
 
 
+        __coalTskCntr=0;
+        if(__coalTskSize < __max_coalTskSize)
+        {
+        __coalTskSize++; // on a successful coalesced task execution, increase its size
+        }
 
-        // transition stage (from virtual -> persistent)
+        /*********************************************
+         * Transition stage (from virtual -> persistent)
+         ********************************************/
         __temp_virtualTaskAddr = __realTask;
         __sendPagTemp(CrntPagHeader);
 
@@ -159,26 +138,19 @@ void os_scheduler()
             __persis_pagsInTemp[p_cnt] = __pagsInTemp[p_cnt];
         }
 
-        __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
-
+        //Keep track of the last accessed page over a power cycle
+        __persis_CrntPagHeader = CrntPagHeader;
         __commit_flag = COMMITTING;
+
+        /******************************************************
+         * firm transition and page commiting
+         ******************************************************/
 commit:
-        // firm transition
      __virtualTaskAddr = (unsigned int) __temp_virtualTaskAddr;
 
      // Commit the dirty pages
     __pagsCommit();
     __commit_flag = COMMIT_FINISH;
-
-# if COALESCING
-    //if you die during the commit stage, the __realTaskCntr will be zero.
-    //However,  __virtualTaskCntr will get a value from __realTaskCntr before the __realTaskCntr is reseted
-    if( !__virtualTaskCntr )
-    {
-        __virtualTaskCntr = ((__realTaskCntr >>1)+1) ; // the new virtual task is half of the history of execution
-    }
-#endif
-
     }
 
 }

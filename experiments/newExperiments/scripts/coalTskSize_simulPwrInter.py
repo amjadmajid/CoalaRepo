@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-apps, filesContainer = filesFinder('simulatedPwrInter_1500/CoalescedTaskSize/*.txt')
+apps, filesContainer = filesFinder('simulatedPwrInter_1500/CoalescedTaskSize/camelPowerPattern/*.txt')
 fifNUm = 0
 
 maxCoalSize = 64 # this is used to check for the max coalesced task size
