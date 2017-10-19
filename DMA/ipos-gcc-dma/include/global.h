@@ -28,7 +28,7 @@
 // function pointer
 typedef void (* funcPt)(void);
 
-extern unsigned int __virtualTaskAddr;
+extern unsigned int __coalTskAddr;
 extern volatile unsigned int  __totNumTask;
 extern unsigned int __persis_CrntPagHeader;
 extern unsigned int __pagsInTemp[];
@@ -36,7 +36,7 @@ extern unsigned int __persis_pagsInTemp[];
 extern volatile uint8_t dirtyPag ;
 extern uint32_t __temp_temp;
 extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
-extern unsigned int __virtualTaskCntr;
+extern unsigned int __coalTaskCntr;
 
 //This is a task interface. It is shared between the user and IPOS
 typedef struct _taskId{
@@ -51,6 +51,6 @@ typedef struct _taskId{
 #define NEXT_OFFSET         4
 
 
-#define PAGCMT() __virtualTaskCntr=1
+#define PAGCMT() __coalTaskCntr=1
 
 #endif /* INCLUDE_GLOBAL_H_ */

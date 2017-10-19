@@ -1,0 +1,35 @@
+#define JUMP2()  if(!__jump)  \
+                    {   \
+                            __realTask = (unsigned int *) *(__realTask + NEXT_OFFSET_PT) ;     /* soft transition */  \
+                    }else{  \
+                        unsigned int totJumpSize = (*(__realTask + BLOCK_OFFSET_PT) + __jump_by);   \
+                            if(totJumpSize > __totNumTask)  \
+                            {   \
+                                int dis  = totJumpSize - __totNumTask;  \
+                                while( dis  > __totNumTask) \
+                                {   \
+                                    dis = dis - __totNumTask;   \
+                                }   \
+                                dis = dis - (totJumpSize - __jump_by);  \
+                                __realTask  += (dis + dis + dis) ;  \
+                            }else{  \
+                                __realTask  += ( __jump_by+__jump_by  + __jump_by )  ;  \
+                                }   \
+                            __jump = 0; \
+                        }
+
+
+#define JUMP();    if(!__jump){   \
+        __realTask  =  \
+        (unsigned int*) (*(__realTask + NEXT_OFFSET_PT)) ;     /* soft transition */ \
+        }else{  \
+            while(__jump_cnt < __jump_by)   \
+            {   \
+                __realTask  =  \
+                (unsigned int*) (*(__realTask + NEXT_OFFSET_PT)) ;  /* soft transition */ \
+        __jump_cnt++;     \
+            }       \
+            __jump = 0;     \
+            __jump_cnt = 0;    \
+        }
+        

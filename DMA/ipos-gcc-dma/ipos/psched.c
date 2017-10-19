@@ -1,77 +1,117 @@
-   #include <psched.h>
+#include <psched.h>
 #include <msp430fr5969.h>
 #include <mspDebugger.h>
 
-#define DEBUG 1
+// PLEASE SELECT AN ALGORITHIN
+#define FST_CHNG_ALGO 0
+#define SLO_CHNG_ALGO 1
+#define SLO_CHNG_TSK_AWAR_ALGO 0
+#define NO_COALESCING 0
+
+/***********************************
+*    Common Debugging flags
+**********************************/
+#define COAL_TSK_SIZ_SEND 0
 
 
+#if NO_COALESCING
+
+#undef COALESCING
+#undef FST_CHNG_ALGO
+#define FST_CHNG_ALGO 1
+#undef SLO_CHNG_ALGO
+#undef SLO_CHNG_TSK_AWAR_ALGO
+
+#else
+#define COALESCING 1
+#endif
+
+#define NUM_PWR_INTR__MEM_DUMP 0
+#define __numbPwrInt (*(uint16_t*)(0x1990))
+#define __PI_overflow (*(uint16_t*)(0x1992))
+
+// algorithm selection flags control
+#if FST_CHNG_ALGO && SLO_CHNG_ALGO || \
+    FST_CHNG_ALGO && SLO_CHNG_TSK_AWAR_ALGO || \
+    SLO_CHNG_ALGO && SLO_CHNG_TSK_AWAR_ALGO
+#error "More than one algorithm is enabled"
+#endif
+
+#if FST_CHNG_ALGO ==0  && SLO_CHNG_ALGO ==0 && SLO_CHNG_TSK_AWAR_ALGO ==0
+#error "No coalescing algorithm is selected"
+#endif
+
+
+ /***********************************
+  *     System flags
+  **********************************/
 #define COMMITTING      1
 #define COMMIT_FINISH   0
 
-#define JUMP2()  if(!__jump)  \
-                    {   \
-                            __realTask = (unsigned int *) *(__realTask + NEXT_OFFSET_PT) ;     /* soft transition */  \
-                    }else{  \
-                        unsigned int totJumpSize = (*(__realTask + BLOCK_OFFSET_PT) + __jump_by);   \
-                            if(totJumpSize > __totNumTask)  \
-                            {   \
-                                int dis  = totJumpSize - __totNumTask;  \
-                                while( dis  > __totNumTask) \
-                                {   \
-                                    dis = dis - __totNumTask;   \
-                                }   \
-                                dis = dis - (totJumpSize - __jump_by);  \
-                                __realTask  += (dis + dis + dis) ;  \
-                            }else{  \
-                                __realTask  += ( __jump_by+__jump_by  + __jump_by )  ;  \
-                                }   \
-                            __jump = 0; \
-                        }
+#include "jump.txt"
 
-
-#define JUMP();    if(!__jump){   \
-        __realTask  =  \
-        (unsigned int*) (*(__realTask + NEXT_OFFSET_PT)) ;     /* soft transition */ \
-        }else{  \
-            while(__jump_cnt < __jump_by)   \
-            {   \
-                __realTask  =  \
-                (unsigned int*) (*(__realTask + NEXT_OFFSET_PT)) ;  /* soft transition */ \
-        __jump_cnt++;     \
-            }       \
-            __jump = 0;     \
-            __jump_cnt = 0;    \
-        }
-
-unsigned char __jump = 0;
-unsigned int __jump_by = 0;
-unsigned int __jump_cnt = 0;
+ /***********************************
+  *     Common variables
+  **********************************/
+     unsigned char __jump = 0;
+     unsigned int __jump_by = 0;
+     unsigned int __jump_cnt = 0;
 
 __nv unsigned char  __commit_flag = 0;
+     unsigned int *__realTask = NULL;
 
-// __virtualTaskAddr holds persistently the address of the last executed task
-// Initially __virtualTaskAddr will be initialized to the fist task in the taskId array
-// __virtualTaskAddr is modified externally
+// __coalTskAddr holds a task address. It is modified externally
+__nv unsigned int  __coalTskAddr = 0;
+__nv unsigned int *__temp_coalTskAddr = NULL;
+__nv unsigned int __max_coalTskSize = 0x7f;
 
-__nv unsigned int  __virtualTaskAddr = 0;
-__nv unsigned int *__temp_virtualTaskAddr = NULL;
-
-    unsigned int *__realTask = NULL;
-
-// Coalescing params
+/***********************************
+ *  Algorithm specific variables
+ **********************************/
+#if SLO_CHNG_ALGO
 __nv unsigned int __coalTskSize = 2;    // start with 2 because we will directly decrease it in the os_scheduler
-__nv unsigned int __max_coalTskSize = 64;
+#endif
+
+#if FST_CHNG_ALGO
+
+     unsigned int  __coalTaskCntr = 0;
+__nv unsigned int  __realTaskCntr = 10;
+
+#endif
 
 
-
+/***********************************
+ *  Common functionality
+ **********************************/
 void os_jump(unsigned int j)
 {
     __jump = 1;
     __jump_by = j;
 }
 
+void os_enter_critical()
+{
+    __bis_SR_register(GIE);
+}
+
+void os_exit_critical()
+{
+    __bic_SR_register(GIE);
+}
+
+#if SLO_CHNG_ALGO
 void os_scheduler()
 {
+
+#if NUM_PWR_INTR__MEM_DUMP
+    __numbPwrInt++;
+    if(__numbPwrInt >= 0xffff)
+    {
+        __PI_overflow++;
+        __numbPwrInt=0;
+    }
+#endif
+
     // Coalescing
     if(__coalTskSize > 1)
     {
@@ -88,7 +128,7 @@ void os_scheduler()
         // we need to do a page swap to bring the correct page from temp  or  ROM
         // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
         __bringPersisCrntPag(__persis_CrntPagHeader );
-        __realTask = __temp_virtualTaskAddr;
+        __realTask = __temp_coalTskAddr;
         goto commit;
     }
 
@@ -97,7 +137,7 @@ void os_scheduler()
  * Recover the virtual state
  ******************************************************/
     __bringCrntPagROM();
-    __realTask = (unsigned int *) __virtualTaskAddr;
+    __realTask = (unsigned int *) __coalTskAddr;
     unsigned int __coalTskCntr = 0;
 
     while (1)
@@ -113,7 +153,7 @@ while(__coalTskCntr < __coalTskSize)
             __coalTskCntr++;
         }
 
-#if DEBUG
+#if COAL_TSK_SIZ_SEND
       uart_sendHex8(__coalTskSize);
       uart_sendStr("\n\r\0");
 #endif
@@ -128,7 +168,7 @@ while(__coalTskCntr < __coalTskSize)
         /*********************************************
          * Transition stage (from virtual -> persistent)
          ********************************************/
-        __temp_virtualTaskAddr = __realTask;
+        __temp_coalTskAddr = __realTask;
         __sendPagTemp(CrntPagHeader);
 
         unsigned int p_cnt;
@@ -146,11 +186,148 @@ while(__coalTskCntr < __coalTskSize)
          * firm transition and page commiting
          ******************************************************/
 commit:
-     __virtualTaskAddr = (unsigned int) __temp_virtualTaskAddr;
+     __coalTskAddr = (unsigned int) __temp_coalTskAddr;
 
      // Commit the dirty pages
     __pagsCommit();
     __commit_flag = COMMIT_FINISH;
     }
+#endif
 
-}
+
+#if FST_CHNG_ALGO
+
+
+void os_scheduler()
+{
+
+#if NUM_PWR_INTR__MEM_DUMP
+    __numbPwrInt++;
+    if(__numbPwrInt >= 0xffff)
+    {
+        __PI_overflow++;
+        __numbPwrInt=0;
+    }
+#endif
+
+# if COALESCING
+    __coalTaskCntr = (__realTaskCntr >> 1)+1 ;  // make half of the last execution history, your new virtual task size
+    __realTaskCntr = 0;    // on a power reboot the __realTaskCntr must be reseted
+#endif
+
+    if (__commit_flag == COMMITTING)
+    {
+        // we need to do a page swap to bring the correct page from temp  or  ROM
+        // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
+        __bringPersisCrntPag(__persis_CrntPagHeader );
+        __realTask = __temp_coalTskAddr;
+        goto commit;
+    }
+
+    // Recover the virtual state
+    __bringCrntPagROM();
+    __realTask = (unsigned int *) __coalTskAddr;
+
+
+    while (1)
+    {
+
+#if COALESCING
+
+#if COAL_TSK_SIZ_SEND
+        uart_sendHex8(__coalTaskCntr);
+        uart_sendStr("\n\r\0");
+
+#endif
+
+        for(; __coalTaskCntr > 0 ; __coalTaskCntr-- )
+        {
+#endif
+            // Accessing a task
+            ((funcPt) (*__realTask))();
+
+            // virtual progressing
+            JUMP();
+
+# if COALESCING
+            //last execution history (my next virtual task size)
+            // set a maximum virtual task size (64)
+            if(__realTaskCntr < __max_coalTskSize){
+            __realTaskCntr++;
+            }
+        }
+
+#endif
+        //At this point a virtual task must be finished
+
+
+
+        // transition stage (from virtual -> persistent)
+        __temp_coalTskAddr = __realTask;
+        __sendPagTemp(CrntPagHeader);
+
+        unsigned int p_cnt;
+        for (p_cnt=0; __pagsInTemp[p_cnt]; p_cnt++)
+        {
+            //move the dirty pages addresses to a persistent buffer
+            __persis_pagsInTemp[p_cnt] = __pagsInTemp[p_cnt];
+        }
+
+        __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
+
+        __commit_flag = COMMITTING;
+commit:
+        // firm transition
+     __coalTskAddr = (unsigned int) __temp_coalTskAddr;
+
+     // Commit the dirty pages
+    __pagsCommit();
+    __commit_flag = COMMIT_FINISH;
+
+# if COALESCING
+    //if you die during the commit stage, the __realTaskCntr will be zero.
+    //However,  __coalTaskCntr will get a value from __realTaskCntr before the __realTaskCntr is reseted
+    if( !__coalTaskCntr )
+    {
+        __coalTaskCntr = ((__realTaskCntr >>1)+1) ; // the new virtual task is half of the history of execution
+    }
+#endif
+
+    }
+
+#endif
+
+
+
+}  // end of scheduler function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

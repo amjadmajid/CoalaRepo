@@ -6,6 +6,11 @@
 #include <ipos.h>
 
 
+#define TSK_SIZ
+#define AUTO_RST
+#define LOG_INFO
+
+
 #define SEED 4L
 #define ITER 100
 #define CHAR_BIT 8
@@ -87,14 +92,25 @@ void init() {
     CSCTL0_H = 0;
 #endif
 
+#ifdef TSK_SIZ
     cp_init();
+#endif
+
+#ifdef LOG_INFO
     uart_init();
+#endif
+
+#ifdef AUTO_RST
     mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
 
 }
 
 void task_init() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     pinCont=1;
     WP(_v_func) = 0;
@@ -108,11 +124,16 @@ void task_init() {
 
     os_jump(OFFSET(t_init, t_select_func));
 
-    //   cp_sendRes("task_init \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_init \0");
+#endif
 }
 
 void task_select_func() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     WP(_v_seed) = (uint32_t)SEED; // for test, seed is always the same
     WP(_v_iter) = 0;
@@ -148,10 +169,17 @@ void task_select_func() {
         os_jump(OFFSET(t_select_func, t_end));
     }
 
-    //   cp_sendRes("task_select_func \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_select_func \0");
+#endif
+
 }
+
 void task_bit_count() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
@@ -169,10 +197,16 @@ void task_bit_count() {
         os_jump(OFFSET(t_bit_count, t_select_func));
     }
 
-    //   cp_sendRes("task_bit_count \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_bit_count \0");
+#endif
 }
+
 void task_bitcount() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
@@ -191,7 +225,9 @@ void task_bitcount() {
         os_jump(OFFSET(t_bitcount, t_select_func));
     }
 
-    //   cp_sendRes("task_bitcount \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_bitcount \0");
+#endif
 }
 int recursive_cnt(uint32_t x){
     int cnt = bits[(int)(x & 0x0000000FL)];
@@ -211,7 +247,10 @@ int non_recursive_cnt(uint32_t x){
     return cnt;
 }
 void task_ntbl_bitcnt() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_n_2) += non_recursive_cnt(tmp_seed);
@@ -225,10 +264,16 @@ void task_ntbl_bitcnt() {
         os_jump(OFFSET(t_ntbl_bitcnt, t_select_func));
     }
 
-    //   cp_sendRes("task_ntbl_bitcnt \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_ntbl_bitcnt \0");
+#endif
+
 }
 void task_ntbl_bitcount() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     uint16_t __cry = RP(_v_seed);
     WP(_v_n_3) += bits[ (int) (__cry & 0x0000000FUL)       ] +
@@ -250,10 +295,16 @@ void task_ntbl_bitcount() {
         os_jump(OFFSET(t_ntbl_bitcount, t_select_func));
     }
 
-    //   cp_sendRes("task_ntbl_bitcount \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_ntbl_bitcount \0");
+#endif
+
 }
 void task_BW_btbl_bitcount() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     union
     {
@@ -276,10 +327,15 @@ void task_BW_btbl_bitcount() {
         os_jump(OFFSET(t_BW_btbl_bitcount, t_select_func));
     }
 
-    //   cp_sendRes("task_BW_btbl_bitcount \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_BW_btbl_bitcount \0");
+#endif
 }
 void task_AR_btbl_bitcount() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     unsigned char * Ptr = (unsigned char *) &P(_v_seed) ;
     int Accu ;
@@ -300,10 +356,16 @@ void task_AR_btbl_bitcount() {
         os_jump(OFFSET(t_AR_btbl_bitcount, t_select_func));
     }
 
-    //   cp_sendRes("task_AR_btbl_bitcount \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_AR_btbl_bitcount \0");
+#endif
 }
+
 void task_bit_shifter() {
-    //   cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     unsigned i, nn;
     uint32_t tmp_seed = RP(_v_seed);
@@ -323,7 +385,10 @@ void task_bit_shifter() {
         os_jump(OFFSET(t_bit_shifter, t_select_func));
     }
 
-    //   cp_sendRes("task_bit_shifter \0");
+#ifdef TSK_SIZ
+       cp_sendRes("task_bit_shifter \0");
+#endif
+
 }
 
 void task_end() {

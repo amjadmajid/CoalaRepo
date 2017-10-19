@@ -88,8 +88,8 @@ void init() {
 //  __enable_interrupt();
 
 //    cp_init();
-    uart_init();
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+//    uart_init();
+//    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
 }
 
 void task_init() {

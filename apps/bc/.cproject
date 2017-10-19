@@ -35,14 +35,13 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/codeProfiler/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ipos-gcc-dma/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE.401753648" name="Optimize for space rather than speed (-Os)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OPT_FOR_SPACE" value="false" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS.1113858329" name="Other flags" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.OTHER_FLAGS" valueType="stringList">
-									<listOptionValue builtIn="false" value="-mlarge"/>
+									<listOptionValue builtIn="false" value=""/>
 									<listOptionValue builtIn="false" value="-mhwmult=f5series"/>
 									<listOptionValue builtIn="false" value="-mcode-region=none"/>
 									<listOptionValue builtIn="false" value="-mdata-region=none"/>

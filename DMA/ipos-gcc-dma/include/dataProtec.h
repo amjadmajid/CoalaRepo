@@ -44,11 +44,6 @@ void __bringCrntPagROM();
 #define __VAR_PT_IN_RAM(var)            (  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
 
 
-
-
-
-
-
 #define WVAR(var, val)   if( __IS_VAR_IN_CRNT_PAG(var) )\
                                 { \
                                     *__VAR_PT_IN_RAM(var) = val ;\
@@ -60,60 +55,13 @@ void __bringCrntPagROM();
                                     dirtyPag = 1;
 
 
-#define GWVAR(var, oper,val)  if( __IS_VAR_IN_CRNT_PAG(var) )\
-                                { \
-                                    *__VAR_PT_IN_RAM(var) oper val ;\
-                                }\
-                                else{\
-                                    __pageSwap(&(var)) ;\
-                                    * __VAR_PT_IN_RAM(var) oper val;\
-                                    }
-
-
-
-#define PVAR(var)   (\
-                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
-                        ( __VAR_PT_IN_RAM(var) ):\
-                        ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-                    )
-
-
-#define RVAR(var)   ( * PVAR(var))
-
-
-//#define RVAR(var)   (\
-//                        (  __IS_VAR_IN_CRNT_PAG( (var) ) ) ? \
-//                        ( * __VAR_PT_IN_RAM(var) ):\
-//                        ( *(  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-//                    )
-
-#define PPVAR(wvar, rvar)  __temp_temp = (*PVAR( (rvar) )); \
-                          (*PVAR( (wvar) )) =  __temp_temp; dirtyPag = 1;
-
-#define OPPVAR(wvar, rvar) if(  __IS_VAR_IN_CRNT_PAG(var)  ) { \
-                                __temp_temp =  (*__VAR_PT_IN_RAM(var)) ; \
-                                WVAR(wvar, __temp_temp); \
-                                }else{\
-                                //TODO check if the page is in the buffer if so  *(&var + (0x3000)/2 )
-                                // else var
-
-
-
-
-
-
-
 #define __RP(var)   (\
                         (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
                         ( __VAR_PT_IN_RAM(var) ):\
                         ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
                     )
 
-//#define __WP(var)   (\
-//                        ( ( dirtyPag |= __IS_VAR_IN_CRNT_PAG(var) ) == 1 ) ? \
-//                        ( (__VAR_PT_IN_RAM(var)) ):\
-//                        ( (  (__typeof__(var)*) ( (( __pageSwap_w(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-//                    )
+#define RVAR(var)   ( * __RP(var))
 
 
 #define __PP(wvar, rvar)  __temp_temp = RP(rvar) ; \
@@ -123,9 +71,7 @@ void __bringCrntPagROM();
  *        User Memory Interface
  ******************************************/
 
-//#define WP(var)         ( *__WP(var))
 #define WP(var)         ( *VARW(var) )
-//#define RP(var)         ( *__RP(var))
 #define RP(var)         ( *VAR(var) )
 #define PP(wvar, rvar)  ( __PP(wvar, rvar) )
 
