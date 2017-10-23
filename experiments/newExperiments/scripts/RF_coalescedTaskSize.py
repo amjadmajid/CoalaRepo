@@ -8,27 +8,9 @@ import sys
 
 def main():
 
-	user_app = None
-	apps, files = filesFinder('CoalescedTaskSize/*-60cm.hex')
-	disp_apps = apps[:]
-	user_choice=[]
-
-	while(1):
-		if( sys.version_info[0] ) < 3 :
-			print('to choose from '+str(disp_apps)+' or (done):')
-			user_app = raw_input()
-		else:
-			user_app = input()
-
-		if(user_app == 'done'):
-			break;
-		disp_apps.remove(user_app)
-		user_choice.append(user_app)
-
-	if user_choice !=[]:
-		apps = user_choice[:]
-
-
+	apps = appsSelector()
+	files = filesFinder(apps, 'CoalescedTaskSize/*-60cm.hex')
+	
 	dataMean=[]
 	data=[]
 

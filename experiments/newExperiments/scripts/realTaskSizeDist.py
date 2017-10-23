@@ -5,30 +5,6 @@ from csf import *
 import scipy.stats as stats
 import numpy as np
 import math
-from collections import defaultdict
-
-
-def dataMiner( apps, paths ):
-	"""
-	@input: relative paths to data files extracted from 
-			codeProfiler library
-	@output: { app:{task:values, ....}, .... } 
-	"""
-	task_sizes= defaultdict(list)
-	apps_size={}
-	for app, path in zip(apps, paths):
-
-		file = "../data/user/"+path[0]  # first path
-		for line in open(file):
-			try:
-				(taskId, value) = line.split(" ")
-			except:
-				continue
-
-			task_sizes[app+'_'+taskId].append( int(value[:-1], 16) ) # lists of a task sizes for repeated executions
-		apps_size[app] = task_sizes.copy()
-		task_sizes.clear()
-	return apps_size
 
 
 
@@ -44,9 +20,9 @@ def list_flatter(l):
 
 
 def main():
-	
-	apps, paths = filesFinder('realTaskSize/*.txt')
-	d = dataMiner(apps, paths)
+	apps = appsSelector()
+	paths = filesFinder(apps, 'realTaskSize/*.txt')
+	d = mspProfiler_dataMiner(apps, paths)
 	apps_names = d.keys() 
 
 
@@ -55,16 +31,19 @@ def main():
 
 	# plt.figure("tasks distributions")
 	# for app in apps_names:
-		# tasks_names = d[app].keys()
-		# print(tasks_names)
-		# c = generateRandomColor()
-		# print("task c", c)
+	# 	tasks_names = d[app].keys()
+	# 	print(tasks_names)
+	# 	c = generateRandomColor()
+	# 	print("task c", c)
 
-		# for task_name in tasks_names:
-		# 	if not normPlotting(d[app][task_name], c):
-		# 		print(task_name)
+	# 	for task_name in tasks_names:
+	# 		print( d[app][task_name] )
+	# 		# if not normPlotting(d[app][task_name], c):
+	# 			# print(task_name)
 
 	# plt.show()
+
+	# exit()
 
 
 	apps_dict={}

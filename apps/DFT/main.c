@@ -12,6 +12,13 @@
 #include <ipos.h>
 
 
+#define TSK_SIZ
+#define AUTO_RST
+#define LOG_INFO
+
+
+// The original program
+
 #if 0
 
 #define SIZE 16
@@ -93,9 +100,11 @@ __p unsigned int n =0, k = 0;
 
 void discTimeSign()
 {
-    // uart_sendText("discTimeSign ", 13);
-    // cp_reset();
-    // Get the input for the task
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     unsigned int in_n = RVAR(n);
     float in_x_n = RVAR(x[in_n]);
 
@@ -115,7 +124,10 @@ void discTimeSign()
     // commit the output of the task
     WVAR(n, in_n);
 
-    // cp_getResult(1);
+#ifdef TSK_SIZ
+     cp_sendRes("discTimeSign \0");
+#endif
+
 }
 
 // Calculate DFT of x using brute force
@@ -126,9 +138,11 @@ void dft_outer_loop() {
 }
 
 void dft_real() {
-    // uart_sendText("dft_real ", 9);
-    // cp_reset();
-    // Get the input for the task
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     unsigned int in_k = RVAR(k);
     unsigned int in_n = RVAR(n);
     float in_Xre_k = RVAR(Xre[in_k]);
@@ -147,12 +161,17 @@ void dft_real() {
     // commit the output of the task
     WVAR(n, in_n);
 
-    // cp_getResult(1 );
+#ifdef TSK_SIZ
+     cp_sendRes("dft_real \0");
+#endif
 }
 
 void dft_im() {
-    // uart_sendText("dft_im ", 7);
-    // Get the input for the task
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     unsigned int in_k = RVAR(k);
     unsigned int in_n = RVAR(n);
     float in_Xim_k = RVAR(Xim[in_k]);
@@ -170,12 +189,17 @@ void dft_im() {
     // commit the output of the task
     WVAR(n, in_n);
 
-    // cp_getResult(1 );
+#ifdef TSK_SIZ
+     cp_sendRes("dft_im \0");
+#endif
 }
 
 void  dft_power(){
-    // uart_sendText("dft_power ", 10);
-    // Get the input for the task
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     unsigned int in_k = RVAR(k);
     float in_Xim_k = RVAR(Xim[in_k]);
     float in_Xre_k = RVAR(Xre[in_k]);
@@ -194,14 +218,18 @@ void  dft_power(){
     WVAR(k, in_k);
     WVAR(P[in_k], in_p_k);
 
-    // cp_getResult(1 );
-
+#ifdef TSK_SIZ
+     cp_sendRes("dft_power \0");
+#endif
 }
 
 
 void dft_end() {
-    // uart_sendText("dft_end ", 8);
-    // Get the input for the task
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     unsigned int in_k = RVAR(k);
 
         P3OUT |= BIT5;
@@ -211,10 +239,9 @@ void dft_end() {
     // commit the output of the task
     WVAR(k, in_k);
 
-    // cp_getResult(1 );
-
-    // uart_sendText("End\n\r", 5);
-
+#ifdef TSK_SIZ
+     cp_sendRes("dft_end \0");
+#endif
 }
 
 void init()
@@ -222,6 +249,8 @@ void init()
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+    P3OUT &= ~BIT5;
+    P3DIR |=BIT5;
 
 #if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
@@ -232,12 +261,17 @@ void init()
     CSCTL0_H = 0;
 #endif
 
-    P3OUT &= ~BIT5;
-    P3DIR |=BIT5;
-
+#ifdef TSK_SIZ
     cp_init();
+#endif
+
+#ifdef LOG_INFO
     uart_init();
+#endif
+
+#ifdef AUTO_RST
     mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
 
 }
 

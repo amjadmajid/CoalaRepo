@@ -15,8 +15,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from csf import *
 
-
-apps, filesContainer = filesFinder('simulatedPwrInter_1500/TimeToCompletion/*/*.csv')
+apps =  appsSelector()
+filesContainer = filesFinder(apps, 'simulatedPwrInter_1500/TimeToCompletion/*/*.csv')
 
 # print(apps)
 # print('---------------')

@@ -4,14 +4,13 @@
 #include "mspDebugger.h"
 #include <ipos.h>
 
+#define TSK_SIZ
+#define AUTO_RST
+#define LOG_INFO
 
 #define DATA_LEN 48
-//#define DEBUG 1
-
 __nv uint8_t pinCont = 0;
-
 const unsigned int CRC_Init = 0xFFFF;
-
 const unsigned int CRC_Input[] = {
                                   0x0fc0, 0x1096, 0x5042, 0x0010,           // 16 random 16-bit numbers
                                   0x7ff7, 0xf86a, 0xb58e, 0x7651,           // these numbers can be
@@ -63,36 +62,57 @@ void init()
 #endif
 
 
-//    cp_init();
-//    uart_init();
+#ifdef TSK_SIZ
+    cp_init();
+#endif
+
+#ifdef LOG_INFO
+    uart_init();
+#endif
+
+#ifdef AUTO_RST
     mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
 
 }
 
 void initTask()
 {
-    // cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     pinCont=1;
     WP(cnt) = 0;
     WP(SW_Results) = CRC_Init;
 
-    // cp_sendRes("initTask \0");
+#ifdef TSK_SIZ
+     cp_sendRes("initTask \0");
+#endif
+
 }
 
 void firstByte()
 {
-    // cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     // First input lower byte
     WP(SW_Results) = CCITT_Update(RP(SW_Results), CRC_Input[RP(cnt)] & 0xFF);
 
-    // cp_sendRes("firstByte \0");
+#ifdef TSK_SIZ
+     cp_sendRes("firstByte \0");
+#endif
 
 }
 
 void secondByte()
 {
-    // cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     // Then input upper byte
     WP(SW_Results) = CCITT_Update(RP(SW_Results), (CRC_Input[RP(cnt)] >> 8) & 0xFF);
@@ -103,14 +123,18 @@ void secondByte()
         os_jump(3);
     }
 
-    // cp_sendRes("secondByte \0");
-
+#ifdef TSK_SIZ
+     cp_sendRes("secondByte \0");
+#endif
 }
 
 void task_finish()
 {
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
-//    PAGCMT(); // force a commit after this task
+    PAGCMT(); // force a commit after this task
 
 
     if (pinCont){
@@ -121,10 +145,8 @@ void task_finish()
     pinCont=0;
     __enable_interrupt();
 
-#ifdef DEBUG
-
-    uint16_t n = RP(SW_Results);
-    uart_sendHex16(n);
+#ifdef TSK_SIZ
+     cp_sendRes("task_finish \0");
 #endif
 
 }

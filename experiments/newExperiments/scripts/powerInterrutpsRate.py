@@ -6,7 +6,8 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-apps, paths = filesFinder('powerInterruptRate/*.txt')
+apps = appsSelector()
+paths = filesFinder(apps, 'powerInterruptRate/*.txt')
 
 rates=[]
 
@@ -25,7 +26,8 @@ for anApp in paths:
 
 f= plt.figure() 
 figureSetting()
-normPlotting(rates)
+c = generateRandomColor()
+normPlotting(rates,c)
 # plt.bar(rates, rates)
 # plt.boxplot(rates)
 plt.ylabel("Power interrupt rate (frequency)")

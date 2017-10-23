@@ -11,6 +11,11 @@
 #include <ipos.h>
 
 
+#define TSK_SIZ
+#define AUTO_RST
+#define LOG_INFO
+
+
 #define NUM_BUCKETS 128 // must be a power of 2
 #define NUM_INSERTS (NUM_BUCKETS / 4) // shoot for 25% occupancy
 #define NUM_LOOKUPS NUM_INSERTS
@@ -119,7 +124,9 @@ unsigned i;
 
 void task_init()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     unsigned i;
         for (i = 0; i < NUM_BUCKETS ; ++i) {
             WP(_v_filter[i]) = 0;
@@ -132,12 +139,15 @@ void task_init()
         WP(_v_next_task) = t_insert;
 
         os_jump(OFFSET(t_init, t_generate_key));
-
-        //     cp_sendRes("task_init \0");
+#ifdef TSK_SIZ
+     cp_sendRes("task_init \0");
+#endif
 }
 
 void task_init_array() {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     unsigned i;
         for (i = 0; i < BUFFER_SIZE - 1; ++i) {
             WP(_v_filter[i + P(_v_index)*(BUFFER_SIZE-1)]) = 0;
@@ -150,12 +160,16 @@ void task_init_array() {
             os_jump(0);
         }
 
-        //     cp_sendRes("task_init_array \0");
+#ifdef TSK_SIZ
+     cp_sendRes("task_init_array \0");
+#endif
 }
 
 void task_generate_key()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     // insert pseufo-random integers, for testing
     // If we use consecutive ints, they hash to consecutive DJB hashes...
     // NOTE: we are not using rand(), to have the sequence available to verify
@@ -173,12 +187,16 @@ void task_generate_key()
         os_jump(TASK_NUM - RP(_v_next_task) + t_generate_key);
     }
 
-    //     cp_sendRes("task_generate_key \0");
+#ifdef TSK_SIZ
+   cp_sendRes("task_generate_key \0");
+#endif
 }
 
 void task_calc_indexes()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     uint16_t __cry;
     __cry = hash_to_fingerprint(RP(_v_key));
@@ -186,12 +204,16 @@ void task_calc_indexes()
 
     os_jump(1);
 
-    //     cp_sendRes("task_calc_indexes \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_calc_indexes \0");
+#endif
 }
 
 void task_calc_indexes_index_1()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     uint16_t __cry;
     __cry = hash_to_index(RP(_v_key));
@@ -199,12 +221,16 @@ void task_calc_indexes_index_1()
 
     os_jump(1);
 
-    //     cp_sendRes("task_calc_indexes_index_1 \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_calc_indexes_index_1 \0");
+#endif
 }
 
 void task_calc_indexes_index_2()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     index_t fp_hash = hash_to_index(RP(_v_fingerprint));
     uint16_t __cry;
      __cry = RP(_v_index1) ^ fp_hash;
@@ -217,26 +243,32 @@ void task_calc_indexes_index_2()
         os_jump(TASK_NUM - RP(_v_next_task) + t_calc_indexes_index_2);
     }
 
-    //     cp_sendRes("task_calc_indexes_index_2 \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_calc_indexes_index_2 \0");
+#endif
 }
-
-
 
 // This task is redundant.
 // Alpaca never needs this but since Chain code had it, leaving it for fair comparison.
 void task_insert()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     WP(_v_next_task) = t_add;
     os_jump(12);
 
-    //     cp_sendRes("task_insert \0");
+#ifdef TSK_SIZ
+   cp_sendRes("task_insert \0");
+#endif
 }
 
 
 void task_add()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     uint16_t __cry;
     uint16_t __cry_idx = RP(_v_index1);
     uint16_t __cry_idx2 = RP(_v_index2);
@@ -278,15 +310,18 @@ void task_add()
             return;
         }
     }
-
-    //     cp_sendRes("task_add \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_add \0");
+#endif
 }
 
 
 
 void task_relocate()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     uint16_t __cry;
     fingerprint_t fp_victim = RP(_v_fingerprint);
     index_t fp_hash_victim = hash_to_index(fp_victim);
@@ -314,7 +349,9 @@ void task_relocate()
         return;
     }
 
-    //     cp_sendRes("task_relocate \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_relocate \0");
+#endif
 }
 
 
@@ -322,7 +359,9 @@ void task_relocate()
 
 void task_insert_done()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     uint16_t __cry;
     ++WP(_v_insert_count);
     __cry = RP(_v_inserted_count);
@@ -341,21 +380,29 @@ void task_insert_done()
         return;
     }
 
-    //     cp_sendRes("task_insert_done \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_insert_done \0");
+#endif
 }
 
 void task_lookup()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     WP(_v_next_task) = t_lookup_search;
     os_jump(8);
 
-    //     cp_sendRes("task_lookup \0");
+#ifdef TSK_SIZ
+    cp_sendRes("task_lookup \0");
+#endif
 }
 
 void task_lookup_search()
 {
-    //     cp_reset();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
     if (RP(_v_filter[RP(_v_index1)]) == RP(_v_fingerprint)) {
         WP(_v_member) = true;
     } else {
@@ -369,12 +416,18 @@ void task_lookup_search()
     }
 
 //    os_jump(1);
-    //     cp_sendRes("task_lookup_search \0");
+#ifdef TSK_SIZ
+      cp_sendRes("task_lookup_search \0");
+#endif
 }
 
 void task_lookup_done()
 {
-    //     cp_reset();
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     uint16_t __cry;
     ++WP(_v_lookup_count);
     __cry = P(_v_member_count) ;
@@ -390,7 +443,9 @@ void task_lookup_done()
         return;
     }
 
-    //     cp_sendRes("task_lookup_done \0");
+#ifdef TSK_SIZ
+     cp_sendRes("task_lookup_done \0");
+#endif
 }
 
 void task_print_stats()
@@ -398,11 +453,13 @@ void task_print_stats()
 //    __no_operation();
     pinRaised=1;
 
-//    FLASH();
 }
 
 void task_done()
 {
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     if(pinRaised){
         P3OUT |= BIT5;
@@ -410,17 +467,19 @@ void task_done()
     }
     pinRaised=0;
 
+#ifdef TSK_SIZ
+     cp_sendRes("task_done \0");
+#endif
 }
 
-//#endif
 
 void init()
 {
-    P3OUT &= ~BIT5;
-    P3DIR |=BIT5;
-
     WDTCTL = WDTPW | WDTHOLD;
     PM5CTL0 &= ~LOCKLPM5;
+
+    P3OUT &= ~BIT5;
+    P3DIR |=BIT5;
 
 #if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
@@ -431,9 +490,18 @@ void init()
     CSCTL0_H = 0;
 #endif
 
-//    cp_init();
+#ifdef TSK_SIZ
+    cp_init();
+#endif
+
+#ifdef LOG_INFO
     uart_init();
+#endif
+
+#ifdef AUTO_RST
     mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
+
 }
 int main(void) {
     init();

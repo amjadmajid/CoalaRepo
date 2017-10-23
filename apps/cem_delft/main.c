@@ -4,6 +4,11 @@
 #include "mspDebugger.h"
 #include <ipos.h>
 
+#define TSK_SIZ
+#define AUTO_RST
+#define LOG_INFO
+
+
 
 __nv uint8_t pinCont = 0;
 #define NIL 0 // like NULL, but for indexes, not real pointers
@@ -16,7 +21,6 @@ __nv uint8_t pinCont = 0;
 #define LETTER_SIZE_BITS             8
 #define NUM_LETTERS (LETTER_MASK + 1)
 
-#define CODEPROFILE 0
 
 typedef uint16_t index_t;
 typedef uint16_t letter_t;
@@ -72,7 +76,7 @@ static sample_t acquire_sample(letter_t prev_sample)
 void task_init()
 {
 
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -84,7 +88,7 @@ void task_init()
     WVAR(_v_letter_idx, 0);
     WVAR(_v_sample_count,1);
 
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_init \0");
 #endif
 
@@ -93,7 +97,7 @@ void task_init()
 
 void task_init_dict()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -110,14 +114,14 @@ void task_init_dict()
 //        os_jump(1);
         ;
     }
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_init_dict \0");
 #endif
 }
 
 void task_sample()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -132,14 +136,14 @@ void task_sample()
     } else {
         os_jump(2);
     }
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_sample \0");
 #endif
 }
 
 void task_measure_temp()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -152,14 +156,14 @@ void task_measure_temp()
     WVAR(_v_sample, sample);
 //    os_jump(1);
 
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_measure_temp \0");
 #endif
 }
 
 void task_letterize()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -173,14 +177,14 @@ void task_letterize()
 
     WVAR(_v_letter, letter);
 //    os_jump(1);
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_letterize \0");
 #endif
 }
 
 void task_compress()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -202,14 +206,14 @@ void task_compress()
     (RVAR(_v_sample_count))++;
 
 //    os_jump(1);
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_compress \0");
 #endif
 }
 
 void task_find_sibling()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -245,14 +249,14 @@ void task_find_sibling()
 //        os_jump(1);
 //    }
 
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_find_sibling \0");
 #endif
 }
 
 void task_add_node()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -279,7 +283,7 @@ void task_add_node()
 //        os_jump(1);
     }
 
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_add_node \0");
 #endif
 
@@ -287,7 +291,7 @@ void task_add_node()
 
 void task_add_insert()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -329,7 +333,7 @@ void task_add_insert()
     __cry = RVAR(_v_parent);
     WVAR(_v_symbol, __cry);
     (RVAR(_v_node_count))++;
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_add_insert \0");
 #endif
 
@@ -338,7 +342,7 @@ void task_add_insert()
 
 void task_append_compressed()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -353,7 +357,7 @@ void task_append_compressed()
     } else {
         os_jump(5);
     }
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_append_compressed \0");
 #endif
 
@@ -361,7 +365,7 @@ void task_append_compressed()
 
 void task_print()
 {
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_reset();
 #endif
 
@@ -372,7 +376,7 @@ void task_print()
         index_t index = RVAR(_v_compressed_data[i].letter);
     }
 
-#if CODEPROFILE
+#ifdef TSK_SIZ
     cp_sendRes("task_print \0");
 #endif
 
@@ -381,11 +385,20 @@ void task_print()
 
 void task_done()
 {
+
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
+
     if (pinCont){
         P3OUT |=BIT5;
         P3OUT &=~BIT5;
     }
     pinCont=0;
+
+#ifdef TSK_SIZ
+     cp_sendRes("task_done \0");
+#endif
 }
 
 
@@ -409,21 +422,23 @@ void init()
       CSCTL0_H = 0;
 #endif
 
-#if CODEPROFILE
-      cp_init();
+#ifdef TSK_SIZ
+    cp_init();
 #endif
 
-//    uart_init();
+#ifdef LOG_INFO
+    uart_init();
+#endif
+
+#ifdef AUTO_RST
     mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
 
 }
 
 int main(void) {
     init();
-    //  PRINTF("INIT\r\n");
-    //  for (unsigned k = 0; k < arr_len; ++k) {
-    //      PRINTF("arr[%u]: %u\r\n", k, arr[k]);
-    //  }
+
     taskId tasks[] = {{task_init, 0},
         {task_init_dict, 0},
         {task_sample, 0},

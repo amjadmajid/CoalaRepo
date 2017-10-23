@@ -10,8 +10,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-apps, filesContainer = filesFinder('simulatedPwrInter_1500/CoalescedTaskSize/camelPowerPattern/*.txt')
+apps = appsSelector()
+print(apps)
+pwrPtn = unified_input("Select from (camel, toward, fixed)")
+filesContainer = filesFinder(apps, 'simulatedPwrInter_1500/CoalescedTaskSize/'+pwrPtn+'PowerPattern/*.txt')
 fifNUm = 0
 
 maxCoalSize = 64 # this is used to check for the max coalesced task size

@@ -10,8 +10,8 @@ from csf import *
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-
-apps, filesContainer = filesFinder('simulatedPwrInter_1500/TimeToCompletion/*/*.csv')
+apps = appsSelector()
+filesContainer = filesFinder(apps, 'simulatedPwrInter_1500/TimeToCompletion/*/*.csv')
 
 dd=0
 for files in filesContainer:

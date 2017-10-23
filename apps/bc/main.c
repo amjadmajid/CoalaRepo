@@ -6,7 +6,7 @@
 #include <ipos.h>
 
 
-#define TSK_SIZ
+//#define TSK_SIZ
 #define AUTO_RST
 #define LOG_INFO
 
@@ -393,13 +393,19 @@ void task_bit_shifter() {
 
 void task_end() {
 
-//    __no_operation();
+#ifdef TSK_SIZ
+       cp_reset();
+#endif
 
     if (pinCont){
         P3OUT |=BIT5;
         P3OUT &=~BIT5;
     }
     pinCont=0;
+
+#ifdef TSK_SIZ
+     cp_sendRes("task_end \0");
+#endif
 }
 
 int main(void) {

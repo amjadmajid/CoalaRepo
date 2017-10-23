@@ -10,6 +10,9 @@ import os
 import glob
 import random
 import colors
+from collections import defaultdict
+import sys
+
 
 colorCnts=0
 
@@ -20,17 +23,49 @@ def generateRandomColor():
 	colorCnts %=len(colors.colors)
 	return (c)
 
+def unified_input(aStr=""):
+	user_input =None
+	if( sys.version_info[0] ) < 3 :
+		user_input = raw_input(aStr)
+	else:
+		user_input = input(aStr)
+	return user_input
+
 
 dataUser = '../data/user/'
+scriptsDir = '../../scripts/'
 
-def filesFinder(path):
+def appsSelector():
+	os.chdir(dataUser)
+	apps = glob.glob('*')  # grep all apps folders
+
+	disp_apps = apps[:]
+	print(disp_apps)
+	user_choice=[]
+
+	while(1):
+		
+		user_input = unified_input('to choose from '+str(disp_apps)+' or (done):')
+
+		if(user_input == 'done'):
+			break;
+		disp_apps.remove(user_input)
+		user_choice.append(user_input)
+
+	if user_choice !=[]:
+		apps = user_choice[:]
+	os.chdir(scriptsDir)
+
+	return apps
+
+def filesFinder(apps, path):
 	filesPaths = []
-	os.chdir( dataUser )
-	appsMainFolders = glob.glob('*')  # grep all apps folders
+	appsMainFolders = apps
+	os.chdir(dataUser)
 	for appFolder in appsMainFolders:
 		filesPaths.append( glob.glob( os.path.join(appFolder,path)) )
-	os.chdir('../../scripts/')
 
+	os.chdir(scriptsDir)
 	validPaths=[]
 	validApps=[]
 	for i, p in enumerate(filesPaths):
@@ -38,7 +73,7 @@ def filesFinder(path):
 			validPaths.append(p)
 			validApps.append(appsMainFolders[i])
 
-	return (validApps, validPaths)
+	return (validPaths)
 
 
 def dataMiner(fileName, memStart, memEnd, wordSize):
@@ -67,6 +102,28 @@ def dataMiner(fileName, memStart, memEnd, wordSize):
 			# exit(0)
 		
 	return(data)
+
+def mspProfiler_dataMiner( apps, paths ):
+	"""
+	@input: relative paths to data files extracted from 
+			mspProfiler library
+	@output: { app:{task:values, ....}, .... } 
+	"""
+	task_sizes= defaultdict(list)
+	apps_size={}
+	for app, path in zip(apps, paths):
+
+		file = "../data/user/"+path[0]  # first path
+		for line in open(file):
+			try:
+				(taskId, value) = line.split(" ")
+			except:
+				continue
+
+			task_sizes[app+'_'+taskId].append( int(value[:-1], 16) ) # lists of a task sizes for repeated executions
+		apps_size[app] = task_sizes.copy()
+		task_sizes.clear()
+	return apps_size
 
 def normPlotting(d, c):
 	if len(d) < 1:
