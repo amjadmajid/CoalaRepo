@@ -13,7 +13,7 @@ import numpy as np
 apps = appsSelector()
 print(apps)
 pwrPtn = unified_input("Select from (camel, toward, fixed)")
-filesContainer = filesFinder(apps, 'simulatedPwrInter_1500/CoalescedTaskSize/'+pwrPtn+'PowerPattern/*.txt')
+filesContainer = filesFinder(apps, 'simulatedPwrInter/CoalescedTaskSize/'+pwrPtn+'PowerPattern/*.txt')
 fifNUm = 0
 
 maxCoalSize = 64 # this is used to check for the max coalesced task size
@@ -27,7 +27,7 @@ for files in filesContainer:
 		l = labelMaker(file)
 		print(l)
 		data=[]
-		for line in open('../data/user/'+file):
+		for line in open('../data/'+file):
 			if len(line) < 2:
 				continue
 			num = int(line, 16)

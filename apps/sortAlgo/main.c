@@ -26,7 +26,7 @@ void task_finish();
 void task_outer_loop();
 void task_inner_loop();
 
-////// Global variables
+////// Global Piables
 __p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
     unsigned int arr2[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
 
@@ -123,8 +123,8 @@ void task_finish()
     }
 
 
-    WVAR(i, 0) ;
-    WVAR(j, 1);
+    WP(i) = 0 ;
+    WP(j) = 1;
 
 #if CODEPROFILE
     cp_sendRes("\ntask_finish \0");
@@ -151,16 +151,18 @@ void init()
   CSCTL0_H = 0;
 #endif
 
-#if CODEPROFILE
-  cp_init();
+#ifdef TSK_SIZ
+    cp_init();
 #endif
 
-#if PWR_INT_SIM
-
-  uart_init();
-  mr_auto_rand_reseter(13000); // every 13 msec the MCU will be reseted
-
+#ifdef LOG_INFO
+    uart_init();
 #endif
+
+#ifdef AUTO_RST
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
+
 
 }
 

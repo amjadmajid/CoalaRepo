@@ -11,7 +11,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 apps = appsSelector()
-filesContainer = filesFinder(apps, 'simulatedPwrInter_1500/TimeToCompletion/*/*.csv')
+filesContainer = filesFinder(apps, 'simulatedPwrInter/TimeToCompletion/*/*.csv')
 
 dd=0
 for files in filesContainer:
@@ -21,7 +21,7 @@ for files in filesContainer:
 		x=np.array([])
 		y=np.array([])
 		i=0
-		for line in open('../data/user/'+file):
+		for line in open('../data/'+file):
 			i+=1
 			if(i > 200):
 				break

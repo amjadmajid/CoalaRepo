@@ -12,9 +12,9 @@
 #include <ipos.h>
 
 
-#define TSK_SIZ
-#define AUTO_RST
-#define LOG_INFO
+//#define TSK_SIZ
+//#define AUTO_RST
+//#define LOG_INFO
 
 
 // The original program
@@ -105,13 +105,13 @@ void discTimeSign()
        cp_reset();
 #endif
 
-    unsigned int in_n = RVAR(n);
-    float in_x_n = RVAR(x[in_n]);
+    unsigned int in_n = RP(n);
+    float in_x_n = RP(x[in_n]);
 
         // Generate random discrete-time signal x in range (-1,+1)
         in_x_n = ((2.0 * rand()) / RAND_MAX) - 1.0;
 
-        WVAR(x[in_n] ,in_x_n);
+        WP(x[in_n]) = in_x_n;
 
         in_n++;
 
@@ -122,7 +122,7 @@ void discTimeSign()
         }
 
     // commit the output of the task
-    WVAR(n, in_n);
+    WP(n) = in_n;
 
 #ifdef TSK_SIZ
      cp_sendRes("discTimeSign \0");
@@ -143,13 +143,13 @@ void dft_real() {
        cp_reset();
 #endif
 
-    unsigned int in_k = RVAR(k);
-    unsigned int in_n = RVAR(n);
-    float in_Xre_k = RVAR(Xre[in_k]);
+    unsigned int in_k = RP(k);
+    unsigned int in_n = RP(n);
+    float in_Xre_k = RP(Xre[in_k]);
 
-        in_Xre_k += RVAR(x[in_n]) * cosf(in_n * in_k * PI2 / SIZE);
+        in_Xre_k += RP(x[in_n]) * cosf(in_n * in_k * PI2 / SIZE);
         // commit to the buffer
-        WVAR(Xre[in_k], in_Xre_k);
+        WP(Xre[in_k]) = in_Xre_k;
         in_n++;
         if(in_n < SIZE)
         {
@@ -159,7 +159,7 @@ void dft_real() {
         }
 
     // commit the output of the task
-    WVAR(n, in_n);
+    WP(n) = in_n;
 
 #ifdef TSK_SIZ
      cp_sendRes("dft_real \0");
@@ -172,12 +172,12 @@ void dft_im() {
        cp_reset();
 #endif
 
-    unsigned int in_k = RVAR(k);
-    unsigned int in_n = RVAR(n);
-    float in_Xim_k = RVAR(Xim[in_k]);
+    unsigned int in_k = RP(k);
+    unsigned int in_n = RP(n);
+    float in_Xim_k = RP(Xim[in_k]);
 
-        in_Xim_k -= RVAR(x[in_n]) * sinf(in_n * in_k * PI2 / SIZE);
-        WVAR(Xim[in_k], in_Xim_k);
+        in_Xim_k -= RP(x[in_n]) * sinf(in_n * in_k * PI2 / SIZE);
+        WP(Xim[in_k]) = in_Xim_k;
         in_n++;
         if(in_n < SIZE)
         {
@@ -187,7 +187,7 @@ void dft_im() {
         }
 
     // commit the output of the task
-    WVAR(n, in_n);
+    WP(n) = in_n;
 
 #ifdef TSK_SIZ
      cp_sendRes("dft_im \0");
@@ -200,10 +200,10 @@ void  dft_power(){
        cp_reset();
 #endif
 
-    unsigned int in_k = RVAR(k);
-    float in_Xim_k = RVAR(Xim[in_k]);
-    float in_Xre_k = RVAR(Xre[in_k]);
-    float in_p_k = RVAR(P[in_k]);
+    unsigned int in_k = RP(k);
+    float in_Xim_k = RP(Xim[in_k]);
+    float in_Xre_k = RP(Xre[in_k]);
+    float in_p_k = RP(P[in_k]);
 
         in_p_k = in_Xre_k * in_Xre_k + in_Xim_k * in_Xim_k;
         in_k++;
@@ -215,8 +215,8 @@ void  dft_power(){
             os_jump(3);
         }
 
-    WVAR(k, in_k);
-    WVAR(P[in_k], in_p_k);
+    WP(k) = in_k;
+    WP(P[in_k]) = in_p_k;
 
 #ifdef TSK_SIZ
      cp_sendRes("dft_power \0");
@@ -230,14 +230,14 @@ void dft_end() {
        cp_reset();
 #endif
 
-    unsigned int in_k = RVAR(k);
+    unsigned int in_k = RP(k);
 
         P3OUT |= BIT5;
         P3OUT &= ~BIT5;
         in_k = 0;
 
     // commit the output of the task
-    WVAR(k, in_k);
+    WP(k) = in_k;
 
 #ifdef TSK_SIZ
      cp_sendRes("dft_end \0");

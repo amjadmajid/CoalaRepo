@@ -22,7 +22,7 @@ if [ $option -eq 1 ]; then
 elif [ $option -eq 2 ]; then
 	./MSP430Flasher -r [FirmwareOutput.hex,0x0000-0xffff]
 cd -
-	cp ~/MSPFlasher_1.3.8/FirmwareOutput.hex  $(pwd)/../data/user/$appName/CoalescedTaskSize/$appName-$dis$cm.hex
+	cp ~/MSPFlasher_1.3.8/FirmwareOutput.hex  $(pwd)/../data/$appName/CoalescedTaskSize/$appName-$dis$cm.hex
 
 elif [ $option -eq 3 ]; then
 	./MSP430Flasher -w "FirmwareOutput.hex" -v -g -z [VCC]

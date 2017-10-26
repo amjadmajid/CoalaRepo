@@ -5,6 +5,12 @@
 #include "mspDebugger.h"
 #include <ipos.h>
 
+
+//#define TSK_SIZ
+//#define AUTO_RST
+//#define LOG_INFO
+
+
 //#define DEBUG 1
 
 #define MSG "hello"
@@ -41,21 +47,21 @@ int main(void )
     init();
 
     taskId tasks[] = {
-        {initTask, 1},
-        {ce_1, 2},
-        {ce_2, 3},
-        {is_i_prime, 4},
-        {ce_3, 5},
-        {cd, 6},
-        {ce_4, 7},
-        {encrypt_init, 8},
-        {encrypt_inner_loop, 9},
-        {encrypt_finish, 10},
-        {encrypt_print, 11},
-        {decrypt_init, 12},
-        {decrypt_inner_loop, 13},
-        {decrypt_finish, 14},
-        {decrypt_print, 15},
+        {initTask,           1, 3},
+        {ce_1,               2, 1},
+        {ce_2,               3, 1 },
+        {is_i_prime,         4, 4},
+        {ce_3,               5, 1},
+        {cd,                 6, 5},
+        {ce_4,               7, 1},
+        {encrypt_init,       8, 1},
+        {encrypt_inner_loop, 9, 1},
+        {encrypt_finish,     10, 1},
+        {encrypt_print,      11, 1},
+        {decrypt_init,       12, 1},
+        {decrypt_inner_loop, 13, 1},
+        {decrypt_finish,     14, 1},
+        {decrypt_print,      15, 1},
     };
 
     //This function should be called only once
@@ -83,13 +89,25 @@ void init()
     CSCTL0_H = 0;
 #endif
 
-//    cp_init();
+#ifdef TSK_SIZ
+    cp_init();
+#endif
+
+#ifdef LOG_INFO
     uart_init();
-    mr_auto_rand_reseter(50000); // every 12 msec the MCU will be reseted
+#endif
+
+#ifdef AUTO_RST
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
+
 }
 
 void initTask()
 {
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
     protect = 1;
 
 #ifdef DEBUG
@@ -112,34 +130,51 @@ void initTask()
         WP(m[ii]) = *(msgPt+ii);
     }
 
-    // cp_sendRes ("initTask \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("initTask \0");
+#endif
 }
 
 void ce_1()
 {
-    // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     WP(i)++; // start with i=2
 
     if(RP(i) >= RP(t) )
     {
         os_jump(6);  // go to encryption
     }
-    // cp_sendRes ("ce_1 \0");
+
+#ifdef TSK_SIZ
+    cp_sendRes ("ce_1 \0");
+#endif
 }
 
 void ce_2()
 {
-    // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     if( RP(t) % RP(i) == 0)
     {
         os_jump(14); // go to ce_1
     }
-    // cp_sendRes ("ce_2 \0");
+
+#ifdef TSK_SIZ
+    cp_sendRes ("ce_2 \0");
+#endif
 }
 
 void  is_i_prime()
 {
-    // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     int c;
     c=sqrt(RP(i));
     WP(j) = c;
@@ -153,13 +188,18 @@ void  is_i_prime()
         }
     }
     WP(flag) = 1;
-    // cp_sendRes ("is_i_prime \0");
 
+#ifdef TSK_SIZ
+    cp_sendRes ("is_i_prime \0");
+#endif
 }
 
 void ce_3()
 {
-    // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     long int in_i = RP(i);
     if( RP(flag) == 1 && in_i != RP(p) && in_i != RP(q) )
     {
@@ -168,12 +208,17 @@ void ce_3()
         os_jump(12); // go to ce_1
     }
 
-    // cp_sendRes ("ce_3 \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("ce_3 \0");
+#endif
 }
 
 void cd()
 {
-    // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     long int kk=1, __cry;
     while(1)
     {
@@ -185,12 +230,17 @@ void cd()
         }
     }
 
-    // cp_sendRes ("cd \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("cd \0");
+#endif
 }
 
 void ce_4()
 {
-    // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     int __cry = RP(flag);
     if(__cry > 0)
     {
@@ -201,13 +251,18 @@ void ce_4()
     {
         os_jump(10); // go to ce_1
     }
-    // cp_sendRes ("ce_4 \0");
 
+#ifdef TSK_SIZ
+    cp_sendRes ("ce_4 \0");
+#endif
 }
 
 void encrypt_init()
 {
-  // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
   long int __cry;
    __cry = RP(m[ RP(en_cnt) ]) ;
    WP(en_pt) = __cry;
@@ -217,12 +272,17 @@ void encrypt_init()
    __cry = RP(e[0]) ;
    WP(en_key) = __cry;
 
-   // cp_sendRes ("encrypt_init \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("encrypt_init \0");
+#endif
 }
 
 void encrypt_inner_loop()
 {
-   // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
    long int __cry;
    if( RP(en_j) < RP(en_key) )
    {
@@ -234,12 +294,17 @@ void encrypt_inner_loop()
        os_jump(0);
    }
 
-   // cp_sendRes ("encrypt_inner_loop \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("encrypt_inner_loop \0");
+#endif
 }
 
 void encrypt_finish()
 {
-   // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
    long int __cry;
    __cry = RP(en_k);
    WP(temp[ RP(en_cnt) ]) = __cry;
@@ -256,8 +321,9 @@ void encrypt_finish()
       WP(en[ RP(en_cnt) ]) = -1;
    }
 
-    // cp_sendRes ("encrypt_finish \0");
-
+#ifdef TSK_SIZ
+    cp_sendRes ("encrypt_finish \0");
+#endif
 }
 
 void encrypt_print()
@@ -273,19 +339,26 @@ void encrypt_print()
 }
 void decrypt_init()
 {
-   // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
    long int __cry;
    WP(de_k)  = 1;
    WP(de_j)  = 0;
    __cry =d[0];
    WP(de_key) = __cry;
 
-   // cp_sendRes ("decrypt_init \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("decrypt_init \0");
+#endif
 }
 
 void decrypt_inner_loop()
 {
-   // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
    long int __cry;
    __cry =  RP(temp[ RP(de_cnt) ]);
    WP(de_ct) = __cry;
@@ -300,12 +373,17 @@ void decrypt_inner_loop()
        os_jump(0);
    }
 
-//   // cp_sendRes ("decrypt_inner_loop \0");
+#ifdef TSK_SIZ
+   cp_sendRes ("decrypt_inner_loop \0");
+#endif
 }
 
 void decrypt_finish()
 {
-//   // cp_reset ();
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
    long int __cry;
    __cry = RP(de_k) + 96;
    WP(de_pt) = __cry;
@@ -317,13 +395,20 @@ void decrypt_finish()
        os_jump(13); // go to decrypt_init
    }
 
-//    // cp_sendRes ("decrypt_print \0");
+#ifdef TSK_SIZ
+   cp_sendRes ("decrypt_print \0");
+#endif
 }
 
 void decrypt_print()
 {
+
+#ifdef TSK_SIZ
+    cp_reset ();
+#endif
+
     __disable_interrupt();
-//    // cp_reset ();
+
     if(protect){
         P3OUT |=BIT5;
         P3OUT &=~BIT5;
@@ -332,7 +417,9 @@ void decrypt_print()
 
     __enable_interrupt();
 
-//    // cp_sendRes ("decrypt_finish \0");
+#ifdef TSK_SIZ
+    cp_sendRes ("decrypt_finish \0");
+#endif
 
 #ifdef DEBUG
    uart_sendText("THE_DECRYPTED_MESSAGE_IS\n\r", 26);

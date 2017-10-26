@@ -4,9 +4,9 @@
 #include "mspDebugger.h"
 #include <ipos.h>
 
-#define TSK_SIZ
-#define AUTO_RST
-#define LOG_INFO
+//#define TSK_SIZ
+//#define AUTO_RST
+//#define LOG_INFO
 
 #define DATA_LEN 48
 __nv uint8_t pinCont = 0;

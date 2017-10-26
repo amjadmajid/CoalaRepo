@@ -56,7 +56,7 @@ for ampVal in ampVals:
     PowerPattens.append ( (basicNoisyPwrPat + CapSize +y * ampVal).astype(int)) 
 
 temp_PP = []
-for i in np.arange(0,200, 1):
+for i in np.arange(0,sampRate, 1):
     temp_PP.append((basicNoisyPwrPat[i] + CapSize +i**2).astype(int)) 
 
 PowerPattens.append(temp_PP)

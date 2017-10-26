@@ -4,9 +4,9 @@
 
 // PLEASE SELECT AN ALGORITHIN
 #define NO_COALESCING 0
-#define SLO_CHNG_ALGO 0
+#define SLO_CHNG_ALGO 1
 #define FST_CHNG_ALGO 0
-#define FST_CHNG_TSK_AWAR_ALGO 1
+#define FST_CHNG_TSK_AWAR_ALGO 0
 
 /***********************************
  *    Common Debugging flags
@@ -22,7 +22,7 @@
         FST_CHNG_ALGO && NO_COALESCING || \
         SLO_CHNG_ALGO && FST_CHNG_TSK_AWAR_ALGO || \
         SLO_CHNG_ALGO && NO_COALESCING || \
-        FST_CHNG_TSK_AWAR_ALGO && NO_COALESCING \
+        FST_CHNG_TSK_AWAR_ALGO && NO_COALESCING
 #error "More than one algorithm is enabled"
 #endif
 
@@ -46,8 +46,11 @@ unsigned char __jump = 0;
 unsigned int __jump_by = 0;
 unsigned int __jump_cnt = 0;
 
+unsigned int  __coalTaskCntr = 0;
+
 __nv unsigned char  __commit_flag = 0;
 unsigned int *__realTask = NULL;
+unsigned int *__riskLevel = NULL;
 
 // __coalTskAddr holds a task address. It is modified externally
 __nv unsigned int  __coalTskAddr = 0;
@@ -61,9 +64,8 @@ __nv unsigned int __max_coalTskSize = 0x7f;
 __nv unsigned int __coalTskSize = 2;    // start with 2 because we will directly decrease it in the os_scheduler
 #endif
 
-#if FST_CHNG_ALGO
+#if FST_CHNG_ALGO || FST_CHNG_TSK_AWAR_ALGO
 
-unsigned int  __coalTaskCntr = 0;
 __nv unsigned int  __realTaskCntr = 10;
 
 #endif
@@ -339,7 +341,6 @@ commit:
 
 #if FST_CHNG_TSK_AWAR_ALGO
 
-
 void os_scheduler()
 {
 
@@ -367,8 +368,10 @@ void os_scheduler()
     // Recover the virtual state
     __bringCrntPagROM();
     __realTask = (unsigned int *) __coalTskAddr;
+    __riskLevel =  ( (unsigned int *) (__coalTskAddr+2)) ;
 
 
+    uint16_t temp_rl;
     while (1)
     {
 
@@ -379,8 +382,9 @@ void os_scheduler()
 
 #endif
 
-        for(; __coalTaskCntr > 0 ; __coalTaskCntr-- )
+        while( __coalTaskCntr > 0 )
         {
+            temp_rl =  ((*__riskLevel) & 0xff) ;
             // Accessing a task
             ((funcPt) (*__realTask))();
 
@@ -389,9 +393,19 @@ void os_scheduler()
 
             //last execution history (my next virtual task size)
             // set a maximum virtual task size (64)
-            if(__realTaskCntr < __max_coalTskSize){
-                __realTaskCntr++;
+            if(__realTaskCntr < __max_coalTskSize ){
+                __realTaskCntr ++;
             }
+
+            if(temp_rl < __coalTaskCntr ){
+                __coalTaskCntr -=  temp_rl;
+            }else{
+                __coalTaskCntr = 0;
+            }
+
+            __riskLevel++;
+            __riskLevel = (unsigned int *) *__riskLevel;
+            __riskLevel++;
         }
         //At this point a virtual task must be finished
 

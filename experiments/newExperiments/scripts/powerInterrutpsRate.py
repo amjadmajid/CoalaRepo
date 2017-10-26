@@ -13,7 +13,7 @@ rates=[]
 
 for anApp in paths:
 	for apath in anApp:
-		f = open('../data/user/'+apath)
+		f = open('../data/'+apath)
 		text = f.read()
 		f.close()
 		timeStamp = re.findall(r'\d{2}:\d{2}:\d{2},\d{3}', text)

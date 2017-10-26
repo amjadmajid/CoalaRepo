@@ -7,8 +7,8 @@
 
 
 //#define TSK_SIZ
-#define AUTO_RST
-#define LOG_INFO
+//#define AUTO_RST
+//#define LOG_INFO
 
 
 #define SEED 4L
@@ -76,35 +76,6 @@ __p uint32_t _v_seed;
 __p unsigned _v_iter;
 
 
-void init() {
-
-    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
-
-    P3DIR = BIT5;
-
-#if 0
-    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-//  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
-    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-    CSCTL0_H = 0;
-#endif
-
-#ifdef TSK_SIZ
-    cp_init();
-#endif
-
-#ifdef LOG_INFO
-    uart_init();
-#endif
-
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
-#endif
-
-}
 
 void task_init() {
 
@@ -408,18 +379,48 @@ void task_end() {
 #endif
 }
 
+void init() {
+
+    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
+    PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+
+    P3DIR = BIT5;
+
+#if 0
+    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+//  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+    CSCTL0_H = 0;
+#endif
+
+#ifdef TSK_SIZ
+    cp_init();
+#endif
+
+#ifdef LOG_INFO
+    uart_init();
+#endif
+
+#ifdef AUTO_RST
+    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#endif
+
+}
+
 int main(void) {
     init();
-    taskId tasks[] = {{task_init, 0},
-        {task_select_func, 0},
-        {task_bit_count, 0},
-        {task_bitcount, 0},
-        {task_ntbl_bitcnt, 0},
-        {task_ntbl_bitcount, 0},
-        {task_BW_btbl_bitcount, 0},
-        {task_AR_btbl_bitcount, 0},
-        {task_bit_shifter, 0},
-        {task_end, 0}};
+    taskId tasks[] = {{task_init,        1, 1},
+        {task_select_func,               2, 1},
+        {task_bit_count,                 3, 1},
+        {task_bitcount,                  4, 1},
+        {task_ntbl_bitcnt,               5, 1},
+        {task_ntbl_bitcount,             6, 1},
+        {task_BW_btbl_bitcount,          7, 1},
+        {task_AR_btbl_bitcount,          8, 1},
+        {task_bit_shifter,               9, 1},
+        {task_end,                       10, 1}};
 
     //This function should be called only once
     os_addTasks(TASK_NUM, tasks );

@@ -18,7 +18,9 @@ void os_memMapper(unsigned int *cnt, taskId _task)
 {
     *(__head +*cnt) = (unsigned int) _task.func;
     ++(*cnt);
-    *(__head +*cnt) = _task.block;  // This can be splitted into two bytes. One for blocking and one of priority
+    *(__head +*cnt) = _task.id;
+    *(__head +*cnt) <<= 8;
+    *(__head +*cnt) |= _task.riskLevel;
     ++(*cnt);
     *(__head +*cnt) =(unsigned int) (__head +1+(*cnt)); // a pointer to the next node
     ++(*cnt);

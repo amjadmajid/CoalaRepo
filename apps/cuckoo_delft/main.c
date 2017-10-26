@@ -11,9 +11,9 @@
 #include <ipos.h>
 
 
-#define TSK_SIZ
-#define AUTO_RST
-#define LOG_INFO
+//#define TSK_SIZ
+//#define AUTO_RST
+//#define LOG_INFO
 
 
 #define NUM_BUCKETS 128 // must be a power of 2
@@ -506,21 +506,21 @@ void init()
 int main(void) {
     init();
 
-    taskId tasks[] = {{task_init, 0},
-        {task_init_array, 0} ,
-        {task_generate_key, 0},
-        {task_calc_indexes, 0},
-        {task_calc_indexes_index_1, 0},
-        {task_calc_indexes_index_2, 0},
-        {task_insert, 0},
-        {task_add, 0},
-        {task_relocate, 0},
-        {task_insert_done, 0},
-        {task_lookup, 0},
-        {task_lookup_search, 0},
-        {task_lookup_done, 0},
-        {task_print_stats, 0},
-        {task_done, 0}
+    taskId tasks[] = {{task_init,       1, },
+        {task_init_array,               2, } ,
+        {task_generate_key,             3, },
+        {task_calc_indexes,             4, },
+        {task_calc_indexes_index_1,     5, },
+        {task_calc_indexes_index_2,     6, },
+        {task_insert,                   7, },
+        {task_add,                      8, },
+        {task_relocate,                 9, },
+        {task_insert_done,              10, },
+        {task_lookup,                   11, },
+        {task_lookup_search,            12, },
+        {task_lookup_done,              14, },
+        {task_print_stats,              15, },
+        {task_done,                     16, }
     };
 
     os_addTasks(TASK_NUM, tasks );

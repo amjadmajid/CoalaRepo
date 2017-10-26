@@ -356,3 +356,27 @@ uint8_t* __return_addr_wr(uint8_t* var) {
         return __VAR_PT_IN_RAM(*var);
     }
 }
+
+uint8_t* __return_addr_no_check(uint8_t* var) {
+    if( __IS_VAR_IN_CRNT_PAG(*var) )
+    {
+        return __VAR_PT_IN_RAM(*var);
+    }
+    else{
+        __pageSwap((var));
+        return __VAR_PT_IN_RAM(*var);
+    }
+}
+
+uint8_t* __return_addr_wr_no_check(uint8_t* var) {
+    if( __IS_VAR_IN_CRNT_PAG(*var) )
+    {
+        dirtyPag = 1;
+        return __VAR_PT_IN_RAM(*var);
+    }
+    else{
+        __pageSwap((var));
+        dirtyPag = 1;
+        return __VAR_PT_IN_RAM(*var);
+    }
+}

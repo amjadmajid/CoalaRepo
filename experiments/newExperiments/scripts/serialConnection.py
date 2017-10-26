@@ -3,18 +3,19 @@ import serial
 import os
 import sys 
 import time 
-
+from csf import *
 # get app name 
-appName=None
-if( sys.version_info[0] ) < 3 :
-    appName =  raw_input('enter app name: ')
-else:
-    appName =  input('enter app name: ')
+appName=unified_input("enter app's name: ")
+fileName=unified_input("file's name (fast, slow, smart): ")
+fileName +='Change.txt'
+pwrPtn = unified_input("Select from (camel, toward, fixed)")
 
+Togo=int( unified_input("Number of lines to be received: ") )
+lineLen=int( unified_input("line's length: ") )
 
 # check if the required directory exist
-basePath= '../data/user/'
-tailPath = 'simulatedPwrInter_1500/CoalescedTaskSize/camelPowerPattern/'
+basePath= '../data/'
+tailPath = 'simulatedPwrInter/CoalescedTaskSize/'+pwrPtn+'PowerPattern/'
 
 dirPath = os.path.join(os.path.join(basePath,appName), tailPath)
 
@@ -28,7 +29,7 @@ if not os.path.isdir(dirPath) :
 
 cp = os.getcwd()
 
-fname =  open( os.path.join(dirPath,'slowChange_2.txt') , 'w')
+fname =  open( os.path.join(dirPath,fileName) , 'w')
 
 portName = "/dev/cu.usbmodem1413"
 baudRate = 115200
@@ -36,18 +37,15 @@ baudRate = 115200
 ser = serial.Serial(portName, baudRate, timeout=5)
 
 
-
-Togo = 1000
-while True:
-	if Togo :
+while Togo:
 		try:
-			np = str(ser.read(4), 'utf-8') 
+			np = str(ser.read(lineLen), 'utf-8') 
 			print(np, end="")
 			fname.write(np )
 		except e :
 			print("Reception error: ", str(e) )
 			continue
-	else:
-		ser.close()
-		exit()
-	Togo -=1
+		Togo -=1
+
+ser.close()
+exit()

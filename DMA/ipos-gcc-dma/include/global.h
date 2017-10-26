@@ -41,7 +41,8 @@ extern unsigned int __coalTaskCntr;
 //This is a task interface. It is shared between the user and IPOS
 typedef struct _taskId{
   funcPt * func;
-  unsigned block;
+  uint8_t id;
+  uint8_t riskLevel;
 }taskId;
 
 #define BLOCK_OFFSET_PT     1

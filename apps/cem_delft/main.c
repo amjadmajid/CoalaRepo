@@ -4,9 +4,9 @@
 #include "mspDebugger.h"
 #include <ipos.h>
 
-#define TSK_SIZ
-#define AUTO_RST
-#define LOG_INFO
+//#define TSK_SIZ
+//#define AUTO_RST
+//#define LOG_INFO
 
 
 
@@ -81,12 +81,12 @@ void task_init()
 #endif
 
     pinCont=1;
-    WVAR(_v_parent_next, 0);
-    WVAR(_v_out_len,0);
-    WVAR(_v_letter, 0);
-    WVAR(_v_prev_sample, 0);
-    WVAR(_v_letter_idx, 0);
-    WVAR(_v_sample_count,1);
+    WP(_v_parent_next) = 0;
+    WP(_v_out_len) = 0;
+    WP(_v_letter) = 0;
+    WP(_v_prev_sample) = 0;
+    WP(_v_letter_idx) = 0;
+    WP(_v_sample_count) = 1 ;
 
 #ifdef TSK_SIZ
     cp_sendRes("task_init \0");
@@ -101,16 +101,16 @@ void task_init_dict()
     cp_reset();
 #endif
 
-    int i = RVAR(_v_letter);
-    WVAR(_v_dict[i].letter,i);
-    WVAR(_v_dict[i].sibling, NIL);
-    WVAR(_v_dict[i].child, NIL);
+    int i = RP(_v_letter);
+    WP(_v_dict[i].letter) = i ;
+    WP(_v_dict[i].sibling) =  NIL;
+    WP(_v_dict[i].child) = NIL;
     i++;
-    WVAR(_v_letter, i);
+    WP(_v_letter) = i;
     if (i < NUM_LETTERS) {
         os_jump(0);
     } else {
-        WVAR(_v_node_count, NUM_LETTERS);
+        WP(_v_node_count) =  NUM_LETTERS;
 //        os_jump(1);
         ;
     }
@@ -125,12 +125,12 @@ void task_sample()
     cp_reset();
 #endif
 
-    unsigned next_letter_idx = RVAR(_v_letter_idx) + 1;
+    unsigned next_letter_idx = RP(_v_letter_idx) + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
         next_letter_idx = 0;
 
-    WVAR(_v_letter_idx,next_letter_idx);
-    if (RVAR(_v_letter_idx) == 0) {
+    WP(_v_letter_idx) = next_letter_idx;
+    if (RP(_v_letter_idx) == 0) {
 //        os_jump(1);
         ;
     } else {
@@ -148,12 +148,12 @@ void task_measure_temp()
 #endif
 
     sample_t prev_sample;
-    prev_sample = RVAR(_v_prev_sample);
+    prev_sample = RP(_v_prev_sample);
 
     sample_t sample = acquire_sample(prev_sample);
     prev_sample = sample;
-    WVAR(_v_prev_sample, prev_sample);
-    WVAR(_v_sample, sample);
+    WP(_v_prev_sample) = prev_sample;
+    WP(_v_sample) = sample;
 //    os_jump(1);
 
 #ifdef TSK_SIZ
@@ -167,15 +167,15 @@ void task_letterize()
     cp_reset();
 #endif
 
-    unsigned letter_idx = RVAR(_v_letter_idx);
+    unsigned letter_idx = RP(_v_letter_idx);
     if (letter_idx == 0)
         letter_idx = NUM_LETTERS_IN_SAMPLE;
     else
         letter_idx--;
     unsigned letter_shift = LETTER_SIZE_BITS * letter_idx;
-    letter_t letter = (RVAR(_v_sample) & (LETTER_MASK << letter_shift)) >> letter_shift;
+    letter_t letter = (RP(_v_sample) & (LETTER_MASK << letter_shift)) >> letter_shift;
 
-    WVAR(_v_letter, letter);
+    WP(_v_letter) = letter;
 //    os_jump(1);
 #ifdef TSK_SIZ
     cp_sendRes("task_letterize \0");
@@ -189,21 +189,21 @@ void task_compress()
 #endif
 
     // pointer into the dictionary tree; starts at a root's child
-    index_t parent = RVAR(_v_parent_next);
+    index_t parent = RP(_v_parent_next);
 
     uint16_t __cry;
-    __cry = RVAR(_v_dict[parent].child);
-    WVAR(_v_sibling, __cry) ;
-    __cry = RVAR(_v_dict[parent].letter);
-    WVAR(_v_parent_node.letter, __cry);
-    __cry = RVAR(_v_dict[parent].sibling);
-    WVAR(_v_parent_node.sibling, __cry);
-    __cry = RVAR(_v_dict[parent].child);
-    WVAR(_v_parent_node.child, __cry);
-    WVAR(_v_parent, parent);
-    __cry = RVAR(_v_dict[parent].child);
-    WVAR(_v_child, __cry);
-    (RVAR(_v_sample_count))++;
+    __cry = RP(_v_dict[parent].child);
+    WP(_v_sibling) = __cry ;
+    __cry = RP(_v_dict[parent].letter);
+    WP(_v_parent_node.letter) =  __cry;
+    __cry = RP(_v_dict[parent].sibling);
+    WP(_v_parent_node.sibling) = __cry;
+    __cry = RP(_v_dict[parent].child);
+    WP(_v_parent_node.child) = __cry;
+    WP(_v_parent) = parent;
+    __cry = RP(_v_dict[parent].child);
+    WP(_v_child) = __cry;
+    (RP(_v_sample_count))++;
 
 //    os_jump(1);
 #ifdef TSK_SIZ
@@ -217,21 +217,21 @@ void task_find_sibling()
     cp_reset();
 #endif
 
-    if (RVAR(_v_sibling) != NIL) {
-        int i = RVAR(_v_sibling);
+    if (RP(_v_sibling) != NIL) {
+        int i = RP(_v_sibling);
 
-        uint16_t __cry = RVAR(_v_letter);
-        if (RVAR(_v_dict[i].letter) == __cry ) { // found
+        uint16_t __cry = RP(_v_letter);
+        if (RP(_v_dict[i].letter) == __cry ) { // found
 
-            __cry = RVAR(_v_sibling);
-            WVAR(_v_parent_next, __cry);
+            __cry = RP(_v_sibling);
+            WP(_v_parent_next) = __cry;
 
             os_jump(10);
             return;
         } else { // continue traversing the siblings
-            if(RVAR(_v_dict[i].sibling) != 0){
-                __cry = RVAR(_v_dict[i].sibling);
-                WVAR(_v_sibling, __cry);
+            if(RP(_v_dict[i].sibling) != 0){
+                __cry = RP(_v_dict[i].sibling);
+                WP(_v_sibling) = __cry;
                 os_jump(0);
                 return;
             }
@@ -239,10 +239,10 @@ void task_find_sibling()
 
     }
 
-    index_t starting_node_idx = (index_t)RVAR(_v_letter);
-    WVAR(_v_parent_next, starting_node_idx);
+    index_t starting_node_idx = (index_t)RP(_v_letter);
+    WP(_v_parent_next) = starting_node_idx;
 
-    if (RVAR(_v_child) == NIL) {
+    if (RP(_v_child) == NIL) {
         os_jump(2);
     }
 //    else {
@@ -260,12 +260,12 @@ void task_add_node()
     cp_reset();
 #endif
 
-    int i = RVAR(_v_sibling);
+    int i = RP(_v_sibling);
 
 
-    if (RVAR(_v_dict[i].sibling) != NIL) {
-        index_t next_sibling = RVAR(_v_dict[i].sibling);
-        WVAR(_v_sibling, next_sibling);
+    if (RP(_v_dict[i].sibling) != NIL) {
+        index_t next_sibling = RP(_v_dict[i].sibling);
+        WP(_v_sibling) = next_sibling;
         os_jump(0);
 
     } else { // found last sibling in the list
@@ -273,12 +273,12 @@ void task_add_node()
 //        LOG("add node: found last\r\n");
         uint16_t __cry;
 
-         __cry = RVAR(_v_dict[i].letter);
-         WVAR(_v_sibling_node.letter, __cry);
-        __cry = RVAR(_v_dict[i].sibling);
-        WVAR(_v_sibling_node.sibling, __cry);
-        __cry = RVAR(_v_dict[i].child);
-        WVAR(_v_sibling_node.child, __cry);
+         __cry = RP(_v_dict[i].letter);
+         WP(_v_sibling_node.letter) = __cry;
+        __cry = RP(_v_dict[i].sibling);
+        WP(_v_sibling_node.sibling) = __cry;
+        __cry = RP(_v_dict[i].child);
+        WP(_v_sibling_node.child) = __cry;
 
 //        os_jump(1);
     }
@@ -295,44 +295,44 @@ void task_add_insert()
     cp_reset();
 #endif
 
-    if (RVAR(_v_node_count) == DICT_SIZE) { // wipe the table if full
+    if (RP(_v_node_count) == DICT_SIZE) { // wipe the table if full
         while (1);
     }
 
-    index_t child = RVAR(_v_node_count);
+    index_t child = RP(_v_node_count);
     uint16_t __cry;
-    if (RVAR(_v_parent_node.child) == NIL) { // the only child
+    if (RP(_v_parent_node.child) == NIL) { // the only child
 
-        WVAR(_v_parent_node.child, child);
-        int i = RVAR(_v_parent);
+        WP(_v_parent_node.child) = child;
+        int i = RP(_v_parent);
 
 
-        __cry = RVAR(_v_parent_node.letter);
-        WVAR(_v_dict[i].letter, __cry);
-        __cry  = RVAR(_v_parent_node.sibling);
-        WVAR(_v_dict[i].sibling, __cry);
-        __cry = RVAR(_v_parent_node.child);
-        WVAR(_v_dict[i].child, __cry);
+        __cry = RP(_v_parent_node.letter);
+        WP(_v_dict[i].letter) = __cry;
+        __cry  = RP(_v_parent_node.sibling);
+        WP(_v_dict[i].sibling) = __cry;
+        __cry = RP(_v_parent_node.child);
+        WP(_v_dict[i].child) = __cry;
 
     } else { // a sibling
 
-        index_t last_sibling = RVAR(_v_sibling);
+        index_t last_sibling = RP(_v_sibling);
 
-        WVAR(_v_sibling_node.sibling, child);
-        __cry = RVAR(_v_sibling_node.letter);
-        WVAR(_v_dict[last_sibling].letter, __cry);
-        __cry = RVAR(_v_sibling_node.sibling);
-        WVAR(_v_dict[last_sibling].sibling, __cry);
-        __cry  = RVAR(_v_sibling_node.child);
-        WVAR(_v_dict[last_sibling].child, __cry);
+        WP(_v_sibling_node.sibling) = child;
+        __cry = RP(_v_sibling_node.letter);
+        WP(_v_dict[last_sibling].letter) = __cry;
+        __cry = RP(_v_sibling_node.sibling);
+        WP(_v_dict[last_sibling].sibling) = __cry;
+        __cry  = RP(_v_sibling_node.child);
+        WP(_v_dict[last_sibling].child) = __cry;
     }
-    __cry = RVAR(_v_letter);
-    WVAR(_v_dict[child].letter, __cry);
-    WVAR(_v_dict[child].sibling, NIL);
-    WVAR(_v_dict[child].child, NIL);
-    __cry = RVAR(_v_parent);
-    WVAR(_v_symbol, __cry);
-    (RVAR(_v_node_count))++;
+    __cry = RP(_v_letter);
+    WP(_v_dict[child].letter) = __cry;
+    WP(_v_dict[child].sibling) = NIL;
+    WP(_v_dict[child].child) = NIL;
+    __cry = RP(_v_parent);
+    WP(_v_symbol) = __cry;
+    (RP(_v_node_count))++;
 #ifdef TSK_SIZ
     cp_sendRes("task_add_insert \0");
 #endif
@@ -347,11 +347,11 @@ void task_append_compressed()
 #endif
 
     uint16_t __cry;
-    int i = RVAR(_v_out_len);
-    __cry = RVAR(_v_symbol);
-    WVAR(_v_compressed_data[i].letter, __cry);
+    int i = RP(_v_out_len);
+    __cry = RP(_v_symbol);
+    WP(_v_compressed_data[i].letter) = __cry;
 
-    if ( (++(RVAR(_v_out_len))) == BLOCK_SIZE) {
+    if ( (++(RP(_v_out_len))) == BLOCK_SIZE) {
 //        os_jump(1);
         ;
     } else {
@@ -373,7 +373,7 @@ void task_print()
     unsigned i;
 
     for (i = 0; i < BLOCK_SIZE; ++i) {
-        index_t index = RVAR(_v_compressed_data[i].letter);
+        index_t index = RP(_v_compressed_data[i].letter);
     }
 
 #ifdef TSK_SIZ
@@ -439,22 +439,32 @@ void init()
 int main(void) {
     init();
 
-    taskId tasks[] = {{task_init, 0},
-        {task_init_dict, 0},
-        {task_sample, 0},
-        {task_measure_temp, 0},
-        {task_letterize, 0},
-        {task_compress, 0},
-        {task_find_sibling, 0},
-        {task_add_node, 0},
-        {task_add_insert, 0},
-        {task_append_compressed, 0},
-        {task_print, 0},
-        {task_done, 0}};
+    taskId tasks[] = {{task_init,   1,  1  },
+        {task_init_dict,            2,  3  },
+        {task_sample,               3,  1  },
+        {task_measure_temp,         4,  1  },
+        {task_letterize,            5,  5  },
+        {task_compress,             6,  2  },
+        {task_find_sibling,         7,  3  },
+        {task_add_node,             8,  3  },
+        {task_add_insert,           9,  5  },
+        {task_append_compressed,    10, 2 },
+        {task_print,                11, 3 },
+        {task_done,                 12, 1 }};
     //This function should be called only once
     os_addTasks(12, tasks );
 
     os_scheduler();
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
 

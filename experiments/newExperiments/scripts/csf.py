@@ -32,8 +32,8 @@ def unified_input(aStr=""):
 	return user_input
 
 
-dataUser = '../data/user/'
-scriptsDir = '../../scripts/'
+dataUser = '../data/'
+scriptsDir = '../scripts/'
 
 def appsSelector():
 	os.chdir(dataUser)
@@ -113,7 +113,7 @@ def mspProfiler_dataMiner( apps, paths ):
 	apps_size={}
 	for app, path in zip(apps, paths):
 
-		file = "../data/user/"+path[0]  # first path
+		file = dataUser+path[0]  # first path
 		for line in open(file):
 			try:
 				(taskId, value) = line.split(" ")
@@ -188,10 +188,14 @@ def executionTime(fh):
 
 def labelMaker(s):
 	if 'fast' in s:
-		label = 'fast'
-	if 'slow' in s:
-		label = 'slow'
-	return label
+		return 'fast'
+	elif 'slow' in s:
+		return 'slow'
+	elif 'smart' in s:
+		return 'smart'
+	else:
+		return "????"
+
 
 def nameMaker(s):
 	name = s.split("/")[0]
