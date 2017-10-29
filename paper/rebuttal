@@ -1,12 +1,6 @@
-We thank the Reviewers for assessing our paper. Our responses to all
-questions are itemized and given below.
+We thank the Reviewers for assessing our paper. Our responses to all questions are itemized and given below.
 
-> Comparison with checkpointing-based approaches
-
-We focused our comparison on task-based systems (Chain [10]), which prior work
-showed perform better than some checkpointing-based systems. We appreciate the
-suggestion to extend our evaluation to include more prior results.
-
+**Comparison with checkpointing-based approaches**: We focused our comparison on task-based systems (Chain [10]), which prior work showed perform better than some checkpointing-based systems. We appreciate the suggestion to extend our evaluation to include more prior results.
 
 > Why do statically placed task boundaries underestimate the task size?
 
