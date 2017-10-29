@@ -1,26 +1,23 @@
-We thank the Reviewers for assessing our paper. Our responses to all questions are itemized and given below.
-
 **Comparison with checkpointing:** We focused our comparison on task-based systems (Chain [10]), which prior work showed to perform better than some checkpointing-based systems. We appreciate the suggestion to include more prior results.
 
 **Why do statically-placed task boundaries underestimate the task size:** At compile time, the compiler generates small tasks that can execute even with a small energy buffer/negligible input power. Coala coalesces small tasks at runtime, adapting to available energy.
 
-**Why only one page in volatile memory and how Figure 10 evaluates its size:** A single-page buffer allows for fast software translation without an MMU. In Figure 10 we vary the size of the page, while keeping it below the fixed size of the volatile memory on the MCU. In Figure 10, "cuckoo" and "bc" have zero page faults: we will improve the
-presentation as suggested.
+**Why only one page in volatile memory; how Figure 10 evaluates its size:** A single-page buffer allows for fast software translation without an MMU. In Figure 10 we vary the size of the page, while keeping it below the fixed size of the MCU volatile memory. In Figure 10, "cuckoo" and "bc" have zero page faults: we will improve the presentation as suggested.
 
-**Significance of PagesTemp in virtualization:** PagesTemp is a non-volatile page commit buffer that we use for two-phase commit (Section 5.1.3). The execution phase ends and writes dirty pages to PagesTemp, and the commit phase atomically (regardless of power interruption) writes pages from PagesTemp into their locations in non-volatile main memory.
+**Significance of PagesTemp in virtualization:** PagesTemp is a non-volatile page commit buffer we use for two-phase commit (Section 5.1.3). The execution phase ends and writes dirty pages to PagesTemp, and the commit phase atomically (regardless of power interruption) writes pages from PagesTemp into their locations in non-volatile main memory.
 
-**Can Coala encounter a live-lock during commit:** When pages are copied from PagesTemp in the second-phase of the commit, once each page finishes copying, its dirty bit is cleared, and it will not be re-copied again. If power fails before the last page is copied, the second-phase will restart, but it will resume copying only un-copied pages. We will revise Section 5, stating that since the amount of work in the second-phase of the commit decreases with each attempt, the live-lock cannot occur as long as there is sufficient energy to copy one page.
+**Can Coala encounter a live-lock during commit:** When pages are copied from PagesTemp in the second-phase of the commit, once each page finishes copying, its dirty bit is cleared, and will not be re-copied again. If power fails before the last page copy, the second-phase will restart, but will resume copying only un-copied pages. We will revise Section 5, stating that since the amount of work in the second commit phase decreases with each attempt, the live-lock cannot occur with sufficient energy to copy one page.
 
-**Memory and register alignment (consistency) across coalesced tasks:** Task code does not change as a result of coalescing: tasks remain self-contained idempotent regions of code: registers do not live across a task boundary, regardless of coalescing.
+**Memory and register alignment (consistency) across coalesced tasks:** Task code remains unchanged as a result of coalescing: tasks remain self-contained idempotent regions of code; registers do not live across a task boundary, regardless of coalescing.
 
-**Language-level restrictions imposed by Coala:** In Section 4, we state that Coala does not support recursion, must be able to ensure a single entry into each task (which precludes goto and similar primitives). In Section 4.1.1, we explain how Coala handles loops without a static bound (a boundary is placed in the loop body). We will add to Section 4.1 that our analysis does not support function pointers. 
+**Language-level restrictions imposed by Coala:** We state that Coala does not support recursion (Section 4) and must ensure a single entry into each task (which precludes goto and similar primitives). In Section 4.1.1, we explain how Coala handles loops without a static bound (a boundary is placed in the loop body). We will add to Section 4.1 that our analysis does not support function pointers. 
 
-**CFG compiler analysis and inlining:** In Section 4.1 we list the drawbacks of inlining, and suggest an alternative potential approach that places a boundary on each function invocation. 
+**CFG compiler analysis and inlining:** In Section 4.1 we list the drawbacks of inlining, and suggest an alternative approach that places a boundary on each function invocation. 
 
-**Commit implementation alternatives and relationship to databases/filesystems:** Section 8 explains the relationship to transactional memory and shadow-paging. We appreciate the suggestion to compare to more implementation alternatives. 
+**Commit implementation alternatives and relationship to databases/filesystems:** Section 8 explains the relationship to transactional memory and shadow-paging. We appreciate the suggestion of comparison to implementation alternatives. 
 
-**Amount of coalescing in the experiments:** Our measurement setup (Section 7.1) did not include an ability to trace the coalescing at runtime. Tracing while running on intermittent power is difficult, i.e. the lack of any channel for debuging out of the device. Figure 8 shows run time, which captures the end-to-end effect of coalescing.
+**Amount of coalescing in the experiments:** Our setup (Section 7.1) precluded the ability to trace the coalescing at runtime, i.e. the lack of any channel for debugging out of the device. Figure 8 shows the end-to-end effect of coalescing.
 
-**Compilation time and memory:** We list the compilation time by the Coala compiler on each benchmark in Table 3. Section 7.2.2 mentions that 1GB of RAM (in a VM) was sufficient for the compiler.
+**Compilation time and memory:** Table 3 lists the Coala compiler compilation time on each benchmark. Section 7.2.2 mentions that 1GB of RAM (in a VM) was sufficient for the compiler.
 
 **Relevance of benchmarks to IoT/embedded applications:** Our benchmarks (Section 7.1) include both end-to-end applications that acquire/process sensor data and kernels relevant to embedded sensing devices (DFT, encryption, compression), similar to ones in established suites (e.g. MiBench).
