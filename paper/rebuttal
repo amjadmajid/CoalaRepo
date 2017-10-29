@@ -1,10 +1,10 @@
-**Comparison with checkpointing:** Comparison focused on task-based systems (Chain [10]), which prior work showed to perform better than some checkpointing-based systems. We appreciate the suggestion to include prior results.
+**Comparison with checkpointing:** Comparison focused on task-based systems (Chain [10]), which prior work showed to perform better than checkpointing-based systems. We appreciate the suggestion to include prior results.
 
 **Why do statically-placed task boundaries underestimate the task size:** At compile time, the compiler generates small tasks that execute even with a small energy buffer/negligible input power. Coala coalesces small tasks at runtime, adapting to available energy.
 
 **Why only one page in volatile memory; how Figure 10 evaluates its size:** A single-page buffer allows for fast software translation without an MMU. In Figure 10 we vary the page size, while keeping it below the fixed size MCU volatile memory; "cuckoo" and "bc" have zero page faults: we will improve the figure presentation as suggested.
 
-**Significance of PagesTemp in virtualization:** PagesTemp is a non-volatile page commit buffer we use for two-phase commit (Section 5.1.3). The execution phase ends and writes dirty pages to PagesTemp, and the commit phase regardless of power interruption writes pages from PagesTemp into their locations in non-volatile main memory.
+**Significance of PagesTemp in virtualization:** PagesTemp is a non-volatile page commit buffer we use for two-phase commit (Section 5.1.3). The execution phase ends and writes dirty pages to PagesTemp, and the commit phase regardless of power interruption writes pages from PagesTemp into their locations in non-volatile memory.
 
 **Can Coala encounter a live-lock during commit:** When pages are copied from PagesTemp in the commit second-phase, once each page finishes copying, its dirty bit is cleared and will not be re-copied. If power fails before the last page copy, the second-phase will restart, but will resume copying only un-copied pages. We will revise Section 5 adding: since the workload in the second commit decreases with each attempt, the live-lock cannot occur having sufficient energy to copy one page.
 
