@@ -1,5 +1,6 @@
 %\documentclass[sigconf,anonymous,review]{acmart}
-\documentclass[pageno]{jpaper}
+%\documentclass[pageno]{jpaper}
+\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 
 %replace XXX with the submission number you are given from the ASPLOS submission site.
 \newcommand{\asplossubmissionnumber}{39}
@@ -15,8 +16,17 @@
 \usepackage{xspace}
 %\usepackage{tikz}
 \usepackage{listings}
+%\usepackage{float}
 %Brandon: this broke the build for me
 %\usepackage[keeplastbox]{flushend}
+
+%%Added for sub-float package from jpaper.cls - will check later
+
+\RequirePackage[font={normalsize,sf,bf}]{caption}
+\RequirePackage[position=bottom]{subfig}
+\captionsetup[table]{aboveskip=0.5em, belowskip=0.5em}
+\captionsetup[figure]{aboveskip=0.5em, belowskip=0em}
+\captionsetup[subfloat]{font={small,sf}}
 
 \hypersetup{colorlinks=false,linkcolor=blue,urlcolor=blue}
 \urlstyle{rm}
