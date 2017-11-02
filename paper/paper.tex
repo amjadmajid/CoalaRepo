@@ -1,11 +1,19 @@
-%\documentclass[sigconf,anonymous,review]{acmart}
-%\documentclass[pageno]{jpaper}
-\documentclass[sigplan,10pt,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\documentclass[sigplan,10pt,review,anonymous]{acmart}
+\settopmatter{printfolios=true,printccs=false,printacmref=false}
 
-%replace XXX with the submission number you are given from the ASPLOS submission site.
-\newcommand{\asplossubmissionnumber}{39}
+\acmConference[Submitted to PLDI'18]{ACM SIGPLAN Conference on Programming Language Design and Implementation}{June 18--22, 2018}{Philadelphia, PA, USA}
 
-\usepackage[normalem]{ulem}
+\acmYear{2018}
+\acmISBN{} % \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
+\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
+\startPage{1}
+\setcopyright{none}
+
+%% Some recommended packages.
+%\usepackage{booktabs}   %% For formal tables: http://ctan.org/pkg/booktabs
+%\usepackage{subcaption} %% For complex figures with subfigures/subcaptions http://ctan.org/pkg/subcaption
+
+%\usepackage[normalem]{ulem}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{algorithm} % environment for the algorithm code (like figure and table)
@@ -14,18 +22,15 @@
 \usepackage{tikz} % needed for: tikz pics
 \usepackage{xcolor}
 \usepackage{xspace}
-%\usepackage{tikz}
 \usepackage{listings}
+
 %\usepackage{float}
-%Brandon: this broke the build for me
-%\usepackage[keeplastbox]{flushend}
-
-%%Added for sub-float package from jpaper.cls - will check later
-
-\RequirePackage[font={normalsize,sf,bf}]{caption}
+%\usepackage[keeplastbox]{flushend} %Brandon: this broke the build for me
+%Added for sub-float package from jpaper.cls - will check later
+%\RequirePackage[font={normalsize,sf,bf}]{caption}
 \RequirePackage[position=bottom]{subfig}
-\captionsetup[table]{aboveskip=0.5em, belowskip=0.5em}
-\captionsetup[figure]{aboveskip=0.5em, belowskip=0em}
+%\captionsetup[table]{aboveskip=0.5em, belowskip=0.5em}
+%\captionsetup[figure]{aboveskip=0.5em, belowskip=0em}
 \captionsetup[subfloat]{font={small,sf}}
 
 \hypersetup{colorlinks=false,linkcolor=blue,urlcolor=blue}
@@ -53,16 +58,11 @@
 % \setlength{\paragraphaboveskip}{2pt plus 1pt minus 1pt}
 
 % Tighter than defaults:
- \setlength{\sectionbelowskip}{1pt}
- \setlength{\sectionaboveskip}{5pt plus 1.5pt minus 1.5pt}
- \setlength{\subsectionbelowskip}{1pt}
- \setlength{\subsectionaboveskip}{3pt plus 1pt minus 1pt}
- \setlength{\paragraphaboveskip}{1pt plus 1pt minus 1pt}
-
-%\usepackage{natbib}
-%\usepackage{graphicx}
-%\usepackage{subfigure}
-%\usepackage[inline]{enumitem}
+\setlength{\sectionbelowskip}{1pt}
+\setlength{\sectionaboveskip}{5pt plus 1.5pt minus 1.5pt}
+\setlength{\subsectionbelowskip}{1pt}
+\setlength{\subsectionaboveskip}{3pt plus 1pt minus 1pt}
+\setlength{\paragraphaboveskip}{1pt plus 1pt minus 1pt}
 
 \newcommand{\TODO}[1]{{\bf \em \textcolor{red}{TODO: #1}\xspace}}
 \newcommand{\todo}[2]{\textcolor{red}{$\bullet$ \textbf{Task:} #1; \textbf{Responsible:} #2}}
@@ -70,26 +70,8 @@
 \newcommand{\sys}{Coala\xspace}
 \newcommand{\transition}{{\tt next\_task}\xspace}
 
-%Title Options (Brandon: your call which one)
-%\newcommand{\sysfull}{VIPER: Virtualised Intermittent Programming model, Execution model, and Runtime environment}
-%\newcommand{\sysfull}{VIPER: Virtualized Intermittently-Powered Execution Runtime}
-%\newcommand{\sysfull}{PREVIEW: Programming and Runtime Environment with Virtualised Intermittent Execution Windows}
-%\newcommand{\sysfull}{VIPE: Virtualized Intermittently-Powered Execution}
-\newcommand{\sysfull}{\sys: Efficient Task-based Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization}
-
-%\setcopyright{rightsretained}
-
-%\acmDOI{http://dx.doi.org/xx.xxxx/xxxxxxx.xxxxxxx}
-
-%\acmISBN{978-1-xxxx-xxxx-x/17/11}
-
-%\acmConference[ASPLOS]{The 23rd ACM International Conference on Architectural Support for Programming Languages and Operating Systems}{March 24--28, 2017}{Williamsburg, VA, USA}
-
-%\acmYear{2017}
-
-%\copyrightyear{2017}
-
-%\acmPrice{15.00}
+%newcommand{\sysfull}{\sys: Efficient Task-based Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization} %Old title
+\newcommand{\sysfull}{\sys: Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization}
 
 \begin{document}
 
@@ -103,7 +85,7 @@
 %\affiliation{%
 %	\institution{Carnegie Mellon University}
 %	\streetaddress{4720 Forbes Avenue}
-%\city{Pittsburgh} 
+%   \city{Pittsburgh} 
 %	\state{PA} 
 %	\postcode{15213}
 %}
@@ -171,11 +153,6 @@
 
 %\renewcommand{\shortauthors}{A. Y. Majid et al.}
 
-\date{}
-\maketitle
-
-\thispagestyle{empty}
-
 \begin{abstract}
 	
 \input{abstract}
@@ -227,6 +204,8 @@
 
 %\keywords{Energy harvesting, transient operation, operating system}
 
+\maketitle
+
 \section{Introduction}
 \label{sec:intro}
 
@@ -276,12 +255,6 @@
 \label{sec:conclusions}
 
 \input{conclusions}
-
-%\newpage
-
-% The intermittent execution is cumulative discrete process. The intermittent execution model is only able to execute a few number of instructions, as compared to the conventional (continuous) model, before its progress is terminated. Therefore, the intermittent execution model adapts an execution progress state saving mechanism. This mechanism is realized either by means of a checkpoint~\cite{}, where all the context of the program is saved into non-volatile memory. Or 
-
-% This progress state saving mechanism is normally injected into a program either by a compiler~\cite{}. A compiler injects trigger pointers to checkpoint (save) the context of the program into the non-volatile memory.  or it is added by a programmer~\cite{chain}. [compare these two approaches]...
 
 \bibliographystyle{plain}
 \bibliography{bib}
