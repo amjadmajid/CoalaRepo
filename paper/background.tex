@@ -24,8 +24,8 @@ Intermittent execution is different from continuous execution. A power failure c
 
 \begin{figure}
 	\centering
-	\subfloat[Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration]{\includegraphics[width=\columnwidth]{figures/crc_example}\label{fig:crc_example}}\\
-	\subfloat[Consecutive execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)]{\includegraphics[width=\columnwidth]{figures/crc_example_war}\label{fig:crc_example_war}}
+	%\subfloat[Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration]{\includegraphics[width=\columnwidth]{figures/crc_example}\label{fig:crc_example}}\\
+	%\subfloat[Consecutive execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)]{\includegraphics[width=\columnwidth]{figures/crc_example_war}\label{fig:crc_example_war}}
 	\caption{Code example demonstrating effect of write after read on volatile memory checkpointing.}
 	\label{fig:code_demo_incosistency}
 \end{figure}
@@ -71,8 +71,8 @@ Task-based models incur costs that motivate \sys.
 
 \begin{figure}
 	\centering
-	\subfloat[Energy cost of \emph{write} operation]{\includegraphics[width=0.49\columnwidth]{figures/fram_write.eps}}
-	\subfloat[Energy cost of \emph{read} operation]{\includegraphics[width=0.49\columnwidth]{figures/fram_read.eps}}
+	%\subfloat[Energy cost of \emph{write} operation]{\includegraphics[width=0.49\columnwidth]{figures/fram_write.eps}}
+	%\subfloat[Energy cost of \emph{read} operation]{\includegraphics[width=0.49\columnwidth]{figures/fram_read.eps}}
 	\caption{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write (left) and read (right) operation.}
 	\label{fig:framEnergy}
 \end{figure}
