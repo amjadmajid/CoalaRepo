@@ -165,10 +165,10 @@ unsigned int CCITT_Update(unsigned int init, unsigned int input)
 int main(void) {
     init();
 
-    taskId tasks[] = {  {initTask,1},
-                        {firstByte,2},
-                        {secondByte,3 },
-                        {task_finish, 4}
+    taskId tasks[] = {  {initTask,1, 1},
+                        {firstByte,2, 1},
+                        {secondByte,3, 1 },
+                        {task_finish, 4, 1}
     };
     //This function should be called only once
     os_addTasks(4, tasks );

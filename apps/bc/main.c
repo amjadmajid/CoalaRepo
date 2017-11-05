@@ -308,13 +308,13 @@ void task_AR_btbl_bitcount() {
        cp_reset();
 #endif
 
-    unsigned char * Ptr = (unsigned char *) &P(_v_seed) ;
+    unsigned char * Ptr = (unsigned char *) &RP(_v_seed) ;
     int Accu ;
 
-    Accu  = bits[ P(*Ptr++) ];
-    Accu += bits[ P(*Ptr++) ];
-    Accu += bits[ P(*Ptr++) ];
-    Accu += bits[ P(*Ptr) ];
+    Accu  = bits[ RP(*Ptr++) ];
+    Accu += bits[ RP(*Ptr++) ];
+    Accu += bits[ RP(*Ptr++) ];
+    Accu += bits[ RP(*Ptr) ];
     WP(_v_n_5)+= Accu;
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;

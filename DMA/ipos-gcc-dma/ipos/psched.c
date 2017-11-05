@@ -99,15 +99,16 @@ void os_scheduler()
 
     if (__commit_flag == COMMITTING)
     {
-        // we need to do a page swap to bring the correct page from temp  or  ROM
-        // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
-        __bringPersisCrntPag(__persis_CrntPagHeader );
-        __realTask = __temp_coalTskAddr;
-        goto commit;
+        // firm transition
+        __coalTskAddr = (unsigned int) __temp_coalTskAddr;
+
+        // Commit the dirty pages
+        __pagsCommit();
+        __commit_flag = COMMIT_FINISH;
     }
 
     // Recover the virtual state
-    __bringCrntPagROM();
+    __bringPagROM(__persis_CrntPagHeader);
     __realTask = (unsigned int *) __coalTskAddr;
 
 

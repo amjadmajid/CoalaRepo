@@ -150,7 +150,7 @@ void task_init_array() {
 #endif
     unsigned i;
         for (i = 0; i < BUFFER_SIZE - 1; ++i) {
-            WP(_v_filter[i + P(_v_index)*(BUFFER_SIZE-1)]) = 0;
+            WP(_v_filter[i + RP(_v_index)*(BUFFER_SIZE-1)]) = 0;
         }
         ++WP(_v_index);
         if (RP(_v_index) == NUM_BUCKETS/(BUFFER_SIZE-1)) {
@@ -180,8 +180,8 @@ void task_generate_key()
     __cry = (RP(_v_key) + 1) * 17;
     WP(_v_key) = __cry;
 
-    if (P(_v_next_task) >= t_generate_key) {
-        os_jump(P(_v_next_task) - t_generate_key);
+    if (RP(_v_next_task) >= t_generate_key) {
+        os_jump(RP(_v_next_task) - t_generate_key);
     }
     else {
         os_jump(TASK_NUM - RP(_v_next_task) + t_generate_key);
@@ -236,7 +236,7 @@ void task_calc_indexes_index_2()
      __cry = RP(_v_index1) ^ fp_hash;
      WP(_v_index2) = __cry;
 
-    if (P(_v_next_task) >= t_calc_indexes_index_2) {
+    if (RP(_v_next_task) >= t_calc_indexes_index_2) {
         os_jump(RP(_v_next_task) - t_calc_indexes_index_2);
     }
     else {
@@ -272,7 +272,7 @@ void task_add()
     uint16_t __cry;
     uint16_t __cry_idx = RP(_v_index1);
     uint16_t __cry_idx2 = RP(_v_index2);
-    if (!P(_v_filter[__cry_idx])) {
+    if (!RP(_v_filter[__cry_idx])) {
 
         WP(_v_success) = true;
         __cry = RP(_v_fingerprint);
@@ -280,7 +280,7 @@ void task_add()
         os_jump(2);
         return;
     } else {
-        if (!P(_v_filter[__cry_idx2])) {
+        if (!RP(_v_filter[__cry_idx2])) {
 
             WP(_v_success) = true;
             __cry = RP(_v_fingerprint);
@@ -369,7 +369,7 @@ void task_insert_done()
     WP(_v_inserted_count) = __cry;
 
 
-    if (P(_v_insert_count) < NUM_INSERTS) {
+    if (RP(_v_insert_count) < NUM_INSERTS) {
         WP(_v_next_task) = t_insert;
         os_jump(8);
         return;
@@ -430,11 +430,11 @@ void task_lookup_done()
 
     uint16_t __cry;
     ++WP(_v_lookup_count);
-    __cry = P(_v_member_count) ;
-    __cry+= P(_v_member);
+    __cry = RP(_v_member_count) ;
+    __cry+= RP(_v_member);
     WP(_v_member_count)  = __cry;
 
-    if (P(_v_lookup_count) < NUM_LOOKUPS) {
+    if (RP(_v_lookup_count) < NUM_LOOKUPS) {
         WP(_v_next_task) = t_lookup;
         os_jump(5);
         return;
@@ -481,6 +481,8 @@ void init()
     P3OUT &= ~BIT5;
     P3DIR |=BIT5;
 
+    srand(0);
+
 #if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //    CSCTL1 = DCOFSEL_4 |  DCORSEL;      // Set DCO to 16MHz
@@ -506,21 +508,21 @@ void init()
 int main(void) {
     init();
 
-    taskId tasks[] = {{task_init,       1, },
-        {task_init_array,               2, } ,
-        {task_generate_key,             3, },
-        {task_calc_indexes,             4, },
-        {task_calc_indexes_index_1,     5, },
-        {task_calc_indexes_index_2,     6, },
-        {task_insert,                   7, },
-        {task_add,                      8, },
-        {task_relocate,                 9, },
-        {task_insert_done,              10, },
-        {task_lookup,                   11, },
-        {task_lookup_search,            12, },
-        {task_lookup_done,              14, },
-        {task_print_stats,              15, },
-        {task_done,                     16, }
+    taskId tasks[] = {{task_init,       1,1 },
+        {task_init_array,               2,1} ,
+        {task_generate_key,             3,1 },
+        {task_calc_indexes,             4,1 },
+        {task_calc_indexes_index_1,     5,1 },
+        {task_calc_indexes_index_2,     6,1 },
+        {task_insert,                   7,1 },
+        {task_add,                      8,1 },
+        {task_relocate,                 9,1 },
+        {task_insert_done,              10,1 },
+        {task_lookup,                   11,1 },
+        {task_lookup_search,            12,1 },
+        {task_lookup_done,              14,1 },
+        {task_print_stats,              15,1 },
+        {task_done,                     16,1 }
     };
 
     os_addTasks(TASK_NUM, tasks );

@@ -4,9 +4,9 @@
 #include "mspProfiler.h"
 #include "mspDebugger.h"
 
-#define CODEPROFILE 0
-#define RAISE_PIN 1
-#define PWR_INT_SIM 1
+//#define TSK_SIZ 0
+//#define RAISE_PIN 1
+//#define PWR_INT_SIM 1
 
 /*
 void sortAlgo(int arr[], int arrLen){
@@ -26,11 +26,19 @@ void task_finish();
 void task_outer_loop();
 void task_inner_loop();
 
-////// Global Piables
-__p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
-    unsigned int arr2[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
+////// Global variables
 
-    unsigned int arr_len = 50;
+__p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
+                          65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40,
+                          3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
+                          65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
+
+    unsigned int arr2[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
+                           65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40,
+                           3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
+                           65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
+
+    unsigned int arr_len = 100;
 __p unsigned int i =  0;
 __p unsigned int j = 1;
 
@@ -40,7 +48,7 @@ __nv unsigned protect = 0;
 unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
-#if CODEPROFILE
+#if TSK_SIZ
     cp_reset();
 #endif
 
@@ -48,11 +56,8 @@ void task_inner_loop()
     protect = 1;
 #endif
 
-    in_i = RP(i);
-    in_j = RP( j);
-    arr_i = RP( arr[ in_i ]);
-    arr_j = RP( arr[ in_j ]);
-
+    arr_i = RP( arr[RP(i)] );
+    arr_j = RP( arr[RP(j)] );
 
     if( arr_i  > arr_j )
     {
@@ -61,17 +66,14 @@ void task_inner_loop()
         arr_i =  temp;
     }
 
-    if( in_j < (arr_len-1) )
-    {
-        os_jump(0);
-    }
+    if( RP(j) < (arr_len-1) ) os_jump(0);
 
 
-    WP( arr[ in_i ] )= arr_i;
-    WP( arr[ in_j ]) = arr_j;
-    in_j++;
-    WP(j) = in_j;
-#if CODEPROFILE
+    WP( arr[RP(i)] ) = arr_i;
+    WP( arr[RP(j)] ) = arr_j;
+    WP(j)++;
+
+#if TSK_SIZ
     cp_sendRes("task_inner_loop \0");
 #endif
 }
@@ -80,22 +82,17 @@ void task_inner_loop()
 void task_outer_loop()
 {
 
-#if CODEPROFILE
+#if TSK_SIZ
     cp_reset();
 #endif
-    unsigned int in_i;
-    in_i = RP(i);
-    in_i++;
 
-    if(in_i < arr_len)
-    {
-        os_jump(2);
-    }
+    WP(i)++;
 
-    WP(i)= in_i;
-    WP(j)= in_i+1;
+    if(RP(i) < arr_len)   os_jump(2);
 
-#if CODEPROFILE
+    WP(j)=  RP(i)+1;
+
+#if TSK_SIZ
     cp_sendRes( "task_outer_loop \0");
 #endif
 }
@@ -104,7 +101,7 @@ void task_outer_loop()
 
 void task_finish()
 {
-#if CODEPROFILE
+#if TSK_SIZ
     cp_reset();
 #endif
 
@@ -126,7 +123,7 @@ void task_finish()
     WP(i) = 0 ;
     WP(j) = 1;
 
-#if CODEPROFILE
+#if TSK_SIZ
     cp_sendRes("\ntask_finish \0");
 #endif
 }
@@ -140,15 +137,6 @@ void init()
 #if RAISE_PIN
   P3OUT &=~BIT5;
   P3DIR |=BIT5;
-#endif
-
-#if 0
-  CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-//    CSCTL1 = DCOFSEL_4 |  DCORSEL;      // Set DCO to 16MHz
-  CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-  CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-  CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-  CSCTL0_H = 0;
 #endif
 
 #ifdef TSK_SIZ
@@ -169,7 +157,10 @@ void init()
 int main(void) {
     init();
 
-       taskId tasks[] = {  {task_inner_loop,1}, {task_outer_loop,2}, {task_finish,3}};
+       taskId tasks[] = {  {task_inner_loop,    1, 1},
+                           {task_outer_loop,    2, 1},
+                           {task_finish,        3, 1}
+                       };
        //This function should be called only once
        os_addTasks(3, tasks );
 

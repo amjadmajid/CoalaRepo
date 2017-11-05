@@ -23,13 +23,14 @@
 
 uint8_t* __return_addr(uint8_t* var) ;
 uint8_t* __return_addr_wr(uint8_t* var) ;
-uint8_t* __return_addr_no_check(uint8_t* var) ;
-uint8_t* __return_addr_wr_no_check(uint8_t* var) ;
+uint8_t* __return_addr_no_check(unsigned int* var) ;
+uint8_t* __return_addr_wr_no_check(unsigned int* var) ;
 void __sendPagTemp(unsigned int pagTag);
 void __bringPagTemp(unsigned int pagTag);
 void __bringPagROM(unsigned int pagTag);
 void __sendPagROM(unsigned int pagTag);
 unsigned int __pageSwap(unsigned int * varAddr);
+void __pagesSwap(unsigned int * CurnPag, unsigned int * varAddr);
 void __bringPersisCrntPag(unsigned int curntPag);
 void __pagsCommit();
 void __bringCrntPagROM();
