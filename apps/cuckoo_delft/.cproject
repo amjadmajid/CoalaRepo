@@ -35,7 +35,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ipos-gcc-dma/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/coala/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
 								</option>
@@ -60,7 +60,7 @@
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
 									<listOptionValue builtIn="false" value="mspDebugger"/>
 									<listOptionValue builtIn="false" value="mspProfiler"/>
-									<listOptionValue builtIn="false" value="ipos-gcc-dma"/>
+									<listOptionValue builtIn="false" value="coala"/>
 									<listOptionValue builtIn="false" value="mspReseter"/>
 									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 								</option>
@@ -69,7 +69,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ipos-gcc-dma/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/coala/Debug}&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1997956903" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" value="&quot;${ProjName}.out&quot;" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE.405836656" name="Write a map file (-Map)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.MAP_FILE" value="&quot;${ProjName}.map&quot;" valueType="string"/>
