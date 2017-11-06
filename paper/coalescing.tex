@@ -1,50 +1,24 @@
-\sys dynamically {\em coalesces} consecutively executing tasks at run time.
-When two tasks are coalesced, the first of the two tasks does not commit its
-updates to protected memory locations when it reaches a \transition statement.
-Instead, execution immediately continues from the beginning of the second of
-the two tasks. At the end of the second of the two coalesced tasks, \sys
-commits the pages that were updated by either of the coalescing tasks. The
-purpose of coalescing is to better amortize the run time overhead of committing
-updated pages when a task ends. If consecutive tasks access the same pages of
-data, the pages accessed by both tasks only need to be committed once.  
+\sys dynamically {\em coalesces} consecutively executing tasks at run time. When two tasks are coalesced, the first of the two tasks does not commit its updates to protected memory locations when it reaches a \transition statement. Instead, execution immediately continues from the beginning of the second of the two tasks. At the end of the second of the two coalesced tasks, \sys commits the pages that were updated by either of the coalescing tasks. The purpose of coalescing is to better amortize the run time overhead of committing updated pages when a task ends. If consecutive tasks access the same pages of data, the pages accessed by both tasks only need to be committed once.  
 
-\sys can coalesce an arbitrary number of consecutive tasks. As more tasks
-coalesce, their collective commit overhead amortizes better, potentially
-improving performance. As more tasks coalesce, the amount of potentially {\em
-wasted work} also increases. If power fails during a long sequence of coalesced
-tasks the lack of an intervening commit requires execution to restart from the
-{\em first} task in the sequence, failing to preserve the progress of any of
-the tasks in the long sequence. \sys moderates the risk of coalescing and
-capitalizes on its benefit by dynamically, \emph{adaptively} determining a
-coalescing factor that combines many tasks without suffering an excess of
-wasted work. 
+\textbf{Task Coalescing Problem:} \sys can coalesce an arbitrary number of consecutive tasks. As more tasks coalesce, their collective commit overhead amortizes better, potentially improving performance. As more tasks coalesce, the amount of potentially {\em wasted work} also increases. If power fails during a long sequence of coalesced tasks the lack of an intervening commit requires execution to restart from the {\em first} task in the sequence, failing to preserve the progress of any of the tasks in the long sequence. \sys moderates the risk of coalescing and capitalizes on its benefit by dynamically, \emph{adaptively} determining a coalescing factor that combines many tasks without suffering an excess of wasted work. 
 
-The challenge to coalescing tasks is determining how many tasks to coalesce
-before committing. During execution, an executing task is either a {\em
-coalesced} task, which does not commit its state before transitioning or a {\em
-committing} task, which does commit its state before transitioning. \sys
-monitors a program's execution to adaptively determine $C$, the number of tasks
-to coalesce before committing; \sys repeatedly executes $C-1$ coalesced tasks,
+The challenge to coalescing tasks is determining how many tasks to coalesce before committing. During execution, an executing task is either a {\em coalesced} task, which does not commit its state before transitioning or a {\em committing} task, which does commit its state before transitioning. \sys monitors a program's execution to adaptively determine $C$, the number of tasks to coalesce before committing; \sys repeatedly executes $C-1$ coalesced tasks,
 followed by a committing task. 
 
-\sys determines $C$ for a given operation based on the number of tasks
-completed, $S$, during the current operational period. \sys begins execution in
-a coalesced task with $C$ initialized to half of the number of tasks executed
-during the previous operating period and $S$ initialized to $0$. The system
-executes $C-1$ coalesced tasks followed by one committing task. After each
-commit, \sys assigns $C$ to half of $S$.   If more tasks complete in an
-operating period, \sys attempts to coalesce more tasks. If fewer tasks
+\textbf{Task Coalescing Strategies:} There are infinite possible strategies for coalescing (infinite amount of $(C_U,C_D)$ pairs). We will consider the three fundamental ones:
+
+\begin{enumerate}
+	\item \textbf{$N$ up/$N$ down:} where task coalescing factor increases by $N$ at each successful virtual task execution and decreases by $N$, otherwise;
+	\item \textbf{History-driven:} where coalescing will consider history of power failures into deciding on $(C_U,C_D)$ values on the fly;
+	\item \textbf{Program profiling-driven:} where coalescing strategy takes into account \emph{expected size} of each task in the application to pick the best coalescing factor.
+\end{enumerate}
+
+\subsection{Operation of $N$ up/$N$ Down Coalescing:} \todo{To be written}{Przemek}
+
+\subsection{Operation of History-driven Coalescing}: \sys determines $C$ for a given operation based on the number of tasks completed, $S$, during the current operational period. \sys begins execution in a coalesced task with $C$ initialized to half of the number of tasks executed during the previous operating period and $S$ initialized to $0$. The system executes $C-1$ coalesced tasks followed by one committing task. After each commit, \sys assigns $C$ to half of $S$. If more tasks complete in an operating period, \sys attempts to coalesce more tasks. If fewer tasks
 complete, \sys attempts to coalesce fewer tasks. If no committing task
 completes due to a power failure, \sys updates $C$ on reboot to half of $S$
 (the number of tasks completed before the power failure) and continues.
-
-\begin{figure}
-	\centering
-	%\subfloat[\sys coalesces consecutive tasks.]{\includegraphics[width=\columnwidth]{figures/coalescing_states}\label{fig:coalescing_example_states}}\\
-	%\subfloat[\sys dynamically adapts the amount of coalescing.]{\includegraphics[width=\columnwidth]{figures/coalescing_timeline}\label{fig:coalescing_example_flowchart}}
-	\caption{\sys coalesces tasks to avoid overheads.}
-	\label{fig:coalescing_example}
-\end{figure}
 
 \noindent\textbf{Task Coalescing Illustration:}
 Figure~\ref{fig:coalescing_example_states} shows a sequence of three tasks
@@ -64,6 +38,15 @@ to half of $S$, which is three (after rounding up). \sys coalesces three tasks
 and again commits.  At this point, $S=8$; \sys assigns $C=4$ and execution
 continues.
 
+\subsection{Operation of Program Profiling-driven Coalescing:} \todo{To be written}{Przemek}
+
+\begin{figure}
+	\centering
+	%\subfloat[\sys coalesces consecutive tasks.]{\includegraphics[width=\columnwidth]{figures/coalescing_states}\label{fig:coalescing_example_states}}\\
+	%\subfloat[\sys dynamically adapts the amount of coalescing.]{\includegraphics[width=\columnwidth]{figures/coalescing_timeline}\label{fig:coalescing_example_flowchart}}
+	\caption{\sys coalesces tasks to avoid overheads.}
+	\label{fig:coalescing_example}
+\end{figure}
 
 %However, it takes a conservative approach by making the virtual task size equal
 %to the half of the number of successfully executed real tasks before the last
