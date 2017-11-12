@@ -42,6 +42,15 @@ continues.
 
 \begin{figure}
 	\centering
+	\includegraphics[width=\columnwidth]{figures/TskDist.pdf}
+	\caption{Result of benchmark applications (Section~ref{}) task size measurement, measured in the number of instruction cycles. We observe very large variations of task sizes per each benchmark. \todo{Describe X axis, no capitals in titles - except first word; markers in addition to colors per app; remove 4.7}{Amjad}}
+\label{fig:task_profiling}
+\end{figure}
+
+Result of the task size measurement is provided in Figure~\ref{fig:task_profiling}. Each benchmark was run for predefined period of time, on non-intermittent power, and at each task evocation, its execution time was measured. If a task was evoked more than once, longer execution time replaces the short one---this way we obtain conservative values of task sizes. At the end of task measurement, normalized values of task execution are assigned for each task, the shortest one being one task, the longest one X tasks.
+
+\begin{figure}
+	\centering
 	%\subfloat[\sys coalesces consecutive tasks.]{\includegraphics[width=\columnwidth]{figures/coalescing_states}\label{fig:coalescing_example_states}}\\
 	%\subfloat[\sys dynamically adapts the amount of coalescing.]{\includegraphics[width=\columnwidth]{figures/coalescing_timeline}\label{fig:coalescing_example_flowchart}}
 	\caption{\sys coalesces tasks to avoid overheads.}

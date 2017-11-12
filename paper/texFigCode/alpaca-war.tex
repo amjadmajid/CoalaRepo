@@ -1,0 +1,52 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning} 
+\usetikzlibrary{fit}
+
+
+
+\tikzset{
+	%Define standard arrow tip
+	>=stealth',
+	%Define style for boxes
+	punkt/.style={
+		rectangle,
+		rounded corners,
+		draw=black, very thick,
+		text width=4.5em,
+		minimum height=1em,
+		text centered},
+	% Define arrow style
+	pil/.style={
+		->,
+		thick,
+		shorten <=2pt,
+		shorten >=2pt,}
+}
+
+\begin{document}
+	
+	\begin{tikzpicture}[node distance=1cm, auto,]
+	
+	\pgfdeclarelayer{bg}    % declare background layer
+	\pgfsetlayers{bg,main}  % set the order of the layers (main is the standard layer)
+	
+	\node[punkt] (task1) {y = x+1};
+	\node[below = 0.1cm of task1] (t1) {Task 1};
+	\node[punkt, below =0.7cm of task1] (task2) {z = y+1};
+	\node[below = 0.1cm of task2] (t2) {Task 2};
+	\node[punkt, below =0.7cm of task2] (task3) {x = z+1};
+	\node[below = 0.1cm of task3] (t3) {Task 3};
+	\node[punkt, blue, dotted, right = 2cm of task2, fill=red!10] (task4) {y = \textcolor{red}{x}+1 
+		\\ z = y+1 \\ \textcolor{red}{x} = z+1};
+	\node[below = 0.3cm of task4](t4) {Merged tasks};
+	
+	
+	\begin{pgfonlayer}{bg}    % select the background layer
+		\node[draw,thick,dotted,red,minimum width=7em, fill=blue!10, fit=(task1) (task2) (t3) ] (Virtualized) {};
+		\draw[<->] ([xshift=1.5cm]Virtualized.north) --node[sloped, anchor=south] {Virtualization Window} ([xshift=1.5cm]Virtualized.south);
+	\end{pgfonlayer}
+	
+	\end{tikzpicture}
+	
+\end{document}
