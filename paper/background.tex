@@ -13,7 +13,11 @@ Many platforms enable intermittent, battery-less energy harvesting-based computa
 
 %In all of the above, the main source of energy harvested is the electromagnetic radiation in the radio frequency range (ambient transmitters such as high power TV transmitters~\cite{liu_sigcomm_2013} or dedicated RFID antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}). Naturally, other forms of energy harvesting sources exist, including temperature gradient, (micro-)motions, light/sun radiation, vibrations, and body fluid flow (blood, gastric acid). Several recent surveys discussing energy harvesting, low-power, embedded systems and intermittent computing at a high level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
 
-\subsection{Energy Harvesting and Intermittent Computation}
+\textbf{Hardware Assumptions.}%
+\label{sec:background_hardware}%
+%
+ \sys is designed for the demands of existing and future energy-harvesting platforms based around general purpose, commodity computing components~\cite{wisp,msp430datasheet}. We assume a device with a memory system that has fast, byte-addressable volatile and non-volatile memory; in particular, our target platform~\cite{wisp} is equipped with a mixture of SRAM and FRAM. Our implementation leverages hardware support for fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. We do not require a particular non-volatile memory technology, nor do we require architectural additions commodity processors~\cite{su_date_2017,ratchet,quickrecall,nvp}. \sys supports I/O behavior similar to~\cite{alpaca,chain}, allowing safe, synchronous I/O and unsafe, asynchronous I/O.
+\subsection{Intermittent Execution}
 \label{sec:background_consistency}
 
 %Energy-harvesting devices execute software according to the {\em intermittent execution model}. Physically, a device charges until a threshold, operates briefly until its energy is depleted, shuts down recharges, and repeats the cycle.
@@ -38,7 +42,7 @@ Despite checkpointing at line 3 in Fig.~\ref{fig:crc_example}, the code may comp
 %
 Checkpoint-based systems risk violating memory consistency~\cite{dino}. To maintain consistency, prior systems~\cite{dino,ratchet} {\em version} a subset of non-volatile data with the checkpoint. Task-based systems~\cite{chain,alpaca}, which we focus on, ensure consistency using programmer, compiler, and runtime support.
 
-\subsection{Task-based Intermittent Computation}
+\subsection{Task-based Intermittent Programming}
 \label{section:background_task_computing}
 
 Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to decompose their program into tasks. A task is a function with no caller containing arbitrary computation, sensing, and communication. A programmer describes task control-flow as a {\em task graph}. Task flow happens at programmer demarcated transition points that may be conditional on program values. Task-based programming abstractions guarantee that tasks execute {\em atomically}, regardless of power failures. Task-based runtime systems ensure task-atomic semantics by ensuring that repeated task executions are idempotent. The key to idempotence is ensuring that non-volatile updates made by an interrupted task are never visible to a future task execution.  
@@ -121,8 +125,3 @@ on a device with a small energy buffer may be a relatively short,
 task on a device with a larger buffer. The
 key problem is that using existing systems, the programmer statically sizes tasks for a fixed energy buffer. \sys's {\em task coalescing}, described
 in Section~\ref{sec:task_coalescing}, is motivated by these observations.
-
-\subsection{Hardware Assumptions}
-\label{sec:background_hardware}
-
-\sys is designed for the demands of existing and future energy-harvesting platforms based around general purpose, commodity computing components~\cite{wisp,msp430datasheet}. We assume a device with a memory system that has fast, byte-addressable volatile and non-volatile memory; in particular, our target platform~\cite{wisp} is equipped with a mixture of SRAM and FRAM. Our implementation leverages hardware support for fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. We do not require a particular non-volatile memory technology, nor do we require architectural additions commodity processors~\cite{su_date_2017,ratchet,quickrecall,nvp}. \sys supports I/O behavior similar to~\cite{alpaca,chain}, allowing safe, synchronous I/O and unsafe, asynchronous I/O.
