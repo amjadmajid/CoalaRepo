@@ -5,6 +5,7 @@ Release/
 .config/
 .lauches/
 *.pdf
+!paper/figures/*.pdf
 *.aux
 *.log
 .DS_store
