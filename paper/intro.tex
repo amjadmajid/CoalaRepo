@@ -16,8 +16,11 @@ energy-harvesting device buffers energy in a small storage, e.g. a capacitor~\ci
 %\end{figure}
 
 \begin{figure}
-	%\includegraphics[width=\columnwidth]{figures/}
-    \caption{\label{fig:coalesce}Task decomposition is required for intermittent execution but task transitions introduce overhead.}
+	\includegraphics[width=0.9\columnwidth]{figures/coalescing-horiz}
+    \caption{\label{fig:coalesce}Task coalescing at runtime reduces time and
+energy overhead in task-based intermittent programming models by performing
+fewer commits and buffering updates to non-volatile variables in volatile
+memory.}
 \end{figure}
 
 \textbf{Data Consistency in Intermittent Computing.} Software in an energy-harvesting system operates in the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017}, with execution interrupted by failure periods. When power fails, a device loses volatile state, i.e., registers, stack, SRAM, and retains its non-volatile state, i.e., FRAM, Flash. While capturing periodic checkpoints~\cite{mementos,quickrecall} and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help preserve execution progress, failures can leave volatile and non-volatile state inconsistent, leading to unrecoverable failures~\cite{dino,edb}. 
