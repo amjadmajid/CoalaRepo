@@ -16,11 +16,9 @@ energy-harvesting device buffers energy in a small storage, e.g. a capacitor~\ci
 %\end{figure}
 
 \begin{figure}
-	%\includegraphics[width=.5\columnwidth]{presentation/images/alpaca-war.pdf}
-    \caption{\label{fig:coalesce}Task decomposition is required for
-intermittent execution but task transitions introduce overhead.}
+	%\includegraphics[width=\columnwidth]{figures/}
+    \caption{\label{fig:coalesce}Task decomposition is required for intermittent execution but task transitions introduce overhead.}
 \end{figure}
-
 
 \textbf{Data Consistency in Intermittent Computing.} Software in an energy-harvesting system operates in the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017}, with execution interrupted by failure periods. When power fails, a device loses volatile state, i.e., registers, stack, SRAM, and retains its non-volatile state, i.e., FRAM, Flash. While capturing periodic checkpoints~\cite{mementos,quickrecall} and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help preserve execution progress, failures can leave volatile and non-volatile state inconsistent, leading to unrecoverable failures~\cite{dino,edb}. 
 
@@ -31,40 +29,13 @@ task-based} programming and execution models~\cite{alpaca,chain} advocate for
 static decomposition of a program (by a programmer) into a collection of tasks.
 Tasks can include arbitrary computation and, upon completion, are guaranteed to
 have executed {\em atomically}, despite arbitrarily-timed power failures.
-The programmer explicitly expresses task-to-task control flow.
-%, which may be conditionally input-dependent.
-%
-Figure~\ref{fig:decomp} illustrates how the decomposition into tasks affects
-the time the application takes to complete.
-%
-Each task transition introduces the overhead of tracking and atomically
-committing the modifications to non-volatile memory by the task, to maintain
-consistency of program state.
-%
-Naively minimizing the number of task transitions, (i.e. the task count),
-\emph{at compile time} risks creating a task that requires more energy than the
-device can buffer in its storage capacitor.
-%
-Such a large task would fail to complete unless the environment provides
-sufficient incoming energy to supplement the energy in the capacitor.
-%
-To eliminate this risk, the programmer (or the compiler) must decompose the
-program conservatively into many small tasks, at the cost of higher task
-transition overhead.
+The programmer explicitly expresses task-to-task control flow. Figure~\ref{fig:coalesce} illustrates how the decomposition into tasks affects
+the time the application takes to complete. Each task transition introduces the overhead of tracking and atomically committing the modifications to non-volatile memory by the task, to maintain consistency of program state. Naively minimizing the number of task transitions, (i.e. the task count), \emph{at compile time} risks creating a task that requires more energy than the device can buffer in its storage capacitor. Such a large task would fail to complete unless the environment provides
+sufficient incoming energy to supplement the energy in the capacitor. To eliminate this risk, the programmer (or the compiler) must decompose the program conservatively into many small tasks, at the cost of \emph{higher task transition overhead}.
 
-One approach to decrease the task count, without assumming a minimum level of
+One approach to decrease the task count, without assuming a minimum level of
 incoming power always available, is to predict task energy consumption and
-choose a decomposition specific to the device capacitor size.
-%
-Howerver, statically predicting energy of arbitrary input-dependent code with
-peripheral access is a problem without a general solution.
-%
-Furthermore, a static decomposition approach cannot produce decompositions
-portable across devices with different storage capacitorss.
-%
-In this paper, we propose a \emph{dynamic} task decomposition approach, that
-accepts any static decomposition and opportunistically \emph{coalesces} tasks
-at runtime when there is sufficient energy.
+choose a decomposition specific to the device capacitor size. However, statically predicting energy of arbitrary input-dependent code with peripheral access is a problem without a general solution. Furthermore, a static decomposition approach cannot produce decompositions portable across devices with different storage capacitors.
 
 %A key challenge is that the length of a software
 %task's execution is \emph{limited by the fixed total amount of energy} that a
@@ -81,15 +52,9 @@ at runtime when there is sufficient energy.
 %This calls for at-runtime adaptive task division of any transiently-powered
 %application---namely \emph{task virtualization}.
 
-\textbf{Task Coalescing.} To add support for dynamic task
-dvision to a task-based programming model, we propose a
-\emph{task coalescing} mechanism: merging of atomic tasks
-into a single (larger) task while preserving atomicity.
-Merging two atomic tasks might produce a non-atomic task,
-that may leave memory inconsistent after a partial
-execution. A merge breaks atomicity when the accesses to
-non-volatile memory from the previously atomic merged tasks
-form a \emph{write-after-read (WAR)} dependency.
+\textbf{Task Coalescing.} To address this challenge we propose a \emph{dynamic} task decomposition approach, that accepts any static decomposition and opportunistically \emph{coalesces} tasks at runtime when there is sufficient energy. The \emph{task coalescing} is a mechanism where atomic tasks are merged into a single (larger) task while preserving atomicity. 
+
+Unfortunately, merging two atomic tasks might produce a non-atomic task, that may leave memory inconsistent after a partial execution. A merge breaks atomicity when the accesses to non-volatile memory from the previously atomic merged tasks form a \emph{write-after-read (WAR)} dependency.
 %
 %variables in non-volatile memory at \emph{run-time} that can
 %break the atomicity of the \emph{virtual task}. Consider the
@@ -106,14 +71,9 @@ form a \emph{write-after-read (WAR)} dependency.
 %since its re-execution will not always produce the same
 %results.
 %
-Although WAR dependencies introduced by the \emph{static}
-task division can be eliminated at compile time~\cite{alpaca}, those introduced \emph{dynamically} at
-run-time cannot.
-%
-To maintain memory consistency in merged tasks, we propose a
-mechanism for \emph{memory virtualization} that buffers the
-updates to non-volatile variables in volatile memory before
-committing them at the dynamic task boundary.
+Although WAR dependencies introduced by the \emph{static} task division can be eliminated at compile time~\cite{alpaca}, those introduced \emph{dynamically} at
+run-time cannot. To maintain memory consistency in merged tasks, we propose a
+mechanism for \emph{memory virtualization} that buffers the updates to non-volatile variables in volatile memory before committing them at the dynamic task boundary.
 %
 %Therefore, we require a \emph{new execution
 %model} that keeps each virtual task atomic by committing the
@@ -121,40 +81,17 @@ committing them at the dynamic task boundary.
 %dynamically at run-time---keeping the non-volatile memory
 %unmodified upon a power-interrupt and preserving its
 %consistency.
-%
 
-Task coallescing removes the optimization burden of choosing
-the best task decomposition from the programmer, because it
-accepts any decomposition and improves it dynamically.
-%
-To further reduce the programmer effort, we propose a
-compiler pass for \emph{automatic decomposition} of programs
-into (small) \emph{atomic} tasks.
-%
-The compiler identifies non-volatile variables shared across
-tasks as tasks are created, and instruments reads and writes
-of those variables, using memory virtualization, to keep
-the data consistent in the presence of power loss.
-%
-Despite being limited to a subset of the C language, the
-automatic task decomposition allowed us to port several
-applications to an intermittent platform with a moderate
-effort.
+Task coalescing removes the optimization burden of choosing the best task decomposition from the programmer, because it accepts any decomposition and improves it dynamically. To further reduce the programmer effort, we propose a compiler pass for \emph{automatic decomposition} of programs into (small) \emph{atomic} tasks. The compiler identifies non-volatile variables shared across tasks as tasks are created, and instruments reads and writes of those variables, using memory virtualization, to keep the data consistent in the presence of power loss. Despite being limited to a subset of the C language, the automatic task decomposition allowed us to port several
+applications to an intermittent platform with a moderate effort.
 
-We develop \sys%
-\footnote{To be released at \url{http://anonymized.link}}
-%
-: a task coallescing system for task-based
-programming models on intermittently-powered devices. The
-capabilities required for effective coallescing mark our
-contributions:
+\textbf{Contributions.} We develop \sys\footnote{To be released at \url{http://anonymized.link}}: a task coalescing system for task-based programming models on intermittently-powered devices. The capabilities required for effective coalescing mark our contributions:
 
 \begin{itemize}
-\item Two adaptive coallescing strategies for selecting boundaries to coallesce based on past execution behavior
-\item Software memory virtualization for transiently-powered devices that preserves atomicity of coallesced tasks
-\item Compiler pass for automatic decomposition into small atomic tasks for adaptive coallescing at runtime
+	\item Two adaptive coalescing strategies for selecting boundaries to coalesce based on past execution behaviour;
+	\item Software memory virtualisation for transiently-powered devices that preserves atomicity of coalesced tasks;
+	\item Compiler pass for automatic decomposition into small atomic tasks for adaptive coalescing at runtime.
 \end{itemize}
-
 
 %Existing programming and execution models may require more accesses to non-volatile memory (for multi-versioning)~\cite{dino,chain} or may preclude the use of volatile memory~\cite{ratchet}. Effective use of both volatile and non-volatile memory is important for \emph{efficiency}, because non-volatile memory has higher access energy and latency than SRAM~\cite{nvp}, and \emph{generality}, because devices often have much more FRAM than SRAM (e.g., 64 times more in~\cite{wolverine}). How to connect this trade-off with task virtualization remains an open question.
 
@@ -168,12 +105,8 @@ contributions:
 %	\item {\bf Volatile memory virtualization with transiently-powered device:} Colascing through task virtualization requires memory virtualization. \sys's uses SRAM as working memory, which \sys dynamically populates with pages of data from FRAM on demand, during a task's execution. When a task ends, \sys commits dirty pages to FRAM using DMA block copies, ensuring task atomicity and memory consistency. To the best of our knowledge this is the first time when memory virtualization has been demonstrated on a transient power budget.
 %\end{itemize}
 
-We evaluated \sys end-to-end on a real energy-harvesting
-device~\cite{wisp} running existing benchmarks ~\cite{chain}
-and new programs. A comparison to a state-of-the-art
-task-based system~\cite{chain} showed that \sys recovers
-performance on conservative task decompositions missed by
-systems with static decomposition.
+We evaluated \sys end-to-end on a real energy-harvesting device~\cite{wisp} running existing benchmarks ~\cite{chain} and new programs. A comparison to a state-of-the-art task-based system~\cite{chain} showed that \sys recovers
+performance on conservative task decompositions missed by systems with static decomposition.
 %
 %and can flexibly target a variety of platforms without rewriting code.
 %
