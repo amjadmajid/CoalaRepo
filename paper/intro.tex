@@ -16,24 +16,26 @@ energy-harvesting device buffers energy in a small storage, e.g. a capacitor~\ci
 %\end{figure}
 
 \begin{figure}
-	\includegraphics[width=0.9\columnwidth]{figures/coalescing-horiz}
-    \caption{\label{fig:coalesce}Task coalescing at runtime reduces time and
-energy overhead in task-based intermittent programming models by performing
-fewer commits and buffering updates to non-volatile variables in volatile
-memory.}
+	\includegraphics[width=0.85\columnwidth]{figures/coalescing-is}
+    \caption{\label{fig:coalesce}\textbf{An execution of three
+statically-defined tasks without (top) and with (bottom) dynamic
+coalescing.} Task coalescing at runtime reduces time and energy overhead in
+task-based intermittent programming models by performing fewer commits and
+buffering updates to non-volatile (NV) variables in volatile (V) memory.}
 \end{figure}
 
 \textbf{Data Consistency in Intermittent Computing.} Software in an energy-harvesting system operates in the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017}, with execution interrupted by failure periods. When power fails, a device loses volatile state, i.e., registers, stack, SRAM, and retains its non-volatile state, i.e., FRAM, Flash. While capturing periodic checkpoints~\cite{mementos,quickrecall} and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help preserve execution progress, failures can leave volatile and non-volatile state inconsistent, leading to unrecoverable failures~\cite{dino,edb}. 
 
-There are two main approaches for dealing with data inconsistency for intermittently-powered devices: (i) \emph{programming and execution models}~\cite{dino,ratchet,chain,alpaca} and (ii) \emph{architectures}~\cite{hicks_isca_2017,idetic,nvp,tictpl}. New architectures require hardware changes and are inapplicable to today's systems~\cite{hicks_isca_2017,nvp}, therefore new programming models and compilers are more suitable (as of now). However, they have their own limitations that need to be addressed---the core one being \emph{inability to adapt} to changing energy conditions.
+There are two main approaches for dealing with data inconsistency for intermittently-powered devices: (i) \emph{programming and execution models}~\cite{dino,ratchet,chain,alpaca} and (ii) \emph{architectures}~\cite{hicks_isca_2017,idetic,nvp,tictpl}. New architectures require hardware changes and are inapplicable to today's systems~\cite{hicks_isca_2017,nvp}, therefore new programming models and compilers are more suitable (as of now). However, they have their own limitations that need to be addressed---the core one being the rigidity of the \emph{static} decomposition into tasks.
 
 \textbf{Task Decomposition of Intermittent Programs.} Recently proposed {\em
 task-based} programming and execution models~\cite{alpaca,chain} advocate for
 static decomposition of a program (by a programmer) into a collection of tasks.
 Tasks can include arbitrary computation and, upon completion, are guaranteed to
 have executed {\em atomically}, despite arbitrarily-timed power failures.
-The programmer explicitly expresses task-to-task control flow. Figure~\ref{fig:coalesce} illustrates how the decomposition into tasks affects
-the time the application takes to complete. Each task transition introduces the overhead of tracking and atomically committing the modifications to non-volatile memory by the task, to maintain consistency of program state. Naively minimizing the number of task transitions, (i.e. the task count), \emph{at compile time} risks creating a task that requires more energy than the device can buffer in its storage capacitor. Such a large task would fail to complete unless the environment provides
+The programmer explicitly expresses task-to-task control flow. The execution
+in Figure~\ref{fig:coalesce} (top) illustrates how the decomposition into
+tasks affects the time the application takes to complete. Each task transition introduces the overhead of tracking and atomically committing the modifications to non-volatile memory by the task, to maintain consistency of program state~\cite{chain,alpaca}. Naively minimizing the number of task transitions, (i.e. the task count), \emph{at compile time} risks creating a task that requires more energy than the device can buffer in its storage capacitor. Such a large task would fail to complete unless the environment provides
 sufficient incoming energy to supplement the energy in the capacitor. To eliminate this risk, the programmer (or the compiler) must decompose the program conservatively into many small tasks, at the cost of \emph{higher task transition overhead}.
 
 One approach to decrease the task count, without assuming a minimum level of
@@ -55,9 +57,22 @@ choose a decomposition specific to the device capacitor size. However, staticall
 %This calls for at-runtime adaptive task division of any transiently-powered
 %application---namely \emph{task virtualization}.
 
-\textbf{Task Coalescing.} To address this challenge we propose a \emph{dynamic} task decomposition approach, that accepts any static decomposition and opportunistically \emph{coalesces} tasks at runtime when there is sufficient energy. The \emph{task coalescing} is a mechanism where atomic tasks are merged into a single (larger) task while preserving atomicity. 
+\textbf{Task Coalescing.} To address this challenge we propose a
+\emph{dynamic} task decomposition approach, that accepts any static
+decomposition and opportunistically coalesces tasks at runtime when
+there is sufficient energy. \emph{Task coalescing} is a mechanism where
+atomic tasks are merged into a single (larger) task while preserving
+atomicity of the merged task. If power fails while a colesced task is
+running, execution will restart at the first task in the group.
+Figure~\ref{fig:coalescing} (bottom) illustrates how dynamic coalescing
+changes the earlier execution and highlights the change in memory model
+necessary to not break atomicity.
 
-Unfortunately, merging two atomic tasks might produce a non-atomic task, that may leave memory inconsistent after a partial execution. A merge breaks atomicity when the accesses to non-volatile memory from the previously atomic merged tasks form a \emph{write-after-read (WAR)} dependency.
+Unfortunately, naively merging two atomic tasks might produce a non-atomic
+task, that may leave memory inconsistent after a partial execution. A merge
+breaks atomicity when the accesses to non-volatile memory from the
+previously atomic merged tasks form a \emph{write-after-read (WAR)}
+dependency.
 %
 %variables in non-volatile memory at \emph{run-time} that can
 %break the atomicity of the \emph{virtual task}. Consider the
