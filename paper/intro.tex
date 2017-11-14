@@ -28,6 +28,12 @@ buffering updates to non-volatile (NV) variables in volatile (V) memory.}
 
 There are two main approaches for dealing with data inconsistency for intermittently-powered devices: (i) \emph{programming and execution models}~\cite{dino,ratchet,chain,alpaca} and (ii) \emph{architectures}~\cite{hicks_isca_2017,idetic,nvp,tictpl}. New architectures require hardware changes and are inapplicable to today's systems~\cite{hicks_isca_2017,nvp}, therefore new programming models and compilers are more suitable (as of now). However, they have their own limitations that need to be addressed---the core one being the rigidity of the \emph{static} decomposition into tasks.
 
+% <<<<<<< HEAD
+% \begin{figure}
+% 	\includegraphics[width=.5\columnwidth]{figures/alpaca-war.pdf}
+% 	\caption{\label{fig:virtualization}Adaptive task division at run-time might lead to write-after-read dependencies (variable \ttfamily{x}) that do not exist with static task division.\todo{Box with Task 1,2,3 must be the same size as merged task; Merged task must be named as Task 4; x must be marked in text as having WAR; "Task X" name should be next to the task box; "Window" - small letter}{Sinan}}
+% \end{figure}
+% =======
 \textbf{Task Decomposition of Intermittent Programs.} Recently proposed {\em
 task-based} programming and execution models~\cite{alpaca,chain} advocate for
 static decomposition of a program (by a programmer) into a collection of tasks.
@@ -103,7 +109,18 @@ mechanism for \emph{memory virtualization} that buffers the updates to non-volat
 Task coalescing removes the optimization burden of choosing the best task decomposition from the programmer, because it accepts any decomposition and improves it dynamically. To further reduce the programmer effort, we propose a compiler pass for \emph{automatic decomposition} of programs into (small) \emph{atomic} tasks. The compiler identifies non-volatile variables shared across tasks as tasks are created, and instruments reads and writes of those variables, using memory virtualization, to keep the data consistent in the presence of power loss. Despite being limited to a subset of the C language, the automatic task decomposition allowed us to port several
 applications to an intermittent platform with a moderate effort.
 
+% <<<<<<< HEAD
+% We develop \sys%
+% \footnote{To be released at \url{http://anonymized.link}}
+% %
+% : a task coallescing system for task-based
+% programming models on intermittently-powered devices. The
+% capabilities required for effective coallescing mark our
+% contributions:
+% >>>>>>> 96e5d9f9b4e97ce8700c375bd8e11708870f5aba
+% =======
 \textbf{Contributions.} We develop \sys\footnote{To be released at \url{http://anonymized.link}}: a task coalescing system for task-based programming models on intermittently-powered devices. The capabilities required for effective coalescing mark our contributions:
+% >>>>>>> 84d7711b6c6f6424cdad97efc8aad96e52f316ff
 
 \begin{itemize}
 	\item Two adaptive coalescing strategies for selecting boundaries to coalesce based on past execution behaviour;
