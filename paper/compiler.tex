@@ -134,31 +134,89 @@ iteration into its own task.
 \subsubsection{Task Boundary Placement}
 \label{sec:compiler_boundary}
 
-After completing program cost analysis, \sys inserts task boundaries into the CFG in two steps. The first step is to insert task boundaries on the back-edges of all loops that have an energy cost greater than the device's energy buffer capacity, producing an initial boundary placement. The second step is to insert task boundaries at additional points in the code, sub-dividing tasks that have an estimated cost that exceeds the energy buffer's capacity.
+After completing program cost analysis, \sys inserts task boundaries into the
+CFG in two steps. The first step is to insert task boundaries on the back-edges
+of all loops that have an energy cost greater than the device's energy buffer
+capacity, producing an initial boundary placement. The second step is to insert
+task boundaries at additional points in the code, sub-dividing tasks that have
+an estimated cost that exceeds the energy buffer's capacity.
 
-To sub-divide these tasks, \sys does depth-first traversals of all paths in the CFG, ignoring back-edges. Traversals start from the beginning of the main function, or from an existing task boundary. \sys accumulates the cost of basic blocks during the traversal until reaching another task boundary or an exit node in the CFG. At the end of a traversal, if the accumulated cost exceeds to device's energy capacity \sys must split the traversed path with a task boundary. Each edge on the path is a candidate location for a boundary.
+To sub-divide these tasks, the compiler prototype does depth-first traversals
+of all paths in the CFG, ignoring back-edges. Traversals start from the
+beginning of the main function, or from an existing task boundary. The
+prototype accumulates the cost of basic blocks during the traversal until
+reaching another task boundary or an exit node in the CFG. At the end of a
+traversal, if the accumulated cost exceeds to estimated device energy capacity the
+compiler prototype must split the traversed path with a task boundary. Each
+edge on the path is a candidate location for a boundary.
 
-\sys uses a heuristic to compute a score for each candidate and places a boundary at the candidate with the highest score. The heuristic tries to avoid placing boundaries on loops, to minimize the number of live variables that must be protected across the new boundary, and to maximize the number of operations along the path. A boundary candidate's score is computed as
+\sys uses a heuristic to compute a score for each candidate and places a
+boundary at the candidate with the highest score. The heuristic tries to avoid
+placing boundaries on loops, tries to minimize the number of live variables 
+protected across the new boundary, and tries to maximize the number of operations
+along the path. A boundary candidate's score is computed as
 %
 \begin{equation}
 \text{score} = {\left(w_{0} N_{\text{IR}} - w_{1} N_{\text{PV}}\right)}{N_{\text{loop}}^{-1}},\nonumber
 \end{equation}
 %
-where $N_{\text{IR}}$ is the length of the path being traversed up to the candidate, $N_{\text{PV}}$ is the number of protected variables that will be newly introduced by placing boundary at the candidate, and $N_{\text{loop}}$ is the product of the loop bounds of all loops (i.e., nested loops) containing the boundary candidate. \sys normalizes $N_{\text{IR}}$ and $N_{\text{PV}}$ to the values among boundary candidates. The weights, $w_{0}, w_{1}$ are between zero and one, and are hand-tuned parameters that define the relative importance of $N_{\text{IR}}$,
-$N_{\text{PV}}$, and $N_{\text{loop}}$. We empirically determined these weight values by measuring the runtime for different weight values across applications. We found that varying weights varies runtime by only around 5\% in most cases and in our experimental evaluation, we used $w_{0} = w_{1} = 0.5$.
+where $N_{\text{IR}}$ is the length of the path being traversed up to the
+candidate, $N_{\text{PV}}$ is the number of protected variables that will be
+newly introduced by placing boundary at the candidate, and $N_{\text{loop}}$ is
+the product of the loop bounds of all loops (to handle nested loops) containing the
+boundary candidate. \sys normalizes $N_{\text{IR}}$ and $N_{\text{PV}}$ to the
+values among boundary candidates. The weights, $w_{0}, w_{1}$ are between zero
+and one, and are hand-tuned parameters that define the relative importance of
+$N_{\text{IR}}$,
+$N_{\text{PV}}$, and $N_{\text{loop}}$. We empirically determined these weight
+values by measuring the runtime for different weight values across
+applications. We found that varying weights varies runtime by only around 5\%
+in most cases and in our experimental evaluation, we used $w_{0} = w_{1} =
+0.5$.
 
-After placing task boundaries, the compiler must ensure that all tasks are single-entry. To do so, \sys computes the dominator tree of the CFG and checks that every vertex within a task is dominated by the entry vertex of the task. If this dominance condition is unmet for a CFG node, the compiler places an additional task boundary at that node, meeting the condition. Figure~\ref{fig:compiler_overview} illustrates boundary placement: the first three vertices make up one task and the remainder become a second task.
+After placing task boundaries, the compiler must ensure that all tasks are
+single-entry. To do so, \sys computes the dominator tree of the CFG and checks
+that every vertex within a task is dominated by the entry vertex of the task.
+If this dominance condition is unmet for a CFG node, the compiler places an
+additional task boundary at that node and re-evaluates the condition, repeatedly
+inserting a boundary at each node for which the dominance condition is unmet.
+Figure~\ref{fig:compiler_overview} illustrates boundary placement: the first
+three vertices make up one task and the remainder become a second task.
 
 \subsection{Task Transformation}
 \label{sec:compiler_transform_pass}
 
-After placing task boundaries during analysis, \sys's transformation analysis restructures the code into tasks defined by the placed boundaries. The analysis traverses the CFG starting from an arbitrary task boundary. On reaching a subsequent boundary, the transformation analysis identifies all paths between the two task boundaries and copies those paths into a new task function. The analysis continues until all paths are contained within a task. 
+After placing task boundaries during analysis, \sys's transformation analysis
+restructures the each task into its own function. The analysis
+traverses the CFG starting from an arbitrary task boundary. On reaching a
+subsequent boundary, the transformation analysis identifies all paths between
+the two task boundaries and copies those paths into a new task function. The
+analysis continues until all paths are contained within a task. 
 
-After forming tasks, variables that are live beyond the end of the task become protected, which requires renaming those variables and updating references to renamed variable names. For example, Figure~\ref{fig:compiler_overview} shows a boundary placed within the live range of {\tt b}; {\tt b} becomes protected and accesses to {\tt b} should be redirected to {\tt p\_b} (as shown in Figure~\ref{fig:compiler_overview}). {\tt a} is task-local and need not be protected, but only declared in the task. Constants and read-only variable are never protected. When writes in multiple, newly formed tasks may update the same location (i.e., at a PHI node in the CFG), \sys re-writes the accesses to refer to the same global name. Subsequent reads simply read the protected variable.
+After forming tasks, variables that are live beyond the end of the task become
+protected, which requires renaming those variables and updating references to
+renamed variable names. For example, Figure~\ref{fig:compiler_overview} shows a
+boundary placed within the live range of {\tt b}; {\tt b} becomes protected and
+accesses to {\tt b} should be redirected to {\tt p\_b} (as shown in
+Figure~\ref{fig:compiler_overview}). {\tt a} is task-local and need not be
+protected, but only declared in the task. Constants and read-only variable are
+never protected. When writes in multiple, newly formed tasks may update the
+same location (i.e., at a PHI node in the CFG), \sys re-writes the accesses to
+refer to the same protected, global name. Subsequent reads simply read the
+protected variable.
 
-After forming tasks, some branches in a task may refer to targets in another task. \sys patches the CFG to re-write those branches to instead be \transition statements that transition to the entry point of the other task. Such a ``broken'' branch will always refer to a task's entry node because \sys ensures that all tasks have only one entry. 
+After forming tasks, some branches in a task may refer to targets in another
+task. \sys patches the CFG to re-write those branches to instead be \transition
+statements that transition to the entry point of the other task.  Cross-task
+branches will always refer to a task's entry node because each task boundary
+was placed and guaranteed to be single-entry using the compiler's dominance
+analysis.
 
-The compiler re-writes accesses to protected variables to use \sys's memory virtualization API. Pointers pose a challenge to re-writing protected accesses because unprotected pointers may point to protected data. Leveraging LLVM's {\tt basic} pointer alias analysis the compiler conservatively re-writes all accesses that {\em may} read or write protected data. 
+The compiler re-writes accesses to protected variables to use \sys's memory
+virtualization API. Pointers pose a challenge to re-writing protected accesses
+because unprotected pointers may point to protected data. Leveraging LLVM's
+{\tt basic} pointer alias analysis the compiler conservatively re-writes all
+accesses that {\em may} read or write protected data. 
 
 %After task generation is done, the compiler generates new main function and
 %peppers the system with necessary codes that is needed by \sys (such as code
