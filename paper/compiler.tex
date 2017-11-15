@@ -95,27 +95,11 @@ iteration into its own task.
 \subsubsection{Task Boundary Placement}
 \label{sec:compiler_boundary}
 
-After completing program cost analysis, \sys inserts task boundaries into the
-CFG in two steps. The first step is to insert task boundaries on the back-edges
-of all loops that have an energy cost greater than the device's energy buffer
-capacity, producing an initial boundary placement. The second step is to insert
-task boundaries at additional points in the code, sub-dividing tasks that have
-an estimated cost that exceeds the energy buffer's capacity.
+After completing program cost analysis, \sys inserts task boundaries into the CFG in two steps. The first step is to insert task boundaries on the back-edges of all loops that have an energy cost greater than the device's energy buffer capacity, producing an initial boundary placement. The second step is to insert task boundaries at additional points in the code, sub-dividing tasks that have an estimated cost that exceeds the energy buffer's capacity.
 
-To sub-divide these tasks, the compiler prototype does depth-first traversals
-of all paths in the CFG, ignoring back-edges. Traversals start from the
-beginning of the main function, or from an existing task boundary. The
-prototype accumulates the cost of basic blocks during the traversal until
-reaching another task boundary or an exit node in the CFG. At the end of a
-traversal, if the accumulated cost exceeds to estimated device energy capacity the
-compiler prototype must split the traversed path with a task boundary. Each
-edge on the path is a candidate location for a boundary.
+To sub-divide these tasks, the compiler prototype does depth-first traversals of all paths in the CFG, ignoring back-edges. Traversals start from the beginning of the main function, or from an existing task boundary. Our prototype accumulates the cost of basic blocks during the traversal until reaching another task boundary or an exit node in the CFG. At the end of a traversal, if the accumulated cost exceeds to estimated device energy capacity the compiler prototype must split the traversed path with a task boundary. Each edge on the path is a candidate location for a boundary.
 
-\sys uses a heuristic to compute a score for each candidate and places a
-boundary at the candidate with the highest score. The heuristic tries to avoid
-placing boundaries on loops, tries to minimize the number of live variables 
-protected across the new boundary, and tries to maximize the number of operations
-along the path. A boundary candidate's score is computed as
+\textbf{Boundary Placement Heuristic.} \sys uses a heuristic to compute a score for each candidate and places a boundary at the candidate with the highest score. The heuristic tries to avoid placing boundaries on loops, tries to minimize the number of live variables protected across the new boundary, and tries to maximize the number of operations along the path. A boundary candidate's score is computed as
 %
 \begin{equation}
 \text{score} = {\left(w_{0} N_{\text{IR}} - w_{1} N_{\text{PV}}\right)}{N_{\text{loop}}^{-1}},\nonumber
