@@ -1,27 +1,16 @@
 We studied \sys's effectiveness for systems with automatically generated task
 boundaries by developing a simple compiler prototype that transforms an
 arbitrary C into a program with tasks. The compiler is representative of,
-although not a direct implementation of, a system that assists in writing
+although \emph{not a direct implementation} of, a system that assists in writing
 task-based programs by automatically inserting tasks (e.g., inspired by
-Ratchet~\cite{ratchet}). Translating C code to use tasks requires identifying program points to use as task boundaries, defining a set of task functions that begin and end at those boundaries, ensuring that all existing control-flow paths are either contained within a task or are made explicit with inter-task control-flow, and identifying and instrumenting accesses to task-shared variables that need to be protected by \sys at runtime. Our simple prototype, implemented using LLVM, analyzes the control-flow graph (CFG) and uses a rule-based heuristic to determine at which points to place a task boundary. After identifying where to put task
-boundaries, the \sys compiler transforms the imperative code into tasks,
-instrumenting protected memory accesses. 
+Ratchet~\cite{ratchet}). 
+
+\textbf{Automatic Task Generation Flow.} Transforming C code to use tasks requires identifying program points to use as task boundaries, defining a set of task functions that begin and end at those boundaries, ensuring that all existing control-flow paths are either contained within a task or are made explicit with inter-task control-flow, and identifying and instrumenting accesses to task-shared variables that need to be protected by \sys at runtime. Our simple prototype, implemented using LLVM, analyzes the control-flow graph (CFG) and uses a rule-based heuristic to determine where to place a task boundary. After identifying task boundaries placement, the \sys compiler transforms the imperative code into tasks, instrumenting protected memory accesses. 
 
 \subsection{Task Boundary Identification Analysis}
 \label{sec:compiler_analysis_pass}
 
-\sys analyzes a program to determine where to put task boundaries. 
-%
-A task is single-entry, multiple-exit part of the CFG that \sys compiler excises
-into a new function.  
-%
-There are several factors determining efficient task execution. A task decomposition should minimize the number of variables that are accessed by multiple tasks and, consequently, must be protected by \sys's paging mechanism. 
-%
-Different tasks should be approximately the same size to make reasoning about
-coalescing simple by eliminating the need to consider variable run time costs. 
-%
-To minimize task boundary overheads (e.g., commit), a task decomposition should
-maximize task size, which minimizes the frequency of task transitions.
+\sys analyzes a program to determine where to put task boundaries. A task is single-entry, multiple-exit part of the CFG that \sys compiler excises into a new function. There are several factors determining efficient task execution. A task decomposition should minimize the number of variables that are accessed by multiple tasks and, consequently, must be protected by \sys's paging mechanism. Different tasks should be approximately the same size to make reasoning about coalescing simple by eliminating the need to consider variable run time costs. To minimize task boundary overheads (e.g., commit), a task decomposition should maximize task size, which minimizes the frequency of task transitions.
 
 %\begin{enumerate}[label={\bf C\arabic*:}]
 %\item{No task should ever use up more energy than what the capacitor of the system can provide;} \TODO{We do not (cannot, actually) guarantee this, so I think we can, at best, say that this is an optimization constraint.  What do you think?}
@@ -46,16 +35,9 @@ maximize task size, which minimizes the frequency of task transitions.
 \end{figure}
 
 The task boundary identification analysis processes a standard C program (as
-shown in Figure~\ref{fig:compiler_overview}) and produces a CFG with some
-vertices marked as {\em task boundaries}. In our simple
-reference prototype, we implemented inter-procedural analysis by inlining all
-functions called.  We opted not to support recursion, which is uncommon in
-embedded code. We leave to future work better approaches to inter-procedural
-analysis and task transformation.
- 
-%
+shown in Figure~\ref{fig:compiler_overview}) and produces a CFG with some vertices marked as {\em task boundaries}. In our simple reference prototype, we implemented inter-procedural analysis by inlining all functions called. We opted not to support recursion, which is uncommon in embedded code. We leave to future work better approaches to inter-procedural analysis and task transformation.
+
 %\sys uses a cost-based task boundary placement analysis that considers per-block energy consumption estimates, inter-task variable liveness, and the cost of partitioning loops.
-%
 
 \subsubsection{Task Cost Analysis}
 
@@ -71,10 +53,10 @@ LLVM intermediate representation (IR) instructions and assigns a higher cost to
 a block with more operations, assuming that the block runs for a longer period
 of time and consumes more energy. To make the cost estimate useful, our compiler prototype estimates the maximum cost that the device's energy buffering capacitor supports. \sys does this by measuring the number of arithmetic operations that can execute without a power interruption, starting from a full capacitor. This maximum number of operations is a limit on the cost of a task---any longer task risks not executing to completion.
 
-\textbf{Live Variable Cost.} Each CFG edge is associated with a set of
-variables that {\em may} be {\em alive} across the edge, i.e., variables
+\textbf{Live Variable Cost.} Each CFG edge associates with a set of
+variables that {\em may} be {\em alive} across the edge, i.e. variables
 assigned before the edge and may be read after the edge. Variables that live
-across an edge must be protected by \sys's memory virtualization mechanism when
+across an edge must be protected by \sys's memory virtualization when
 \sys places a task boundary on the edge. \sys heuristically minimizes variable
 virtualization overhead by placing boundaries to minimize the number of
 live variables that span task boundaries.
