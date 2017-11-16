@@ -57,10 +57,10 @@ original locations of protected variables unchanged.  When a coalesced task
 completes, \sys atomically commits modified pages to their original locations
 in non-volatile memory.
 
-\textbf{\sys Task Scheduler.} The scheduler {\em coalesces}
-statically\hyp{}defined tasks into dynamic tasks sized to match the available
-energy. By default, tasks run in sequence and each task commits as it
-completes, potentially incurring unnecessary overhead for commits between
+\textbf{\sys Task Scheduler.} The scheduler
+{\em coalesces} statically\hyp{}defined tasks into dynamic tasks sized to match
+the available energy. By default, tasks run in sequence and each task commits
+as it completes, potentially incurring unnecessary overhead for commits between
 consecutive, non-failing tasks. \sys dynamically coalesces consecutive tasks by
 deferring the commit of an earlier task until the completion of a later task.
 \sys's memory management mechanism is essential for coalescing, because commits
