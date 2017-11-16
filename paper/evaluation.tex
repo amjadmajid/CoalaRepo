@@ -1,27 +1,25 @@
 %We present the experimental results of \sys's performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
 
 We evaluated \sys using a WISP\,5.1~\cite{wisp5,wisp} energy-harvesting
-platform build around a MSP430FR5969~\cite{wolverine} MCU with 64kB of FRAM.
+platform build around a MSP430FR5969~\cite{wolverine} MCU with 64\,kB of FRAM.
 We used a TI Flash Emulation Tool (FET)~\cite{fet} as a power supply during
-experiments with continuous power.  For energy measurements, we used
-EDB~\cite{edb}.  In experiments with wireless power, we powered the WISP using
+experiments with continuous power. For energy measurements, we used
+EDB~\cite{edb}. In experiments with wireless power, we powered the WISP using
 an RFID reader (Impinj R1000 with firmware version
 3.2.4.240~\cite{r1000_data_sheet}) connected to the Liard RFMAX S9028PCRJ
-8\,dBic~\cite{atlas2015}. We ccontrolled the RFID reader from a workstation
-running Ubuntu 10.4 using \emph{sllurp}~\cite{sllrp_github}.  We set the
+8\,dBic~\cite{atlas2015}. We controlled the RFID reader from a workstation
+running Ubuntu 10.4 using \emph{sllurp}~\cite{sllrp_github}. We set the
 transmitted power of the RFID reader to 30\,dBm at 915\,MHz center frequency.
 For distance-controlled experiments, we affixed the WISP at varying lengths to
-hollow paper tubes placed flat on a lying antenna. We did timing measurements
-using the Salea~\cite{saleae} logic analyzer.
+hollow paper tubes placed flat on a lying antenna. Timing measurements
+were done using the Salea~\cite{saleae} logic analyzer.
 
 For some experiments (noted below) we used an alternative setup where the
-MSP-TS430RGZ48C launchpad was used for continuous power experiments. We used
+MSP-TS430RGZ48C launchpad was used for continuous power experiments and used
 internal timer for measuring run time. For harvested energy, we used
 WISP\,5.0~\cite{wisp5,wisp} hardware and ThingMagic Astra-EX integrated RFID
-reader set at 30\,dBm transmission power at 915\,MHz.  We used EDB~\cite{edb}
-to measure run time. Applications were cross-compiled using GCC and Clang,
-allowing us to use LLVM for the \sys compiler. We used version 3.8.0 of both
-Clang and LLVM.
+reader set at 30\,dBm transmission power at 915\,MHz. We used EDB~\cite{edb}
+to measure run time. Applications were cross-compiled using GCC and Clang (both version 3.8.0), allowing us to use LLVM for the \sys compiler. 
 
 \subsection{Benchmarks and Baseline}
 \label{sec:results_software}
@@ -41,8 +39,8 @@ entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: which implements
 a Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random
 numbers, then queries the filter to recover the sequence; (iv) \textbf{rsa}:
 which encrypts a fixed string with a stored key; (v) \textbf{ar}: which
-performs nearest neighbour classification of randomly generated data modeling a
-three-axis accelerometer.  This set of benchmarks overlaps with those used
+performs nearest neighbour classification of randomly generated data modelling a
+three-axis accelerometer. This set of benchmarks overlaps with those used
 in~\cite{chain,alpaca}. We implemented several new applications: (vi)
 \textbf{sort}: selection sort algorithm on a fixed sequence of numbers, and
 (vii) \textbf{dft}: discrete Fourier transform. All applications are compared
@@ -74,11 +72,7 @@ number of source lines of code compared to Chain.
 \label{sec:results_evaluation}
 
 We evaluated \sys to show that it is easy to use and efficient across our
-benchmarks.  We evaluate \sys's ease of use by characterizing \sys's automatic
-task compiler.  We evaluate \sys efficiency by comparing its runtime
-performance to Chain.  We characterize \sys by studying how its performance
-varies due to coalescing and when using automatic task compilation versus
-manual task compilation.
+benchmarks. %We evaluate \sys's ease of use by characterizing \sys's automatic task compiler. We evaluate \sys efficiency by comparing its runtime performance to Chain. We characterize \sys by studying how its performance varies due to coalescing and when using automatic task compilation versus manual task compilation.
 
 %\begin{table}[t]
 %	\centering
