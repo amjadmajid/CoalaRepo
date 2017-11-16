@@ -9,28 +9,62 @@
 
 \textbf{\sys Programming Model.} To use \sys, a programmer first writes plain, imperative C code. The programmer then has an option to {\em manually} or {\em automatically} translate the program into code for \sys's task-based programming model. To manually translate, the programmer decomposes the program into tasks, and annotates memory accesses that manipulate data shared by multiple tasks. To automatically translate, the programmer simply uses \sys's compiler (described in Section~\ref{sec:compiler}), which decomposes a program into tasks and annotates accesses to task-shared data. After translating to task-based code and compiling, the programmer has an executable \sys binary.
 
-\sys consists of its compiler and the run time software support for its execution model and includes several lightweight programming model extensions similar to those in prior work~\cite{chain,alpaca}. Table~\ref{tab:viper_syntax} summarizes these extensions, which can be used manually by a programmer or added to a program automatically, using \sys's compiler. As in prior task-based intermittent programming models~\cite{chain,alpaca}, a \sys program is decomposed into tasks, which are functions that are not allowed to have any direct callers. The programmer identifies a task by adding the {\tt task} keyword to the function's declaration. A programmer invokes one task, {\tt t} from another task {\tt u} using {\tt next\_task(\,t\,)}, which atomically commits the state of {\tt u} and transfers control to the entry point of {\tt t}. A program has a single {\em origin} task that executes first during the program's first execution; after a power failure, in subsequent operating periods, \sys restarts from the task that was executing just before the failure.
-
-A \sys program manipulates {\em protected} state---accessed by more than one task---using the {\tt RP} and {\tt WP} operations, which read and write (respectively) a protected variable. These operations convey to \sys's runtime system which data must be protected through paging by the memory manager.   
+\sys's programming interface, listed in Table~\ref{tab:viper_syntax}, consists of
+constructs for defining tasks~\cite{chain,alpaca} and accessors for
+protected variables shared between tasks. These anotations are added either by
+the programmer (in the manual translation mode) or the compiler (in automatic
+translation mode). As in prior task-based intermittent programming
+models~\cite{chain,alpaca}, tasks are functions that are not allowed to have
+any direct callers but receive control by explicit {\tt next\_task} statements.
+In \sys, a task transition atomically commits the memory operations of the
+current task.  The programmer identifies each task by adding the {\tt task}
+keyword to the function's declaration and designates one task as the {\em
+origin} task at which execution begins. After a power failure,
+\sys restarts from the last (partially) executed task.
+%
+A \sys program manipulates {\em protected} state---accessed by more than one
+task---using the \emph{read variable} ({\tt RVAR}) and \emph{write variable}
+({\tt WVAR}) operations. These operations convey to \sys's memory manager which
+data must be buffered in volatile memory and committed.
 
 \begin{table}
 	\centering
 	\footnotesize
 	\begin{tabular}{|c|c|}
 		\hline
-		Keyword & Description\\
+		\textbf{Keyword} & \textbf{Description} \\
 		\hline\hline
-		\texttt{task foo(){...}} & Task declaration\\
-		\texttt{origin task foo(){...}} & Origin task declaration\\
-		\texttt{next\_task()} & Transition to a new task\\
-		\texttt{RVAR} & Read-protected variable\\
-		\texttt{WVAR} & Write-protected variable\\
+		\texttt{task foo() \{...\}} & Task definition\\
+		\texttt{origin task foo() \{...\}} & Origin task definition\\
+		\texttt{next\_task(t)} & Transition to task \texttt{t}\\
+		\texttt{u = RVAR(v)} & Read protected variable \texttt{v} into \texttt{u}\\
+		\texttt{WVAR(v, u)} & Write \texttt{u} to protected variable \texttt{v}\\
 		\hline
 	\end{tabular}
-	\caption{\sys's programming model extensions.}
+	\caption{\sys's programming interface.}
 	\label{tab:viper_syntax}
 \end{table}
 
-\textbf{\sys Memory Manager.} When the binary executes, \sys's runtime support affects its execution through a {\em (coalescing) task scheduler} (described in Section~\ref{sec:task_coalescing}) and {\em (virtualizing) memory manager} (described in Section~\ref{sec:memory_virtulaization}). The \sys binary executes its tasks correctly, with consistent memory state, due to \sys's virtual memory mechanism. Relying on programmer or compiler annotation of accesses to memory locations that might be shared between tasks, \sys's memory virtualization {\em pages} these data to SRAM from FRAM as they are needed. Tasks operate, accessing SRAM only, demand-paging data to accommodate a SRAM smaller than FRAM. When a task completes, \sys commits modified, paged data back to its original FRAM location atomically ensuring subsequent tasks page in correct memory state.
+\textbf{\sys Memory Manager.} At runtime \sys's \emph{virtualizing memory
+manager} (Section~\ref{sec:memory_virtulaization}) protects changes to
+non-volatile data against becoming inconsistent after a power failure.  Relying
+on annotations of accesses to protected variables, \sys's memory manager {\em
+pages} these data into volatile memory from non-volatile memory as they are
+needed.  Tasks cannot modify protected variables directly in non-volatile
+memory.  If the working set exceeds the size of volatile memory, pages are
+swapped out to non-volatile memory without committing the changes, leaving
+original locations of protected variables unchanged.  When a coalesced task
+completes, \sys atomically commits modified pages to their original locations
+in non-volatile memory.
 
-\textbf{\sys Task Scheduler.} \sys runs a lightweight task scheduler that uses {\em task coalescing} to make \sys's statically defined tasks efficiently use available energy. By default, tasks run in sequence and each task commits as it completes, potentially incurring unnecessary overhead for commits between consecutive, non-failing tasks. \sys dynamically coalesces consecutive tasks by deferring the commit of an earlier task until the completion of a later task. \sys's memory management mechanism facilitates coalescing because \sys can defer an earlier task's commit by simply buffering modified, paged data as the later task executes. After coalescing a sequence of tasks, \sys commits all tasks' updates to FRAM, together, combining tasks updates to the same pages and minimizing the commit overhead.
+\textbf{\sys Task Scheduler.} The scheduler {\em coalesces}
+statically\hyp{}defined tasks into dynamic tasks sized to match the available
+energy. By default, tasks run in sequence and each task commits as it
+completes, potentially incurring unnecessary overhead for commits between
+consecutive, non-failing tasks. \sys dynamically coalesces consecutive tasks by
+deferring the commit of an earlier task until the completion of a later task.
+\sys's memory management mechanism is essential for coalescing, because commits
+are deferred by keeping dirty pages in volatile memory across coalesced
+boundaries.  After a coalesced sequence of tasks completes, \sys commits pages
+updated by all of the tasks to non-volatile memory, reducing the commit
+overhead through batching.
