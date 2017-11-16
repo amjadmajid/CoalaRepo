@@ -1,10 +1,49 @@
-Often, energy available at the transiently-powered device is sufficient to run multiple consecutive tasks without page commit at each task boundary. This way task-based execution model can better amortize the overhead of committing updated pages when a task ends. Hence many tasks can be \emph{merged} into a single virtual task---a process we call \emph{coalescing}. 
+When incoming energy is sufficient to run multiple consecutive tasks,
+committing state after each task is wasteful. \sys mitigates this
+waste by deferring the expensive commits and performing them in a
+batch. In the resulting execution, several tasks are \emph{merged} into a
+single virtual task---a process we call \emph{coalescing}. 
+%
+When $N$ tasks are coalesced, $N-1$ boundaries are crossed and some number of
+pages are dirtied. The first $N-2$ executions of \transition statement skip
+committing dirty pages to non-volatile memory, leaving the work of committing
+pages modified by any of the $N$ tasks to the statement $N-1$.
+Coalescing is likely to reduce the total number of non-volatile memory
+accesses, because when coalesced tasks access the same pages of data, only the
+last version of the page needs to be committed.
 
-\textbf{Process of Task Coalescing.} \sys, as the first task-based execution model, dynamically coalesces consecutively executing tasks at run time. When $X$ tasks are coalesced, the $X-1$ tasks do not commit their updates to protected memory locations when reaching a \transition statement. Instead, execution immediately continues from the beginning of the $X$th task. At the end of the $X$th coalesced task, \sys commits the pages that were updated by any of the $X$ coalescing tasks. If consecutive tasks access the same pages of data, the pages accessed by both tasks only need to be committed once. \sys repeatedly executes $X-1$ coalesced tasks, followed by a committing task. 
+\textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
+arbitrary number of consecutive tasks. However, as more tasks coalesce, their
+collective commit overhead amortizes better, but the risk of wasting work also
+increases. If power fails during a long sequence of coalesced tasks, execution
+will restart from the last commit, i.e. the first task in the sequence, losing
+the progress made by any of the coalesced tasks.  The challenge to coalescing
+tasks is determining how many tasks to coalesce before committing.
+%
+%During execution, an executing task is either a {\em coalesced} task, which
+%does not commit its state before transitioning or a {\em committing} task,
+%which does commit its state before transitioning.
 
-\textbf{Coalescing Speed/Wasted Effort Trade-off.} \sys can coalesce an arbitrary number of consecutive tasks. As more tasks coalesce, their collective commit overhead amortizes better, potentially improving performance. However, as more tasks coalesce, the amount of potentially {\em wasted work} also increases. If power fails during a long sequence of coalesced tasks the lack of an intervening commit requires execution to restart from the {\em first} task in the sequence, failing to preserve the progress of any of the tasks in this long sequence. The challenge to coalescing tasks is determining how many tasks to coalesce before committing. During execution, an executing task is either a {\em coalesced} task, which does not commit its state before transitioning or a {\em committing} task, which does commit its state before transitioning.
-
-\textbf{Task Coalescing Strategies.} The simplest strategy will coalesce/de-coalesce fixed number of task at every successful/unsuccessful commit operation, where task coalescing factor increases by $C_U$ at each successful virtual task execution and decreases by $C_D$, otherwise. There are naturally infinite possible strategies for coalescing, i.e. infinite amount of $(C_U,C_D)$ pairs. The caveat of predefined $(C_U,C_D)$ pair is inability to adapt to changing energy availability conditions. A \emph{good} coalescing strategy must moderate the risk of coalescing and capitalize on its benefit by dynamically, \emph{adaptively} determining a coalescing factors $(C_U,C_D)$ that combines many tasks without suffering an excess of wasted work. Therefore we propose to consider two fundamental coalescing strategies for \sys, which we will later assess and compare experimentally:
+\textbf{Task Coalescing Strategies.} 
+A good coalescing strategy must moderate the risk of wasted work and capitalize
+on benefits of deferred commits by adapting the target size of the dynamic task
+to the energy available at runtime.
+%
+The general structure of our strategies is to increase the target task size by
+some positive delta $C_\text{up}$ after the dynamic coalesced task completes,
+and decrease it by some negative delta $C_\text{down}$ upon a reboot after a
+power failure.
+%
+The choice of $C_\text{up}$ and $C_\text{down}$, including their units, defines
+the strategy and its performance.
+%
+For example, a naive strategy that fixes $C_\text{up}$ and $C_\text{down}$ to
+``one static task``, will be very slow to react to changes in incoming energy,
+since its dynamic task size can only change by the size of one (small) static
+task per charge-discharge cycle.
+%
+Working from these observations, we propose and evaluate two coalescing
+strategies for \sys:
 
 \begin{enumerate}
 	\item \textbf{Interrupt History Coalescing (HDC):} when more tasks are coalesced without power interrupt, $C_U$ increases, and $C_D$ increases, as more task are interrupted before committing; and 
