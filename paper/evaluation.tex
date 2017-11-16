@@ -107,64 +107,29 @@ benchmarks. %We evaluate \sys's ease of use by characterizing \sys's automatic t
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coala_chain_clang}
-	\caption{Performance of \sys applications (divided manually into tasks) at fixed power (left-most bar per application) and at multiple WISP to RFID reader antenna distances, \{20, 40\}\,cm (center and right-most bar per application) compared against Chain (results are normalized).}
+	\caption{\textbf{Performance of \sys applications (divided manually into tasks) at multiple WISP to RFID reader antenna distances}: fixed power (0\,m to the antenna) and \{0.2, 0.4\}\,m (left, center and right-most bar per application, respectively), compared against Chain (results are normalized).}
 	\label{fig:runtime}
 \end{figure}
 
-We evaluate \sys's run time performance and compare the results to the run time
-performance of Chain.  We show the results in Figure~\ref{fig:runtime}. For
-each application we measured its execution time on continuous power (the first
-two bars of each group) and on intermittent power at 20cm and 40 cm from the
-RFID antenna (the second two and third two bars of each group, respectively).
-The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average.
-The results show that \sys provides 
-a performance benefit compared to Chain for most applications.  The performance benefit
-is greatest for applications that have small tasks (bc,
-sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that  
-have larger tasks (e.g. dft) or access more different pages of memory, \sys incurs
-overhead from memory virtualization that cause its performance to be comparable to
-(or in the single case of cem, worse than) Chain. 
+\textbf{\sys versus Task-based Model.} We evaluate \sys's run time performance and compare \sys to the run time performance of Chain. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time on continuous power, i.e. 0\,m RFID antenna/WISP distance (the first two bars of each group) and on intermittent power at 20\,cm and 40\,cm from the RFID antenna (the second two and third two bars of each group, respectively). The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Chain for most applications. The performance benefit is greatest for applications that have small tasks (bc, sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that have larger tasks (e.g. dft) or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or in the \emph{single} cem case, worse than) Chain. 
 
+\textbf{Coalescing Strategies.} We evaluated the impact that \sys's dynamic task coalescing had on run time performance.  Figure~\ref{fig:coalescing} shows the run time performance of \sys's coalescing, compared to \sys running without coalescing enabled with data normalized to the run time performance of \sys with coalescing.  We show data from experiments with continuous power (the first two bars in each bar
+group), and with intermittent power, with the WISP at 20\,cm and 40\,cm from the
+RFID reader (the second and third groups of two bars in each group). The data illustrate that coalescing improves \sys's performance by eliminating the overhead of committing after each task.  The performance benefit varies, providing up to 4.5x performance improvement (for cuckoo filtering, at 40cm). The cuckoo application (like other top-performers, bc and sort) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. cem, coalescing does not improve performance. The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case. 
 
-We evaluated the impact that \sys's dynamic task coalescing had on run time
-performance.  Figure~\ref{fig:coalescing} shows the run time performance of
-\sys's coalescing, compared to \sys running without coalescing enabled with
-data normalized to the run time performance of \sys with coalescing.  We show
-data from experiments with continuous power (the first two bars in each bar
-group), and with intermittent power, with the WISP at 20 cm and 40cm from the
-RFID reader (the second and third groups of two bars in each group).
-%
-The data illustrate that coalescing improves \sys's performance by eliminating
-the overhead of committing after each task.  The performance benefit varies,
-providing up to 4.5x performance improvement (for cuckoo filtering, at 40cm).
-The cuckoo application (like other top-performers, bc and sort) has small tasks
-that \sys can easily coalesce to eliminate many commits. In contrast, for some
-applications, e.g. cem, coalescing does not improve performance. The reason for
-cem's poor performance is that cem uses a large LZW dictionary structure that
-spans multiple pages, but has very little {\em locality}.  The absence of
-locality means that coalesced tasks do not access the same pages, and as a
-result, do not amortize commit overhead. The lack of locality causes
-performance to regress to be similar to the non-coalescing case. 
+%Uniformly distributed random pattern of power interrupts with an average on and off time of 15\,ms and 10\,ms respectively.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}
-	\caption{\sys coalescing performance measured per application on fixed power (left-most bar per application) and at 20 cm and 40 cm from the RFID reader (center and right-most two bars per application) compared to \sys without coalescing.}
+	\caption{\textbf{\sys coalescing strategies (`WHD' and `HD') performance per application on intermittent power compared to \sys without coalescing (`NO').} Coalescing provides benefit for all applications, while we observe little difference between `WHD' and `HD'.}
 	\label{fig:coalescing}
 \end{figure}
 
-
-\subsubsection{Evaluating \sys's Compiler}
+\subsubsection{\sys's Compiler}
 \label{sec:result_compiler_time}
-\label{sec:results_compiler}
 
-We characterized the behavior of, and evaluated the efficiency of the \sys
-compiler.  Table~\ref{table:compiler_result} shows, for each application, for
-manually written benchmarks (Man.) and automatically compiled benchmarks
-(Comp.) the difference in the number of bytes of protected data (columns 2 and
-3), the number of tasks (columns 4 and 5), the number of \sys protected data
-API access calls (columns 6 and 7), the lines of code in each application for
-\sys and Chain (columns 8 and 9), and compilation time using \sys's compiler
+We characterized the behavior and the efficiency of the \sys compiler. Table~\ref{table:compiler_result} shows, for each application, for manually written (Man.) and automatically compiled (Comp.) benchmarks the difference in the number of bytes of protected data (columns 2 and 3), the number of tasks (columns 4 and 5), the number of \sys protected data API access calls (columns 6 and 7), the lines of code in each application for \sys and Chain (columns 8 and 9), and compilation time using \sys's compiler
 (column 10). 
 
 \begin{table}[t]
