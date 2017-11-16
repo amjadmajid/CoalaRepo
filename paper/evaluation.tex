@@ -153,39 +153,13 @@ RFID reader (the second and third groups of two bars in each group). The data il
 \subsubsection{\sys Paging Performance}
 \label{sec:results_memory_management}
 
-We evaluated the effect that paging with different page sizes has on \sys's
-performance and we show data in Figure~\ref{fig:page_size}. We show two plots:
-the top plot shows the run time performance normalized to the best
-per-application performance, using pages of different sizes in \sys, indicated
-with the labels on top of each cem bar; the bottom plot shows the number of
-page faults for the same set of executions normalized to the maximum of each
-set.
-%
-We measured performance as MCU clock cycles using values read out by TI's CCS
-IDE. 
-%
-The results show a clear ``bathtub curve'' in the performance of each
-application, as the number of page faults varies. The data show that across
-application there is a page size that minimizes \emph{both} execution time.  We
-observe that the page size is not the same for each application, although 64
-byte pages perform well for all applications. The increased rate of
-page faults is responsible for the overhead with small page sizes; smaller
-pages require accessing more different pages, leading to higher paging costs.
-With larger page sizes, the overhead is higher than with moderate pages, too.
-The explanation for these higher overheads is that large pages have a higher
-commit cost. Even if an application accesses few memory locations, \sys pages
-data at full page size, degrading performance by sometimes paging in and out
-unnecessary data.  The data reveal a reasonable default page size of 64 bytes
-and when developing an application, a developer should consider varying the
-page size to moderate poor performance.
-
+We evaluated the effect that paging with different page sizes has on \sys's performance and we show data in Figure~\ref{fig:page_size}; The top plot shows the run time performance normalized to the best per-application performance, using pages of different sizes in \sys, indicated with the labels at each bar; the bottom plot shows the number of page faults for the same set of executions normalized to the maximum of each set. We measured performance as MCU clock cycles using values read out by TI's CCS IDE. The results show a clear ``bathtub curve'' in the performance of each application, as the number of page faults varies. The data show that across application there is a page size that minimizes \emph{both} execution time. We observe that the page size is not the same for each application, although 64 byte pages perform well for all applications. The increased rate of page faults is responsible for the overhead with small page sizes; smaller pages require accessing more different pages, leading to higher paging costs. With larger page sizes, the overhead is higher than with moderate pages, too. The explanation for these higher overheads is that large pages have a higher commit cost. Even if an application accesses few memory locations, \sys pages data at full page size, degrading performance by sometimes paging in and out unnecessary data. The data reveal a reasonable default page size of 64 bytes and when developing an application, a developer should consider varying the page size to moderate poor performance.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/ramPagsSizes}
 	\includegraphics[width=\columnwidth]{figures/pagefault}
-	\caption{\sys's page size affects overhead and page fault count.}
-	\label{fig:IPOSPerformance}
+	\caption{\textbf{\sys normalized runtime for various page sizes, \{32, 64, $\ldots$,1024\}\,bytes, per application (top) and respective page faults (bottom)}; X: no page faults.}
 	\label{fig:page_size}
 \end{figure}
 
