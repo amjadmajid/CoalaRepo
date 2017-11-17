@@ -31,9 +31,9 @@ Intermittent execution is different from continuous execution. A power failure c
 	\end{subfigure}
 	\begin{subfigure}[t]{\linewidth}
 		\centering \includegraphics[width=\columnwidth]{figures/crc_example_war}
-		\caption{Consecutive execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
+		\caption{Execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
     \end{subfigure}
-	\caption{Code example demonstrating effect of write after read on volatile memory checkpointing.}\label{fig:code_demo_incosistency}
+	\caption{\textbf{Code example demonstrating effect of write after read on volatile memory checkpointing.}}\label{fig:code_demo_incosistency}
 \end{figure}
 
 %\begin{figure}
@@ -71,26 +71,26 @@ There are several run time strategies to ensuring task idempotence. One approach
 		Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Reg. (requires NV main memory) \\
 		\hline
 	\end{tabular}
-	\caption{Memory consistency enforcement overheads of intermittent execution models. \emph{Reg.} includes the entire register file, \emph{PC} is the program counter, \emph{Channel data} are variables explicitly task-shared by the programmer, and \emph{WAR variables} are variables involved in WAR dependences (\emph{NV}: non-volatile).}
+	\caption{\textbf{Memory consistency enforcement overheads of intermittent execution models;} \emph{Reg.}: the entire register file, \emph{PC}: program counter, \emph{Channel data}: variables explicitly task-shared by the programmer, \emph{WAR variables}: variables involved in WAR dependences (\emph{NV}: non-volatile).}
 	\label{table:chechpoint_comparison}
 \end{table}
 
 \subsubsection{Costs of Task-based Models}
 
-Task-based models incur costs that motivate \sys.
+%Task-based models incur costs that motivate \sys.
 
 \textbf{Memory Consistency Enforcement Overhead.} Intermittent execution models incur overheads to checkpoint data~\cite{dino,ratchet,quickrecall,mementos}, manage channels~\cite{chain}, or privatize and commit data~\cite{alpaca}. Table~\ref{table:chechpoint_comparison} compares overheads for recent intermittent execution models (cf. \cite[Sec. 2.4]{alpaca}.) The mechanism responsible for overhead in each model varies, but the bulk of overhead in all models is a manipulating non-volatile memory. Checkpointing moves data to and from non-volatile memory, channel accesses manipulate non-volatile data~\cite{chain}, privatization copies from and commits to non-volatile memory~\cite{alpaca}, and idempotence solutions~\cite{ratchet} use {\em only} non-volatile memory.  
 
 \begin{figure}
 \begin{subfigure}[t]{.49\columnwidth}
 	\centering \includegraphics[width=\columnwidth]{figures/fram_write}
-	\caption{Cost of \emph{write} operation.}
+	\caption{Cost of \emph{write} operation}
 \end{subfigure}%
 \begin{subfigure}[t]{.49\columnwidth}
 	\centering \includegraphics[width=\columnwidth]{figures/fram_read}
-	\caption{Cost of \emph{read} operation.}
+	\caption{Cost of \emph{read} operation}
 \end{subfigure}
-	\caption{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write and read operation.\todo{pico jole$\rightarrow$Picojoule}{Amjad}}\label{fig:framEnergy}
+	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.}}\label{fig:framEnergy}
 \end{figure}
 
 %\begin{figure}
@@ -126,7 +126,7 @@ To understand these non-volatile memory overheads, for the MSP430FR5969~\cite{ms
 %	\label{table:capacitor}
 %\end{table}
 
-\textbf{Fixed-size Tasks are Inflexible and Inefficient.} If a programmer writes a task that consumes {\em more} energy than the device can buffer, the task will never complete using buffered energy. {\em preventing forward progress} by repeatedly re-executing. If a programmer writes tasks that consume far {\em less} energy than a device can buffer, the system may operate {\em inefficiently}. When a task and its successor both complete, the two tasks were interleaved by a task boundary that preserves progress and state (i.e., checkpoint or commit). However, absent a power failure, the work to preserve state was {\em unnecessary}, incurring overhead on the tasks' executions.
+\textbf{Fixed-size Tasks are Inflexible and Inefficient.} If a programmer writes a task that consumes {\em more} energy than the device can buffer, the task will never complete using buffered energy {\em preventing forward progress} by repeatedly re-executing. If a programmer writes tasks that consume far {\em less} energy than a device can buffer, the system may operate {\em inefficiently}. When a task and its successor both complete, the two tasks were interleaved by a task boundary that preserves progress and state (i.e., checkpoint or commit). However, absent a power failure, the work to preserve state was {\em unnecessary}, incurring overhead on the tasks' executions.
 
 Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware with a fixed energy buffering capacity. Buffer sizes from prior work vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short, task on a device with a larger buffer. The key problem is that using existing systems, the programmer statically sizes tasks for a fixed energy buffer. \sys's {\em task coalescing}, described
 in Section~\ref{sec:task_coalescing}, is motivated by these observations.
