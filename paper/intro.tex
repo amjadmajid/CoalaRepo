@@ -63,7 +63,7 @@ choose a decomposition specific to the device capacitor size. However, staticall
 %This calls for at-runtime adaptive task division of any transiently-powered
 %application---namely \emph{task virtualization}.
 
-\textbf{Task Coalescing.} To address this challenge we propose a \emph{dynamic} task decomposition, that accepts any static decomposition and opportunistically coalesces tasks at runtime when there is sufficient energy. With \emph{task coalescing} atomic tasks are merged into a single (larger) task while preserving atomicity of the merged task. If power fails while a coalesced task is running, execution will restart at the first task in the group. Figure~\ref{fig:coalescing} (bottom) illustrates how dynamic coalescing changes the earlier execution and highlights the change in memory model necessary to not break atomicity.
+\textbf{Task Coalescing.} To address this challenge we propose a \emph{dynamic} task decomposition, that accepts any static decomposition and opportunistically coalesces tasks at runtime when there is sufficient energy. With \emph{task coalescing} atomic tasks are merged into a single (larger) task while preserving atomicity of the merged task. If power fails while a coalesced task is running, execution will restart at the first task in the group. Figure~\ref{fig:coalesce} (bottom) illustrates how dynamic coalescing changes the earlier execution and highlights the change in memory model necessary to not break atomicity.
 
 Unfortunately, naively merging two atomic tasks might produce a non-atomic task, that may leave memory inconsistent after a partial execution. A merge breaks atomicity when the accesses to non-volatile memory from the previously atomic merged tasks form a \emph{write-after-read (WAR)} dependency.
 %
@@ -132,7 +132,7 @@ performance on conservative task decompositions missed by systems with static de
 %
 %and can flexibly target a variety of platforms without rewriting code.
 %
-\todo{Provide concrete numeric results supporting this claim}{Amjad/Przemek}
+%\todo{Provide concrete numeric results supporting this claim}{Amjad/Przemek}
 
 %In this work we also address the problem of task construction burden imposed on the programmer. That is, we introduce \sys's compiler that transforms arbitrary C code into a graph of tasks that reflects the original program's control- and data-flow constraints. The compiler identifies data shared by multiple of the newly created tasks and instruments reads and writes of those data so that \sys's memory virtualization mechanism keeps those data consistent. While \sys's complier is still \emph{limited in scope}, e.g. is unable to handle instruction jumps, normalized loops and recursions, it already eliminates the labour-intensive process of writing tasks~\cite{chain,alpaca}, i.e., hours of programmer time.
 
