@@ -65,7 +65,7 @@ choose a decomposition specific to the device capacitor size. However, staticall
 
 \textbf{Task Coalescing.} To address this challenge we propose a \emph{dynamic} task decomposition, that accepts any static decomposition and opportunistically coalesces tasks at runtime when there is sufficient energy. With \emph{task coalescing} atomic tasks are merged into a single (larger) task while preserving atomicity of the merged task. If power fails while a coalesced task is running, execution will restart at the first task in the group. Figure~\ref{fig:coalesce} (bottom) illustrates how dynamic coalescing changes the earlier execution and highlights the change in memory model necessary to not break atomicity.
 
-Unfortunately, naively merging two atomic tasks might produce a non-atomic task, that may leave memory inconsistent after a partial execution. A merge breaks atomicity when the accesses to non-volatile memory from the previously atomic merged tasks form a \emph{write-after-read (WAR)} dependency.
+Unfortunately, naively merging two atomic tasks might produce a non-atomic task, that may leave non-volatile memory inconsistent after a partial execution. A merge breaks atomicity when atomic merged tasks form a \emph{write-after-read (WAR)} dependency---for instance if two tasks \texttt{\{x++\}; \{vector[x]=v;\}} are merged and if the power failure occurs after \texttt{x++}, the value \texttt{x} will be increased twice when the merged task is restarted, that leads to an inconsistency.
 %
 %variables in non-volatile memory at \emph{run-time} that can
 %break the atomicity of the \emph{virtual task}. Consider the
@@ -106,7 +106,7 @@ applications to an intermittent platform with a moderate effort.
 % contributions:
 % >>>>>>> 96e5d9f9b4e97ce8700c375bd8e11708870f5aba
 % =======
-\textbf{Contributions.} We develop \sys\footnote{To be released at \url{http://anonymized.link}}: a task coalescing system for task-based programming models on intermittently-powered devices. The capabilities required for effective coalescing mark our contributions:
+\textbf{Contributions.} We develop \sys\footnote{To be released at \url{http://anonymized.link}}: the first task coalescing system for task-based programming models on intermittently-powered devices. The capabilities required for effective coalescing mark our contributions:
 % >>>>>>> 84d7711b6c6f6424cdad97efc8aad96e52f316ff
 
 \begin{itemize}
