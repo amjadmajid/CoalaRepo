@@ -16,11 +16,10 @@ the programmer (in the manual translation mode) or the compiler (in automatic
 translation mode). As in prior task-based intermittent programming
 models~\cite{chain,alpaca}, tasks are functions that are not allowed to have
 any direct callers but receive control by explicit {\tt next\_task} statements.
-In \sys, a task transition atomically commits the memory operations of the
-current task. The programmer identifies each task by adding the {\tt task}
+In \sys, a task transition does not atomically commit the memory operations of the current task---commit is deferred until the boundary of the coalesced task is reached. The programmer identifies each task by adding the {\tt task}
 keyword to the function's declaration and designates one task as the {\em
 origin} task at which execution begins. After a power failure,
-\sys restarts from the last (partially) executed task.
+\sys restarts from the last (partially) executed coalesced task.
 %
 A \sys program manipulates {\em protected} state---accessed by more than one
 task---using the \emph{read variable} ({\tt RVAR}) and \emph{write variable}
