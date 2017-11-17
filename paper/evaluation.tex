@@ -104,20 +104,9 @@ benchmarks. %We evaluate \sys's ease of use by characterizing \sys's automatic t
 \subsubsection{\sys Runtime Performance}
 \label{sec:result_coalescing}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/coala_chain_clang}
-	\caption{\textbf{Performance of \sys applications (divided manually into tasks) at multiple WISP to RFID reader antenna distances}: fixed power (0\,m to the antenna) and \{0.2, 0.4\}\,m (left, center and right-most bar per application, respectively), compared against Chain (results are normalized).}
-	\label{fig:runtime}
-\end{figure}
+\textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time performance of both \sys's coalescing, compared to \sys running without coalescing enabled with data normalized to the run time performance of \sys with coalescing\todo{which one: WHD, or HD?}{Amjad}. We show data from experiments with intermittent power, where intermittency was generated in software \todo{Say briefly how we generate full reset with MSP430}{Amjad} by creating uniformly distributed random pattern of power interrupts with an average power availability and unavailability time of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. 
 
-\textbf{\sys versus Task-based Model.} We evaluate \sys's run time performance and compare \sys to the run time performance of Chain. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time on continuous power, i.e. 0\,m RFID antenna/WISP distance (the first two bars of each group) and on intermittent power at 20\,cm and 40\,cm from the RFID antenna (the second two and third two bars of each group, respectively). The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Chain for most applications. The performance benefit is greatest for applications that have small tasks (bc, sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that have larger tasks (e.g. dft) or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or in the \emph{single} cem case, worse than) Chain. 
-
-\textbf{Coalescing Strategies.} We evaluated the impact that \sys's dynamic task coalescing had on run time performance.  Figure~\ref{fig:coalescing} shows the run time performance of \sys's coalescing, compared to \sys running without coalescing enabled with data normalized to the run time performance of \sys with coalescing.  We show data from experiments with continuous power (the first two bars in each bar
-group), and with intermittent power, with the WISP at 20\,cm and 40\,cm from the
-RFID reader (the second and third groups of two bars in each group). The data illustrate that coalescing improves \sys's performance by eliminating the overhead of committing after each task.  The performance benefit varies, providing up to 4.5x performance improvement (for cuckoo filtering, at 40cm). The cuckoo application (like other top-performers, bc and sort) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. cem, coalescing does not improve performance. The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case. 
-
-%Uniformly distributed random pattern of power interrupts with an average on and off time of 15\,ms and 10\,ms respectively.
+While we see the benefit from coalescing for all applications (except for dft \todo{why coalescing for dft does not work but in Fig. 9 does?}{Amjad}), the runtime difference between WHD and HD strategies is actually small \todo{say why this difference is small}{Amjad}. For this reason we shall proceed with HD coalescing strategy in subsequent evaluations. 
 
 \begin{figure}
 	\centering
@@ -125,6 +114,17 @@ RFID reader (the second and third groups of two bars in each group). The data il
 	\caption{\textbf{\sys coalescing strategies (`WHD' and `HD') performance per application on intermittent power compared to \sys without coalescing (`NO').} Coalescing provides benefit for all applications, while we observe little difference between `WHD' and `HD'.}
 	\label{fig:coalescing}
 \end{figure}
+
+\textbf{\sys versus Task-based Model.} We evaluate \sys's run time performance and compare \sys to the run time performance of Chain. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provision with RFID reader for continuous power, i.e. 0\,m RFID antenna/WISP distance (the first two bars of each group) and on intermittent power at 20\,cm and 40\,cm from the RFID antenna (the second two and third two bars of each group, respectively). The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Chain for most applications. The performance benefit is greatest for applications that have small tasks (bc, sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that have larger tasks (e.g. dft) or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or in the \emph{single} cem case, worse than) Chain. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coala_chain_clang}
+	\caption{\textbf{Performance of \sys applications (divided manually into tasks) at multiple WISP to RFID reader antenna distances}: fixed power (0\,m to the antenna) and \{0.2, 0.4\}\,m (left, center and right-most bar per application, respectively), compared against Chain (results normalized).}
+	\label{fig:runtime}
+\end{figure}
+
+The data also illustrate that coalescing improves \sys's performance by eliminating the overhead of committing after each task. The performance benefit varies, providing up to 4.5x performance improvement. The cuckoo application (like other top-performers, bc and sort) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. cem, coalescing does not improve performance. The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case. 
 
 %\begin{table}
 %	\centering
