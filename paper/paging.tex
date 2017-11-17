@@ -54,7 +54,7 @@ similar except for an assignment instead of the return.
 
 %How an $a$-bit memory address decomposes into a tag and an offset depends on the number (and size) of each page of protected memory. To address {\tt p} pages of size {\tt s}, a tag comprises $log(p)$ bits, the offset comprises $log(s)$ bits and $log(p) + log(s) = a$. For example, in a 16-bit address space (i.e., 16\,kB of protected memory) with 512 pages of 128 bytes each, a page's tag is the high-order nine bits of the address and a byte's page offset is the remaining 7 bits.
 
-\begin{algorithm}
+\begin{algorithm}[t]
 	\caption{\texttt{RVAR}(variable $v$)}
 	\label{algo:rwar}
 	\scriptsize
