@@ -105,7 +105,7 @@ the variable's page offset (Lines 5-6).
 		\State $\texttt{\underline{shadow}}[t_\text{victim}] \xleftarrow{\text{DMA}} \texttt{working}[i_\text{victim}]$
             \Comment{Swap out the page}
         \If {$t_\text{victim} \not\in \texttt{\underline{shadowList}}$} \Comment{Keep track as list for quick traversal}
-            \State $\texttt{\underline{shadowList}}[\texttt{numUncommited++}] \gets t_\text{victim}$
+            \State $\texttt{\underline{shadowList}}[\texttt{numShadowed++}] \gets t_\text{victim}$
         \EndIf
 		\EndIf
 		\If {\Call{IsValid}{\underline{shadow}[$t$]}} \Comment{Had the page been swapped out earlier?}
@@ -208,17 +208,17 @@ clearing the bit.
                 \State $t \gets \Call{Tag}{\texttt{working}[i]}$
                 \State $\texttt{\underline{shadow}}[\Call{Tag}{\texttt{working}[i]}] \xleftarrow{\text{DMA}} \texttt{working}[i]$
                 \State $\texttt{\underline{shadowList}}[\texttt{\underline{numShadowed}}] \gets t$
-                \State $\texttt{\underline{numUncommited}} \gets \texttt{\underline{numUncommited}} + 1$
+                \State $\texttt{\underline{numShadowed}} \gets \texttt{\underline{numShadowed}} + 1$
             \EndFor
             \State \Call{CommitPhase2}{}
         \EndProcedure
         \Procedure{CommitPhase2}{}
             \State $\texttt{\underline{committing}} \gets \textbf{true}$
-            \While{\texttt{\underline{numUncommited}} > 0}
-                \State $t \gets \texttt{\underline{shadowList}}[\texttt{\underline{numUncommited}} - 1]$
+            \While{\texttt{\underline{numShadowed}} > 0}
+                \State $t \gets \texttt{\underline{shadowList}}[\texttt{\underline{numShadowed}} - 1]$
                 \State $\texttt{\underline{store}}[t] \xleftarrow{\text{DMA}} \texttt{\underline{shadow}}[t]$
                 \State $\texttt{\underline{shadow}}[t] \gets \textbf{nil}$ \Comment{Clear entry for page fault handler}
-                \State $\texttt{\underline{numUncommited}} \gets \texttt{\underline{numUncommited}} - 1 $
+                \State $\texttt{\underline{numShadowed}} \gets \texttt{\underline{numShadowed}} - 1 $
             \EndWhile
             \State $\texttt{\underline{committing}} \gets \textbf{false}$
         \EndProcedure
