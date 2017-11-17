@@ -64,6 +64,9 @@
 % \setlength{\subsectionaboveskip}{4pt plus 1pt minus 1pt}
 % \setlength{\paragraphaboveskip}{2pt plus 1pt minus 1pt}
 
+\algnewcommand{\LeftComment}[2][.5\linewidth]{%
+  \leavevmode\makebox[#1][l]{$\triangleright$~#2}\hfill}
+
 % Tighter than defaults:
 \setlength{\sectionbelowskip}{1pt}
 \setlength{\sectionaboveskip}{5pt plus 1.5pt minus 1.5pt}
