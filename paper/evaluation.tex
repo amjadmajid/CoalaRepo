@@ -104,14 +104,29 @@ benchmarks. %We evaluate \sys's ease of use by characterizing \sys's automatic t
 \subsubsection{\sys Runtime Performance}
 \label{sec:result_coalescing}
 
-\textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time performance of both \sys's coalescing, compared to \sys running without coalescing enabled with data normalized to the run time performance of \sys with coalescing\todo{which one: WHD, or HD?}{Amjad}. We show data from experiments with intermittent power, where intermittency was generated in software \todo{Say briefly how we generate full reset with MSP430}{Amjad} by creating uniformly distributed random pattern of power interrupts with an average power availability and unavailability time of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. 
-
-While we see the benefit from coalescing for all applications (except for dft \todo{why coalescing for dft does not work but in Fig. 9 does?}{Amjad}), the runtime difference between WHD and HD strategies is actually small \todo{say why this difference is small}{Amjad}. For this reason we shall proceed with HD coalescing strategy in subsequent evaluations. 
+\textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time
+of \sys's two coalescing strategies normalized to the run time without
+coalescing. We show data from experiments with intermittent power, where intermittency was generated in software
+%\todo{Say briefly how we generate full reset with MSP430}{Amjad}
+by triggering a reset from software at intervals that were uniformly distributed with an average power availability and unavailability interval of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. 
+%
+The results show the benefit from coalescing for most applications, with the
+exception of dft, where wasted work dominated the gains from coalescing.
+ %\todo{why coalescing for dft does not work but in Fig. 9 does?}{Amjad}
+The difference in performance between HC and TSHC strategies is highly
+application-dependent, with some applications benefiting from size awareness
+while others suffering, due to decisions based on inaccurate prediction of the
+actual task energy consumption.
+The TSHC gains are particularly small (or negative) for applications with
+narrower range of task sizes in Figure~\ref{fig:task_profiling}.
+%\todo{say why this difference is small}{Amjad}.
+%For this reason we shall proceed with HD coalescing strategy in subsequent evaluations. 
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}
-	\caption{\textbf{\sys coalescing strategies (`WHD' and `HD') performance per application on intermittent power compared to \sys without coalescing (`NO').} Coalescing provides benefit for all applications, while we observe little difference between `WHD' and `HD'. \todo{Change WHD to TSHC and HD to HC}{Amjad}}
+	\caption{\textbf{\sys coalescing strategies performance per application on intermittent power compared to \sys without coalescing (`NO').}}
+%\todo{Change WHD to TSHC and HD to HC}{Amjad}}
 	\label{fig:coalescing}
 \end{figure}
 
@@ -159,7 +174,8 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 	\centering
 	\includegraphics[width=\columnwidth]{figures/ramPagsSizes}
 	\includegraphics[width=\columnwidth]{figures/pagefault}
-	\caption{\textbf{\sys normalized runtime for various page sizes, \{32, 64, $\ldots$,1024\}\,bytes, per application (top) and respective page faults (bottom)}; X: no page faults. \todo{change X to 0, remove the definition of X from caption}{Amjad}}
+	\caption{\textbf{\sys normalized runtime for various page sizes, \{32, 64, $\ldots$,1024\}\,bytes, per application (top) and respective page faults (bottom)}; X = zero page faults.}
+%\todo{change X to 0, remove the definition of X from caption}{Amjad}}
 	\label{fig:page_size}
 \end{figure}
 
