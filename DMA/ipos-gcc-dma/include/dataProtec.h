@@ -21,49 +21,25 @@
  */
 
 
-uint8_t* __return_addr(uint8_t* var) ;
-uint8_t* __return_addr_wr(uint8_t* var) ;
-uint8_t* __return_addr_no_check(unsigned int* var) ;
-uint8_t* __return_addr_wr_no_check(unsigned int* var) ;
-void __sendPagTemp(unsigned int pagTag);
-void __bringPagTemp(unsigned int pagTag);
-void __bringPagROM(unsigned int pagTag);
-void __sendPagROM(unsigned int pagTag);
-unsigned int __pageSwap(unsigned int * varAddr);
-void __pagesSwap(unsigned int * CurnPag, unsigned int * varAddr);
-void __bringPersisCrntPag(unsigned int curntPag);
+
+uint8_t* __return_addr_no_check(uint8_t*var) ;
+uint8_t* __return_addr_wr_no_check(uint8_t* var) ;
+void __sendPagTemp(unsigned int from, unsigned int to);
+void __movPag(unsigned int from, unsigned int to);
+void __pageSwap(uint8_t * varAddr, uint8_t * dirtyPag, unsigned int *curtPagHdr, unsigned int ramPagsBuf  );
+
+
 void __pagsCommit();
-void __bringCrntPagROM();
 
 // Memory access interface
 
-#define DIRTY_PAGE  0      // make it 0 to commit only the dirty pages [This macro does not work with P() ]
+#define CLR_DIRTY_PAGE  0
 
-#define __VAR_ADDR(var)                 ((unsigned int) (&(var)) )
+//#define __VAR_ADDR(var)                 ((unsigned int) (&(var)) )
 
-#define __IS_VAR_IN_CRNT_PAG(var)       ( ( __VAR_ADDR(var)  >= CrntPagHeader ) && \
-                                        ( __VAR_ADDR(var)  <  (CrntPagHeader+PAG_SIZE) ))
+#define __IS_VAR_IN_CRNT_PAG(var, ramPagsBuf)       ( ( ((unsigned int)var)  >= ramPagsBuf.crntPagHdr ) && ( ((unsigned int)var)   <  (ramPagsBuf.crntPagHdr+PAG_SIZE) ))
 
-#define __VAR_PT_IN_RAM(var)            (  (__typeof__(var)*) (  (__VAR_ADDR(var) - CrntPagHeader) + RAM_PAG )  )
-
-
-//#define WVAR(var, val)   if( __IS_VAR_IN_CRNT_PAG(var) )\
-//                                { \
-//                                    *__VAR_PT_IN_RAM(var) = val ;\
-//                                }\
-//                                else{\
-//                                    __pageSwap(&(var)) ;\
-//                                    * __VAR_PT_IN_RAM(var) = val;\
-//                                    }\
-//                                    dirtyPag = 1;
-//
-//#define __RP(var)   (\
-//                        (  __IS_VAR_IN_CRNT_PAG(var) ) ? \
-//                        ( __VAR_PT_IN_RAM(var) ):\
-//                        ( (  (__typeof__(var)*) ( (( __pageSwap(&(var)) +  __VAR_ADDR(var) ) - CrntPagHeader)  + RAM_PAG  )  )  )\
-//                    )
-//
-//#define RVAR(var)   ( * __RP(var))
+#define __VAR_PT_IN_RAM_PG(var, ramPagsBuf)     (  (__typeof__(var)*) (  (((unsigned int)var) - ramPagsBuf.crntPagHdr) + ramPagsBuf.ramPagAddr )  )
 
 
 #define __PP(wvar, rvar)  __temp_temp = RP(rvar) ; \

@@ -100,7 +100,7 @@ plt.ylabel('Seconds')
 num_bars = len(data)
 # hatches = ['+', '/']
 colors = ['#edf8b1', '#7fcdbb']
-labels = ["VIPER", "Chain"]
+labels = ["IPE", "Chain"]
 
 gap = 0.1                         # space each bars group 0.1 from the next group
 bar_width = (1- gap) / num_bars   # divide the remaining distance equally between the bars          
@@ -142,7 +142,7 @@ for i, row in enumerate(data):    # enumerate returns a data unit (a row) and it
 
 plt.legend(loc='upper left')
 # plt.ylim(0,3.2) 
-f.savefig("../figures/viperChain.eps",format="eps", dpi=1200)
+f.savefig("../figures/ipeChain.eps",format="eps", dpi=1200)
 plt.show()
 
 

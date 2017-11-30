@@ -80,7 +80,7 @@ void init()
     P3OUT &=~BIT5;
     P3DIR |=BIT5;
 
-#if 0
+#if 1
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
     //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
     CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
@@ -98,7 +98,7 @@ void init()
 #endif
 
 #ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+    mr_auto_rand_reseter(25000); // every 12 msec the MCU will be reseted
 #endif
 
 }
@@ -414,6 +414,7 @@ void decrypt_print()
         P3OUT &=~BIT5;
     }
     protect=0;
+    PAGCMT();
 
     __enable_interrupt();
 

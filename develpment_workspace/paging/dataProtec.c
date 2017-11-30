@@ -16,8 +16,8 @@
 unsigned int __pagsInTemp[NUM_PAG] = {0};
 __nv unsigned int __persis_pagsInTemp[NUM_PAG] = {0};
 
-unsigned int CrntPagHeader = BIGEN_ROM;
-__nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
+unsigned int CrntPagHeader = BGN_ROM;
+__nv unsigned int __persis_CrntPagHeader = BGN_ROM;
 __nv uint8_t pageCommit = 0;
 
 uint16_t dirtyPag=0;
@@ -61,7 +61,7 @@ void __sendPagTemp(unsigned int pagHeader)
 
 
     // Find the page index
-    unsigned int pageGuess = pagHeader - BIGEN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
+    unsigned int pageGuess = pagHeader - BGN_ROM ; // possible values are 0, 0x400, 0x800, 0xc00 ...
     uint8_t idx=0;
     unsigned int __pageSizes = PAG_SIZE;
     while( pageGuess >= __pageSizes )
@@ -139,7 +139,7 @@ unsigned int __pageSwap(unsigned int * varAddr)
     //2// Find the requested page 
     unsigned int ReqPagTag;
     unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
-    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+    unsigned int __temp_pagSize = BGN_ROM+PAG_SIZE ; // the upper limit of the first page
     // TODO we are not checking if the var is not in any page !
     uint8_t idx=0;
     while( ! (ReqPagTag_dirty <= __temp_pagSize) )  // if the var is not with the page
@@ -209,7 +209,7 @@ unsigned int __pageSwap_w(unsigned int * varAddr)
     //2// Find the requested page
     unsigned int ReqPagTag;
     unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
-    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+    unsigned int __temp_pagSize = BGN_ROM+PAG_SIZE ; // the upper limit of the first page
     // TODO we are not checking if the var is not in any page !
     unsigned char idx=0;
 

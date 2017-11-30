@@ -35,7 +35,7 @@ def figureSetting():
 
     #set size of markers, e.g., circles representing points
     #set numpoints for legend
-    plt.rcParams['legend.numpoints'] = 1
+    # plt.rcParams['legend.numpoints'] = 1
 
 
 chain_cont   = [0.355809,    0.091599,    1.651908,   5.771600664062499  , 0.309126,    0.278821,    0.600697]
@@ -60,7 +60,7 @@ data = [ np.transpose([chain_cont, coal_cont]),
 # print(data)
 # exit()         
 
-f = plt.figure(figsize=(8,2.6))
+f = plt.figure(figsize=(8,2.5))
 figureSetting()    
 
 s=0
@@ -72,11 +72,21 @@ for i in range(1,8):
     # print(np.arange(6) + s)
     # exit()
 
-    [us, co, _,__,___,____]= plt.bar( np.arange(6) + s, data , 
+    [us, co, _,__,___,____]= plt.bar( np.arange(6)+0.5 + s, data , 
             width=1, 
             color=['#addd8e','#31a354', '#addd8e','#31a354', '#addd8e','#31a354'], 
              linewidth=0.5)
     s+=6.5
+
+# add text at the bottom of the bars 
+
+pos=np.array([1,3,5])-0.3
+lbl = ['0m', '.2m','.4m' ]
+d=0
+for h in range(7):
+    for i in range( 3 ):
+        plt.text( pos[i]+d , 0.1 , lbl[i] , fontsize=9, color='#404040', rotation=90, verticalalignment='bottom')
+    d+=6.5
 
 plt.legend([us, co], ["Coala", "Chain"], loc='upper left')
 
@@ -86,7 +96,7 @@ ax.xaxis.set_major_formatter(ticker.FixedFormatter( apps ))
 
 
 # exit()
-plt.yticks([1,2,3])
+plt.yticks([1,2,3,4])
 plt.xlim(0,45)
 plt.ylabel("Norm. runtime")
 plt.tight_layout()

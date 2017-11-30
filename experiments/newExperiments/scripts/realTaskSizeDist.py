@@ -56,7 +56,8 @@ def main():
 	f = plt.figure("Apps distributions", figsize=(8,3))
 	ax = plt.axes()
 	ax.set_xscale('log')
-	for app in apps_names :
+	# linSty = ['b--', 'r:', 'g.', 'b:', "m-", ',', '>']
+	for i, app in enumerate(apps_names) :
 		c = generateRandomColor()
 		# if not normPlotting( apps_dict[app], c  ): 
 		# 	print(apps)

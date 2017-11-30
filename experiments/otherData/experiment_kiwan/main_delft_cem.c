@@ -101,7 +101,7 @@ void task_init_dict()
 {
 	LOG("init dict: letter %u\r\n", P(_v_letter));
 
-	int i = P(_v_letter);	
+	uint16_t i = P(_v_letter);	
 	PW(_v_dict[i].letter) = P(_v_letter); 
 	PW(_v_dict[i].sibling) = NIL; 
 	PW(_v_dict[i].child) = NIL; 

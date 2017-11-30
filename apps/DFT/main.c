@@ -252,7 +252,7 @@ void init()
     P3OUT &= ~BIT5;
     P3DIR |=BIT5;
 
-#if 0
+#if 1
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
     CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
@@ -270,7 +270,7 @@ void init()
 #endif
 
 #ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+    mr_auto_rand_reseter(50000); // every 12 msec the MCU will be reseted
 #endif
 
 }
@@ -303,12 +303,12 @@ int main(void) {
     // uart_sendText("Start\n\r", 7);
 
 
-       taskId tasks[] = {  {discTimeSign,1},
-                           {dft_outer_loop,2},
-                           {dft_real,3 },
-                           {dft_im, 4},
-                           {dft_power, 5},
-                           {dft_end,6}
+       taskId tasks[] = {  {discTimeSign,1, 4},
+                           {dft_outer_loop,2, 1},
+                           {dft_real,3, 5 },
+                           {dft_im, 4, 5},
+                           {dft_power, 5, 1},
+                           {dft_end,6, 2}
        };
        //This function should be called only once
        os_addTasks(6, tasks );

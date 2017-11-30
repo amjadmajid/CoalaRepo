@@ -1,51 +1,34 @@
-
-
 #include "dataProtec.h"
-/*####################################
-              Paging
-#####################################*/
+#include "contFlags.h"
+//#include <mspDebugger.h>
 
-     volatile uint8_t dirtyPag = DIRTY_PAGE;
      uint32_t __temp_temp=0;
      // TODO THIS ARRAY CONSUME TOO MUCH OF THE SRAM
-     unsigned int __pagsInTemp[NUM_PAG] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
-__nv unsigned int __persis_pagsInTemp[NUM_PAG ] = {0};
+     unsigned int __pagsInTemp[NUM_PRS_PAGS] = {0};  // This can be pretty big and consume large section of the SRAM, therefore I shift it to FRAM
+__nv unsigned int __persis_pagsInTemp[NUM_PRS_PAGS] = {0};
 
-     unsigned int CrntPagHeader = BIGEN_ROM;
-__nv unsigned int __persis_CrntPagHeader = BIGEN_ROM;
+
+    volatile unsigned int swapIndex = 0;
+    ramPagMeta ramPagsBuf[RAM_BUF_LEN] = {{BGN_RAM , CLR_DIRTY_PAGE,  BGN_ROM }, 0};
+//__nv unsigned int __prs_crntPagHdr = BGN_ROM;
 
 __nv unsigned int __pageFaultCounter = 0;
+__nv unsigned int __fullpageFaultCounter = 0;
+__nv unsigned int __cntr=0;   // to enable incremental commit
 
-/*
- * Bring a page to its ROM buffer
- */
-// void __bringCrntPagROM()
-// {
-//     // Configure DMA channel 1
-//     __data16_write_addr((unsigned short) &DMA0SA,(unsigned long) ( __persis_CrntPagHeader) );
-//                                             // Source block address
-//     __data16_write_addr((unsigned short) &DMA0DA,(unsigned long) RAM_PAG );
-//                                             // Destination single address
-//     DMA0SZ = PAG_SIZE_W;                            // Block size
-//     DMA0CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
-//     DMA0CTL |= DMAEN;                         // Enable DMA0
-
-//     DMA0CTL |= DMAREQ;                      // Trigger block transfer
-
-//     CrntPagHeader = __persis_CrntPagHeader; // update the volatile current page header
-// }
-
-
-
-/*
- * Bring a page to its ROM buffer
- */
-void __bringPagROM(unsigned int pagHeader)
+void __movPag(unsigned int from, unsigned int to)
 {
     // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (pagHeader) );
+
+//      uart_sendStr("__movPag: \0");
+//      uart_sendHex16(from);
+//      uart_sendStr(" \0");
+//      uart_sendHex16(to);
+//      uart_sendStr("\n\r \0");
+
+    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (from) );
                                             // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) RAM_PAG );
+    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) (to) );
                                             // Destination single address
     DMA1SZ = PAG_SIZE_W;                            // Block size
     DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
@@ -54,118 +37,72 @@ void __bringPagROM(unsigned int pagHeader)
     DMA1CTL |= DMAREQ;                      // Trigger block transfer
 }
 
-/*
- * Send a page to its final locaiton
- */
-void __sendPagROM(unsigned int pagHeader)
+//uint16_t __d_from=0;
+//uint16_t __d_to=0;
+
+void __sendPagTemp(unsigned int from, unsigned int to)
 {
-    // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA2SA,(unsigned long) pagHeader + APP_MEM);
-                                            // Source block address
-    __data16_write_addr((unsigned short) &DMA2DA,(unsigned long)  pagHeader );
-                                            // Destination single address
-    DMA2SZ = PAG_SIZE_W;                            // Block size
-    DMA2CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
-    DMA2CTL |= DMAEN;                         // Enable DMA0
 
-    DMA2CTL |= DMAREQ;                      // Trigger block transfer
-}
+    //    __d_from = from;
+//    __d_to= to;
 
-
-/*
- * Bring a page to its temp buffer
- */
-void __bringPagTemp(unsigned int pagHeader)
-{
-    // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) (pagHeader + APP_MEM) );
-                                            // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long)  RAM_PAG );
-                                            // Destination single address
-    DMA1SZ = PAG_SIZE_W;                            // Block size
-    DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
-    DMA1CTL |= DMAEN;                         // Enable DMA0
-
-    DMA1CTL |= DMAREQ;                      // Trigger block transfer
-}
+      // uart_sendStr("sendPagTemp: \0");
+      // uart_sendHex16(__d_from);
+      // uart_sendStr(" \0");
+      // uart_sendHex16(__d_to);
+      // uart_sendStr("\n\r \0");
 
 
 
-/*
- * Send a page to its temp buffer
- */
-void __sendPagTemp(unsigned int pagHeader)
-{
-    // Configure DMA channel 1
-    __data16_write_addr((unsigned short) &DMA1SA,(unsigned long) RAM_PAG);
-                                            // Source block address
-    __data16_write_addr((unsigned short) &DMA1DA,(unsigned long) pagHeader + APP_MEM );
-                                            // Destination single address
-    DMA1SZ = PAG_SIZE_W;                            // Block size
-    DMA1CTL = DMADT_5 | DMASRCINCR_3 | DMADSTINCR_3; // Rpt, inc
-    DMA1CTL |= DMAEN;                         // Enable DMA0
+    __movPag(from,(to+APP_MEM));
 
-    DMA1CTL |= DMAREQ;                      // Trigger block transfer
-
-
-
-
-    unsigned char idx=0;
+    unsigned int idx=0;
     while(__pagsInTemp[idx] !=0 )
     {
-        if(pagHeader == __pagsInTemp[idx] )
+        if(to == __pagsInTemp[idx] )
         {
             break;
         }
         idx++;
     }
     // Keep track of the buffered pages
-    __pagsInTemp[ idx ] = pagHeader;
+    __pagsInTemp[ idx ] = to;
 
-
-
-//    while( pageGuess >= __pageSizes )
-//    {
-//        idx++;
-//        __pageSizes +=   PAG_SIZE;               // move to next page
-//    }
-//
-//    // Keep track of the buffered pages
-//    __pagsInTemp[ idx ] = pagHeader;
-//__no_operation();
 }
 
+/*####################################
+          Pages Swap
+#####################################*/
 
-/*
- * pageSwap:
- */
-//TODO this function does not
-unsigned int __pageSwap(unsigned int * varAddr)
+void __pageSwap(uint8_t * varAddr, uint8_t * dirtyPag, unsigned int *curtPagHdr, unsigned int ramPag  )
 {
-#if !DIRTY_PAGE
+#if PAG_FAULT_CNTR
     __pageFaultCounter++;
+    if(* dirtyPag)
+      __fullpageFaultCounter++;
 #endif
+
+    // uart_sendStr("pageSwap: \n\r\0");
 
     //2// Find the requested page
     unsigned int ReqPagTag;
     unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
-    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
+    unsigned int __temp_pagSize = BGN_ROM+PAG_SIZE ; // the upper limit of the first page
     // TODO we are not checking if the var is not in any page !
-    unsigned char idx=0;
+    unsigned int idx=0;
 
     // Search the page in the buffer
     while( (ReqPagTag = __pagsInTemp[idx]) != 0)
     {
         if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
                 {
-                    if(dirtyPag)
+                    if(*dirtyPag)
                     {
-                        __pageFaultCounter++;
-                        __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
-                        dirtyPag=DIRTY_PAGE;
+                        __sendPagTemp( ramPag, *curtPagHdr  );  // check the buffer before inserting to it
+                        *dirtyPag=CLR_DIRTY_PAGE;
                     }
                     // we found the page
-                    __bringPagTemp( ReqPagTag );
+                    __movPag( (ReqPagTag+ APP_MEM), ramPag );
 
                     goto PAG_IN_TEMP;
                 }
@@ -181,175 +118,19 @@ unsigned int __pageSwap(unsigned int * varAddr)
 
     ReqPagTag = __temp_pagSize-PAG_SIZE;
 
-    if(dirtyPag)
+    if(*dirtyPag)
     {
-        __pageFaultCounter++;
-        __sendPagTemp( CrntPagHeader );
-        dirtyPag=DIRTY_PAGE;
+        __sendPagTemp( ramPag, *curtPagHdr  );
+        *dirtyPag=CLR_DIRTY_PAGE;
     }
-    __bringPagROM(ReqPagTag);
+    __movPag(ReqPagTag, ramPag); // bring a page from ROM to RAM (first page)
 
 PAG_IN_TEMP:
 
-//    //3// pull the ther requested page from the temp buffer or ROM
-//     if( __pagsInTemp[idx] == ReqPagTag)
-//     {
-//         // Bring from the temp buffer
-//         __bringPagTemp(ReqPagTag);
-//     }else{
-//        // bring from pages final locations in ROM
-//         __bringPagROM(ReqPagTag);
-//     }
-
-     //4// keep track of the current page
-     // at this stage __persis_CrntPagHeader and  CrntPagHeader will be different
-     CrntPagHeader = ReqPagTag;
-    return 0;
+    *curtPagHdr  = ReqPagTag;
+      // uart_sendHex16( *curtPagHdr);
+      // uart_sendStr("\n\r \0");
 }
-
-
-/*
- * pageSwap:
- */
-//TODO this function does not
-void __pagesSwap(unsigned int * CurnPag, unsigned int * varAddr)
-{
-#if !DIRTY_PAGE
-    __pageFaultCounter++;
-#endif
-
-    //2// Find the requested page
-    unsigned int ReqPagTag;
-    unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
-    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
-    // TODO we are not checking if the var is not in any page !
-    unsigned char idx=0;
-
-    // Search the page in the buffer
-    while( (ReqPagTag = __pagsInTemp[idx]) != 0)
-    {
-        if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
-                {
-                    if(dirtyPag)
-                    {
-                        __pageFaultCounter++;
-                        __sendPagTemp( *CurnPag );  // check the buffer before insertting to it
-                        dirtyPag=DIRTY_PAGE;
-                    }
-                    // we found the page
-                    __bringPagTemp( ReqPagTag );
-
-                    goto PAG_IN_TEMP;
-                }
-        idx++;
-    }
-
-    //TODO optimize this search (maybe with a switch statement )
-    // search the page in the ROM if it is not in the buffer
-    while( ! (ReqPagTag_dirty < __temp_pagSize) )  // if the var is not with the page
-    {
-        __temp_pagSize +=   PAG_SIZE;               // move to next page
-    }
-
-    ReqPagTag = __temp_pagSize-PAG_SIZE;
-
-    if(dirtyPag)
-    {
-        __pageFaultCounter++;
-        __sendPagTemp( *CurnPag );
-        dirtyPag=DIRTY_PAGE;
-    }
-    __bringPagROM(ReqPagTag);
-
-PAG_IN_TEMP:
-
-        *CurnPag = ReqPagTag;
-}
-
-#if 0    // this function does a swap and raise the dirtyPag flag
-unsigned int __pageSwap_w(unsigned int * varAddr)
-{
-    //**// This page swap is caused by write operation //**//
-#if !DIRTY_PAGE
-    __pageFaultCounter++;
-#endif
-
-    //2// Find the requested page
-    unsigned int ReqPagTag;
-    unsigned int ReqPagTag_dirty = (unsigned int) varAddr;
-    unsigned int __temp_pagSize = BIGEN_ROM+PAG_SIZE ; // the upper limit of the first page
-    // TODO we are not checking if the var is not in any page !
-    unsigned char idx=0;
-
-    // Search the page in the buffer
-    while( (ReqPagTag = __pagsInTemp[idx]) != 0)
-    {
-        if ( (ReqPagTag_dirty >= ReqPagTag) && (ReqPagTag_dirty < (ReqPagTag+PAG_SIZE) ) )
-                {
-                    if(dirtyPag)
-                    {
-                        __pageFaultCounter++;
-                        __sendPagTemp( CrntPagHeader );  // check the buffer before insertting to it
-                    }
-                    // we found the page
-                    __bringPagTemp( ReqPagTag );
-
-                    goto PAG_IN_TEMP_W;
-                }
-        idx++;
-    }
-
-    //TODO optimize this search (maybe with a switch statement )
-    // search the page in the ROM if it is not in the buffer
-    while( ! (ReqPagTag_dirty < __temp_pagSize) )  // if the var is not with the page
-    {
-        __temp_pagSize +=   PAG_SIZE;               // move to next page
-    }
-
-    ReqPagTag = __temp_pagSize-PAG_SIZE;
-
-    if(dirtyPag)
-    {
-        __pageFaultCounter++;
-        __sendPagTemp( CrntPagHeader );
-    }
-    __bringPagROM(ReqPagTag);
-
-PAG_IN_TEMP_W:
-
-     dirtyPag=1;   // we want to write to this page show it is dirty
-     CrntPagHeader = ReqPagTag;
-    return 0;
-}
-
-#endif
-
-/*
- * pageSwap:
- */
-//TODO this function does not
-void __bringPersisCrntPag(unsigned int curntPag)
-{
-    unsigned int ReqPagTag, idx=0;
-
-    // Search the page in the buffer
-    while( (ReqPagTag = __persis_pagsInTemp[idx]) != 0)
-    {
-        if ( ReqPagTag  == curntPag )
-            {
-                __bringPagTemp( curntPag );
-                goto PAGE_PULLED;
-             }
-        idx++;
-    }
-
-        __bringPagROM( curntPag);
-
-PAGE_PULLED:
-
-     CrntPagHeader =  curntPag;
-}
-
 
 /*####################################
           Paging commit
@@ -357,97 +138,86 @@ PAGE_PULLED:
 
 void __pagsCommit()
 {
-
-    unsigned int cnt=0;
-    unsigned int page;
-    while (__persis_pagsInTemp[cnt])
+  //TODO what if the __persis_pagsInTemp is full, there will be an error!!! 
+    while (__persis_pagsInTemp[__cntr])
     {
-        // send the pages to their final locations in ROM
-            __sendPagROM(__persis_pagsInTemp[cnt] );
-            __pagsInTemp[cnt] = 0; // clear the temp buffer
-           cnt++;
+            __movPag( (__persis_pagsInTemp[__cntr]+ APP_MEM) , __persis_pagsInTemp[__cntr] );
+            __pagsInTemp[__cntr] = 0; // clear the temp buffer
+           __cntr++;
     }
 
-    while(cnt--)
+    for(;--__cntr;)
     {
-        __persis_pagsInTemp[cnt] =0;
-    }
-
-
-//    unsigned int cnt;
-//    for (cnt=0; cnt < NUM_PAG; cnt++)
-//    {
-//        // send the pages to their final locations in ROM
-//        if(__persis_pagsInTemp[cnt] )
-//        {
-//            __sendPagROM( __persis_pagsInTemp[cnt] );
-//        }
-//    }
-}
-
-
-
-uint8_t* __return_addr(uint8_t* var) {
-    if (var > END_ROM || var < BIGEN_ROM) {
-        return var;
-    }
-    if( __IS_VAR_IN_CRNT_PAG(*var) )
-    {
-        return __VAR_PT_IN_RAM(*var);
-    }
-    else{
-        __pageSwap((var));
-        return __VAR_PT_IN_RAM(*var);
+        __persis_pagsInTemp[__cntr] =0;
     }
 }
 
-uint8_t* __return_addr_wr(uint8_t* var) {
-    if (var > END_ROM || var < BIGEN_ROM) {
-        return var;
+/*####################################
+      User interface facilitator
+#####################################*/
+
+uint8_t* __return_addr_no_check(uint8_t* var) {
+
+  // if(var < BGN_ROM || var < BGN_ROM+APP_MEM)
+  // {
+  //   return var;
+  // }
+
+    volatile unsigned int  cntr=0;
+
+    while(cntr < RAM_BUF_LEN ){
+
+          if( ramPagsBuf[cntr].crntPagHdr == 0)
+            {
+              break;
+            }
+
+          if( __IS_VAR_IN_CRNT_PAG(var, ramPagsBuf[cntr]) )
+            {
+
+              return __VAR_PT_IN_RAM_PG(var, ramPagsBuf[cntr]);
+            }
+          cntr++;
     }
-    if( __IS_VAR_IN_CRNT_PAG(*var) )
-    {
-        dirtyPag = 1;
-        return __VAR_PT_IN_RAM(*var);
+    // cntr = swapIndex; // swapIndex must be updated it before the return statement 
+
+    swapIndex++;
+    if(swapIndex >= RAM_BUF_LEN){
+        swapIndex=0;
     }
-    else{
-        __pageSwap((var));
-        dirtyPag = 1;
-        return __VAR_PT_IN_RAM(*var);
-    }
+
+    __pageSwap(var, &ramPagsBuf[swapIndex].dirtyPag, &ramPagsBuf[swapIndex].crntPagHdr, ramPagsBuf[swapIndex].ramPagAddr);
+
+    
+    return __VAR_PT_IN_RAM_PG(var, ramPagsBuf[swapIndex]);
 }
 
-uint8_t* __return_addr_no_check(unsigned int * var) {
-    if( __IS_VAR_IN_CRNT_PAG(*var) )
-    {
-        return __VAR_PT_IN_RAM(*var);
+uint8_t* __return_addr_wr_no_check(uint8_t* var) {
+
+    volatile unsigned int  cntr=0;
+
+    while(cntr < RAM_BUF_LEN ){
+          if( ramPagsBuf[cntr].crntPagHdr == 0)
+            {
+              break;
+            }
+
+          if( __IS_VAR_IN_CRNT_PAG(var, ramPagsBuf[cntr]) )
+            {
+                ramPagsBuf[cntr].dirtyPag = 1;
+              return __VAR_PT_IN_RAM_PG(var, ramPagsBuf[cntr]);
+            }
+          cntr++;
     }
-    else{
-        __pageSwap((var));
-        return __VAR_PT_IN_RAM(*var);
+
+    swapIndex++;
+    if(swapIndex >= RAM_BUF_LEN){
+        swapIndex=0;
     }
+
+    __pageSwap(var, &ramPagsBuf[swapIndex].dirtyPag, &ramPagsBuf[swapIndex].crntPagHdr, ramPagsBuf[swapIndex].ramPagAddr);
+    ramPagsBuf[swapIndex].dirtyPag = 1;
+
+
+    return __VAR_PT_IN_RAM_PG(var, ramPagsBuf[swapIndex]);
 }
-
-uint8_t* __return_addr_wr_no_check(unsigned int * var) {
-    if( __IS_VAR_IN_CRNT_PAG(*var) )
-    {
-        dirtyPag = 1;
-        return __VAR_PT_IN_RAM(*var);
-    }
-    else{
-        __pageSwap((var));
-        dirtyPag = 1;
-        return __VAR_PT_IN_RAM(*var);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-

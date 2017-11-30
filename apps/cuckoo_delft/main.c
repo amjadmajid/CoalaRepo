@@ -11,7 +11,7 @@
 #include <ipos.h>
 
 
-//#define TSK_SIZ
+#define TSK_SIZ
 //#define AUTO_RST
 //#define LOG_INFO
 
@@ -124,6 +124,10 @@ unsigned i;
 
 void task_init()
 {
+
+        P3OUT |= BIT5;
+        P3OUT &= ~BIT5;
+
 #ifdef TSK_SIZ
        cp_reset();
 #endif
@@ -450,9 +454,11 @@ void task_lookup_done()
 
 void task_print_stats()
 {
-//    __no_operation();
-    pinRaised=1;
 
+        P3OUT |= BIT5;
+        P3OUT &= ~BIT5;
+
+        PAGCMT();
 }
 
 void task_done()
@@ -461,15 +467,13 @@ void task_done()
        cp_reset();
 #endif
 
-    if(pinRaised){
-        P3OUT |= BIT5;
-        P3OUT &= ~BIT5;
-    }
-    pinRaised=0;
 
 #ifdef TSK_SIZ
      cp_sendRes("task_done \0");
 #endif
+
+     while(1);
+
 }
 
 
@@ -481,8 +485,6 @@ void init()
     P3OUT &= ~BIT5;
     P3DIR |=BIT5;
 
-    srand(0);
-
 #if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
 //    CSCTL1 = DCOFSEL_4 |  DCORSEL;      // Set DCO to 16MHz
@@ -493,6 +495,7 @@ void init()
 #endif
 
 #ifdef TSK_SIZ
+    uart_init();
     cp_init();
 #endif
 
@@ -504,11 +507,14 @@ void init()
     mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
 #endif
 
+    srand(0);
+
 }
+
 int main(void) {
     init();
 
-    taskId tasks[] = {{task_init,       1,1 },
+    taskId tasks[] = {{task_init,       1,5 },
         {task_init_array,               2,1} ,
         {task_generate_key,             3,1 },
         {task_calc_indexes,             4,1 },

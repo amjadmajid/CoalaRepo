@@ -6,16 +6,34 @@ import time
 from csf import *
 # get app name 
 appName=unified_input("enter app's name: ")
-fileName=unified_input("file's name (fast, slow, smart): ")
+fileName=unified_input("file's name ( (f)ast, (s)low, smar(t) ): ")
+
+if fileName == 'f':
+	fileName = 'fast'
+elif fileName == 's':
+	fileName = 'slow'
+elif fileName == 't':
+	fileName = 'smart'
+
+
 fileName +='Change.txt'
-pwrPtn = unified_input("Select from (camel, toward, fixed)")
+pwrPtn = unified_input("Select from ( (c)amel, (t)oward, (f)ixed)")
+
+if pwrPtn == 'c':
+	pwrPtn = 'camel'
+elif pwrPtn == 't':
+	pwrPtn = 'toward'
+elif pwrPtn == 'f':
+	pwrPtn = 'fixed'
 
 Togo=int( unified_input("Number of lines to be received: ") )
 lineLen=int( unified_input("line's length: ") )
 
 # check if the required directory exist
 basePath= '../data/'
-tailPath = 'simulatedPwrInter/CoalescedTaskSize/'+pwrPtn+'PowerPattern/'
+# tailPath = 'simulatedPwrInter/CoalescedTaskSize/'+pwrPtn+'PowerPattern/'
+tailPath = 'realTaskSize/'
+
 
 dirPath = os.path.join(os.path.join(basePath,appName), tailPath)
 
@@ -31,11 +49,17 @@ cp = os.getcwd()
 
 fname =  open( os.path.join(dirPath,fileName) , 'w')
 
-portName = "/dev/cu.usbmodem1413"
+portsName = ["/dev/cu.usbmodem1413","/dev/cu.usbmodem1423","/dev/cu.usbmodem1433" ]
 baudRate = 115200
-
-ser = serial.Serial(portName, baudRate, timeout=5)
-
+# port=None
+# e=None
+# ser=None
+# while port in portsName:
+# 	try: 
+ser = serial.Serial(portsName[1], baudRate, timeout=5)
+	# except e:
+	# 		print("Port error: ", str(e) )
+	# 		continue
 
 while Togo:
 		try:

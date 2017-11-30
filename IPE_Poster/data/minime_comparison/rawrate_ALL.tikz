@@ -1,0 +1,165 @@
+\pgfplotstableread[col sep=comma]{./data/minime_comparison/rawrate_ALL_120B-1s.csv}\datatable
+
+\makeatletter
+\pgfplotsset{
+	/pgfplots/flexible xticklabels from table/.code n args={3}{%
+    	\pgfplotstableread[#3]{#1}\coordinate@table
+    	\pgfplotstablegetcolumn{#2}\of{\coordinate@table}\to\pgfplots@xticklabels
+    	\let\pgfplots@xticklabel=\pgfplots@user@ticklabel@list@x
+	}
+}
+\makeatother
+
+\makeatletter
+\newcommand\resetstackedplots{
+    \makeatletter
+    \pgfplots@stacked@isfirstplottrue
+    \makeatother
+    \addplot [forget plot,draw=none] coordinates {(0,0) (1,0)};%coordinates{(1,0) (5,0) (10,0) (15,0) (20,0)};
+}
+\makeatother
+
+\begin{tikzpicture}
+	[scale=1.0, every node/.style={scale=1.0}, %scaling
+	]
+
+	\pgfkeys{/pgf/number format/.cd,fixed,fixed zerofill,precision=1}
+
+	\begin{axis}
+		[	ybar stacked,
+			scale only axis,
+			width=.9\columnwidth, height=.3\columnwidth,
+			%ybar=3pt,
+			bar width=9pt,
+			x=2.5cm,
+		%
+			enlarge x limits={true, value=1.11},
+			enlarge y limits={upper, value=0.8},
+		%
+		%	xlabel=Scenario, xlabel near ticks,
+			ylabel={Data [\#\si{Byte}]}, ymin=0, ymax=16666, ylabel near ticks, scaled y ticks={base 10:-4},
+		%
+			flexible xticklabels from table={./data/minime_comparison/rawrate_ALL_120B-1s.csv}{label}{col sep=comma},
+			xtick=data,
+		%
+		%	nodes near coords,
+		%	nodes near coords align={vertical},
+		%	every node near coord/.append style={rotate=90, anchor=west, color=black},
+		%
+			legend pos={north east},
+			legend columns=3,
+			legend style={
+            	/tikz/column 2/.style={
+                	column sep=5pt,
+            	},
+            	/tikz/column 4/.style={
+            		column sep=5pt,
+            	},
+        	},
+			every axis legend/.append style={nodes={right}},
+			area legend,
+		%
+			font=\footnotesize\sffamily, % sans serif font (math still serif)
+			tick label style={font=\footnotesize\sansmath\sffamily}, % sans serif math font
+		]
+
+		\addplot
+		plot[bar shift=-24pt,
+			postaction={pattern=crosshatch dots, pattern color=red!50!white},
+ 			thin,
+			draw=red!80!black,
+			fill=none,
+		] table[x expr=\coordindex, y={wisp naivewisp}]{\datatable};
+		\addlegendentry{\acs{wisp} (Battery)}
+
+		\addplot
+		plot[bar shift=-24pt,
+			forget plot,
+			postaction={pattern=crosshatch dots, pattern color=white!50!white},
+ 			thin,
+			draw=red!80!black,
+			fill=red!80!white,
+		] table[x expr=\coordindex, y={ble naivewisp}]{\datatable};
+
+		\resetstackedplots
+
+		\addplot
+		plot[bar shift=-12pt,
+			postaction={pattern=north east lines, pattern color=blue!50!white},
+ 			thin,
+			draw=blue!80!black,
+			fill=none,
+		] table[x expr=\coordindex, y={wisp ble}]{\datatable};
+		\addlegendentry{\acs{ble} (4\,dBm)}
+
+		\addplot
+		plot[bar shift=-12pt,
+			postaction={pattern=north east lines, pattern color=white!50!white},
+			forget plot,
+ 			thin,
+			draw=blue!80!black,
+			fill=blue!80!white,
+		] table[x expr=\coordindex, y={ble ble}]{\datatable};
+
+		\resetstackedplots
+
+		\addplot
+		plot[bar shift=0pt,
+			postaction={pattern=crosshatch, pattern color=green!50!white},
+ 			thin,
+			draw=green!80!black,
+			fill=none,
+		] table[x expr=\coordindex, y={wisp naiveblisp}]{\datatable};
+		\addlegendentry{Na\"ive}
+
+		\addplot
+		plot[bar shift=0pt,
+			postaction={pattern=crosshatch, pattern color=white!50!white},
+			forget plot,
+ 			thin,
+			draw=green!80!black,
+			fill=green!80!white,
+		] table[x expr=\coordindex, y={ble naiveblisp}]{\datatable};
+
+		\resetstackedplots
+
+		\addplot
+		plot[bar shift=12pt,
+			postaction={pattern=crosshatch dots, pattern color=cyan!50!white},
+ 			thin,
+			draw=cyan!80!black,
+			fill=none,
+		] table[x expr=\coordindex, y={wisp rndto3blisp}]{\datatable};
+		\addlegendentry{Random ($<3$)}
+
+		\addplot
+		plot[bar shift=12pt,
+			postaction={pattern=crosshatch dots, pattern color=white!50!white},
+			forget plot,
+ 			thin,
+			draw=cyan!80!black,
+			fill=cyan!80!white,
+		] table[x expr=\coordindex, y={ble rndto3blisp}]{\datatable};
+
+		\resetstackedplots
+
+		\addplot
+		plot[bar shift=24pt,
+			postaction={pattern=north west lines, pattern color=orange!50!white},
+ 			thin,
+			draw=orange!80!black,
+			fill=none,
+		] table[x expr=\coordindex, y={wisp rndto10blisp}]{\datatable};
+		\addlegendentry{Random ($<10$)}
+
+		\addplot
+		plot[bar shift=24pt,
+			postaction={pattern=north west lines, pattern color=white!50!white},
+			forget plot,
+ 			thin,
+			draw=orange!80!black,
+			fill=orange!80!white,
+		] table[x expr=\coordindex, y={ble rndto10blisp}]{\datatable};
+
+	\end{axis}
+\end{tikzpicture}

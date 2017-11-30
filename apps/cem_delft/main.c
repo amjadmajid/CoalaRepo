@@ -5,7 +5,7 @@
 #include <ipos.h>
 
 //#define TSK_SIZ
-//#define AUTO_RST
+#define AUTO_RST
 //#define LOG_INFO
 
 
@@ -49,8 +49,6 @@ void task_print();
 void task_done();
 
 
-
-__p node_t _v_dict[DICT_SIZE];
 __p letter_t _v_letter;
 __p unsigned _v_letter_idx;
 __p sample_t _v_prev_sample;
@@ -66,6 +64,8 @@ __p node_t _v_parent_node;
 __p node_t _v_sibling_node;
 __p index_t _v_symbol;
 __p node_t _v_compressed_data[BLOCK_SIZE];
+__p node_t _v_dict[DICT_SIZE];
+
 
 static sample_t acquire_sample(letter_t prev_sample)
 {
@@ -101,19 +101,23 @@ void task_init_dict()
     cp_reset();
 #endif
 
-    int i = RP(_v_letter);
+    uint16_t i = RP(_v_letter);
+
+    // uart_sendStr("_v_letter \0");
+    //     uart_sendHex16(_v_letter);
+    // uart_sendStr("\n\r \0");
+
     WP(_v_dict[i].letter) = i ;
     WP(_v_dict[i].sibling) =  NIL;
     WP(_v_dict[i].child) = NIL;
-    i++;
-    WP(_v_letter) = i;
+    WP(_v_letter)++;
     if (i < NUM_LETTERS) {
         os_jump(0);
     } else {
         WP(_v_node_count) =  NUM_LETTERS;
 //        os_jump(1);
-        ;
     }
+
 #ifdef TSK_SIZ
     cp_sendRes("task_init_dict \0");
 #endif
@@ -125,17 +129,21 @@ void task_sample()
     cp_reset();
 #endif
 
+    // uart_sendStr("task_sample \0");
+    // uart_sendStr("\n\r \0");
+
     unsigned next_letter_idx = RP(_v_letter_idx) + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
         next_letter_idx = 0;
 
-    WP(_v_letter_idx) = next_letter_idx;
     if (RP(_v_letter_idx) == 0) {
-//        os_jump(1);
-        ;
+        WP(_v_letter_idx) = next_letter_idx;
+        // os_jump(1);
     } else {
+        WP(_v_letter_idx) = next_letter_idx;
         os_jump(2);
     }
+
 #ifdef TSK_SIZ
     cp_sendRes("task_sample \0");
 #endif
@@ -146,6 +154,9 @@ void task_measure_temp()
 #ifdef TSK_SIZ
     cp_reset();
 #endif
+
+    // uart_sendStr("task_measure_temp \0");
+    // uart_sendStr("\n\r \0");
 
     sample_t prev_sample;
     prev_sample = RP(_v_prev_sample);
@@ -166,6 +177,9 @@ void task_letterize()
 #ifdef TSK_SIZ
     cp_reset();
 #endif
+
+    // uart_sendStr("task_letterize \0");
+    // uart_sendStr("\n\r \0");
 
     unsigned letter_idx = RP(_v_letter_idx);
     if (letter_idx == 0)
@@ -188,10 +202,18 @@ void task_compress()
     cp_reset();
 #endif
 
+    // uart_sendStr("task_compress \0");
+    // uart_sendStr("\n\r \0");
+
     // pointer into the dictionary tree; starts at a root's child
     index_t parent = RP(_v_parent_next);
 
     uint16_t __cry;
+
+    // uart_sendStr("_v_dict[parent].child \0");
+    // uart_sendHex16(_v_dict[parent].child);
+    // uart_sendStr("\n\r \0");
+
     __cry = RP(_v_dict[parent].child);
     WP(_v_sibling) = __cry ;
     __cry = RP(_v_dict[parent].letter);
@@ -203,7 +225,7 @@ void task_compress()
     WP(_v_parent) = parent;
     __cry = RP(_v_dict[parent].child);
     WP(_v_child) = __cry;
-    (RP(_v_sample_count))++;
+    (WP(_v_sample_count))++;
 
 //    os_jump(1);
 #ifdef TSK_SIZ
@@ -413,7 +435,7 @@ void init()
       P3OUT &=~BIT5;
       P3DIR |=BIT5;
 
-#if 0
+#if 1
       CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
   //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
       CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
@@ -431,7 +453,7 @@ void init()
 #endif
 
 #ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+    mr_auto_rand_reseter(50000); // every 12 msec the MCU will be reseted
 #endif
 
 }

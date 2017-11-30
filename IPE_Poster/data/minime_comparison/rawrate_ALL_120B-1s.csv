@@ -1,0 +1,3 @@
+idx,label,wisp ble,wisp ble err,ble ble,ble ble err,wisp naiveblisp,wisp naiveblisp err,ble naiveblisp,ble naiveblisp err,wisp naivewisp,wisp naivewisp err,ble naivewisp,ble naivewisp err,wisp rndto10blisp,wisp rndto10blisp err,ble rndto10blisp,ble rndto10blisp err,wisp rndto3blisp,wisp rndto3blisp err,ble rndto3blisp,ble rndto3blisp err
+0,Out of range,0.000000,0.000000,11272.800000,0.000000,0.000000,0.000000,11752.800000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,11476.800000,0.000000,0.000000,0.000000,11678.400000,0.000000
+1,In range,0.000000,0.000000,11882.400000,0.000000,12052.800000,0.000000,715.200000,0.000000,12292.800000,0.000000,0.000000,0.000000,828.000000,0.000000,10826.400000,0.000000,11841.600000,0.000000,664.800000,0.000000

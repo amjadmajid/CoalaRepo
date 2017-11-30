@@ -6,10 +6,10 @@
 #include <ipos.h>
 
 
-//#define TSK_SIZ
+#define TSK_SIZ
 //#define AUTO_RST
 //#define LOG_INFO
-
+//#define RAISE_PIN 1
 
 #define SEED 4L
 #define ITER 100
@@ -311,10 +311,10 @@ void task_AR_btbl_bitcount() {
     unsigned char * Ptr = (unsigned char *) &RP(_v_seed) ;
     int Accu ;
 
-    Accu  = bits[ RP(*Ptr++) ];
-    Accu += bits[ RP(*Ptr++) ];
-    Accu += bits[ RP(*Ptr++) ];
-    Accu += bits[ RP(*Ptr) ];
+    Accu  = bits[ *Ptr++ ];
+    Accu += bits[ *Ptr++ ];
+    Accu += bits[ *Ptr++ ];
+    Accu += bits[ *Ptr ];
     WP(_v_n_5)+= Accu;
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
@@ -373,10 +373,13 @@ void task_end() {
         P3OUT &=~BIT5;
     }
     pinCont=0;
+    PAGCMT();
 
 #ifdef TSK_SIZ
      cp_sendRes("task_end \0");
 #endif
+
+     while(1);
 }
 
 void init() {
@@ -384,7 +387,10 @@ void init() {
     WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
-    P3DIR = BIT5;
+#if RAISE_PIN
+  P3OUT &=~BIT5;
+  P3DIR |=BIT5;
+#endif
 
 #if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
@@ -396,6 +402,7 @@ void init() {
 #endif
 
 #ifdef TSK_SIZ
+    uart_init();
     cp_init();
 #endif
 
@@ -404,22 +411,22 @@ void init() {
 #endif
 
 #ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+    mr_auto_rand_reseter(25000); // every 12 msec the MCU will be reseted
 #endif
 
 }
 
 int main(void) {
     init();
-    taskId tasks[] = {{task_init,        1, 1},
-        {task_select_func,               2, 1},
+    taskId tasks[] = {{task_init,        1, 2},
+        {task_select_func,               2, 2},
         {task_bit_count,                 3, 1},
-        {task_bitcount,                  4, 1},
+        {task_bitcount,                  4, 2},
         {task_ntbl_bitcnt,               5, 1},
-        {task_ntbl_bitcount,             6, 1},
-        {task_BW_btbl_bitcount,          7, 1},
-        {task_AR_btbl_bitcount,          8, 1},
-        {task_bit_shifter,               9, 1},
+        {task_ntbl_bitcount,             6, 2},
+        {task_BW_btbl_bitcount,          7, 2},
+        {task_AR_btbl_bitcount,          8, 2},
+        {task_bit_shifter,               9, 2},
         {task_end,                       10, 1}};
 
     //This function should be called only once

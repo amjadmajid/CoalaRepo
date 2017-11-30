@@ -48,6 +48,7 @@ __nv unsigned protect = 0;
 unsigned int in_i, in_j, arr_i, arr_j;
 void task_inner_loop()
 {
+
 #if TSK_SIZ
     cp_reset();
 #endif
@@ -126,6 +127,10 @@ void task_finish()
 #if TSK_SIZ
     cp_sendRes("\ntask_finish \0");
 #endif
+
+//cp_sendRes("\sort_100 \0");
+
+while(1);
 }
 
 void init()
@@ -139,9 +144,20 @@ void init()
   P3DIR |=BIT5;
 #endif
 
+#if 1
+    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
+    //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
+    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
+    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
+    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
+    CSCTL0_H = 0;
+#endif
+
 #ifdef TSK_SIZ
     cp_init();
 #endif
+
+    uart_init();
 
 #ifdef LOG_INFO
     uart_init();

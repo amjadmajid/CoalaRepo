@@ -1,0 +1,103 @@
+task_init 0000032E
+task_selectMode 00000910
+task_warmup 00000752
+task_warmup 00000684
+task_warmup 000006B8
+task_warmup 00000228
+task_sample 00000D40
+task_sample 00000D87
+task_sample 00000DCC
+task_transform 00000423
+task_featurize 00000FBC
+task_train 000008DF
+task_sample 00000D77
+task_sample 00000D7B
+task_sample 00000DA1
+task_transform 00000371
+task_featurize 00000EF0
+task_train 000008C9
+task_sample 00000D92
+task_sample 00000DB6
+task_sample 00000DD9
+task_transform 0000041E
+task_featurize 00000FCA
+task_train 000008E1
+task_sample 00000DB8
+task_sample 00000D74
+task_sample 00000DD4
+task_transform 00000443
+task_featurize 00000FE3
+task_train 000008D0
+task_sample 00000DC3
+task_sample 00000DC5
+task_sample 00000E06
+task_transform 00000376
+task_featurize 00000F07
+task_train 000008D0
+task_sample 00000DF3
+task_sample 00000DED
+task_sample 00000E21
+task_transform 00000443
+task_featurize 00000FE2
+task_train 000008D0
+task_sample 00000E11
+task_sample 00000E18
+task_sample 00000E3B
+task_transform 00000376
+task_featurize 00000F07
+task_train 000008D0
+task_sample 00000E18
+task_sample 00000E1C
+task_sample 00000DCE
+task_transform 00000443
+task_featurize 00000FDF
+task_train 000008D0
+task_sample 00000DDF
+task_sample 00000DF3
+task_sample 00000E24
+task_transform 00000443
+task_featurize 00000FBD
+task_train 000008DF
+task_sample 00000DCB
+task_sample 00000DE3
+task_sample 00000E0A
+task_transform 00000371
+task_featurize 00000F01
+task_train 000008E1
+task_sample 00000DE7
+task_sample 00000DE7
+task_sample 00000E13
+task_transform 0000043E
+task_featurize 00000FCD
+task_train 000008E1
+task_sample 00000DEE
+task_sample 00000E02
+task_sample 00000E27
+task_transform 00000371
+task_featurize 00000F01
+task_train 000008E1
+task_sample 00000DFA
+task_sample 00000DC3
+task_sample 00000E06
+task_transform 0000043E
+task_featurize 00000FCA
+task_train 000008E1
+task_sample 00000DF7
+task_sample 00000DFB
+task_sample 00000E40
+task_transform 0000043E
+task_featurize 00000FBD
+task_train 000008DF
+task_sample 00000E17
+task_sample 00000E1B
+task_sample 00000E40
+task_transform 00000371
+task_featurize 00000F01
+task_train 000008E1
+task_sample 00000E1C
+task_sample 00000E18
+task_sample 00000E49
+task_transform 0000043E
+task_featurize 00000FCD
+task_train 000008E2
+task_idle 0000000C

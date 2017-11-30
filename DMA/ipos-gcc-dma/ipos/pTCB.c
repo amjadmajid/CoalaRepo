@@ -45,7 +45,7 @@ void os_addTasks(unsigned char numTasks, taskId tasks[]){
     if( funcBlocker != 0xAD)
     {
         // each task needs 6 byte of meta data.
-        unsigned int __temp_head =  ((BIGEN_ROM - numTasks * 6) - 2);
+        unsigned int __temp_head =  ((BGN_ROM - numTasks * 6) - 2);
         __head =  (unsigned int*)  __temp_head;
         unsigned char i = 0;
         unsigned int cnt=0;

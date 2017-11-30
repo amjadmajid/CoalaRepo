@@ -3,8 +3,8 @@
 #include <mspDebugger.h>
 
 // PLEASE SELECT AN ALGORITHIN
-#define NO_COALESCING 0
-#define SLO_CHNG_ALGO 1
+#define NO_COALESCING 1
+#define SLO_CHNG_ALGO 0
 #define FST_CHNG_ALGO 0
 #define FST_CHNG_TSK_AWAR_ALGO 0
 
@@ -99,16 +99,24 @@ void os_scheduler()
 
     if (__commit_flag == COMMITTING)
     {
-        // firm transition
+        __pagsCommit(); // Commit the dirty pages
         __coalTskAddr = (unsigned int) __temp_coalTskAddr;
-
-        // Commit the dirty pages
-        __pagsCommit();
         __commit_flag = COMMIT_FINISH;
     }
 
+    // initialize ram pages buffer
+
+    unsigned int __rb_cnt;
+    unsigned int __ramAddr = BGN_RAM;
+    for(__rb_cnt=1; __rb_cnt < RAM_BUF_LEN; __rb_cnt++)
+    {
+        __ramAddr += PAG_SIZE;
+        ramPagsBuf[__rb_cnt].ramPagAddr = __ramAddr;
+    }
+
     // Recover the virtual state
-    __bringPagROM(__persis_CrntPagHeader);
+    __movPag( BGN_ROM , BGN_RAM);
+
     __realTask = (unsigned int *) __coalTskAddr;
 
 
@@ -122,24 +130,36 @@ void os_scheduler()
 
         // transition stage (from virtual -> persistent)
         __temp_coalTskAddr = __realTask;
-        __sendPagTemp(CrntPagHeader);
 
-        unsigned int p_cnt;
-        for (p_cnt=0; __pagsInTemp[p_cnt]; p_cnt++)
+        // moving the dirty pages to PagTempBuffer 
+        unsigned int _wp_cntr;
+
+        for(_wp_cntr = 0; (_wp_cntr < RAM_BUF_LEN)  && ramPagsBuf[_wp_cntr].crntPagHdr ; _wp_cntr++)
         {
-            //move the dirty pages addresses to a persistent buffer
-            __persis_pagsInTemp[p_cnt] = __pagsInTemp[p_cnt];
+            if(ramPagsBuf[_wp_cntr].dirtyPag)
+            {
+                __sendPagTemp(ramPagsBuf[_wp_cntr].ramPagAddr, ramPagsBuf[_wp_cntr].crntPagHdr );  // Send to TempPag
+                ramPagsBuf[_wp_cntr].dirtyPag = 0;
+            }
         }
 
-        __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
+        unsigned int _bufs_cntr;
+    
+        // move the addresses of the dirty pages to a persistent buffer
+        //TODO additional check is needed to not exceed the buffer size
+        for (_bufs_cntr=0; __pagsInTemp[_bufs_cntr]; _bufs_cntr++)
+        {
+            __persis_pagsInTemp[_bufs_cntr] = __pagsInTemp[_bufs_cntr];
+        }
+
+        // __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
 
         __commit_flag = COMMITTING;
-commit:
+
         // firm transition
         __coalTskAddr = (unsigned int) __temp_coalTskAddr;
 
-        // Commit the dirty pages
-        __pagsCommit();
+        __pagsCommit(); // Commit the dirty pages
         __commit_flag = COMMIT_FINISH;
 
     }
@@ -170,25 +190,30 @@ void os_scheduler()
 
 
     /******************************************************
-     *  Does power interrupted execution or commit stage
+     *  Does the power is interrupted in the commit stage
      ******************************************************/
 
-    if (__commit_flag)
+    if (__commit_flag == COMMITTING)
     {
-        // we need to do a page swap to bring the correct page from temp  or  ROM
-        // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
-        __bringPersisCrntPag(__persis_CrntPagHeader );
-        __realTask = __temp_coalTskAddr;
-        goto commit;
+        __pagsCommit(); // Commit the dirty pages
+        __coalTskAddr = (unsigned int) __temp_coalTskAddr;
+        __commit_flag = COMMIT_FINISH;
     }
 
+    // initialize ram pages buffer
+    unsigned int __rb_cnt;
+    unsigned int __ramAddr = BGN_RAM;
+    for(__rb_cnt=1; __rb_cnt < RAM_BUF_LEN; __rb_cnt++)
+    {
+        __ramAddr += PAG_SIZE;
+        ramPagsBuf[__rb_cnt].ramPagAddr = __ramAddr;
+    }
 
     /******************************************************
      * Recover the virtual state
      ******************************************************/
-    __bringCrntPagROM();
+    __movPag( BGN_ROM , BGN_RAM);
     __realTask = (unsigned int *) __coalTskAddr;
-    unsigned int __coalTskCntr = 0;
 
     while (1)
     {
@@ -219,23 +244,34 @@ void os_scheduler()
          * Transition stage (from virtual -> persistent)
          ********************************************/
         __temp_coalTskAddr = __realTask;
-        __sendPagTemp(CrntPagHeader);
 
-        unsigned int p_cnt;
-        for (p_cnt=0; __pagsInTemp[p_cnt]; p_cnt++)
+        unsigned int _wp_cntr;
+        // moving the dirty pages to PagTempBuffer 
+        for(_wp_cntr = 0; (_wp_cntr < RAM_BUF_LEN)  && ramPagsBuf[_wp_cntr].crntPagHdr ; _wp_cntr++)
         {
-            //move the dirty pages addresses to a persistent buffer
-            __persis_pagsInTemp[p_cnt] = __pagsInTemp[p_cnt];
+            if(ramPagsBuf[_wp_cntr].dirtyPag)
+            {
+                __sendPagTemp(ramPagsBuf[_wp_cntr].ramPagAddr, ramPagsBuf[_wp_cntr].crntPagHdr );  // Send to TempPag
+                ramPagsBuf[_wp_cntr].dirtyPag = 0;
+            }
+        }
+
+
+        unsigned int _bufs_cntr;
+        // move the addresses of the dirty pages to a persistent buffer
+        //TODO additional check is needed to not exceed the buffer size
+        for (_bufs_cntr=0; __pagsInTemp[_bufs_cntr]; _bufs_cntr++)
+        {
+            __persis_pagsInTemp[_bufs_cntr] = __pagsInTemp[_bufs_cntr];
         }
 
         //Keep track of the last accessed page over a power cycle
-        __persis_CrntPagHeader = CrntPagHeader;
+        // __persis_CrntPagHeader = CrntPagHeader;
         __commit_flag = COMMITTING;
 
         /******************************************************
          * firm transition and page commiting
          ******************************************************/
-commit:
         __coalTskAddr = (unsigned int) __temp_coalTskAddr;
 
         // Commit the dirty pages
@@ -266,17 +302,24 @@ void os_scheduler()
 
     if (__commit_flag == COMMITTING)
     {
-        // we need to do a page swap to bring the correct page from temp  or  ROM
-        // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
-        __bringPersisCrntPag(__persis_CrntPagHeader );
-        __realTask = __temp_coalTskAddr;
-        goto commit;
+        __pagsCommit(); // Commit the dirty pages
+        __coalTskAddr = (unsigned int) __temp_coalTskAddr;
+        __commit_flag = COMMIT_FINISH;
+    }
+
+    // initialize ram pages buffer
+    unsigned int __rb_cnt;
+    unsigned int __ramAddr = BGN_RAM;
+    for(__rb_cnt=1; __rb_cnt < RAM_BUF_LEN; __rb_cnt++)
+    {
+        __ramAddr += PAG_SIZE;
+        ramPagsBuf[__rb_cnt].ramPagAddr = __ramAddr;
     }
 
     // Recover the virtual state
-    __bringCrntPagROM();
-    __realTask = (unsigned int *) __coalTskAddr;
+    __movPag( BGN_ROM , BGN_RAM);
 
+    __realTask = (unsigned int *) __coalTskAddr;
 
     while (1)
     {
@@ -304,23 +347,32 @@ void os_scheduler()
         }
         //At this point a virtual task must be finished
 
-
-
         // transition stage (from virtual -> persistent)
         __temp_coalTskAddr = __realTask;
-        __sendPagTemp(CrntPagHeader);
 
-        unsigned int p_cnt;
-        for (p_cnt=0; __pagsInTemp[p_cnt]; p_cnt++)
+        unsigned int _wp_cntr;
+        // moving the dirty pages to PagTempBuffer 
+        for(_wp_cntr = 0; (_wp_cntr < RAM_BUF_LEN)  && ramPagsBuf[_wp_cntr].crntPagHdr ; _wp_cntr++)
         {
-            //move the dirty pages addresses to a persistent buffer
-            __persis_pagsInTemp[p_cnt] = __pagsInTemp[p_cnt];
+            if(ramPagsBuf[_wp_cntr].dirtyPag)
+            {
+                __sendPagTemp(ramPagsBuf[_wp_cntr].ramPagAddr, ramPagsBuf[_wp_cntr].crntPagHdr );  // Send to TempPag
+                ramPagsBuf[_wp_cntr].dirtyPag = 0;
+            }
         }
 
-        __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
+        unsigned int _bufs_cntr;
+        // move the addresses of the dirty pages to a persistent buffer
+        //TODO additional check is needed to not exceed the buffer size
+        for (_bufs_cntr=0; __pagsInTemp[_bufs_cntr]; _bufs_cntr++)
+        {
+            __persis_pagsInTemp[_bufs_cntr] = __pagsInTemp[_bufs_cntr];
+        }
+
+        // __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
 
         __commit_flag = COMMITTING;
-commit:
+// commit:
         // firm transition
         __coalTskAddr = (unsigned int) __temp_coalTskAddr;
 
@@ -359,15 +411,13 @@ void os_scheduler()
 
     if (__commit_flag == COMMITTING)
     {
-        // we need to do a page swap to bring the correct page from temp  or  ROM
-        // this page swap must not send a page, and that must not happen since the dirtyPag is 0 at this stage
-        __bringPersisCrntPag(__persis_CrntPagHeader );
-        __realTask = __temp_coalTskAddr;
-        goto commit;
+        __pagsCommit(); // Commit the dirty pages
+        __coalTskAddr = (unsigned int) __temp_coalTskAddr;
+        __commit_flag = COMMIT_FINISH;
     }
 
     // Recover the virtual state
-    __bringCrntPagROM();
+    __movPag( BGN_ROM , BGN_RAM);
     __realTask = (unsigned int *) __coalTskAddr;
     __riskLevel =  ( (unsigned int *) (__coalTskAddr+2)) ;
 
@@ -414,19 +464,30 @@ void os_scheduler()
 
         // transition stage (from virtual -> persistent)
         __temp_coalTskAddr = __realTask;
-        __sendPagTemp(CrntPagHeader);
 
-        unsigned int p_cnt;
-        for (p_cnt=0; __pagsInTemp[p_cnt]; p_cnt++)
+        unsigned int __rb_cnt;
+        // moving the dirty pages to PagTempBuffer 
+        for(_wp_cntr = 0; (_wp_cntr < RAM_BUF_LEN)  && ramPagsBuf[_wp_cntr].crntPagHdr ; _wp_cntr++)
         {
-            //move the dirty pages addresses to a persistent buffer
-            __persis_pagsInTemp[p_cnt] = __pagsInTemp[p_cnt];
+            if(ramPagsBuf[_wp_cntr].dirtyPag)
+            {
+                __sendPagTemp(ramPagsBuf[_wp_cntr].ramPagAddr, ramPagsBuf[_wp_cntr].crntPagHdr );  // Send to TempPag
+                ramPagsBuf[_wp_cntr].dirtyPag = 0;
+            }
         }
 
-        __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
+        unsigned int _bufs_cntr;
+        // move the addresses of the dirty pages to a persistent buffer
+        //TODO additional check is needed to not exceed the buffer size
+        for (_bufs_cntr=0; __pagsInTemp[_bufs_cntr]; _bufs_cntr++)
+        {
+            __persis_pagsInTemp[_bufs_cntr] = __pagsInTemp[_bufs_cntr];
+        }
+
+        // __persis_CrntPagHeader = CrntPagHeader; //Keep track of the last accessed page over a power cycle
 
         __commit_flag = COMMITTING;
-commit:
+// commit:
         // firm transition
         __coalTskAddr = (unsigned int) __temp_coalTskAddr;
 

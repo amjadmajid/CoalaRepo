@@ -1,0 +1,50 @@
+\begin{tikzpicture}
+	[scale=.5,	every node/.style={scale=.5}, 	% scaling
+	]
+
+	\begin{axis}
+		[scale only axis,
+			width=.3\columnwidth, height=.15\columnwidth,
+			inner sep=0.3333em, outer sep=0.5\pgflinewidth,
+		%
+			xlabel={Loss $d$ [\si{\decibel}]}, xmin=25, xmax=90, xlabel near ticks,
+			ylabel={Energy $E_\text{byte}$ [\si{\micro\joule}]}, ymin=0, ymax=.0001, scaled y ticks={base 10:4}, ylabel near ticks,
+		%
+			legend style={font=\scriptsize\sffamily},
+			legend pos={south east}, %north west},
+			every axis legend/.append style={nodes={right}},
+		%
+			font=\footnotesize\sffamily, 				% sans serif font (math still serif)
+			tick label style={font=\footnotesize\sansmath\sffamily}, % sans serif math font
+		%
+			scaled y ticks=manual:{}{\pgfmathparse{#1*1000000}}
+		]
+
+		\addplot [mark=x, color=red!80!black, style=solid, width=thin]
+			table [x=1, y=2, col sep=comma, header=has colnames] {./data/energy_distance/perbyte_WISP-opti_120B-1s_incl50cm.csv}
+			coordinate [pos=0] (wispStart);
+		\draw[-, draw=red!80!black, densely dashed] (wispStart) -- ++(-10cm,0pt);
+		\addlegendentry{WISP (Battery)};
+
+		\addplot [mark=none, color=red!40!black, dash pattern={on 4pt off 1pt on 2pt off 1pt}, width=ultra thick]
+			table [x=1, y=2, col sep=comma, header=has colnames] {./data/energy_distance/wisp_theoretical.csv};
+		\addlegendentry{WISP (Fitted)};
+
+		\addplot [mark=o, color=green!80!black, style=solid, width=thin]
+			table [x=1, y=2, col sep=comma, header=has colnames] {./data/energy_distance/perbyte_BLE-n30dB_24B-200ms.csv}
+			coordinate [pos=0] (bleLowStart);
+		\draw[-, draw=green!80!black, densely dashed] (bleLowStart) -- ++(-10cm,0pt);
+		\addlegendentry{BLE (--30\,dBm)};
+
+		\addplot [mark=none, color=green!40!black, dash pattern={on 4pt off 2pt on 1pt off 2pt}, width=ultra thick]
+			table [x=1, y=2, col sep=comma, header=has colnames] {./data/energy_distance/ble_theoretical.csv};
+		\addlegendentry{BLE (Fitted)};
+
+		\addplot [mark=triangle, color=blue!80!black, style=solid, width=thin]
+			table [x=1, y=2, col sep=comma, header=has colnames] {./data/energy_distance/perbyte_BLE_24B-200ms.csv}
+			coordinate [pos=0] (bleHighStart);
+		\draw[-, draw=blue!80!black, densely dashed] (bleHighStart) -- ++(-10cm,0pt);
+		\addlegendentry{BLE (4\,dBm)};
+
+	\end{axis}
+\end{tikzpicture}
