@@ -1,63 +1,74 @@
-Reviewer A
+>> Reviewer A
 
-[A.a] Coala goal is to make Chain better. Instead PLDI papers should show a principled design ideas or excellent performance.
+[A.a] Overemphasis on Chain 
 
-Coala uses fundamentally different design principle than Chain. Chain's (and other existing runtimes for intermitent devices) static architecture is not suited for systems with dynamic energy arrival budget (e.g. applications running at solar powered devices outdoor run on a completely different energy model than their counterparts indoor). Chain is a comprehensive solution that mix the forward progressing preservation and memory protection. 
+Coala uses a fundamentally different design than Chain, jettisoning fixed
+static tasks in favor of our coalescing model. Chain is a reasonable, recent
+point of comparison and intellectual basis for Coala.
 
-[A.b] Why geometric adjustment is a good idea
 
-Tasks' energy requirements and input power can vary significantly, therefore linear adjustment is too slow and will cause the system to have repeated progress failures on a single task.
+[A.b] Why geometric adjustment? 
+
+Linearly adjusting boundaries may be slow and lead to repeated failures before
+finding a coalescing factor that works.  Geometric adjustment varies the
+coalescing factor more quickly.
 
 [A.c] Alpha sensitivity; power failure rates at 1 Hz and 10 Hz
 
-Poor/good harvesting conditions always result in a short/long execution history. Coala uses the history as environment indicator. Therefore, it dynamically coalesce a few/large number of tasks in poor/good harvesting conditions. We experimentally set alpha to be 0.5.
+Poor/good harvesting conditions always result in a short/long execution
+history. Coala uses the history as environment indicator. Therefore, it
+dynamically coalesce a few/large number of tasks in poor/good harvesting
+conditions. We experimentally set alpha to be 0.5.
 
-[A.d] Coala is compared to Chain only, what about checkpointing and vanilla C?
+[A.d] Coala is compared to Chain only, what about checkpointing and unmodified C?
 
-Chain demonstrated its superiority to the existing approaches and compared itself to vanilla C and we build on top of these published results.
+The original Chain paper compared to these other approaches and unmodified C,
+and we compared to Chain.
 
-Reviewer B
+>> Reviewer B
 
 [A.b] Comparison to Alpaca. 
 
-Alpaca was presented on October, 27 2017 so we could not add it to our comparison. A static system (like Alpaca and Chain) performs well only in a static scenario, since only a small portion of the memory is needed to be protected. However, once the relation between the variables become dynamic, for example when interrupts are considered or task merging, these static systems will break or they need to protect all the memory which will severely degrade their performance. Coala introduces dynamism and demonstrated that it is a competitive system even against the static ones. 
+Alpaca was published after we submitted this paper and we could not add it as a
+basis for comparison.   We expect that Coala's main ideas could be applied in
+Alpaca as well.
+
 
 Reviewer D
 
 [D.a] SLOC column Table 3
 
-The difference in the number of lines of code comes from the fact the in Chain a programmer must define Channels and a channel's fields and the C variables. However, in Coala all the memory protection is hidden from the programmer and the application and it is managed by Coala in the background.
+The difference in the number of lines of code comes from the fact that the Chain programmer must define and manipulate channels.  In Coala, memory protection is abstracted from the programmer and managed by Coala.
+
 
 Reviewer C
 
 [C.a] Task definition
 
-We give an overview of the meaning of the task on lines 96-102 and reference the paper [10] that introduces the task concept in intermittent computing. 
+We give an overview of task semantics in lines 96-102 and reference prior work [10] that introduces the concept. 
 
-[C.b] Explain the competing system
+[C.b] Comparisons to prior work 
 
-See Answers to Reviewer A and B
+See responses to Reviewers A and B. 
 
-[C.c] The compiler-generated tasks is done on continuous power
+[C.c] Evaluating compiler-generated tasks with continuous power
 
-We wanted to show the performance of the automatically generated code as compared to the manually decomposed one. Therefore, we removed the effect of the power interrupt "since it is a random process" to present clearer results. 
+We compare the performance of automatically generated code to manually
+decomposed code without the unpredictable time cost of power failures.  Other
+experiments compare for harvested energy.
 
-[C.d] Is it only about computation? What about timeliness requirements?
+[C.d] What about timeliness requirements?
 
-Coala introduces the dynamism to prepare for the next steps forward in the intermittent computing, where the static approaches will fail. However, we feel that handling I/O and timeliness requirements on intermittent devices requires special care in order to be properly explored and presented. 
+Timeliness was studied by recent work (Mayfly) that is complementary to the ideas in Coala. 
 
 [C.e] History-ware coalescing algorithm growth is unbounded 
 
-Practically it is bounded and it is a parameter that can be tuned to meet special needs.
+This parameter is bounded in our prototype.
 
-[C.f] Unbounded dirty page
+[C.g] components of reported execution time?
 
-Since task coalescing is bounded the number of dirty pages is also limited. 
-
-[C.g] both execution time
-
-It is the execution time of committing the dirty pages and pulling the pages to the SRAM. 
+We report the execution time of committing dirty pages and copying pages to the SRAM. 
 
 [C.h] perform evaluations to test hypothesis and explore scientific questions
 
-On a scientific level Coala advocate that a dynamic system in intermittent computing can be more efficient than the static one, which is counter intuitive since it can take advantage of the changing conditions. On a practical level, Coala decomposes the main problems of intermittent computing (forward progres and memory protection) which is in our opinion a prerequisite to include a more complicated set of applications where I/O and time will be considered.
+The scientific question addressed by Coala is whether adding dynamism (in the form of coalescing) to a static, task-based intermittent computing system is more efficient or simpler to program than a plain, static task system.  Practically, Coala decomposes the entwined problems of forward progress and memory protection for intermittent executions, addressing each with a novel system mechanism. 
