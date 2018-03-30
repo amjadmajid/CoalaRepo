@@ -1,12 +1,27 @@
-#include <msp430.h> 
-#include <ipos.h>
-#include <mspReseter.h>
-#include "mspProfiler.h"
-#include "mspDebugger.h"
+#include <msp430.h>
+#include <stdint.h>
 
-//#define TSK_SIZ 0
-//#define RAISE_PIN 1
-//#define PWR_INT_SIM 1
+#include <mspReseter.h>
+#include <mspProfiler.h>
+#include <mspDebugger.h>
+#include <mspbase.h>
+
+#include <coala.h>
+
+// Profiling defines and flags.
+#define PRF_PORT 3
+#define PRF_PIN  4
+#define RST_PIN  5
+#if RAISE_PIN
+__nv uint8_t full_run_started = 0;
+__nv uint8_t first_run = 1;
+#endif
+
+#ifndef RST_TIME
+#define RST_TIME 25000
+#endif
+
+#define LENGTH 100
 
 /*
 void sortAlgo(int arr[], int arrLen){
@@ -21,165 +36,182 @@ void sortAlgo(int arr[], int arrLen){
     }
 }
 */
-///// function Prototypes
-void task_finish();
-void task_outer_loop();
-void task_inner_loop();
 
-////// Global variables
+const uint16_t a1[LENGTH] = {
+      3,   1,   4,   6,   9,   5,  10,   8,  16,  20,
+     19,  40,  16,  17,   2,  41,  80, 100,   5,  89,
+     66,  77,   8,   3,  32,  55,   8,  11,  99,  65,
+     25,  89,   3,  22,  25, 121,  11,  90,  74,   1,
+     12,  39,  54,  20,  22,  43,  45,  90,  81,  40,
+      3,   1,   4,   6,   9,   5,  10,   8,  16,  20,
+     19,  40,  16,  17,   2,  41,  80, 100,   5,  89,
+     66,  77,   8,   3,  32,  55,   8,  11,  99,  65,
+     25,  89,   3,  22,  25, 121,  11,  90,  74,   1,
+     12,  39,  54,  20,  22,  43,  45,  90,  81,  40
+};
 
-__p unsigned int arr[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
-                          65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40,
-                          3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
-                          65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
+const uint16_t a2[LENGTH] = {
+    121, 177,  50,  55,  32, 173, 164, 132,  17, 174,
+     61, 186,  96,  44, 120, 181,  24, 134,  68, 167,
+      8,  26, 144, 138, 133,  48,  80,  60,  39,   6,
+     86, 126, 154,  42, 150, 113, 105,  52, 139, 175,
+     58,  98,  31, 182,  74, 169,   4,  23, 157, 189,
+     72, 130,   9,  19,  12,  67,   2,  16,  49,  57,
+     69,  94, 145, 136,  99, 152, 198,  59, 153, 127,
+     92,  13,  14, 160,  35, 194, 107,  89, 199, 155,
+    163, 156,  93, 140, 111,  63,  15,  79,  22, 159,
+     65,  78,  81, 122, 135, 180,  76,   3,  38, 102
+};
 
-    unsigned int arr2[] = {3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
-                           65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40,
-                           3,1,4,6,9,5,10,8,16,20,19,40,16,17,2,41,80,100,5,89,66,77,8,3,32,55,8,11,99,
-                           65,25,89,3,22,25,121,11,90,74,1,12,39,54,20,22,43,45,90,81,40};
+// Tasks.
+COALA_TASK(task_init, 5)
+COALA_TASK(task_finish, 1)
+COALA_TASK(task_outer_loop, 1)
+COALA_TASK(task_inner_loop, 1)
 
-    unsigned int arr_len = 100;
-__p unsigned int i =  0;
-__p unsigned int j = 1;
+// Task-shared protected variables.
+COALA_PV(uint16_t, array, LENGTH);
+COALA_PV(uint16_t, outer_idx);
+COALA_PV(uint16_t, inner_idx);
+COALA_PV(uint8_t, iteration);
 
-__nv unsigned protect = 0;
+uint16_t in_i, in_j, arr_i, arr_j;
 
-/////  TASKS
-unsigned int in_i, in_j, arr_i, arr_j;
-void task_inner_loop()
+
+void task_init()
 {
-
-#if TSK_SIZ
-    cp_reset();
-#endif
-
 #if RAISE_PIN
-    protect = 1;
+    full_run_started = 1;
 #endif
 
-    arr_i = RP( arr[RP(i)] );
-    arr_j = RP( arr[RP(j)] );
+    WP(outer_idx) = 0;
+    WP(inner_idx) = 1;
 
-    if( arr_i  > arr_j )
-    {
-        unsigned int temp = arr_j;
-        arr_j =  arr_i;
-        arr_i =  temp;
+    const uint16_t* array_pt;
+
+    ++WP(iteration);
+    if (RP(iteration) & 0x01) {
+        array_pt = a1;
+    } else {
+        array_pt = a2;
     }
 
-    if( RP(j) < (arr_len-1) ) os_jump(0);
+    uint16_t idx;
+    for (idx = 0; idx < LENGTH; idx++) {
+        WP(array[idx]) = array_pt[idx];
+    }
+
+    coala_next_task(task_inner_loop);
+}
 
 
-    WP( arr[RP(i)] ) = arr_i;
-    WP( arr[RP(j)] ) = arr_j;
-    WP(j)++;
+void task_inner_loop()
+{
+    uint16_t i, j, x_i, x_j, temp;
 
-#if TSK_SIZ
-    cp_sendRes("task_inner_loop \0");
-#endif
+    i = RP(outer_idx);
+    j = RP(inner_idx);
+
+    x_i = RP(array[i]);
+    x_j = RP(array[j]);
+
+    if (x_i > x_j) {
+        temp = x_j;
+        x_j =  x_i;
+        x_i =  temp;
+    }
+
+    WP(array[i]) = x_i;
+    WP(array[j]) = x_j;
+    ++WP(inner_idx);
+
+    if (RP(inner_idx) < LENGTH) {
+        coala_next_task(task_inner_loop);
+    } else {
+        coala_next_task(task_outer_loop);
+    }
 }
 
 
 void task_outer_loop()
 {
+    ++WP(outer_idx);
+    WP(inner_idx) = RP(outer_idx) + 1;
 
-#if TSK_SIZ
-    cp_reset();
-#endif
-
-    WP(i)++;
-
-    if(RP(i) < arr_len)   os_jump(2);
-
-    WP(j)=  RP(i)+1;
-
-#if TSK_SIZ
-    cp_sendRes( "task_outer_loop \0");
-#endif
+    if (RP(outer_idx) < LENGTH - 1) {
+        coala_next_task(task_inner_loop);
+    } else {
+        coala_next_task(task_finish);
+    }
 }
-
 
 
 void task_finish()
 {
-#if TSK_SIZ
-    cp_reset();
-#endif
-
 #if RAISE_PIN
-    if(protect){
-    P3OUT |=BIT5;
-    P3OUT &=~BIT5;
+    if (full_run_started) {
+#if AUTO_RST
+        msp_reseter_halt();
+#endif
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        full_run_started = 0;
+        coala_force_commit();
+#if AUTO_RST
+        msp_reseter_resume();
+#endif
     }
-    protect=0;
 #endif
 
-    unsigned cct;
-    for(cct=0; cct< arr_len; cct++)
-    {
-        arr[cct] =  arr2[cct];
-    }
-
-
-    WP(i) = 0 ;
-    WP(j) = 1;
-
-#if TSK_SIZ
-    cp_sendRes("\ntask_finish \0");
-#endif
-
-//cp_sendRes("\sort_100 \0");
-
-while(1);
+    coala_next_task(task_init);
 }
+
 
 void init()
 {
-  WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-  // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
-  PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+    msp_watchdog_disable();
+    msp_gpio_unlock();
 
 #if RAISE_PIN
-  P3OUT &=~BIT5;
-  P3DIR |=BIT5;
+    msp_gpio_clear(PRF_PORT, 4);
+    msp_gpio_clear(PRF_PORT, 5);
+    msp_gpio_clear(PRF_PORT, 6);
+    msp_gpio_dir_out(PRF_PORT, 4);
+    msp_gpio_dir_out(PRF_PORT, 5);
+    msp_gpio_dir_out(PRF_PORT, 6);
 #endif
 
-#if 1
-    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-    //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
-    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-    CSCTL0_H = 0;
-#endif
+    // msp_clock_set_mclk(CLK_8_MHZ);
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
+    uart_init();
     cp_init();
 #endif
 
-    uart_init();
-
-#ifdef LOG_INFO
+#if LOG_INFO
     uart_init();
 #endif
 
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#if AUTO_RST
+    msp_reseter_auto_rand(RST_TIME);
 #endif
-
-
+    msp_gpio_set(PRF_PORT, RST_PIN);
 }
 
-int main(void) {
+
+int main(void)
+{
     init();
 
-       taskId tasks[] = {  {task_inner_loop,    1, 1},
-                           {task_outer_loop,    2, 1},
-                           {task_finish,        3, 1}
-                       };
-       //This function should be called only once
-       os_addTasks(3, tasks );
+    coala_init(task_init);
 
-       os_scheduler();
-       return 0;
+#if RAISE_PIN
+    if (first_run) {
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        first_run = 0;
+    }
+#endif
+
+    coala_run();
+
+    return 0;
 }

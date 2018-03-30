@@ -4,18 +4,27 @@
 #include <stdlib.h>
 
 #include <mspReseter.h>
-#include "mspProfiler.h"
-#include "mspDebugger.h"
-
-#include <ipos.h>
+#include <mspProfiler.h>
+#include <mspDebugger.h>
 #include <accel.h>
-
 #include <msp-math.h>
 
-#define TSK_SIZ
-//#define AUTO_RST
-//#define LOG_INFO
-//#define RAISE_PIN 1
+#include <coala.h>
+
+
+// Profiling defines and flags.
+#define PRF_PORT 3
+#define PRF_PIN  4
+#define RST_PIN  5
+#if RAISE_PIN
+__nv uint8_t full_run_started = 0;
+__nv uint8_t first_run = 1;
+#endif
+
+#ifndef RST_TIME
+#define RST_TIME 25000
+#endif
+
 
 // Number of samples to discard before recording training set
 #define NUM_WARMUP_SAMPLES 3
@@ -27,16 +36,13 @@
 // Number of classifications to complete in one experiment
 #define SAMPLES_TO_COLLECT 128
 
-#define TASK_NUM 11
-#define OFFSET(src, dest) src <= dest ? dest - src : TASK_NUM + dest - src
-
 unsigned volatile *timer = &TBCTL;
 typedef threeAxis_t_8 accelReading;
 typedef accelReading accelWindow[ACCEL_WINDOW_SIZE];
 
 typedef struct {
-    unsigned meanmag;
-    unsigned stddevmag;
+    COALA_SM(unsigned, meanmag);
+    COALA_SM(unsigned, stddevmag);
 } features_t;
 
 typedef enum {
@@ -52,47 +58,35 @@ typedef enum {
     MODE_RECOGNIZE = 0, // default
 } run_mode_t;
 
-enum task_index {
-    t_init,
-    t_selectMode,
-    t_resetStats,
-    t_sample,
-    t_transform,
-    t_featurize,
-    t_classify,
-    t_stats,
-    t_warmup,
-    t_train,
-    t_idle
-};
+// Tasks.
+COALA_TASK(task_init, 1)
+COALA_TASK(task_selectMode, 2)
+COALA_TASK(task_resetStats, 1)
+COALA_TASK(task_sample, 3)
+COALA_TASK(task_transform, 1)
+COALA_TASK(task_featurize, 3)
+COALA_TASK(task_classify, 5)
+COALA_TASK(task_stats, 1)
+COALA_TASK(task_warmup, 2)
+COALA_TASK(task_train, 2)
+COALA_TASK(task_idle, 1)
 
-void task_init();
-void task_selectMode();
-void task_resetStats();
-void task_sample();
-void task_transform();
-void task_featurize();
-void task_classify();
-void task_stats();
-void task_warmup();
-void task_train();
-void task_idle();
-
-__p uint16_t _v_pinState;
-__p unsigned _v_discardedSamplesCount;
-__p run_mode_t _v_class;
-__p unsigned _v_totalCount;
-__p unsigned _v_movingCount;
-__p unsigned _v_stationaryCount;
-__p accelReading _v_window[ACCEL_WINDOW_SIZE];
-__p features_t _v_features;
-__p features_t _v_model_stationary[MODEL_SIZE];
-__p features_t _v_model_moving[MODEL_SIZE];
-__p unsigned _v_trainingSetSize;
-__p unsigned _v_samplesInWindow;
-__p run_mode_t _v_mode;
-__p unsigned _v_seed;
-__p unsigned _v_count;
+// Task-shared protected variables.
+COALA_PV(uint16_t, _v_pinState);
+COALA_PV(unsigned, _v_discardedSamplesCount);
+COALA_PV(class_t, _v_class);
+COALA_PV(unsigned, _v_totalCount);
+COALA_PV(unsigned, _v_movingCount);
+COALA_PV(unsigned, _v_stationaryCount);
+COALA_PV(accelReading, _v_window, ACCEL_WINDOW_SIZE);
+COALA_PV(features_t, _v_features);
+COALA_PV(features_t, _v_model_stationary, MODEL_SIZE);
+COALA_PV(features_t, _v_model_moving, MODEL_SIZE);
+COALA_PV(unsigned, _v_trainingSetSize);
+COALA_PV(unsigned, _v_samplesInWindow);
+COALA_PV(run_mode_t, _v_mode);
+COALA_PV(unsigned, _v_seed);
+COALA_PV(unsigned, _v_count);
 
 void ACCEL_singleSample_(threeAxis_t_8* result){
     result->x = (RP(_v_seed)*17)%85;
@@ -101,82 +95,90 @@ void ACCEL_singleSample_(threeAxis_t_8* result){
     ++WP(_v_seed);
 }
 
-__nv uint8_t pinCont = 0;
-
 void init()
 {
-    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-  // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
-  PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
+    msp_watchdog_disable();
+    msp_gpio_unlock();
 
 #if RAISE_PIN
-  P3OUT &=~BIT5;
-  P3DIR |=BIT5;
+    msp_gpio_clear(PRF_PORT, 4);
+    msp_gpio_clear(PRF_PORT, 5);
+    msp_gpio_clear(PRF_PORT, 6);
+    msp_gpio_dir_out(PRF_PORT, 4);
+    msp_gpio_dir_out(PRF_PORT, 5);
+    msp_gpio_dir_out(PRF_PORT, 6);
 #endif
 
+    // msp_clock_set_mclk(CLK_8_MHZ);
 
-#if 1
-    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-//  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
-    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-    CSCTL0_H = 0;
-#endif
-
-#ifdef TSK_SIZ
+#if TSK_SIZ
     uart_init();
     cp_init();
 #endif
 
-
-#ifdef LOG_INFO
+#if LOG_INFO
     uart_init();
 #endif
 
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(25000); // every 12 msec the MCU will be reseted
+#if AUTO_RST
+    msp_reseter_auto_rand(RST_TIME); // The MCU will be reset after 25 ms
 #endif
-
-    threeAxis_t_8 accelID = {0};
-
+    msp_gpio_set(PRF_PORT, RST_PIN);
 }
 
 void task_init()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    pinCont=1;
-
-        P3OUT |=BIT5;
-        P3OUT &=~BIT5;
+#if RAISE_PIN
+    full_run_started = 1;
+#endif
 
     WP(_v_pinState) = MODE_IDLE;
 
     WP(_v_count) = 0;
     WP(_v_seed) = 1;
-    os_jump(OFFSET(t_init, t_selectMode));
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_init \0");
+    coala_next_task(task_selectMode);
+
+#if TSK_SIZ
+    cp_sendRes("task_init \0");
 #endif
 
+    // threeAxis_t_8 accelID = {0};
 }
+
+
 void task_selectMode()
 {
     uint16_t pin_state=1;
     ++WP(_v_count);
-    // LOG("count: %u\r\n",RP(_v_count));
     if(RP(_v_count) >= 3) pin_state=2;
     if(RP(_v_count)>=5) pin_state=0;
-    // if (RP(_v_count) >= 7) {
-    //     PRINTF("TIME end is 65536*%u+%u\r\n",overflow,(unsigned)TBR);
-    //     while(1);
-    // }
-    run_mode_t mode;
-    class_t class;
+    if (RP(_v_count) >= 7) {
+        // while(1);
+        
+#if RAISE_PIN
+        if (full_run_started) {
+#if AUTO_RST
+            msp_reseter_halt();
+#endif
+            msp_gpio_spike(PRF_PORT, PRF_PIN);
+            full_run_started = 0;
+            coala_force_commit();
+#if AUTO_RST
+            msp_reseter_resume();
+#endif
+        }
+#endif
+
+        coala_next_task(task_init);
+        return;
+    }
+    // run_mode_t mode;
+    // class_t class;
 
     // Don't re-launch training after finishing training
     if ((pin_state == MODE_TRAIN_STATIONARY ||
@@ -187,8 +189,6 @@ void task_selectMode()
         WP(_v_pinState) = pin_state;
     }
 
-    // LOG("selectMode: 0x%x\r\n", pin_state);
-
     switch(pin_state) {
         case MODE_TRAIN_STATIONARY:
             WP(_v_discardedSamplesCount) = 0;
@@ -196,7 +196,7 @@ void task_selectMode()
             WP(_v_class) = CLASS_STATIONARY;
             WP(_v_samplesInWindow) = 0;
 
-            os_jump(OFFSET(t_selectMode, t_warmup));
+            coala_next_task(task_warmup);
             break;
 
         case MODE_TRAIN_MOVING:
@@ -205,33 +205,32 @@ void task_selectMode()
             WP(_v_class) = CLASS_MOVING;
             WP(_v_samplesInWindow) = 0;
 
-            os_jump(OFFSET(t_selectMode, t_warmup));
+            coala_next_task(task_warmup);
             break;
 
         case MODE_RECOGNIZE:
             WP(_v_mode) = MODE_RECOGNIZE;
 
-            os_jump(OFFSET(t_selectMode, t_resetStats));
+            coala_next_task(task_resetStats);
             break;
 
         default:
-            os_jump(OFFSET(t_selectMode, t_idle));
+            coala_next_task(task_idle);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_selectMode \0");
+#if TSK_SIZ
+    cp_sendRes("task_selectMode \0");
 #endif
-
 }
+
 
 void task_resetStats()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     // NOTE: could roll this into selectMode task, but no compelling reason
-    // LOG("resetStats\r\n");
 
     // NOTE: not combined into one struct because not all code paths use both
     WP(_v_movingCount) = 0;
@@ -240,21 +239,20 @@ void task_resetStats()
 
     WP(_v_samplesInWindow) = 0;
 
-    os_jump(OFFSET(t_resetStats, t_sample));
+    coala_next_task(task_sample);
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_resetStats \0");
+#if TSK_SIZ
+    cp_sendRes("task_resetStats \0");
 #endif
 
 }
 
+
 void task_sample()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
-
-    // LOG("sample\r\n");
 
     accelReading sample;
     ACCEL_singleSample_(&sample);
@@ -262,33 +260,31 @@ void task_sample()
     WP(_v_window[RP(_v_samplesInWindow)].y) = sample.y;
     WP(_v_window[RP(_v_samplesInWindow)].z) = sample.z;
     ++WP(_v_samplesInWindow);
-    // LOG("sample: sample %u %u %u window %u\r\n",
-    //         sample.x, sample.y, sample.z, RP(_v_samplesInWindow));
 
     if (RP(_v_samplesInWindow) < ACCEL_WINDOW_SIZE) {
-        os_jump(OFFSET(t_sample, t_sample));
+        coala_next_task(task_sample);
     } else {
-        RP(_v_samplesInWindow) = 0;
-        os_jump(OFFSET(t_sample, t_transform));
+        // RP(_v_samplesInWindow) = 0;
+        WP(_v_samplesInWindow) = 0;
+        coala_next_task(task_transform);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_sample \0");
+#if TSK_SIZ
+    cp_sendRes("task_sample \0");
 #endif
-
 }
+
 
 void task_transform()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     unsigned i;
 
-    // LOG("transform\r\n");
-    accelReading *sample;
-    accelReading transformedSample;
+    // accelReading *sample;
+    // accelReading transformedSample;
 
     for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
         if (RP(_v_window[i].x) < SAMPLE_NOISE_FLOOR ||
@@ -303,18 +299,18 @@ void task_transform()
                 ? RP(_v_window[i].z) : 0;
         }
     }
-    os_jump(OFFSET(t_transform, t_featurize));
+    coala_next_task(task_featurize);
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_transform \0");
+#if TSK_SIZ
+    cp_sendRes("task_transform \0");
 #endif
-
 }
+
 
 void task_featurize()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     accelReading mean, stddev;
@@ -322,11 +318,8 @@ void task_featurize()
     stddev.x = stddev.y = stddev.z = 0;
     features_t features;
 
-    // LOG("featurize\r\n");
-
     int i;
     for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
-        // LOG("featurize: features: x %u y %u z %u \r\n", RP(_v_window[i].x),RP(_v_window[i].y),RP(_v_window[i].z));
         mean.x += RP(_v_window[i].x);
         mean.y += RP(_v_window[i].y);
         mean.z += RP(_v_window[i].z);
@@ -335,7 +328,6 @@ void task_featurize()
     mean.y >>= 2;
     mean.z >>= 2;
 
-    // LOG("featurize: features: mx %u my %u mz %u \r\n", mean.x,mean.y,mean.z);
     for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
         stddev.x += RP(_v_window[i].x) > mean.x ? RP(_v_window[i].x) - mean.x
             : mean.x - RP(_v_window[i].x);
@@ -352,49 +344,46 @@ void task_featurize()
     unsigned stddevmag = stddev.x*stddev.x + stddev.y*stddev.y + stddev.z*stddev.z;
     features.meanmag   = sqrt16(meanmag);
     features.stddevmag = sqrt16(stddevmag);
-    // LOG("featurize: features: mean %u stddev %u\r\n",
-    //         features.meanmag, features.stddevmag);
 
     switch (RP(_v_mode)) {
         case MODE_TRAIN_STATIONARY:
         case MODE_TRAIN_MOVING:
             WP(_v_features.meanmag) = features.meanmag;
             WP(_v_features.stddevmag) = features.stddevmag;
-            os_jump(OFFSET(t_featurize, t_train));
+            coala_next_task(task_train);
             break;
         case MODE_RECOGNIZE:
             WP(_v_features.meanmag) = features.meanmag;
             WP(_v_features.stddevmag) = features.stddevmag;
-            os_jump(OFFSET(t_featurize, t_classify));
+            coala_next_task(task_classify);
             break;
         default:
             // TODO: abort
+            __no_operation();
             break;
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_featurize \0");
+#if TSK_SIZ
+    cp_sendRes("task_featurize \0");
 #endif
-
 }
 
-void task_classify() {
 
-#ifdef TSK_SIZ
+void task_classify()
+{
+
+#if TSK_SIZ
        cp_reset();
 #endif
 
     int move_less_error = 0;
     int stat_less_error = 0;
     int i;
-    class_t class;
+    // class_t class;
     long int meanmag;
     long int stddevmag;
-    // LOG("classify\r\n");
     meanmag = RP(_v_features.meanmag);
     stddevmag = RP(_v_features.stddevmag);
-    // LOG("classify: mean: %u\r\n", meanmag);
-    // LOG("classify: stddev: %u\r\n", stddevmag);
 
     for (i = 0; i < MODEL_SIZE; ++i) {
         long int stat_mean_err = (RP(_v_model_stationary[i].meanmag) > meanmag)
@@ -404,10 +393,6 @@ void task_classify() {
         long int stat_sd_err = (RP(_v_model_stationary[i].stddevmag) > stddevmag)
             ? (RP(_v_model_stationary[i].stddevmag) - stddevmag)
             : (stddevmag - RP(_v_model_stationary[i].stddevmag));
-        // LOG("classify: model_mean: %u\r\n", RP(_v_model_stationary[i].meanmag));
-        // LOG("classify: model_stddev: %u\r\n", RP(_v_model_stationary[i].stddevmag));
-        // LOG("classify: stat_mean_err: %u\r\n", stat_mean_err);
-        // LOG("classify: stat_stddev_err: %u\r\n", stat_sd_err);
 
         long int move_mean_err = (RP(_v_model_moving[i].meanmag) > meanmag)
             ? (RP(_v_model_moving[i].meanmag) - meanmag)
@@ -416,10 +401,7 @@ void task_classify() {
         long int move_sd_err = (RP(_v_model_moving[i].stddevmag) > stddevmag)
             ? (RP(_v_model_moving[i].stddevmag) - stddevmag)
             : (stddevmag - RP(_v_model_moving[i].stddevmag));
-        // LOG("classify: model_mean: %u\r\n", RP(_v_model_moving[i].meanmag));
-        // LOG("classify: model_stddev: %u\r\n", RP(_v_model_moving[i].stddevmag));
-        // LOG("classify: move_mean_err: %u\r\n", move_mean_err);
-        // LOG("classify: move_stddev_err: %u\r\n", move_sd_err);
+
         if (move_mean_err < stat_mean_err) {
             move_less_error++;
         } else {
@@ -435,41 +417,34 @@ void task_classify() {
 
     WP(_v_class) = (move_less_error > stat_less_error) ? CLASS_MOVING : CLASS_STATIONARY;
 
-    // LOG("classify: class 0x%x\r\n", RP(_v_class));
+    coala_next_task(task_stats);
 
-    os_jump(OFFSET(t_classify, t_stats));
-
-
-#ifdef TSK_SIZ
-       cp_sendRes("task_classify \0");
+#if TSK_SIZ
+    cp_sendRes("task_classify \0");
 #endif
-
 }
 
+
+uint16_t mct = 0;
+uint16_t sct = 0;
 void task_stats()
 {
-
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     unsigned movingCount = 0, stationaryCount = 0;
 
-    // LOG("stats\r\n");
-
     ++WP(_v_totalCount);
-    // LOG("stats: total %u\r\n", RP(_v_totalCount));
 
     switch (RP(_v_class)) {
         case CLASS_MOVING:
 
             ++WP(_v_movingCount);
-            // LOG("stats: moving %u\r\n", RP(_v_movingCount));
             break;
         case CLASS_STATIONARY:
 
             ++WP(_v_stationaryCount);
-            // LOG("stats: stationary %u\r\n", RP(_v_stationaryCount));
             break;
     }
 
@@ -479,58 +454,50 @@ void task_stats()
         unsigned resultMovingPct = RP(_v_movingCount) * 100 / RP(_v_totalCount);
 
         unsigned sum = RP(_v_stationaryCount) + RP(_v_movingCount);
-        // PRINTF("stats: s %u (%u%%) m %u (%u%%) sum/tot %u/%u: %c\r\n",
-        //        RP(_v_stationaryCount), resultStationaryPct,
-        //        RP(_v_movingCount), resultMovingPct,
-        //        RP(_v_totalCount), sum, sum == RP(_v_totalCount) ? 'V' : 'X');
-        os_jump(OFFSET(t_stats, t_idle));
+        mct = RP(_v_movingCount);
+        sct = RP(_v_stationaryCount);
+
+        coala_next_task(task_idle);
     } else {
-        os_jump(OFFSET(t_stats, t_sample));
+        coala_next_task(task_sample);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_stats \0");
+#if TSK_SIZ
+    cp_sendRes("task_stats \0");
 #endif
-
 }
 
 void task_warmup()
 {
-
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     threeAxis_t_8 sample;
-    // LOG("warmup\r\n");
 
     if (RP(_v_discardedSamplesCount) < NUM_WARMUP_SAMPLES) {
 
         ACCEL_singleSample_(&sample);
         ++WP(_v_discardedSamplesCount);
-        // LOG("warmup: discarded %u\r\n", RP(_v_discardedSamplesCount));
-        os_jump(OFFSET(t_warmup, t_warmup));
+        coala_next_task(task_warmup);
     } else {
         WP(_v_trainingSetSize) = 0;
-        os_jump(OFFSET(t_warmup, t_sample));
+        coala_next_task(task_sample);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_warmup \0");
+#if TSK_SIZ
+    cp_sendRes("task_warmup \0");
 #endif
-
 }
 
 void task_train()
 {
-
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    // LOG("train\r\n");
-    unsigned trainingSetSize;;
-    unsigned class;
+    // unsigned trainingSetSize;;
+    // unsigned class;
 
     switch (RP(_v_class)) {
         case CLASS_STATIONARY:
@@ -544,59 +511,45 @@ void task_train()
     }
 
     ++WP(_v_trainingSetSize);
-    // LOG("train: class %u count %u/%u\r\n", RP(_v_class),
-    //         RP(_v_trainingSetSize), MODEL_SIZE);
 
     if (RP(_v_trainingSetSize) < MODEL_SIZE) {
-        os_jump(OFFSET(t_train, t_sample));
+        coala_next_task(task_sample);
     } else {
-        //        PRINTF("train: class %u done (mn %u sd %u)\r\n",
-        //               class, features.meanmag, features.stddevmag);
-        os_jump(OFFSET(t_train, t_idle));
+        coala_next_task(task_idle);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_train \0");
+#if TSK_SIZ
+    cp_sendRes("task_train \0");
 #endif
-
 }
 
-void task_idle() {
-
-    if (pinCont){
-        P3OUT |=BIT5;
-        P3OUT &=~BIT5;
-    }
-    pinCont=0;
-
-    PAGCMT();
-
-    os_jump(OFFSET(t_idle, t_selectMode));
-
-#ifdef TSK_SIZ
-       cp_sendRes("task_idle \0");
+void task_idle()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-       while(1);
+    coala_next_task(task_selectMode);
 
+#if TSK_SIZ
+    cp_sendRes("task_idle \0");
+#endif
 }
 
-int main(void) {
+int main(void)
+{
     init();
-    taskId tasks[] = {{task_init, 1,1},
-         {task_selectMode, 2,2},
-         {task_resetStats, 3,1},
-         {task_sample, 4,3},
-         {task_transform, 5,1},
-         {task_featurize, 6,3},
-         {task_classify, 7,5},
-         {task_stats, 8,1},
-         {task_warmup, 9,2},
-         {task_train, 10,2},
-         {task_idle, 11,1}};
-    //This function should be called only once
-    os_addTasks(TASK_NUM, tasks );
 
-    os_scheduler();
+    coala_init(task_init);
+
+#if RAISE_PIN
+    if (first_run) {
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        first_run = 0;
+    }
+#endif
+
+    coala_run();
+
     return 0;
 }

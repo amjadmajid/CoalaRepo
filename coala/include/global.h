@@ -1,63 +1,108 @@
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
+/******************************************************************************
+ * File: global.h                                                             *
+ *                                                                            *
+ * Description: TODO                                                          *
+ *                                                                            *
+ * Note: this is an internal set of functionalities used by Coala's kernel,   *
+ *       do not modify or use externally.                                     *
+ *                                                                            *
+ * Authors: Amjad Majid, Carlo Delle Donne                                    *
+ ******************************************************************************/
 
 #ifndef INCLUDE_GLOBAL_H_
 #define INCLUDE_GLOBAL_H_
 
-#define __nv  __attribute__((section(".nv_vars")))
-#define __p  __attribute__((section(".p_vars")))
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include <mspbase.h>
+
+/**
+ * Prefixes for variables and function declaration.
+ */
+#define __nv    __attribute__((section(".nv_vars")))
+#define __p     __attribute__((section(".p_vars")))
 #define __ro_nv __attribute__((section(".ro_nv_vars")))
-//#define __v  __attribute__((section(".ram_vars")))
+#define INLINE  __attribute__((always_inline)) inline
+// #define __v     __attribute__((section(".ram_vars")))
 
-// Special memory locaitons
+/**
+ * Pages.
+ */
+#define APP_MEM_SIZE    (8 * 0x0400) // Application memory: 8 KB
+#define PAG_SIZE        0x0100
+#define NUM_PRS_PAGS    (APP_MEM_SIZE / PAG_SIZE)
+#define PAG_SIZE_W      (PAG_SIZE / 2)
 
-#define END_ROM         0xFF70   //  using the address 0xFF7F disables DMA transfer
-#define BGN_RAM         0x1F00
-#define APP_MEM         (8 * 1024)  // 12 KB [Linker script might need to be adjusted]
-#define RAM_BUF_SIZE    0x400  // 1024 bytes
-#define PAG_SIZE        256   // 64 128 256 512 1024
-#define RAM_BUF_LEN     (RAM_BUF_SIZE/PAG_SIZE)
-#define NUM_PRS_PAGS    (APP_MEM/PAG_SIZE)  // 1KB
-#define PAG_SIZE_W      (PAG_SIZE/2)  //1KB
-#define BGN_ROM         ( (END_ROM - APP_MEM) - APP_MEM  ) // 0xBF70
-#define LIST_HEAD       (BIGEN_ROM - TASKS_STRUC)           //2 bytes
+/**
+ * FRAM partition.
+ * ------------------------------------------------
+ * |                                              | 0x4400
+ * | Reserved for default sections:               |
+ * | rodata, nv_vars, data, text                  |
+ * |                                              | 0xB6FF
+ * ------------------------------------------------
+ * |                                     BGN_CP   | 0xB700
+ * | Reserved for checkpoint:                     |
+ * | 2 KB (2 times the max stack size)            |
+ * |                                              | 0xBEFF
+ * ------------------------------------------------
+ * |                                     BGN_PRS  | 0xBF00
+ * | Reserved for task-shared variables:          |
+ * | 16 KB (2 times the app memory)               |
+ * |                                              | 0xFEFF
+ * ------------------------------------------------
+ */
+#define BGN_CP          0xB700
+#define BGN_PRS         0xBF00
 
-// function pointer
-typedef void (* funcPt)(void);
-//This is a task interface. It is shared between the user and IPOS
-typedef struct _taskId{
-  funcPt * func;
-  uint8_t id;
-  uint8_t riskLevel;
-}taskId;
+/**
+ * RAM partition.
+ * ------------------------------------------------
+ * |                                     BGN_RAM  | 0x1C00
+ * | Reserved for task-shared variables:          |
+ * | 1 KB                                         |
+ * |                                              | 0x1FFF
+ * ------------------------------------------------
+ * |                                              | 0x2000
+ * | Reserved for default sections:               |
+ * | data, bss, noinit, heap                      |
+ * |                                              |
+ * | /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\ |
+ * |                                              |
+ * | The stack is placed at the bottom:           |
+ * | 1 KB max size                                |
+ * |                                              | 0x23FF
+ * ------------------------------------------------
+ */
+#define BGN_RAM         0x1C00
+#define RAM_SIZE        0x0800
+#define END_STK         (BGN_RAM + RAM_SIZE)
+#define RAM_BUF_SIZE    0x0400 // 1 KB
+#define RAM_BUF_LEN     (RAM_BUF_SIZE / PAG_SIZE)
 
-typedef struct {
-    unsigned int ramPagAddr;
-    uint8_t dirtyPag;
-    unsigned int crntPagHdr;
-}ramPagMeta;
+/**
+ * Function pointer.
+ */
+typedef void (* task_pt)(void);
 
-extern unsigned int __coalTskAddr;
-extern volatile unsigned int  __totNumTask;
-extern ramPagMeta ramPagsBuf[];
+/**
+ * RAM page meta-data.
+ */
+typedef struct ram_page_metadata_t {
+    uint16_t ram_pg_tag;  // address of the page in RAM (fixed)
+    uint8_t is_dirty;     // flag to mark a dirty page
+    uint16_t fram_pg_tag; // address of a page in FRAM (dynamic)
+} ram_page_metadata_t;
 
-// extern unsigned int __persis_CrntPagHeader;
-extern unsigned int __pagsInTemp[];
-extern unsigned int __persis_pagsInTemp[];
-// extern volatile uint8_t dirtyPag ;
-extern uint32_t __temp_temp;
-// extern unsigned int CrntPagHeader;  // Holds the address of the first byte of a page
-extern unsigned int __coalTaskCntr;
+/**
+ * Coala state codes.
+ */
+#define INIT_DONE     0xAD
+#define COMMITTING    1
+#define COMMIT_FINISH 0
 
-
-#define BLOCK_OFFSET_PT     1
-#define NEXT_OFFSET_PT      2
-
-#define BLOCK_OFFSET        2
-#define NEXT_OFFSET         4
-
-
-#define PAGCMT() __coalTaskCntr=1
 
 #endif /* INCLUDE_GLOBAL_H_ */

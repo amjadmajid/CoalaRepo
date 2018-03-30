@@ -1,14 +1,26 @@
-# Coala: 
-## Linker modification 
-change:    
-`ROM (rx)         : ORIGIN = 0x4400, LENGTH = 0xBB80 /* END=0xFF7F, size 48000 */`  
-with:  
-`ROM (rx)         : ORIGIN = 0x4400, LENGTH = 0x7B70 /* END=0xBF7F, size 48000 */`   
-`PRS (rx)         : ORIGIN = 0xBF70, LENGTH = 0x400f /* END=0xFF7F, size 8016 */`  
+# Coala - OOPSLA '18
 
-## Protected variables 
-### Annotation 
-All protected variables must be global and annotated with `__p`  
-### Access 
-A protected vairable must be written to with `WP(var)`  
-A protected vairable must be read from with `RP(var)`  
+Temporary private repository hosting Coala's code.
+
+### Compiling an application
+
+Coala's library and the available applications support the MSP430-GCC compiler. Before compiling an application, edit `maker/envCom.mk` to have the variable `GCC_DIR` point to the path where the compiler is installed. Then,
+
+```bash
+cd apps/anyapp
+make
+```
+
+This also compiles Coala and all the dependencies, if needed.
+
+### Writing an application
+
+Coala's API is provided in `coala/include/coala.h`. This is the only header that has to be included in the application, and it contains the programming interface:
+- `COALA_TASK`, used to declare a new task;
+- `COALA_PV`, used to declare a new protected variable;
+- `coala_next_task`, used to mark the next task to be scheduled after the currently executing one completes;
+- `RP`, used to mark a protected variable read;
+- `WP`, used to mark a protected variable write;
+- `coala_init`, passing the global initialization task to be scheduled upon the first boot as argument;
+- `coala_run`, which hands the control to Coala’s scheduler;
+- `COALA_SM`, used for typedef'ed structures' members, to ensure proper memory alignment required by Coala’s page handler.

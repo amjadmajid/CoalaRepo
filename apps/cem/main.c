@@ -1,16 +1,29 @@
-#include <msp430.h> 
+#include <msp430.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+
 #include <mspReseter.h>
-#include "mspProfiler.h"
-#include "mspDebugger.h"
-#include <ipos.h>
+#include <mspProfiler.h>
+#include <mspDebugger.h>
+#include <mspbase.h>
 
-//#define TSK_SIZ
-#define AUTO_RST
-//#define LOG_INFO
+#include <coala.h>
 
 
+// Profiling defines and flags.
+#define PRF_PORT 3
+#define PRF_PIN  4
+#define RST_PIN  5
+#if RAISE_PIN
+__nv uint8_t full_run_started = 0;
+__nv uint8_t first_run = 1;
+#endif
 
-__nv uint8_t pinCont = 0;
+#ifndef RST_TIME
+#define RST_TIME 25000
+#endif
+
 #define NIL 0 // like NULL, but for indexes, not real pointers
 
 #define DICT_SIZE         512
@@ -28,43 +41,42 @@ typedef uint16_t sample_t;
 
 // NOTE: can't use pointers, since need to ChSync, etc
 typedef struct _node_t {
-    letter_t letter; // 'letter' of the alphabet
-    index_t sibling; // this node is a member of the parent's children list
-    index_t child;   // link-list of children
+    COALA_SM(letter_t, letter); // 'letter' of the alphabet
+    COALA_SM(index_t, sibling); // this node is a member of the parent's children list
+    COALA_SM(index_t, child);   // link-list of children
 } node_t;
 
+// Tasks.
+COALA_TASK(task_init, 1)
+COALA_TASK(task_init_dict, 3)
+COALA_TASK(task_sample, 1)
+COALA_TASK(task_measure_temp, 1)
+COALA_TASK(task_letterize, 5)
+COALA_TASK(task_compress, 2)
+COALA_TASK(task_find_sibling, 3)
+COALA_TASK(task_add_node, 3)
+COALA_TASK(task_add_insert, 5)
+COALA_TASK(task_append_compressed, 2)
+COALA_TASK(task_print, 3)
+COALA_TASK(task_done, 1)
 
-///// function Prototypes
-void task_init();
-void task_init_dict();
-void task_sample();
-void task_measure_temp();
-void task_letterize();
-void task_compress();
-void task_find_sibling();
-void task_add_node();
-void task_add_insert();
-void task_append_compressed();
-void task_print();
-void task_done();
 
-
-__p letter_t _v_letter;
-__p unsigned _v_letter_idx;
-__p sample_t _v_prev_sample;
-__p index_t _v_out_len;
-__p index_t _v_node_count;
-__p sample_t _v_sample;
-__p index_t _v_sample_count;
-__p index_t _v_sibling;
-__p index_t _v_child;
-__p index_t _v_parent;
-__p index_t _v_parent_next;
-__p node_t _v_parent_node;
-__p node_t _v_sibling_node;
-__p index_t _v_symbol;
-__p node_t _v_compressed_data[BLOCK_SIZE];
-__p node_t _v_dict[DICT_SIZE];
+COALA_PV(node_t, _v_compressed_data, BLOCK_SIZE);
+COALA_PV(letter_t, _v_letter);
+COALA_PV(unsigned, _v_letter_idx);
+COALA_PV(sample_t, _v_prev_sample);
+COALA_PV(index_t, _v_out_len);
+COALA_PV(index_t, _v_node_count);
+COALA_PV(sample_t, _v_sample);
+COALA_PV(index_t, _v_sample_count);
+COALA_PV(index_t, _v_sibling);
+COALA_PV(index_t, _v_child);
+COALA_PV(index_t, _v_parent);
+COALA_PV(index_t, _v_parent_next);
+COALA_PV(node_t, _v_parent_node);
+COALA_PV(node_t, _v_sibling_node);
+COALA_PV(index_t, _v_symbol);
+COALA_PV(node_t, _v_dict, DICT_SIZE);
 
 
 static sample_t acquire_sample(letter_t prev_sample)
@@ -73,64 +85,63 @@ static sample_t acquire_sample(letter_t prev_sample)
     return sample;
 }
 
+
 void task_init()
 {
-
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
-    pinCont=1;
+#if RAISE_PIN
+    full_run_started = 1;
+#endif
+
     WP(_v_parent_next) = 0;
     WP(_v_out_len) = 0;
     WP(_v_letter) = 0;
     WP(_v_prev_sample) = 0;
     WP(_v_letter_idx) = 0;
-    WP(_v_sample_count) = 1 ;
+    WP(_v_sample_count) = 1;
 
-#ifdef TSK_SIZ
+    coala_next_task(task_init_dict);
+
+#if TSK_SIZ
     cp_sendRes("task_init \0");
 #endif
-
-//    os_jump(1);
 }
+
 
 void task_init_dict()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
     uint16_t i = RP(_v_letter);
-
-    // uart_sendStr("_v_letter \0");
-    //     uart_sendHex16(_v_letter);
-    // uart_sendStr("\n\r \0");
 
     WP(_v_dict[i].letter) = i ;
     WP(_v_dict[i].sibling) =  NIL;
     WP(_v_dict[i].child) = NIL;
     WP(_v_letter)++;
     if (i < NUM_LETTERS) {
-        os_jump(0);
+        coala_next_task(task_init_dict);
     } else {
         WP(_v_node_count) =  NUM_LETTERS;
-//        os_jump(1);
+        coala_next_task(task_sample);
     }
 
-#ifdef TSK_SIZ
+
+#if TSK_SIZ
     cp_sendRes("task_init_dict \0");
 #endif
 }
 
+
 void task_sample()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
-
-    // uart_sendStr("task_sample \0");
-    // uart_sendStr("\n\r \0");
 
     unsigned next_letter_idx = RP(_v_letter_idx) + 1;
     if (next_letter_idx == NUM_LETTERS_IN_SAMPLE)
@@ -138,25 +149,23 @@ void task_sample()
 
     if (RP(_v_letter_idx) == 0) {
         WP(_v_letter_idx) = next_letter_idx;
-        // os_jump(1);
+        coala_next_task(task_measure_temp);
     } else {
         WP(_v_letter_idx) = next_letter_idx;
-        os_jump(2);
+        coala_next_task(task_letterize);
     }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_sample \0");
 #endif
 }
 
+
 void task_measure_temp()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
-
-    // uart_sendStr("task_measure_temp \0");
-    // uart_sendStr("\n\r \0");
 
     sample_t prev_sample;
     prev_sample = RP(_v_prev_sample);
@@ -165,54 +174,48 @@ void task_measure_temp()
     prev_sample = sample;
     WP(_v_prev_sample) = prev_sample;
     WP(_v_sample) = sample;
-//    os_jump(1);
+    coala_next_task(task_letterize);
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_measure_temp \0");
 #endif
 }
 
+
 void task_letterize()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
-
-    // uart_sendStr("task_letterize \0");
-    // uart_sendStr("\n\r \0");
 
     unsigned letter_idx = RP(_v_letter_idx);
     if (letter_idx == 0)
         letter_idx = NUM_LETTERS_IN_SAMPLE;
     else
         letter_idx--;
+
     unsigned letter_shift = LETTER_SIZE_BITS * letter_idx;
     letter_t letter = (RP(_v_sample) & (LETTER_MASK << letter_shift)) >> letter_shift;
 
     WP(_v_letter) = letter;
-//    os_jump(1);
-#ifdef TSK_SIZ
+    coala_next_task(task_compress);
+
+#if TSK_SIZ
     cp_sendRes("task_letterize \0");
 #endif
 }
 
+
 void task_compress()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
-
-    // uart_sendStr("task_compress \0");
-    // uart_sendStr("\n\r \0");
 
     // pointer into the dictionary tree; starts at a root's child
     index_t parent = RP(_v_parent_next);
 
     uint16_t __cry;
-
-    // uart_sendStr("_v_dict[parent].child \0");
-    // uart_sendHex16(_v_dict[parent].child);
-    // uart_sendStr("\n\r \0");
 
     __cry = RP(_v_dict[parent].child);
     WP(_v_sibling) = __cry ;
@@ -227,15 +230,17 @@ void task_compress()
     WP(_v_child) = __cry;
     (WP(_v_sample_count))++;
 
-//    os_jump(1);
-#ifdef TSK_SIZ
+    coala_next_task(task_find_sibling);
+
+#if TSK_SIZ
     cp_sendRes("task_compress \0");
 #endif
 }
 
+
 void task_find_sibling()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
@@ -248,13 +253,13 @@ void task_find_sibling()
             __cry = RP(_v_sibling);
             WP(_v_parent_next) = __cry;
 
-            os_jump(10);
+            coala_next_task(task_letterize);
             return;
         } else { // continue traversing the siblings
             if(RP(_v_dict[i].sibling) != 0){
                 __cry = RP(_v_dict[i].sibling);
                 WP(_v_sibling) = __cry;
-                os_jump(0);
+                coala_next_task(task_find_sibling);
                 return;
             }
         }
@@ -265,20 +270,21 @@ void task_find_sibling()
     WP(_v_parent_next) = starting_node_idx;
 
     if (RP(_v_child) == NIL) {
-        os_jump(2);
+        coala_next_task(task_add_insert);
     }
-//    else {
-//        os_jump(1);
-//    }
+    else {
+        coala_next_task(task_add_node);
+    }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_find_sibling \0");
 #endif
 }
 
+
 void task_add_node()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
@@ -288,32 +294,31 @@ void task_add_node()
     if (RP(_v_dict[i].sibling) != NIL) {
         index_t next_sibling = RP(_v_dict[i].sibling);
         WP(_v_sibling) = next_sibling;
-        os_jump(0);
+        coala_next_task(task_add_node);
 
     } else { // found last sibling in the list
 
-//        LOG("add node: found last\r\n");
         uint16_t __cry;
 
-         __cry = RP(_v_dict[i].letter);
-         WP(_v_sibling_node.letter) = __cry;
+        __cry = RP(_v_dict[i].letter);
+        WP(_v_sibling_node.letter) = __cry;
         __cry = RP(_v_dict[i].sibling);
         WP(_v_sibling_node.sibling) = __cry;
         __cry = RP(_v_dict[i].child);
         WP(_v_sibling_node.child) = __cry;
 
-//        os_jump(1);
+        coala_next_task(task_add_insert);
     }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_add_node \0");
 #endif
-
 }
+
 
 void task_add_insert()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
@@ -325,25 +330,22 @@ void task_add_insert()
     uint16_t __cry;
     if (RP(_v_parent_node.child) == NIL) { // the only child
 
-        WP(_v_parent_node.child) = child;
         int i = RP(_v_parent);
-
 
         __cry = RP(_v_parent_node.letter);
         WP(_v_dict[i].letter) = __cry;
         __cry  = RP(_v_parent_node.sibling);
         WP(_v_dict[i].sibling) = __cry;
-        __cry = RP(_v_parent_node.child);
+        __cry = child;
         WP(_v_dict[i].child) = __cry;
 
     } else { // a sibling
 
         index_t last_sibling = RP(_v_sibling);
 
-        WP(_v_sibling_node.sibling) = child;
         __cry = RP(_v_sibling_node.letter);
         WP(_v_dict[last_sibling].letter) = __cry;
-        __cry = RP(_v_sibling_node.sibling);
+        __cry = child;
         WP(_v_dict[last_sibling].sibling) = __cry;
         __cry  = RP(_v_sibling_node.child);
         WP(_v_dict[last_sibling].child) = __cry;
@@ -354,17 +356,19 @@ void task_add_insert()
     WP(_v_dict[child].child) = NIL;
     __cry = RP(_v_parent);
     WP(_v_symbol) = __cry;
-    (RP(_v_node_count))++;
-#ifdef TSK_SIZ
+    (WP(_v_node_count))++;
+
+    coala_next_task(task_append_compressed);
+
+#if TSK_SIZ
     cp_sendRes("task_add_insert \0");
 #endif
-
-//    os_jump(1);
 }
+
 
 void task_append_compressed()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
@@ -373,120 +377,114 @@ void task_append_compressed()
     __cry = RP(_v_symbol);
     WP(_v_compressed_data[i].letter) = __cry;
 
-    if ( (++(RP(_v_out_len))) == BLOCK_SIZE) {
-//        os_jump(1);
-        ;
+    if ( (++(WP(_v_out_len))) == BLOCK_SIZE) {
+        coala_next_task(task_print);
     } else {
-        os_jump(5);
+        coala_next_task(task_sample);
     }
-#ifdef TSK_SIZ
+
+#if TSK_SIZ
     cp_sendRes("task_append_compressed \0");
 #endif
-
 }
+
 
 void task_print()
 {
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_reset();
 #endif
 
+    // unsigned i;
 
-    unsigned i;
+    // for (i = 0; i < BLOCK_SIZE; ++i) {
+    //     index_t index = RP(_v_compressed_data[i].letter);
+    //     printf("%u, ", index);
+    // }
+    // printf("\n");
 
-    for (i = 0; i < BLOCK_SIZE; ++i) {
-        index_t index = RP(_v_compressed_data[i].letter);
-    }
+    coala_next_task(task_done);
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_print \0");
 #endif
-
-//    os_jump(0);
 }
+
 
 void task_done()
 {
-
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    if (pinCont){
-        P3OUT |=BIT5;
-        P3OUT &=~BIT5;
+#if RAISE_PIN
+    if (full_run_started) {
+#if AUTO_RST
+        msp_reseter_halt();
+#endif
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        full_run_started = 0;
+        coala_force_commit();
+#if AUTO_RST
+        msp_reseter_resume();
+#endif
     }
-    pinCont=0;
+#endif
 
-#ifdef TSK_SIZ
-     cp_sendRes("task_done \0");
+    coala_next_task(task_init);
+
+#if TSK_SIZ
+    cp_sendRes("task_done \0");
 #endif
 }
-
 
 
 void init()
 {
+    msp_watchdog_disable();
+    msp_gpio_unlock();
 
-      WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
-      PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
-
-      P3OUT &=~BIT5;
-      P3DIR |=BIT5;
-
-#if 1
-      CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-  //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
-      CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-      CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-      CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-      CSCTL0_H = 0;
+#if RAISE_PIN
+    msp_gpio_clear(PRF_PORT, 4);
+    msp_gpio_clear(PRF_PORT, 5);
+    msp_gpio_clear(PRF_PORT, 6);
+    msp_gpio_dir_out(PRF_PORT, 4);
+    msp_gpio_dir_out(PRF_PORT, 5);
+    msp_gpio_dir_out(PRF_PORT, 6);
 #endif
 
-#ifdef TSK_SIZ
+    // msp_clock_set_mclk(CLK_8_MHZ);
+
+#if TSK_SIZ
+    uart_init();
     cp_init();
 #endif
 
-#ifdef LOG_INFO
+#if LOG_INFO
     uart_init();
 #endif
 
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(50000); // every 12 msec the MCU will be reseted
+#if AUTO_RST
+    msp_reseter_auto_rand(RST_TIME); // The MCU will be reset after 25 ms
 #endif
-
+    msp_gpio_set(PRF_PORT, RST_PIN);
 }
 
-int main(void) {
+
+int main(void)
+{
     init();
 
-    taskId tasks[] = {{task_init,   1,  1  },
-        {task_init_dict,            2,  3  },
-        {task_sample,               3,  1  },
-        {task_measure_temp,         4,  1  },
-        {task_letterize,            5,  5  },
-        {task_compress,             6,  2  },
-        {task_find_sibling,         7,  3  },
-        {task_add_node,             8,  3  },
-        {task_add_insert,           9,  5  },
-        {task_append_compressed,    10, 2 },
-        {task_print,                11, 3 },
-        {task_done,                 12, 1 }};
-    //This function should be called only once
-    os_addTasks(12, tasks );
+    coala_init(task_init);
 
-    os_scheduler();
+#if RAISE_PIN
+    if (first_run) {
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        first_run = 0;
+    }
+#endif
+
+    coala_run();
+
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-

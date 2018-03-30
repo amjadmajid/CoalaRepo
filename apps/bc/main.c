@@ -1,15 +1,29 @@
 #include <msp430.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+
 #include <mspReseter.h>
-#include "mspProfiler.h"
-#include "mspDebugger.h"
-#include <ipos.h>
+#include <mspProfiler.h>
+#include <mspDebugger.h>
+#include <mspbase.h>
+
+#include <coala.h>
 
 
-#define TSK_SIZ
-//#define AUTO_RST
-//#define LOG_INFO
-//#define RAISE_PIN 1
+// Profiling defines and flags.
+#define PRF_PORT 3
+#define PRF_PIN  4
+#define RST_PIN  5
+#if RAISE_PIN
+__nv uint8_t full_run_started = 0;
+__nv uint8_t first_run = 1;
+#endif
+
+#ifndef RST_TIME
+#define RST_TIME 25000
+#endif
+
 
 #define SEED 4L
 #define ITER 100
@@ -35,55 +49,41 @@ __nv static char bits[256] =
     4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8   /* 240 - 255 */
 };
 
-#define TASK_NUM 10
-#define OFFSET(src, dest) src <= dest ? dest - src : TASK_NUM + dest - src
+// Tasks.
+COALA_TASK(task_init, 2)
+COALA_TASK(task_select_func, 2)
+COALA_TASK(task_bit_count, 1)
+COALA_TASK(task_bitcount, 2)
+COALA_TASK(task_ntbl_bitcnt, 1)
+COALA_TASK(task_ntbl_bitcount, 2)
+COALA_TASK(task_BW_btbl_bitcount, 2)
+COALA_TASK(task_AR_btbl_bitcount, 2)
+COALA_TASK(task_bit_shifter, 2)
+COALA_TASK(task_end, 1)
 
-enum task_index {
-    t_init,
-    t_select_func,
-    t_bit_count,
-    t_bitcount,
-    t_ntbl_bitcnt,
-    t_ntbl_bitcount,
-    t_BW_btbl_bitcount,
-    t_AR_btbl_bitcount,
-    t_bit_shifter,
-    t_end
-};
-
-void task_init();
-void task_select_func();
-void task_bit_count();
-void task_bitcount();
-void task_ntbl_bitcnt();
-void task_ntbl_bitcount();
-void task_BW_btbl_bitcount();
-void task_AR_btbl_bitcount();
-void task_bit_shifter();
-void task_end();
-
-__nv uint8_t pinCont = 0;
-
-__p unsigned _v_n_0;
-__p unsigned _v_n_1;
-__p unsigned _v_n_2;
-__p unsigned _v_n_3;
-__p unsigned _v_n_4;
-__p unsigned _v_n_5;
-__p unsigned _v_n_6;
-__p unsigned _v_func;
-__p uint32_t _v_seed;
-__p unsigned _v_iter;
+// Task-shared protected variables.
+COALA_PV(unsigned, _v_n_0);
+COALA_PV(unsigned, _v_n_1);
+COALA_PV(unsigned, _v_n_2);
+COALA_PV(unsigned, _v_n_3);
+COALA_PV(unsigned, _v_n_4);
+COALA_PV(unsigned, _v_n_5);
+COALA_PV(unsigned, _v_n_6);
+COALA_PV(unsigned, _v_func);
+COALA_PV(uint32_t, _v_seed);
+COALA_PV(unsigned, _v_iter);
 
 
-
-void task_init() {
-
-#ifdef TSK_SIZ
-       cp_reset();
+void task_init()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    pinCont=1;
+#if RAISE_PIN
+    full_run_started = 1;
+#endif
+
     WP(_v_func) = 0;
     WP(_v_n_0) = 0;
     WP(_v_n_1) = 0;
@@ -93,114 +93,124 @@ void task_init() {
     WP(_v_n_5) = 0;
     WP(_v_n_6) = 0;
 
-    os_jump(OFFSET(t_init, t_select_func));
+    coala_next_task(task_select_func);
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_init \0");
+#if TSK_SIZ
+    cp_sendRes("task_init \0");
 #endif
 }
 
-void task_select_func() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+void task_select_func()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    WP(_v_seed) = (uint32_t)SEED; // for test, seed is always the same
+    WP(_v_seed) = (uint32_t) SEED; // for testing, seed is always the same
     WP(_v_iter) = 0;
-    if(RP(_v_func) == 0){
+
+    if (RP(_v_func) == 0) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_bit_count));
+        coala_next_task(task_bit_count);
     }
-    else if(RP(_v_func) == 1){
+    else if (RP(_v_func) == 1) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_bitcount));
+        coala_next_task(task_bitcount);
     }
-    else if(RP(_v_func) == 2){
+    else if (RP(_v_func) == 2) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_ntbl_bitcnt));
+        coala_next_task(task_ntbl_bitcnt);
     }
-    else if(RP(_v_func) == 3){
+    else if (RP(_v_func) == 3) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_ntbl_bitcount));
+        coala_next_task(task_ntbl_bitcount);
     }
-    else if(RP(_v_func) == 4){
+    else if (RP(_v_func) == 4) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_BW_btbl_bitcount));
+        coala_next_task(task_BW_btbl_bitcount);
     }
-    else if(RP(_v_func) == 5){
+    else if (RP(_v_func) == 5) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_AR_btbl_bitcount));
+        coala_next_task(task_AR_btbl_bitcount);
     }
-    else if(RP(_v_func) == 6){
+    else if (RP(_v_func) == 6) {
         WP(_v_func)++;
-        os_jump(OFFSET(t_select_func, t_bit_shifter));
+        coala_next_task(task_bit_shifter);
     }
-    else{
-        os_jump(OFFSET(t_select_func, t_end));
+    else {
+        coala_next_task(task_end);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_select_func \0");
+#if TSK_SIZ
+    cp_sendRes("task_select_func \0");
 #endif
-
 }
 
-void task_bit_count() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+void task_bit_count()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
     unsigned temp = 0;
-    if(tmp_seed) do
+
+    if (tmp_seed) do
         temp++;
-    while (0 != (tmp_seed = tmp_seed&(tmp_seed-1)));
+    while (0 != (tmp_seed = tmp_seed & (tmp_seed - 1)));
+
     WP(_v_n_0) += temp;
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_bit_count, t_bit_count));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_bit_count);
     }
-    else{
-        os_jump(OFFSET(t_bit_count, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_bit_count \0");
+#if TSK_SIZ
+    cp_sendRes("task_bit_count \0");
 #endif
 }
 
-void task_bitcount() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+void task_bitcount()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
+
     tmp_seed = ((tmp_seed & 0xAAAAAAAAL) >>  1) + (tmp_seed & 0x55555555L);
     tmp_seed = ((tmp_seed & 0xCCCCCCCCL) >>  2) + (tmp_seed & 0x33333333L);
     tmp_seed = ((tmp_seed & 0xF0F0F0F0L) >>  4) + (tmp_seed & 0x0F0F0F0FL);
     tmp_seed = ((tmp_seed & 0xFF00FF00L) >>  8) + (tmp_seed & 0x00FF00FFL);
     tmp_seed = ((tmp_seed & 0xFFFF0000L) >> 16) + (tmp_seed & 0x0000FFFFL);
+    
     WP(_v_n_1) += (int)tmp_seed;
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_bitcount, t_bitcount));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_bitcount);
     }
-    else{
-        os_jump(OFFSET(t_bitcount, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_bitcount \0");
+#if TSK_SIZ
+    cp_sendRes("task_bitcount \0");
 #endif
 }
-int recursive_cnt(uint32_t x){
+
+
+int recursive_cnt(uint32_t x)
+{
     int cnt = bits[(int)(x & 0x0000000FL)];
 
     if (0L != (x >>= 4))
@@ -208,7 +218,9 @@ int recursive_cnt(uint32_t x){
 
     return cnt;
 }
-int non_recursive_cnt(uint32_t x){
+
+int non_recursive_cnt(uint32_t x)
+{
     int cnt = bits[(int)(x & 0x0000000FL)];
 
     while (0L != (x >>= 4)) {
@@ -217,37 +229,42 @@ int non_recursive_cnt(uint32_t x){
 
     return cnt;
 }
-void task_ntbl_bitcnt() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+void task_ntbl_bitcnt()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
+    // TRICK ALERT!
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_n_2) += non_recursive_cnt(tmp_seed);
     WP(_v_seed) = tmp_seed + 13;
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_ntbl_bitcnt, t_ntbl_bitcnt));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_ntbl_bitcnt);
     }
-    else{
-        os_jump(OFFSET(t_ntbl_bitcnt, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_ntbl_bitcnt \0");
+#if TSK_SIZ
+    cp_sendRes("task_ntbl_bitcnt \0");
 #endif
-
 }
-void task_ntbl_bitcount() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+
+void task_ntbl_bitcount()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
-
+    // TRICK ALERT!
     uint16_t __cry = RP(_v_seed);
-    WP(_v_n_3) += bits[ (int) (__cry & 0x0000000FUL)       ] +
+
+    WP(_v_n_3) +=
+        bits[ (int) (__cry & 0x0000000FUL)] +
         bits[ (int)((__cry & 0x000000F0UL) >> 4) ] +
         bits[ (int)((__cry & 0x00000F00UL) >> 8) ] +
         bits[ (int)((__cry & 0x0000F000UL) >> 12)] +
@@ -255,30 +272,32 @@ void task_ntbl_bitcount() {
         bits[ (int)((__cry & 0x00F00000UL) >> 20)] +
         bits[ (int)((__cry & 0x0F000000UL) >> 24)] +
         bits[ (int)((__cry & 0xF0000000UL) >> 28)];
+
+    // TRICK ALERT!
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_ntbl_bitcount, t_ntbl_bitcount));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_ntbl_bitcount);
     }
-    else{
-        os_jump(OFFSET(t_ntbl_bitcount, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_ntbl_bitcount \0");
+#if TSK_SIZ
+    cp_sendRes("task_ntbl_bitcount \0");
 #endif
-
 }
-void task_BW_btbl_bitcount() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+
+void task_BW_btbl_bitcount()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    union
-    {
+    union {
         unsigned char ch[4];
         long y;
     } U;
@@ -287,151 +306,162 @@ void task_BW_btbl_bitcount() {
 
     WP(_v_n_4) += bits[ U.ch[0] ] + bits[ U.ch[1] ] +
         bits[ U.ch[3] ] + bits[ U.ch[2] ];
+
+    // TRICK ALERT!
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_BW_btbl_bitcount, t_BW_btbl_bitcount));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_BW_btbl_bitcount);
     }
-    else{
-        os_jump(OFFSET(t_BW_btbl_bitcount, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_BW_btbl_bitcount \0");
+#if TSK_SIZ
+    cp_sendRes("task_BW_btbl_bitcount \0");
 #endif
 }
-void task_AR_btbl_bitcount() {
 
-#ifdef TSK_SIZ
-       cp_reset();
+
+void task_AR_btbl_bitcount()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-    unsigned char * Ptr = (unsigned char *) &RP(_v_seed) ;
-    int Accu ;
+    unsigned char * Ptr = (unsigned char *) &RP(_v_seed);
+    int Accu;
 
     Accu  = bits[ *Ptr++ ];
     Accu += bits[ *Ptr++ ];
     Accu += bits[ *Ptr++ ];
     Accu += bits[ *Ptr ];
     WP(_v_n_5)+= Accu;
+
+    // TRICK ALERT!
     uint32_t tmp_seed = RP(_v_seed);
     WP(_v_seed) = tmp_seed + 13;
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_AR_btbl_bitcount, t_AR_btbl_bitcount));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_AR_btbl_bitcount);
     }
-    else{
-        os_jump(OFFSET(t_AR_btbl_bitcount, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_AR_btbl_bitcount \0");
+#if TSK_SIZ
+    cp_sendRes("task_AR_btbl_bitcount \0");
 #endif
 }
 
-void task_bit_shifter() {
-
-#ifdef TSK_SIZ
-       cp_reset();
+void task_bit_shifter()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     unsigned i, nn;
     uint32_t tmp_seed = RP(_v_seed);
+
     for (i = nn = 0; tmp_seed && (i < (sizeof(long) * CHAR_BIT)); ++i, tmp_seed >>= 1)
         nn += (unsigned)(tmp_seed & 1L);
+
     WP(_v_n_6) += nn;
+
+    // TRICK ALERT!
     tmp_seed = RP(_v_seed);
     tmp_seed += 13;
     WP(_v_seed) = tmp_seed;
 
     WP(_v_iter)++;
 
-    if(RP(_v_iter) < ITER){
-        os_jump(OFFSET(t_bit_shifter, t_bit_shifter));
+    if (RP(_v_iter) < ITER) {
+        coala_next_task(task_bit_shifter);
     }
-    else{
-        os_jump(OFFSET(t_bit_shifter, t_select_func));
+    else {
+        coala_next_task(task_select_func);
     }
 
-#ifdef TSK_SIZ
-       cp_sendRes("task_bit_shifter \0");
+#if TSK_SIZ
+    cp_sendRes("task_bit_shifter \0");
 #endif
-
 }
 
-void task_end() {
-
-#ifdef TSK_SIZ
-       cp_reset();
+void task_end()
+{
+#if TSK_SIZ
+    cp_reset();
 #endif
-
-    if (pinCont){
-        P3OUT |=BIT5;
-        P3OUT &=~BIT5;
-    }
-    pinCont=0;
-    PAGCMT();
-
-#ifdef TSK_SIZ
-     cp_sendRes("task_end \0");
-#endif
-
-     while(1);
-}
-
-void init() {
-
-    WDTCTL = WDTPW | WDTHOLD;   // Stop watchdog timer
-    PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
 #if RAISE_PIN
-  P3OUT &=~BIT5;
-  P3DIR |=BIT5;
+    if (full_run_started) {
+#if AUTO_RST
+        msp_reseter_halt();
+#endif
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        full_run_started = 0;
+        coala_force_commit();
+#if AUTO_RST
+        msp_reseter_resume();
+#endif
+    }
 #endif
 
-#if 0
-    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-//  CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
-    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-    CSCTL0_H = 0;
+    coala_next_task(task_init);
+
+#if TSK_SIZ
+    cp_sendRes("task_end \0");
+#endif
+}
+
+void init()
+{
+    msp_watchdog_disable();
+    msp_gpio_unlock();
+
+#if RAISE_PIN
+    msp_gpio_clear(PRF_PORT, 4);
+    msp_gpio_clear(PRF_PORT, 5);
+    msp_gpio_clear(PRF_PORT, 6);
+    msp_gpio_dir_out(PRF_PORT, 4);
+    msp_gpio_dir_out(PRF_PORT, 5);
+    msp_gpio_dir_out(PRF_PORT, 6);
 #endif
 
-#ifdef TSK_SIZ
+    // msp_clock_set_mclk(CLK_8_MHZ);
+
+#if TSK_SIZ
     uart_init();
     cp_init();
 #endif
 
-#ifdef LOG_INFO
+#if LOG_INFO
     uart_init();
 #endif
 
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(25000); // every 12 msec the MCU will be reseted
+#if AUTO_RST
+    msp_reseter_auto_rand(RST_TIME);
 #endif
-
+    msp_gpio_set(PRF_PORT, RST_PIN);
 }
 
-int main(void) {
+int main(void)
+{
     init();
-    taskId tasks[] = {{task_init,        1, 2},
-        {task_select_func,               2, 2},
-        {task_bit_count,                 3, 1},
-        {task_bitcount,                  4, 2},
-        {task_ntbl_bitcnt,               5, 1},
-        {task_ntbl_bitcount,             6, 2},
-        {task_BW_btbl_bitcount,          7, 2},
-        {task_AR_btbl_bitcount,          8, 2},
-        {task_bit_shifter,               9, 2},
-        {task_end,                       10, 1}};
 
-    //This function should be called only once
-    os_addTasks(TASK_NUM, tasks );
+    coala_init(task_init);
 
-    os_scheduler();
+#if RAISE_PIN
+    if (first_run) {
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        first_run = 0;
+    }
+#endif
+
+    coala_run();
+
     return 0;
 }

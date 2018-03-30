@@ -1,19 +1,29 @@
-#include <stdio.h>
-
 #include <msp430.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
+#include <stdio.h>
+
 #include <mspReseter.h>
-#include "mspProfiler.h"
-#include "mspDebugger.h"
+#include <mspProfiler.h>
+#include <mspDebugger.h>
+#include <mspbase.h>
 
-#include <ipos.h>
+#include <coala.h>
 
 
-#define TSK_SIZ
-//#define AUTO_RST
-//#define LOG_INFO
+// Profiling defines and flags.
+#define PRF_PORT 3
+#define PRF_PIN  4
+#define RST_PIN  5
+#if RAISE_PIN
+__nv uint8_t full_run_started = 0;
+__nv uint8_t first_run = 1;
+#endif
+
+#ifndef RST_TIME
+#define RST_TIME 25000
+#endif
 
 
 #define NUM_BUCKETS 128 // must be a power of 2
@@ -37,63 +47,39 @@ typedef struct _lookup_count {
     unsigned member_count;
 } lookup_count_t;
 
-#define TASK_NUM 15
+// Tasks.
+COALA_TASK(task_init, 5)
+COALA_TASK(task_init_array, 1)
+COALA_TASK(task_generate_key, 1)
+COALA_TASK(task_calc_indexes, 1)
+COALA_TASK(task_calc_indexes_index_1, 1)
+COALA_TASK(task_calc_indexes_index_2, 1)
+COALA_TASK(task_insert, 1)
+COALA_TASK(task_add, 1)
+COALA_TASK(task_relocate, 1)
+COALA_TASK(task_insert_done, 1)
+COALA_TASK(task_lookup, 1)
+COALA_TASK(task_lookup_search, 1)
+COALA_TASK(task_lookup_done, 1)
+COALA_TASK(task_print_stats, 1)
+COALA_TASK(task_done, 1)
 
-#define OFFSET(src, dest) src <= dest ? dest - src : TASK_NUM + dest - src
+// Task-shared protected variables.
+COALA_PV(fingerprint_t, _v_filter, NUM_BUCKETS);
+COALA_PV(index_t, _v_index);
+COALA_PV(value_t, _v_key);
+COALA_PV(task_pt, _v_next_task);
+COALA_PV(fingerprint_t, _v_fingerprint);
+COALA_PV(value_t, _v_index1);
+COALA_PV(value_t, _v_index2);
+COALA_PV(value_t, _v_relocation_count);
+COALA_PV(value_t, _v_insert_count);
+COALA_PV(value_t, _v_inserted_count);
+COALA_PV(value_t, _v_lookup_count);
+COALA_PV(value_t, _v_member_count);
+COALA_PV(bool, _v_success);
+COALA_PV(bool, _v_member);
 
-enum task_index {
-    t_init,
-    t_init_array,
-    t_generate_key,
-    t_calc_indexes,
-    t_calc_indexes_index_1,
-
-    t_calc_indexes_index_2,
-    t_insert,
-    t_add,
-    t_relocate,
-    t_insert_done,
-
-    t_lookup,
-    t_lookup_search,
-    t_lookup_done,
-    t_print_stats,
-    t_done
-};
-
-void task_init();
-void task_init_array();
-void task_generate_key();
-void task_calc_indexes();
-void task_calc_indexes_index_1();
-void task_calc_indexes_index_2();
-void task_insert();
-void task_add();
-void task_relocate();
-void task_insert_done();
-void task_lookup();
-void task_lookup_search();
-void task_lookup_done();
-void task_print_stats();
-void task_done();
-
-__p fingerprint_t _v_filter[NUM_BUCKETS];
-__p index_t _v_index;
-__p value_t _v_key;
-//__p task_t* _v_next_task;
-__p enum task_index _v_next_task;
-__p fingerprint_t _v_fingerprint;
-__p value_t _v_index1;
-__p value_t _v_index2;
-__p value_t _v_relocation_count;
-__p value_t _v_insert_count;
-__p value_t _v_inserted_count;
-__p value_t _v_lookup_count;
-__p value_t _v_member_count;
-__p bool _v_success;
-__p bool _v_member;
-
-__nv uint8_t pinRaised=0;
 
 static value_t init_key = 0x0001; // seeds the pseudo-random sequence of keys
 
@@ -102,195 +88,212 @@ static hash_t djb_hash(uint8_t* data, unsigned len)
     uint16_t hash = 5381;
     unsigned int i;
 
-    for(i = 0; i < len; data++, i++)
+    for (i = 0; i < len; data++, i++)
         hash = ((hash << 5) + hash) + (*data);
-
 
     return hash & 0xFFFF;
 }
 
 static index_t hash_to_index(fingerprint_t fp)
 {
-    hash_t hash = djb_hash((uint8_t *)&fp, sizeof(fingerprint_t));
+    hash_t hash = djb_hash((uint8_t *) &fp, sizeof(fingerprint_t));
     return hash & (NUM_BUCKETS - 1); // NUM_BUCKETS must be power of 2
 }
 
 static fingerprint_t hash_to_fingerprint(value_t key)
 {
-    return djb_hash((uint8_t *)&key, sizeof(value_t));
+    return djb_hash((uint8_t *) &key, sizeof(value_t));
 }
 
-unsigned i;
 
 void task_init()
 {
-
-        P3OUT |= BIT5;
-        P3OUT &= ~BIT5;
-
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
-    unsigned i;
-        for (i = 0; i < NUM_BUCKETS ; ++i) {
-            WP(_v_filter[i]) = 0;
-        }
-        WP(_v_insert_count) = 0;
-        WP(_v_lookup_count) = 0;
-        WP(_v_inserted_count) = 0;
-        WP(_v_member_count) = 0;
-        WP(_v_key) = init_key;
-        WP(_v_next_task) = t_insert;
 
-        os_jump(OFFSET(t_init, t_generate_key));
-#ifdef TSK_SIZ
-     cp_sendRes("task_init \0");
+#if RAISE_PIN
+    full_run_started = 1;
+#endif
+
+    unsigned i;
+    for (i = 0; i < NUM_BUCKETS ; ++i) {
+        WP(_v_filter[i]) = 0;
+    }
+
+    WP(_v_insert_count) = 0;
+    WP(_v_lookup_count) = 0;
+    WP(_v_inserted_count) = 0;
+    WP(_v_member_count) = 0;
+    WP(_v_key) = init_key;
+    WP(_v_next_task) = task_insert;
+
+    coala_next_task(task_generate_key);
+
+#if TSK_SIZ
+    cp_sendRes("task_init \0");
 #endif
 }
 
-void task_init_array() {
-#ifdef TSK_SIZ
-       cp_reset();
-#endif
-    unsigned i;
-        for (i = 0; i < BUFFER_SIZE - 1; ++i) {
-            WP(_v_filter[i + RP(_v_index)*(BUFFER_SIZE-1)]) = 0;
-        }
-        ++WP(_v_index);
-        if (RP(_v_index) == NUM_BUCKETS/(BUFFER_SIZE-1)) {
-//            os_jump(1);
-        }
-        else {
-            os_jump(0);
-        }
 
-#ifdef TSK_SIZ
-     cp_sendRes("task_init_array \0");
+void task_init_array()
+{
+#if TSK_SIZ
+    cp_reset();
+#endif
+
+    unsigned i;
+    for (i = 0; i < BUFFER_SIZE - 1; ++i) {
+        WP(_v_filter[i + RP(_v_index)*(BUFFER_SIZE-1)]) = 0;
+    }
+
+    ++WP(_v_index);
+    if (RP(_v_index) == NUM_BUCKETS / (BUFFER_SIZE - 1)) {
+        coala_next_task(task_generate_key);
+    }
+    else {
+        coala_next_task(task_init_array);
+    }
+
+#if TSK_SIZ
+    cp_sendRes("task_init_array \0");
 #endif
 }
+
 
 void task_generate_key()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
-    // insert pseufo-random integers, for testing
+
+    // Insert pseudo-random integers, for testing.
     // If we use consecutive ints, they hash to consecutive DJB hashes...
     // NOTE: we are not using rand(), to have the sequence available to verify
-    // that that are no false negatives (and avoid having to save the values).
+    // that there are no false negatives (and avoid having to save the values).
 
     uint16_t __cry;
 
     __cry = (RP(_v_key) + 1) * 17;
     WP(_v_key) = __cry;
 
-    if (RP(_v_next_task) >= t_generate_key) {
-        os_jump(RP(_v_next_task) - t_generate_key);
-    }
-    else {
-        os_jump(TASK_NUM - RP(_v_next_task) + t_generate_key);
+    task_pt next_task = RP(_v_next_task);
+
+    if (next_task == task_insert) {
+        coala_next_task(task_insert);
+    } else if (next_task == task_lookup) {
+        coala_next_task(task_lookup);
+    } else {
+        while(1); // Debugging purpose
     }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
    cp_sendRes("task_generate_key \0");
 #endif
 }
 
+
 void task_calc_indexes()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     uint16_t __cry;
     __cry = hash_to_fingerprint(RP(_v_key));
     WP(_v_fingerprint) = __cry;
 
-    os_jump(1);
+    coala_next_task(task_calc_indexes_index_1);
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_calc_indexes \0");
 #endif
 }
 
+
 void task_calc_indexes_index_1()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     uint16_t __cry;
     __cry = hash_to_index(RP(_v_key));
     WP(_v_index1) = __cry;
 
-    os_jump(1);
+    coala_next_task(task_calc_indexes_index_2);
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_calc_indexes_index_1 \0");
 #endif
 }
 
+
 void task_calc_indexes_index_2()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
+
     index_t fp_hash = hash_to_index(RP(_v_fingerprint));
     uint16_t __cry;
-     __cry = RP(_v_index1) ^ fp_hash;
-     WP(_v_index2) = __cry;
+    __cry = RP(_v_index1) ^ fp_hash;
+    WP(_v_index2) = __cry;
 
-    if (RP(_v_next_task) >= t_calc_indexes_index_2) {
-        os_jump(RP(_v_next_task) - t_calc_indexes_index_2);
-    }
-    else {
-        os_jump(TASK_NUM - RP(_v_next_task) + t_calc_indexes_index_2);
+    task_pt next_task = RP(_v_next_task);
+
+    if (next_task == task_add) {
+        coala_next_task(task_add);
+    } else if (next_task == task_lookup_search) {
+        coala_next_task(task_lookup_search);
+    } else {
+        while(1); // Debugging purpose
     }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_calc_indexes_index_2 \0");
 #endif
 }
+
 
 // This task is redundant.
 // Alpaca never needs this but since Chain code had it, leaving it for fair comparison.
 void task_insert()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
-    WP(_v_next_task) = t_add;
-    os_jump(12);
 
-#ifdef TSK_SIZ
-   cp_sendRes("task_insert \0");
+    WP(_v_next_task) = task_add;
+    coala_next_task(task_calc_indexes);
+
+#if TSK_SIZ
+    cp_sendRes("task_insert \0");
 #endif
 }
 
 
 void task_add()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
+
     uint16_t __cry;
     uint16_t __cry_idx = RP(_v_index1);
     uint16_t __cry_idx2 = RP(_v_index2);
+    
     if (!RP(_v_filter[__cry_idx])) {
-
         WP(_v_success) = true;
         __cry = RP(_v_fingerprint);
         WP(_v_filter[__cry_idx]) = __cry;
-        os_jump(2);
-        return;
+        coala_next_task(task_insert_done);
     } else {
         if (!RP(_v_filter[__cry_idx2])) {
-
             WP(_v_success) = true;
             __cry = RP(_v_fingerprint);
             WP(_v_filter[__cry_idx2])  = __cry;
-            os_jump(2);
-            return;
+            coala_next_task(task_insert_done);
         } else { // evict one of the two entries
             fingerprint_t fp_victim;
             index_t index_victim;
@@ -310,22 +313,22 @@ void task_add()
             WP(_v_fingerprint) = fp_victim;
             WP(_v_relocation_count) = 0;
 
-//            os_jump(1);
-            return;
+            coala_next_task(task_relocate);
         }
     }
-#ifdef TSK_SIZ
+
+#if TSK_SIZ
     cp_sendRes("task_add \0");
 #endif
 }
 
 
-
 void task_relocate()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
+
     uint16_t __cry;
     fingerprint_t fp_victim = RP(_v_fingerprint);
     index_t fp_hash_victim = hash_to_index(fp_victim);
@@ -334,13 +337,11 @@ void task_relocate()
     if (!RP(_v_filter[index2_victim])) { // slot was free
         WP(_v_success) = true;
         WP(_v_filter[index2_victim]) = fp_victim;
-//        os_jump(1);
-        return;
+        coala_next_task(task_insert_done);
     } else { // slot was occupied, rellocate the next victim
-
         if (RP(_v_relocation_count) >= MAX_RELOCATIONS) { // insert failed
             WP(_v_success) = false;
-//            os_jump(1);
+            coala_next_task(task_insert_done);
             return;
         }
 
@@ -349,87 +350,85 @@ void task_relocate()
         __cry = RP(_v_filter[index2_victim]);
         WP(_v_fingerprint) = __cry;
         WP(_v_filter[index2_victim]) = fp_victim;
-        os_jump(0);
-        return;
+        coala_next_task(task_relocate);
     }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_relocate \0");
 #endif
 }
 
 
-//#if 0
-
 void task_insert_done()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
+
     uint16_t __cry;
     ++WP(_v_insert_count);
     __cry = RP(_v_inserted_count);
     __cry+= RP(_v_success);
     WP(_v_inserted_count) = __cry;
 
-
     if (RP(_v_insert_count) < NUM_INSERTS) {
-        WP(_v_next_task) = t_insert;
-        os_jump(8);
-        return;
+        WP(_v_next_task) = task_insert;
+        coala_next_task(task_generate_key);
     } else {
-        WP(_v_next_task) = t_lookup;
+        WP(_v_next_task) = task_lookup;
         WP(_v_key) = init_key;
-        os_jump(8);
-        return;
+        coala_next_task(task_generate_key);
     }
 
-#ifdef TSK_SIZ
+#if TSK_SIZ
     cp_sendRes("task_insert_done \0");
 #endif
 }
 
+
 void task_lookup()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
-    WP(_v_next_task) = t_lookup_search;
-    os_jump(8);
 
-#ifdef TSK_SIZ
+    WP(_v_next_task) = task_lookup_search;
+    coala_next_task(task_calc_indexes);
+
+#if TSK_SIZ
     cp_sendRes("task_lookup \0");
 #endif
 }
 
+
 void task_lookup_search()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
+
     if (RP(_v_filter[RP(_v_index1)]) == RP(_v_fingerprint)) {
         WP(_v_member) = true;
     } else {
-
         if (RP(_v_filter[RP(_v_index2)]) == RP(_v_fingerprint)) {
             WP(_v_member) = true;
-        }
-        else {
+        } else {
             WP(_v_member) = false;
         }
     }
 
-//    os_jump(1);
-#ifdef TSK_SIZ
-      cp_sendRes("task_lookup_search \0");
+    coala_next_task(task_lookup_done);
+
+#if TSK_SIZ
+    cp_sendRes("task_lookup_search \0");
 #endif
 }
 
+
 void task_lookup_done()
 {
-
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
     uint16_t __cry;
@@ -439,100 +438,111 @@ void task_lookup_done()
     WP(_v_member_count)  = __cry;
 
     if (RP(_v_lookup_count) < NUM_LOOKUPS) {
-        WP(_v_next_task) = t_lookup;
-        os_jump(5);
-        return;
+        WP(_v_next_task) = task_lookup;
+        coala_next_task(task_generate_key);
     } else {
-//        os_jump(1);
-        return;
+        coala_next_task(task_print_stats);
     }
 
-#ifdef TSK_SIZ
-     cp_sendRes("task_lookup_done \0");
+#if TSK_SIZ
+    cp_sendRes("task_lookup_done \0");
 #endif
 }
+
 
 void task_print_stats()
 {
+    // Print output here
 
-        P3OUT |= BIT5;
-        P3OUT &= ~BIT5;
+    // unsigned i;
+    // for (i = 0; i < NUM_BUCKETS; ++i) {
+    //     printf("%04x ", RP(_v_filter[i]));
+    //     if (i > 0 && (i + 1) % 8 == 0){
+    //         printf("\n");
+    //     }
+    // }
 
-        PAGCMT();
+    __no_operation();
+
+    coala_next_task(task_done);
 }
+
 
 void task_done()
 {
-#ifdef TSK_SIZ
-       cp_reset();
+#if TSK_SIZ
+    cp_reset();
 #endif
 
-
-#ifdef TSK_SIZ
-     cp_sendRes("task_done \0");
+#if RAISE_PIN
+    if (full_run_started) {
+#if AUTO_RST
+        msp_reseter_halt();
+#endif
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        full_run_started = 0;
+        coala_force_commit();
+#if AUTO_RST
+        msp_reseter_resume();
+#endif
+    }
 #endif
 
-     while(1);
+    coala_next_task(task_init);
 
+#if TSK_SIZ
+    cp_sendRes("task_done \0");
+#endif
 }
 
 
 void init()
 {
-    WDTCTL = WDTPW | WDTHOLD;
-    PM5CTL0 &= ~LOCKLPM5;
+    msp_watchdog_disable();
+    msp_gpio_unlock();
 
-    P3OUT &= ~BIT5;
-    P3DIR |=BIT5;
-
-#if 0
-    CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
-//    CSCTL1 = DCOFSEL_4 |  DCORSEL;      // Set DCO to 16MHz
-    CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
-    CSCTL2 =  SELM__DCOCLK;               // MCLK = DCO
-    CSCTL3 = DIVM__1;                     // divide the DCO frequency by 1
-    CSCTL0_H = 0;
+#if RAISE_PIN
+    msp_gpio_clear(PRF_PORT, 4);
+    msp_gpio_clear(PRF_PORT, 5);
+    msp_gpio_clear(PRF_PORT, 6);
+    msp_gpio_dir_out(PRF_PORT, 4);
+    msp_gpio_dir_out(PRF_PORT, 5);
+    msp_gpio_dir_out(PRF_PORT, 6);
 #endif
 
-#ifdef TSK_SIZ
+    // msp_clock_set_mclk(CLK_8_MHZ);
+
+#if TSK_SIZ
     uart_init();
     cp_init();
 #endif
 
-#ifdef LOG_INFO
+#if LOG_INFO
     uart_init();
 #endif
 
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
+#if AUTO_RST
+    msp_reseter_auto_rand(RST_TIME); // every 12 msec the MCU will be reseted
 #endif
+    msp_gpio_set(PRF_PORT, RST_PIN);
 
     srand(0);
-
 }
 
-int main(void) {
+int main(void)
+{
     init();
 
-    taskId tasks[] = {{task_init,       1,5 },
-        {task_init_array,               2,1} ,
-        {task_generate_key,             3,1 },
-        {task_calc_indexes,             4,1 },
-        {task_calc_indexes_index_1,     5,1 },
-        {task_calc_indexes_index_2,     6,1 },
-        {task_insert,                   7,1 },
-        {task_add,                      8,1 },
-        {task_relocate,                 9,1 },
-        {task_insert_done,              10,1 },
-        {task_lookup,                   11,1 },
-        {task_lookup_search,            12,1 },
-        {task_lookup_done,              14,1 },
-        {task_print_stats,              15,1 },
-        {task_done,                     16,1 }
-    };
+    coala_init(task_init);
 
-    os_addTasks(TASK_NUM, tasks );
+#if RAISE_PIN
+    if (first_run) {
+        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        first_run = 0;
+    }
+#endif
 
-    os_scheduler();
+    coala_run();
+
     return 0;
 }
