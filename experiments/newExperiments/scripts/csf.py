@@ -13,6 +13,7 @@ import colors
 from collections import defaultdict
 import sys
 
+plt.style.use('seaborn-darkgrid')
 
 colorCnts=0
 
@@ -141,6 +142,7 @@ def figureSetting():
     """
     Set a figure params
     """
+    plt.rcParams['font.family'] = ['Tahoma', 'DejaVu Sans','Lucida Grande', 'Verdana']
     #set figure linewidth
     plt.rcParams['axes.linewidth']=2
 

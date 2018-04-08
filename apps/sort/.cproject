@@ -32,10 +32,9 @@
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU.930285174" name="Target MCU (-mmcu)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.MMCU" value="msp430fr5969" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH.1567120351" name="Include paths (-I)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/unifiedClock/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/coala/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_INCLUDE_PATH}&quot;"/>
@@ -59,7 +58,6 @@
 							<tool id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug.826112469" name="GNU Linker" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.exe.linkerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY.296636728" name="Libraries (-l, --library)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.LIBRARY" valueType="libs">
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
-									<listOptionValue builtIn="false" value="unifiedClock"/>
 									<listOptionValue builtIn="false" value="mspReseter"/>
 									<listOptionValue builtIn="false" value="mspDebugger"/>
 									<listOptionValue builtIn="false" value="mspProfiler"/>
@@ -68,10 +66,9 @@
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH.159596829" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${CCS_BASE_ROOT}/msp430/include_gcc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/unifiedClock/Debug}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspDebugger/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspProfiler/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mspReseter/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/coala/Debug}&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE.1389981532" name="Output file (-o)" superClass="com.ti.ccstudio.buildDefinitions.MSP430_GNU_6.0.linkerID.OUTPUT_FILE" value="&quot;${ProjName}.out&quot;" valueType="string"/>
@@ -172,4 +169,5 @@
 		</project-mappings>
 	</storageModule>
 	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>

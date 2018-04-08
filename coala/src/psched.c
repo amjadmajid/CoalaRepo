@@ -1,6 +1,6 @@
 #include <psched.h>
 #include <msp430fr5969.h>
-#include <mspDebugger.h>
+//#include <mspDebugger.h>
 
 // PLEASE SELECT AN ALGORITHIN
 #define NO_COALESCING 1

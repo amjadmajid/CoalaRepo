@@ -4,7 +4,7 @@
 #include "mspProfiler.h"
 #include "mspDebugger.h"
 
-//#define TSK_SIZ 0
+#define TSK_SIZ 1
 //#define RAISE_PIN 1
 //#define PWR_INT_SIM 1
 
@@ -154,10 +154,11 @@ void init()
 #endif
 
 #ifdef TSK_SIZ
+    uart_init();
     cp_init();
 #endif
 
-    uart_init();
+//    uart_init();
 
 #ifdef LOG_INFO
     uart_init();
