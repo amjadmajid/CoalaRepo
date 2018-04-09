@@ -1,1 +1,21 @@
-Computation consistency on intermittently-powered devices can be ensured by: (i) checkpointing, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) via tasks, where a programmer splits the code into small idempotent sections. Results so far suggest that a task-based approach performs better than checkpointing. However, existing tasks-based approaches do not adapt to changing energy levels and storage. This makes the code inefficient (when executed on a larger energy buffer than intended) or can potentially completely disable the program (in the opposite case). Therefore, we present \sys: a task-based execution runtime, enabling code portability by means of a new concept of task coalescing. If a code is written for a very small energy buffer, \sys is able to dynamically coalesce these tasks and constructs a bigger (virtual) task to improve execution times up to 4.5 times compared to static task code.
+% Connecting the work to a real-world problem
+Battery-free computers promise a sustainable Internet of things by forgo the batteries and scarf the energy from the environment. 
+% The main problem that we are tackling
+However, relying on the surrounding energy when it is available is at odds with current execution model of long-running computation. 
+% The already proposed solution to the main problem
+Scientists have proposed a discrete-like execution model that alternates between progressing the execution and protecting the execution progress, against power interrupts.
+% The problem of the proposed solutions 
+Generally, the proposed techniques can be classified as (i) checkpointing systems, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) task-based systems, where a programmer splits the code into small idempotent sections. Despite the superiority of the task-based techniques, they suffer from a fixed overhead and they are completely blind to the energy conditions.   
+% Our main claim 
+In this paper we introduce \sys an \emph{efficient} and \emph{adaptive} task-based execution model.
+% show off
+\sys tunes its frequency of switching between progressing and protecting based on the available energy, but 
+% One of the main functions of an OS is to abstract the hardware and to be less dependent on it. Coala does that too!
+tt does not require hardware support to refine its estimation. 
+% main benefits of Coala
+\sys defaults to progress on a multi-tasks scale, when energy permits (\emph{efficiency}), and on a sub-task scale when needed {\emph{guarantee}}. 
+% I really hope it will support our claims!! haha
+Results show the \sys is more efficient than the current state-of-art execution model by X-times and more reliable. 
+
+% old abstract 
+%Computation consistency on intermittently-powered devices can be ensured by: (i) checkpointing, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) via tasks, where a programmer splits the code into small idempotent sections. Results so far suggest that a task-based approach performs better than checkpointing. However, existing tasks-based approaches do not adapt to changing energy levels and storage. This makes the code inefficient (when executed on a larger energy buffer than intended) or can potentially completely disable the program (in the opposite case). Therefore, we present \sys: a task-based execution runtime, enabling code portability by means of a new concept of task coalescing. If a code is written for a very small energy buffer, \sys is able to dynamically coalesce these tasks and constructs a bigger (virtual) task to improve execution times up to 4.5 times compared to static task code.
