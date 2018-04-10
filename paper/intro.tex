@@ -1,7 +1,7 @@
 Advances in processor efficiency along with the development of energy-harvesting systems has created a new category of devices that require neither a battery nor a tethered power supply~\citep{prasad_comst_2014,lucia_snapl_2017,soyata_csm_2016}. These devices operate using ambient energy, such as radio frequency transmissions~\citep{rf_powered_computing_gollakota_2014}, light~\citep{margolies_infocom_2016,margolies_tosn_2016}, and vibration~\citep{gorlatova_sigmetrics_2014}. Incorporating compute, storage, sensing, and communication hardware~\citep{wisp5,moo}, such devices are a promising technology for use in the Internet of Things~\citep{ku_cst_2016}, in-body~\citep{nadeau_naturebio_2017} and on-body~\citep{bandodkar_electroanalysis_2015} medical systems, and energy-harvesting nano-satellites~\citep{kicksat}.
 
 Energy-harvesting devices create unique challenges because they operate {\em intermittently} when energy is available~\citep{hicks_isca_2017,lucia_snapl_2017}. An
-energy-harvesting device buffers energy in a small storage, e.g. a capacitor~\citep{gorlatova_tmc_2013},~\citep{gunduz_commag_2014} and when a threshold amount of energy accumulates, begins operating. Harvestable energy sources are low-power compared to a platform's operating level. A device operates briefly and when buffered energy is depleted, shuts down and recharges to operate again later. As an example, recharge time may be tens of seconds in radio frequency powered medical device~\cite[Fig. 3c]{nadeau_naturebio_2017}. Moreover, charge and discharge times vary by device (due to different capacitor sizes) and some may fail $\approx$10 to $\approx$100 times per second~\citep{tan_infocom_2016},~\citep{mementos},~\citep{nvp}.
+energy-harvesting device buffers energy in a small storage, e.g. a capacitor~\citep{gorlatova_tmc_2013},~\citep{gunduz_commag_2014} and when a threshold amount of energy accumulates, begins operating. Harvestable energy sources are low-power compared to a platform's operating level. A device operates briefly and when buffered energy is depleted, shuts down and recharges to operate again later. As an example, recharge time may be tens of seconds in radio frequency powered medical device~\cite[Fig. 3c]{nadeau_naturebio_2017}. Moreover, charge and discharge times vary by device (due to different capacitor sizes) and some may fail $\approx$10 to $\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.
 
 %\begin{figure}
 %	\begin{subfigure}[t]{.35\linewidth}
@@ -26,7 +26,7 @@ buffering updates to non-volatile (NV) variables in volatile (V) memory.}
 
 \textbf{Data Consistency in Intermittent Computing.} Software in an energy-harvesting system operates in the {\em intermittent execution model}~\citep{dino,lucia_snapl_2017}, with execution interrupted by failure periods. When power fails, a device loses volatile state, i.e., registers, stack, SRAM, and retains its non-volatile state, i.e., FRAM, Flash. While capturing periodic checkpoints~\citep{mementos,quickrecall} and sleep scheduling~\citep{dewdrop,hibernus,hibernusplusplus} help preserve execution progress, failures can leave volatile and non-volatile state inconsistent, leading to unrecoverable failures~\citep{dino,edb}. 
 
-There are two main approaches for dealing with data inconsistency for intermittently-powered devices: (i) \emph{programming and execution models}~\citep{dino,ratchet,chain,alpaca} and (ii) \emph{architectures}~\citep{hicks_isca_2017,idetic,nvp,tictpl}. New architectures require hardware changes and are inapplicable to today's systems~\citep{hicks_isca_2017,nvp}, therefore new programming models and compilers are more suitable (as of now). However, they have their own limitations that need to be addressed---the core one being the rigidity of the \emph{static} decomposition into tasks.
+There are two main approaches for dealing with data inconsistency for intermittently-powered devices: (i) \emph{programming and execution models}~\citep{dino,ratchet,chain,alpaca} and (ii) \emph{architectures}~\citep{hicks_isca_2017,idetic,nvp,tictpl}. \textcolor{red}{tictpl is not HW, is it? also it doesn't deal with inconsistency; this paragraph doesn't include Hibernus, so it should not include CPTL either.} New architectures require hardware changes and are inapplicable to today's systems~\citep{hicks_isca_2017,nvp}, therefore new programming models and compilers are more suitable (as of now). However, they have their own limitations that need to be addressed---the core one being the rigidity of the \emph{static} decomposition into tasks.
 
 % <<<<<<< HEAD
 % \begin{figure}
@@ -37,7 +37,7 @@ There are two main approaches for dealing with data inconsistency for intermitte
 
 \textbf{Task Decomposition of Intermittent Programs.} Recently proposed {\em
 task-based} programming and execution models~\citep{alpaca,chain} advocate for
-static decomposition of a program (by a programmer) into a collection of tasks.
+static decomposition of a program (by a programmer) into a collection of tasks. \textcolor{red}{add \cite{intel} work; separate by-programmer and by-compiler; both cases hit the energy estimation problem; also intel work proposes a method for decomposing into one of many decompositions, but does not give a good solution for choosing one}
 Tasks can include arbitrary computation and, upon completion, are guaranteed to
 have executed {\em atomically}, despite arbitrarily-timed power failures.
 The programmer explicitly expresses task-to-task control flow. The execution
@@ -46,7 +46,7 @@ tasks affects the time the application takes to complete. Each task transition i
 
 One approach to decrease the task count, without assuming a minimum level of
 incoming power always available, is to predict task energy consumption and
-choose a decomposition specific to the device capacitor size. However, statically predicting energy of arbitrary input-dependent code with peripheral access is a problem without a general solution. Furthermore, a static decomposition approach prevents portability across devices with different storage capacitors.
+choose a decomposition specific to the device capacitor size~\cite{cleancut}. However, statically predicting energy of arbitrary input-dependent code with peripheral access is a problem without a general solution. Furthermore, a static decomposition approach prevents portability across devices with different storage capacitors.
 
 %A key challenge is that the length of a software
 %task's execution is \emph{limited by the fixed total amount of energy} that a
@@ -95,8 +95,7 @@ mechanism for \emph{memory virtualization} that buffers the updates to non-volat
 
 \textbf{Task Splitting}: The static task execution model assumes that a single task execution is guaranteed by the hardware. If this assumption is violated, due to hardware inconsistency or inaccurate task devision startegy, the system enters a non-termination loop of failed attempts to reach the next task boundery. logically, better than relying on a rondom process, energy shots arrival, to break out of this loop, the system should execute an "emergency-like" routine to terminate it and preserve forward progress.
 
-Task coalescing removes the burden from the programmer, because it accepts any task decomposition and improves it dynamically. To further reduce the programmer effort, we propose a compiler pass for \emph{automatic decomposition} of programs into (small) \emph{atomic} tasks. The compiler identifies non-volatile variables shared across tasks as tasks are created, and instruments reads and writes of those variables, using memory virtualization, to keep the data consistent in the presence of power loss. Despite being limited to a subset of the C language, the automatic task decomposition allowed us to port several
-applications to an intermittent platform with a moderate effort.
+Task coalescing removes the burden from the programmer, because it accepts any task decomposition and improves it dynamically. To further reduce the programmer effort, we propose a compiler pass for \emph{automatic decomposition} of programs into (small) \emph{atomic} tasks. The compiler identifies non-volatile variables shared across tasks as tasks are created, and instruments reads and writes of those variables, using memory virtualization, to keep the data consistent in the presence of power loss. \textcolor{red}{Despite being limited to a subset of the C language, the automatic task decomposition allowed us to port several	applications to an intermittent platform with a moderate effort.}
 
 % <<<<<<< HEAD
 % We develop \sys%
@@ -112,7 +111,7 @@ applications to an intermittent platform with a moderate effort.
 % >>>>>>> 84d7711b6c6f6424cdad97efc8aad96e52f316ff
 
 \begin{itemize}
-	\item Two adaptive coalescing strategies for selecting boundaries to coalesce based on past execution behaviour;
+	\item \textcolor{red}{XXX} adaptive coalescing strategies for selecting boundaries to coalesce based on past execution behaviour;
 	\item Software memory virtualisation for transiently-powered devices that preserves atomicity of coalesced tasks;
 	\item Task splitting startegy that preserve forward progress and memory consistency;
 \end{itemize}

@@ -10,7 +10,7 @@ committing dirty pages to non-volatile memory, leaving the work of committing
 pages modified by any of the $N$ tasks to the statement $N-1$.
 Coalescing is likely to reduce the total number of non-volatile memory
 accesses, because when coalesced tasks access the same pages of data, only the
-last version of the page needs to be committed.
+last version of the page needs to be committed.  \textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
 
 \textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
 arbitrary number of consecutive tasks. However, as more tasks coalesce, their
@@ -49,6 +49,8 @@ task per charge-discharge cycle.
 Working from these observations, we propose and evaluate two coalescing
 strategies for \sys: \textbf{History-aware Coalescing (HC)} and
 \textbf{Task-size- and History-aware Coalescing (TSHC)}.
+
+\textcolor{red}{Replace the following with definition of all coalescing strategies}
 
 %\begin{enumerate}
 %	\item \textbf{Interrupt History Coalescing (HDC):} when more tasks are coalesced without power interrupt, $C_U$ increases, and $C_D$ increases, as more task are interrupted before committing; and 
