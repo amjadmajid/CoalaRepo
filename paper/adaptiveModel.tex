@@ -4,5 +4,17 @@ Finding an optimal task size, given random energy conditions is an open question
 %However, given the extremely limited recourses any optimization technique must adhere to the principle of simplicity, otherwise it introduces a non-tolerable overhead. 
 
 % %% address the challenge and define the optimal task
-\sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
+\textbf{Trade-off between Speed and Wasted Effort.} \sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
 
+% \textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
+% arbitrary number of consecutive tasks. However, as more tasks coalesce, their
+% collective commit overhead amortizes better, but the risk of wasting work also
+% increases. If power fails during a long sequence of coalesced tasks, execution
+% will restart from the last commit, i.e. the first task in the sequence, losing
+% the progress made by any of the coalesced tasks.  The challenge to coalescing
+% tasks is determining how many tasks to coalesce before committing.
+
+\textbf{Task Coalescing.} 
+The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfilled by a naive strategy that adapts the target (coalesced task size) by a constant value. However, due to the linear behavior of the target adaptation, this approach is slow in reacting to the changes in energy conditions. Actually, even if an coalescing algorithm alters its target exponentially, We still can consider it as a slow algorithm. The reason for describing these algorithms as slow ones is that their targets enlarging and shrinking processes requires the same number of steps to to change from one target to another. For example, if a coalescing algorithm starts with a target size one and then double its target size after each successful commit, it requires five commits to reach the target 16. However, if this algorithm needs to shrink its target to one to preserve the forward progress it requires the system to fail five times!
+
+To This end, we can concluded that a good coalescing algorithm has to separate its adaptation processes. 
