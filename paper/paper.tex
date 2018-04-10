@@ -1,19 +1,18 @@
-\documentclass[sigplan,10pt,review,anonymous]{acmart}
-\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 
-\acmConference[Submitted to OOPSLA'18]{ACM SIGPLAN Conference on Programming Language Design and Implementation}{June 18--22, 2018}{Philadelphia, PA, USA}
-
+\acmJournal{PACMPL}
+\acmVolume{1}
+\acmNumber{OOPSLA} % CONF = POPL or ICFP or OOPSLA
+\acmArticle{1}
 \acmYear{2018}
-\acmISBN{} % \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
+\acmMonth{1}
 \acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
 \startPage{1}
+
 \setcopyright{none}
 
-%% Some recommended packages.
-%\usepackage{booktabs}   %% For formal tables: http://ctan.org/pkg/booktabs
-\usepackage{subcaption} %% For complex figures with subfigures/subcaptions http://ctan.org/pkg/subcaption
-%\usepackage[normalem]{ulem}
-%\usepackage{float}
+\usepackage{booktabs}   % For formal tables: http://ctan.org/pkg/booktabs
+\usepackage{subcaption} % For complex figures with subfigures/subcaptions http://ctan.org/pkg/subcaption
 \usepackage{soul}
 \usepackage{amssymb}
 \usepackage{amsmath}
@@ -26,16 +25,21 @@
 \usepackage{listings}
 \usepackage{hyphenat}
 
-\usepackage{titlesec}
+\hypersetup{colorlinks=false,linkcolor=blue,urlcolor=blue}
+
+%\usepackage[normalem]{ulem}
+%\usepackage{float}
+
+%\usepackage{titlesec} %P{rzemek: ommented, has conflict https://tex.stackexchange.com/questions/321999/conflict-between-makeuppercase-in-title-formatting-and-usepackagexcolor
 
 %\titlespacing{\section}{0pt}{0.5\baselineskip}{\parskip}
 %\titlespacing{\subsection}{0pt}{0.5\baselineskip}{\parskip}
 %\titlespacing{\subsubsection}{0pt}{0.5\baselineskip}{\parskip}
-\titlespacing{\section}{2pt}{0.8\baselineskip}{\parskip}
-\titlespacing{\subsection}{2pt}{0.6\baselineskip}{\parskip}
-\titlespacing{\subsubsection}{2pt}{0.6\baselineskip}{\parskip}
+%\titlespacing{\section}{2pt}{0.8\baselineskip}{\parskip}
+%\titlespacing{\subsection}{2pt}{0.6\baselineskip}{\parskip}
+%\titlespacing{\subsubsection}{2pt}{0.6\baselineskip}{\parskip}
 
-\setlength{\textfloatsep}{5pt}% Remove \textfloatsep
+%\setlength{\textfloatsep}{5pt}% Remove \textfloatsep
 
 %\usepackage[keeplastbox]{flushend} %Brandon: this broke the build for me
 %Added for sub-float package from jpaper.cls - will check later
@@ -43,9 +47,7 @@
 %\RequirePackage[position=bottom]{subfig}
 %\captionsetup[table]{aboveskip=0.5em, belowskip=0.5em}
 %\captionsetup[figure]{aboveskip=0.5em, belowskip=0em}
-\captionsetup[subfloat]{font={small,sf}}
-
-\hypersetup{colorlinks=false,linkcolor=blue,urlcolor=blue}
+%\captionsetup[subfloat]{font={small,sf}}
 
 \newlength{\sectionbelowskip}
 \newlength{\sectionaboveskip}
@@ -86,89 +88,111 @@
 
 \newcommand{\transition}{{\tt next\_task}\xspace}
 \newcommand{\sys}{Coala\xspace}
-\newcommand{\sysmed}{\sys: Adaptive Task Coalescing $\ldots$}
+\newcommand{\sysmed}{\sys: Adaptive Task Coalescing for Intermittent Computing $\ldots$}
 \newcommand{\sysfull}{\sys: Adaptive Task Coalescing for Intermittent Computing on Energy-harvesting Devices}
 %newcommand{\sysfull}{\sys: Efficient Task-based Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization} %Old title
 
 \begin{document}
 
-\title[\sysmed]{\sysfull}
+%% Title information
+\title[\sysmed]{\sysfull}         %% [Short Title] is optional;
+%% when present, will be used in
+%% header instead of Full Title.
+%\titlenote{}             %% \titlenote is optional;
+%% can be repeated if necessary;
+%% contents suppressed with 'anonymous'
+%\subtitle{}                     %% \subtitle is optional
+%\subtitlenote{}       %% \subtitlenote is optional;
+%% can be repeated if necessary;
+%% contents suppressed with 'anonymous'
 
 %Note: order of authors placed randomly
 
-%\author{Kiwan Maeng}
-%\authornote{}
-%\orcid{}
-%\affiliation{%
-%	\institution{Carnegie Mellon University}
-%	\streetaddress{4720 Forbes Avenue}
-%   \city{Pittsburgh} 
-%	\state{PA} 
-%	\postcode{15213}
-%}
-%\email{kmaeng@andrew.cmu.edu}
+\author{Kiwan Maeng}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Carnegie Mellon University}
+	\streetaddress{4720 Forbes Avenue}
+   \city{Pittsburgh} 
+	\state{PA} 
+	\postcode{15213}
+}
+\email{kmaeng@andrew.cmu.edu}
 
-%\author{Alexei Colin}
-%\authornote{}
-%\orcid{}
-%\affiliation{%
-%	\institution{Carnegie Mellon University}
-%	\streetaddress{4720 Forbes Avenue}
-%	\city{Pittsburgh} 
-%	\state{PA} 
-%	\postcode{15213}
-%}
-%\email{acolin@andrew.cmu.edu}
+\author{Alexei Colin}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Carnegie Mellon University}
+	\streetaddress{4720 Forbes Avenue}
+	\city{Pittsburgh} 
+	\state{PA} 
+	\postcode{15213}
+}
+\email{acolin@andrew.cmu.edu}
 
-%\author{Brandon Lucia}
-%\authornote{}
-%\orcid{}
-%\affiliation{%
-%	\institution{Carnegie Mellon University}
-%	\streetaddress{4720 Forbes Avenue}
-%	\city{Pittsburgh} 
-%	\state{PA} 
-%	\postcode{15213}
-%}
-%\email{blucia@andrew.cmu.edu}
+\author{Brandon Lucia}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Carnegie Mellon University}
+	\streetaddress{4720 Forbes Avenue}
+	\city{Pittsburgh} 
+	\state{PA} 
+	\postcode{15213}
+}
+\email{blucia@andrew.cmu.edu}
 
-%\author{Amjad Yousef Majid}
-%\authornote{}
-%\orcid{}
-%\affiliation{%
-%	\institution{Delft University of Technology}
-%	\streetaddress{Mekelweg 4}
-%	\city{Delft, The Netherlands} 
-%	\state{Zuid Holland} 
-%	\postcode{2628\,CD}
-%}
-%\email{a.y.majid@tudelft.nl}
+\author{Carlo Delle Donne}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{c.delledonne@student.tudelft.nl}
 
-%\author{Kas{\i}m Sinan Y{\i}ld{\i}r{\i}m}
-%\authornote{}
-%\orcid{}
-%\affiliation{%
-%	\institution{Delft University of Technology}
-%	\streetaddress{Mekelweg 4}
-%	\city{Delft, The Netherlands} 
-%	\state{Zuid Holland} 
-%	\postcode{2628\,CD}
-%}
-%\email{k.s.yildirim@tudelft.nl}
+\author{Amjad Yousef Majid}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{a.y.majid@tudelft.nl}
 
-%\author{Przemys{\l}aw Pawe{\l}czak}
-%\authornote{}
-%\orcid{}
-%\affiliation{%
-%	\institution{Delft University of Technology}
-%	\streetaddress{Mekelweg 4}
-%	\city{Delft, The Netherlands} 
-%	\state{Zuid Holland} 
-%	\postcode{2628\,CD}
-%}
-%\email{p.pawelczak@tudelft.nl}
+\author{Kas{\i}m Sinan Y{\i}ld{\i}r{\i}m}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{k.s.yildirim@tudelft.nl}
 
-%\renewcommand{\shortauthors}{A. Y. Majid et al.}
+\author{Przemys{\l}aw Pawe{\l}czak}
+\authornote{}
+\orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{p.pawelczak@tudelft.nl}
+
+\renewcommand{\shortauthors}{A. Y. Majid et al.}
 
 \begin{abstract}
 	
@@ -180,46 +204,46 @@
 %http://dl.acm.org/ccs.cfm Please copy and paste the code instead of the 
 %example below. 
 
-%\begin{CCSXML}
-%	<ccs2012>
-%	<concept>
-%	<concept_id>10010520.10010553.10010562.10010564</concept_id>
-%	<concept_desc>Computer systems organization~Embedded 
-%	software</concept_desc>
-%	<concept_significance>500</concept_significance>
-%	</concept>
-%	<concept>
-%	<concept_id>10010520.10010575.10010578</concept_id>
-%	<concept_desc>Computer systems organization~Availability</concept_desc>
-%	<concept_significance>300</concept_significance>
-%	</concept>
-%	<concept>
-%	<concept_id>10011007.10010940.10010941.10010949.10010957.10010688</concept_id>
-%	<concept_desc>Software and its engineering~Scheduling</concept_desc>
-%	<concept_significance>300</concept_significance>
-%	</concept>
-%	<concept>
-%	<concept_id>10011007.10010940.10010941.10010949.10010965</concept_id>
-%	<concept_desc>Software and its engineering~Communications 
-%	management</concept_desc>
-%	<concept_significance>300</concept_significance>
-%	</concept>
-%	<concept>
-%	<concept_id>10011007.10010940.10010971.10010564</concept_id>
-%	<concept_desc>Software and its engineering~Embedded 
-%	software</concept_desc>
-%	<concept_significance>300</concept_significance>
-%	</concept>
-%	</ccs2012>
-%\end{CCSXML}
+\begin{CCSXML}
+	<ccs2012>
+	<concept>
+	<concept_id>10010520.10010553.10010562.10010564</concept_id>
+	<concept_desc>Computer systems organization~Embedded 
+	software</concept_desc>
+	<concept_significance>500</concept_significance>
+	</concept>
+	<concept>
+	<concept_id>10010520.10010575.10010578</concept_id>
+	<concept_desc>Computer systems organization~Availability</concept_desc>
+	<concept_significance>300</concept_significance>
+	</concept>
+	<concept>
+	<concept_id>10011007.10010940.10010941.10010949.10010957.10010688</concept_id>
+	<concept_desc>Software and its engineering~Scheduling</concept_desc>
+	<concept_significance>300</concept_significance>
+	</concept>
+	<concept>
+	<concept_id>10011007.10010940.10010941.10010949.10010965</concept_id>
+	<concept_desc>Software and its engineering~Communications 
+	management</concept_desc>
+	<concept_significance>300</concept_significance>
+	</concept>
+	<concept>
+	<concept_id>10011007.10010940.10010971.10010564</concept_id>
+	<concept_desc>Software and its engineering~Embedded 
+	software</concept_desc>
+	<concept_significance>300</concept_significance>
+	</concept>
+	</ccs2012>
+\end{CCSXML}
 
-%\ccsdesc[500]{Computer systems organization~Embedded software}
-%\ccsdesc[300]{Computer systems organization~Availability}
-%\ccsdesc[300]{Software and its engineering~Scheduling}
-%\ccsdesc[300]{Software and its engineering~Communications management}
-%\ccsdesc[300]{Software and its engineering~Embedded software}
+\ccsdesc[500]{Computer systems organization~Embedded software}
+\ccsdesc[300]{Computer systems organization~Availability}
+\ccsdesc[300]{Software and its engineering~Scheduling}
+\ccsdesc[300]{Software and its engineering~Communications management}
+\ccsdesc[300]{Software and its engineering~Embedded software}
 
-%\keywords{Energy harvesting, transient operation, operating system}
+\keywords{Energy harvesting, transient operation, operating system}
 
 \maketitle
 
@@ -241,8 +265,8 @@
 \section{Task Coalescing}
 \label{sec:task_coalescing}
 
-\input{coalescing}
-% \input{newCoalescing}
+%\input{coalescing}
+\input{newCoalescing}
 
 \section{Memory Virtualization}
 \label{sec:memory_virtulaization}
@@ -254,10 +278,10 @@
 
 \input{compiler}
 
-%\section{Discussion}
-%\label{sec:discussion}
+\section{Discussion}
+\label{sec:discussion}
 
-%\input{discussion}
+\input{discussion}
 
 \section{Methodology and Evaluation}
 \label{sec:methodology_evaluation}
@@ -277,5 +301,6 @@
 \bibliographystyle{ACM-Reference-Format}
 %\bibliographystyle{plain}
 \bibliography{bib}
+\citestyle{acmauthoryear}
 
 \end{document}
