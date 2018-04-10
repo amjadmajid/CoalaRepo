@@ -1,22 +1,20 @@
 % Connecting the work to a real-world problem
 %Intermittently powered computers promise a sustainable Internet of things by forgo the batteries and scarf the energy from the environment. 
-The Internet of Things (IoT) must be energy neutral. This can only be achieved when the batteries are removed and the energy to operate IoT comes from the ambient energy sources.
+Massively deployed Internet of Things (IoT) must be energy neutral. This can only be achieved when the IoT is batteryless and the energy to operate the IoT comes from the ambient energy sources.
 % The main problem that we are tackling
-However, relying on the highly varying, unpredictable and intermittent surrounding energy is at odds with the current programming model of a long-running computation: long computations require long periods of stable uninterrupted energy supply. 
+However, relying on the highly varying, unpredictable and intermittent harvested energy is at odds with the principal programming model: program executions require stable and uninterrupted energy supply. 
 % The already proposed solution to the main problem
-The core programming model solution to the intermittently-powered computation a discrete-like execution that alternates between progressing and protecting the execution progress against power interrupts.
+The core programming model for the intermittently-powered computation is a discrete-like one that alternates between progressing and protecting the execution progress against power interrupts.
 % The problem of the proposed solutions 
-Generally, the intermittent computation systems can be classified into (i) checkpointing systems, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) task-based systems, where a programmer splits the code into small idempotent sections. Despite the superiority of the task-based systems over checkpointing they suffer from a fixed overhead and they are completely oblivious to the energy conditions.   
+Generally, the intermittent computation models can be classified into (i) checkpointing, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) task-based programming, where a programmer splits the code into small idempotent sections. Despite the superiority of the task-based systems over checkpointing, expressed in lower memory overhead, task-based programming is completely oblivious to the energy conditions. Simply, it cannot increase or decrease the size of the task on the fly (the moment of commit to the non-volatile memory) depending on how long the energy burst is. 
 % Our main claim 
-In this paper we introduce \sys: an \emph{efficient} and \emph{adaptive} task-based execution model.
+To address this challenge, this paper introduces \sys: \emph{adaptive} task-based execution model that does not require any dedicated hardware to support task adaptability, which at the same time is \emph{efficient}.
 % show off
-\sys programs tune its frequency of switching between progressing and protecting based on the available energy, taking the burden of finding the right balance from the programer's shoulders.
-% One of the main functions of an OS is to abstract the hardware and to be less dependent on it. Coala does that too!
-\sys programs do not require hardware support to refine its estimation. 
+\sys programs tune frequency of switching between computation progressing and program state protection based on the available energy, taking the burden of finding the right computation/protection period from the programer's shoulders.
 % main benefits of Coala
 \sys defaults to progress on a multi-tasks scale, when energy permits (\emph{efficiency}), and on a sub-task scale when needed {\emph{guarantee}}. 
 % I really hope it will support our claims!! haha
-Results show the \sys is more efficient than the current state-of-art execution model by X-times and more reliable. 
+Results show the \sys is more efficient than the current state-of-art execution model by \textcolor{red}{X times}.
 
 % old PLDI abstract 
 %Computation consistency on intermittently-powered devices can be ensured by: (i) checkpointing, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) via tasks, where a programmer splits the code into small idempotent sections. Results so far suggest that a task-based approach performs better than checkpointing. However, existing tasks-based approaches do not adapt to changing energy levels and storage. This makes the code inefficient (when executed on a larger energy buffer than intended) or can potentially completely disable the program (in the opposite case). Therefore, we present \sys: a task-based execution runtime, enabling code portability by means of a new concept of task coalescing. If a code is written for a very small energy buffer, \sys is able to dynamically coalesce these tasks and constructs a bigger (virtual) task to improve execution times up to 4.5 times compared to static task code.
