@@ -65,7 +65,7 @@ choose a decomposition specific to the device capacitor size. However, staticall
 
 \textbf{Task Coalescing.} To address this challenge we propose a \emph{dynamic} task decomposition, that accepts any static decomposition and opportunistically coalesces tasks at runtime when there is sufficient energy. With \emph{task coalescing} atomic tasks are merged into a single (larger) task while preserving atomicity of the merged task. If power fails while a coalesced task is running, execution will restart at the first task in the group. Figure~\ref{fig:coalesce} (bottom) illustrates how dynamic coalescing changes the earlier execution and highlights the change in memory model necessary to not break atomicity.
 
-Unfortunately, naively merging two atomic tasks might produce a non-atomic task, that may leave non-volatile memory inconsistent after a partial execution. A merge breaks atomicity when atomic merged tasks form a \emph{write-after-read (WAR)} dependency---for instance if two tasks \texttt{\{x++\}; \{vector[x]=v;\}} are merged and if the power failure occurs after \texttt{x++}, the value \texttt{x} will be increased twice when the merged task is restarted, that leads to an inconsistency.
+Unfortunately, naively merging two atomic tasks might produce a non-atomic task, that may leave non-volatile memory inconsistent after a partial execution. A merge breaks atomicity when atomic merged tasks form a \emph{write-after-read (WAR)} dependency---for instance if two tasks \texttt{\{x=y+1\}; \{y=x;\}} are merged and if the power failure occurs after \texttt{x=y}, the value \texttt{x} will be increased twice when the merged task is restarted, that leads to an inconsistency.
 %
 %variables in non-volatile memory at \emph{run-time} that can
 %break the atomicity of the \emph{virtual task}. Consider the
@@ -93,6 +93,8 @@ mechanism for \emph{memory virtualization} that buffers the updates to non-volat
 %unmodified upon a power-interrupt and preserving its
 %consistency.
 
+\textbf{Task Splitting}: The static task execution model assumes that a single task execution is guaranteed by the hardware. If this assumption is violated, due to hardware inconsistency or inaccurate task devision startegy, the system enters a non-termination loop of failed attempts to reach the next task boundery. logically, better than relying on a rondom process, energy shots arrival, to break out of this loop, the system should execute an "emergency-like" routine to terminate it and preserve forward progress.
+
 Task coalescing removes the burden from the programmer, because it accepts any task decomposition and improves it dynamically. To further reduce the programmer effort, we propose a compiler pass for \emph{automatic decomposition} of programs into (small) \emph{atomic} tasks. The compiler identifies non-volatile variables shared across tasks as tasks are created, and instruments reads and writes of those variables, using memory virtualization, to keep the data consistent in the presence of power loss. Despite being limited to a subset of the C language, the automatic task decomposition allowed us to port several
 applications to an intermittent platform with a moderate effort.
 
@@ -112,7 +114,7 @@ applications to an intermittent platform with a moderate effort.
 \begin{itemize}
 	\item Two adaptive coalescing strategies for selecting boundaries to coalesce based on past execution behaviour;
 	\item Software memory virtualisation for transiently-powered devices that preserves atomicity of coalesced tasks;
-	\item Compiler pass for automatic decomposition into small atomic tasks for adaptive coalescing at runtime.
+	\item Task splitting startegy that preserve forward progress and memory consistency;
 \end{itemize}
 
 %Existing programming and execution models may require more accesses to non-volatile memory (for multi-versioning)~\cite{dino,chain} or may preclude the use of volatile memory~\cite{ratchet}. Effective use of both volatile and non-volatile memory is important for \emph{efficiency}, because non-volatile memory has higher access energy and latency than SRAM~\cite{nvp}, and \emph{generality}, because devices often have much more FRAM than SRAM (e.g., 64 times more in~\cite{wolverine}). How to connect this trade-off with task virtualization remains an open question.

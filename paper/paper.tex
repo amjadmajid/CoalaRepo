@@ -85,9 +85,12 @@
 \newcommand{\replace}[2]{\remove{#1} \add{#2}}
 
 \newcommand{\transition}{{\tt next\_task}\xspace}
-\newcommand{\sys}{Coala\xspace}
-\newcommand{\sysmed}{\sys: Adaptive Task Coalescing $\ldots$}
-\newcommand{\sysfull}{\sys: Adaptive Task Coalescing for Intermittent Computing on Energy-harvesting Devices}
+\newcommand{\sys}{ROO\xspace}
+%\newcommand{\sys}{Coala\xspace}
+\newcommand{\sysmed}{\sys: Adaptive Intermittent Execution Model $\ldots$}
+%\newcommand{\sysmed}{\sys: Adaptive Task Coalescing $\ldots$}
+%\newcommand{\sysfull}{\sys: Adaptive Task Coalescing for Intermittent Computing on Energy-harvesting Devices}
+\newcommand{\sysfull}{\sys: Adaptive Intermittent Execution Model for Energy-harvesting Devices}
 %newcommand{\sysfull}{\sys: Efficient Task-based Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization} %Old title
 
 \begin{document}
@@ -232,17 +235,17 @@
 \label{sec:background}
 
 \input{background}
+\section{\sys: Adaptive Intermittent Execution Model}
+\label{sec:execution_model_concept}
+\input{newCoalescing}
 
 \section{\sys: System Overview}
 \label{sec:overall_system}
 
 \input{systemdescription}
 
-\section{Task Coalescing}
-\label{sec:task_coalescing}
 
 \input{coalescing}
-% \input{newCoalescing}
 
 \section{Memory Virtualization}
 \label{sec:memory_virtulaization}
