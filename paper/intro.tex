@@ -129,7 +129,7 @@ applications to an intermittent platform with a moderate effort.
 %	\item {\bf Volatile memory virtualization with transiently-powered device:} Colascing through task virtualization requires memory virtualization. \sys's uses SRAM as working memory, which \sys dynamically populates with pages of data from FRAM on demand, during a task's execution. When a task ends, \sys commits dirty pages to FRAM using DMA block copies, ensuring task atomicity and memory consistency. To the best of our knowledge this is the first time when memory virtualization has been demonstrated on a transient power budget.
 %\end{itemize}
 
-We evaluated \sys end-to-end on a real energy-harvesting device~\cite{wisp} running existing benchmarks ~\cite{chain} and new programs. A comparison to a state-of-the-art task-based system~\cite{chain} showed that \sys recovers
+We evaluated \sys end-to-end on a real energy-harvesting device~\cite{wisp} running existing benchmarks ~\cite{chain} and new programs. A comparison to a state-of-the-art task-based system~\cite{aplaca} showed that \sys recovers
 performance on conservative task decompositions missed by systems with static decomposition.
 %
 %and can flexibly target a variety of platforms without rewriting code.

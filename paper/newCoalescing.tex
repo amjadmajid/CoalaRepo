@@ -22,13 +22,6 @@
 	\end{algorithmic}
 \end{algorithm}
 
-%% Coalescing motivation
-Finding an optimal task size, given random energy conditions is an open question. Obviously, a static approach does not have the potential to answer it. Therefore, \sys champions runtime-based methods to approximate the ideal task size under random energy shots arrival. Furthermore, \sys advocates making intermittently powered software energy-aware is the key for \emph{efficient code execution and probability}. 
-%However, given the extremely limited recourses any optimization technique must adhere to the principle of simplicity, otherwise it introduces a non-tolerable overhead. 
-
-% %% address the challenge and define the optimal task
-\sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
-
 % %% How does Coala approximates an ideal task
 \sys adapts its virtual execution by mean of \emph{coalescing} static tasks, when energy permits, to optimally execute an intermittently powered program. It devises a number of coalescing algorithms, and states that a good coalescing strategy must moderate the risk of wasted work (re-execution penalty) and capitalize on benefits of deferred commits. To describe the proposed strategies we will use the following parameters: \\
 (i) \textit{target budget B}: total number of units to coalesce; (ii) \textit{current budget $B_\text{c}$}: remaining number of tasks to be coalesced before committing to non-volatile memory; (iii) \textit{history H}: total number of tasks executed in the current discharge cycle, initialized to the number of executed tasks in the last power cycle. 
