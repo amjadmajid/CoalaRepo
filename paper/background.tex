@@ -18,6 +18,8 @@ Many platforms enable intermittent, battery-less energy harvesting-based computa
 \subsection{Intermittent Execution}
 \label{sec:background_consistency}
 
+\textcolor{red}{reference work by Intel}
+
 %Energy-harvesting devices execute software according to the {\em intermittent execution model}. Physically, a device charges until a threshold, operates briefly until its energy is depleted, shuts down recharges, and repeats the cycle.
 %
 Software running on an energy-harvesting device executes {\em intermittently} because buffered energy is only available \emph{sometimes}. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. Energy-harvesters provide input power orders of magnitude less than operating power, making recharging negligible during operation.
@@ -69,6 +71,7 @@ There are several run time strategies to ensuring task idempotence. One approach
 		Chain~\cite{chain}                                   & PC   + Channel data\\
 		Alpaca~\cite{alpaca}                                 & PC   + WAR variables \\
 		Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Reg. (requires NV main memory) \\
+		~\cite{intel} & XXX \\
 		\hline
 	\end{tabular}
 	\caption{\textbf{Memory consistency enforcement overheads of intermittent execution models;} \emph{Reg.}: the entire register file, \emph{PC}: program counter, \emph{Channel data}: variables explicitly task-shared by the programmer, \emph{WAR variables}: variables involved in WAR dependences (\emph{NV}: non-volatile).}
@@ -128,5 +131,5 @@ To understand these non-volatile memory overheads, for the MSP430FR5969~\cite{ms
 
 \textbf{Fixed-size Tasks are Inflexible and Inefficient.} If a programmer writes a task that consumes {\em more} energy than the device can buffer, the task will never complete using buffered energy {\em preventing forward progress} by repeatedly re-executing. If a programmer writes tasks that consume far {\em less} energy than a device can buffer, the system may operate {\em inefficiently}. When a task and its successor both complete, the two tasks were interleaved by a task boundary that preserves progress and state (i.e., checkpoint or commit). However, absent a power failure, the work to preserve state was {\em unnecessary}, incurring overhead on the tasks' executions.
 
-Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware with a fixed energy buffering capacity. Buffer sizes from prior work vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short, task on a device with a larger buffer. The key problem is that using existing systems, the programmer statically sizes tasks for a fixed energy buffer. \sys's {\em task coalescing}, described
+Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware with a fixed energy buffering capacity. Buffer sizes from prior work vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short, task on a device with a larger buffer. The key problem is that using existing systems, by defining tasks statically for a fixed energy buffer, the programmer either risks non-termination or poor performance due to high overhead. \sys's {\em task coalescing}, described
 in Section~\ref{sec:task_coalescing}, is motivated by these observations.
