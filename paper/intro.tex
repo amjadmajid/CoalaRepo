@@ -37,14 +37,16 @@ $\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.
 %	\caption{Impact of an inadequate task sizing on the computation speed of a moving transiently-powered device.}\label{fig:1}
 %\end{figure}
 
-\begin{figure}
-	\includegraphics[width=0.95\columnwidth]{figures/coalescing-is}
-    \caption{\label{fig:coalesce}\textbf{An execution of three
+\begin{wrapfigure}{t!}{0.5\textwidth}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/coalescing-is}
+    \caption{\textbf{An execution of three
 statically-defined tasks without (top) and with (bottom) dynamic
 coalescing.} Task coalescing at runtime reduces time and energy overhead in
 task-based intermittent programming models by performing fewer commits and
 buffering updates to non-volatile (NV) variables in volatile (V) memory.}
-\end{figure}
+    \label{fig:coalesce}
+\end{wrapfigure}
 
 \textbf{Data Consistency in Intermittent Computing.}  Software in an
 energy-harvesting system operates according to the {\em intermittent execution
