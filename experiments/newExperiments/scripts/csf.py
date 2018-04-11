@@ -204,10 +204,12 @@ def nameMaker(s):
 	return name
 
 
-
-
-
-
+def remove_outliers(arr):
+	m  = np.mean(arr)
+	sd = np.std(arr)
+	narr = np.array(arr)
+	narr = narr[ np.abs(narr-m) < (3*sd) ]
+	return narr
 
 
 
