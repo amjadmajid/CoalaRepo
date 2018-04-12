@@ -1,5 +1,19 @@
 %Here, we provide background on energy harvesting systems and the intermittent software execution model. We then discuss the key limitations of existing task-based execution models for intermittent computing that \sys addresses.
 
+%\begin{figure}
+\begin{wrapfigure}{t!}{0.5\textwidth}
+	\begin{subfigure}[t]{\linewidth}
+		\centering \includegraphics[width=\columnwidth]{figures/crc_example}
+		\caption{Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration.}\label{fig:crc_example}
+	\end{subfigure}
+	\begin{subfigure}[t]{\linewidth}
+		\centering \includegraphics[width=\columnwidth]{figures/crc_example_war}
+		\caption{Execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
+	\end{subfigure}
+	\caption{\textbf{Code example demonstrating effect of write after read on volatile memory checkpointing.}}\label{fig:code_demo_incosistency}
+\end{wrapfigure}
+%\end{figure}
+
 \subsection{Energy Harvesting Systems}
 \label{sec:background_harvesting}
 
@@ -19,25 +33,13 @@ Many platforms enable intermittent, battery-less energy harvesting-based computa
 \subsection{Intermittent Execution}
 \label{sec:background_consistency}
 
-\textcolor{red}{reference work by Intel}
+\textcolor{red}{reference work by Intel~\cite{baghsorkhi_cgo_2018}}
 
 %Energy-harvesting devices execute software according to the {\em intermittent execution model}. Physically, a device charges until a threshold, operates briefly until its energy is depleted, shuts down recharges, and repeats the cycle.
 %
 Software running on an energy-harvesting device executes {\em intermittently} because buffered energy is only available \emph{sometimes}. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. Energy-harvesters provide input power orders of magnitude less than operating power, making recharging negligible during operation.
 
 Intermittent execution is different from continuous execution. A power failure clears volatile  state (registers, stack, and globals) and non-volatile memory (e.g., FRAM) persists. At a failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos,quickrecall}, sometimes using hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
-
-\begin{figure}
-	\begin{subfigure}[t]{\linewidth}
-		\centering \includegraphics[width=\columnwidth]{figures/crc_example}
-		\caption{Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration.}\label{fig:crc_example}
-	\end{subfigure}
-	\begin{subfigure}[t]{\linewidth}
-		\centering \includegraphics[width=\columnwidth]{figures/crc_example_war}
-		\caption{Execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
-    \end{subfigure}
-	\caption{\textbf{Code example demonstrating effect of write after read on volatile memory checkpointing.}}\label{fig:code_demo_incosistency}
-\end{figure}
 
 %\begin{figure}
 %	\centering
@@ -72,7 +74,7 @@ There are several run time strategies to ensuring task idempotence. One approach
 		Chain~\cite{chain}                                   & PC   + Channel data\\
 		Alpaca~\cite{alpaca}                                 & PC   + WAR variables \\
 		Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Reg. (requires NV main memory) \\
-		~\cite{intel} & XXX \\
+		Region Formation~\cite{baghsorkhi_cgo_2018} & \textcolor{red}{XXX} \\
 		\hline
 	\end{tabular}
 	\caption{\textbf{Memory consistency enforcement overheads of intermittent execution models;} \emph{Reg.}: the entire register file, \emph{PC}: program counter, \emph{Channel data}: variables explicitly task-shared by the programmer, \emph{WAR variables}: variables involved in WAR dependences (\emph{NV}: non-volatile).}
@@ -94,7 +96,7 @@ There are several run time strategies to ensuring task idempotence. One approach
 	\centering \includegraphics[width=\columnwidth]{figures/fram_read}
 	\caption{Cost of \emph{read} operation}
 \end{subfigure}
-	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.}}\label{fig:framEnergy}
+	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.} \textcolor{red}{figures need to be merged into one}}\label{fig:framEnergy}
 \end{figure}
 
 %\begin{figure}
