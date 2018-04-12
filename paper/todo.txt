@@ -1,0 +1,10 @@
+*Decrease scale of all figures -- wrapfig?
+
+*Remove compiler from figure 4
+
+*Remove compiler results to make room for more interesting results?
+
+*Add Alpaca data to all figures
+
+*Expand coalescing explanation
+
