@@ -173,7 +173,7 @@ them to non-volatile memory at the dynamic task boundary.
 A static task decomposition model assumes that each
 single task can execute to completion.  If the hardware energy buffer provides
 inadequate energy to execute each single task to completion, a program will not
-terminate~\cite{cleancut}. To avoid non-termination under adversarial 
+terminate~\cite{cleancut_2018}. To avoid non-termination under adversarial 
 energy conditions, \sys uses a timer-based {\em partial task commit} mechanism.
 Partial commit avoids non-termination by committing the intermediate state of a long-running
 task that has repeatedly failed and restarted.  Partial commit violates
@@ -200,15 +200,15 @@ instead risking non-termination.
 \item The first {\em adaptive} task-based intermittent execution model that dynamically coalesces tasks to avoid unnecessary commit overhead. 
 \item The first software memory virtualization mechanism for an intermittent system that \sys uses to preserve the atomicity of coalesced tasks.
 \item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
-\item A fully-realized prototype of \sys that runs on real energy-harvesting devices~\cite{wisp,capy}, to be released as open source after publication. 
+\item A fully-realized prototype of \sys that runs on real energy-harvesting devices~\cite{wisp,capybara}, to be released as open source after publication. 
 \item An evaluation directly comparing \sys to a state of the art task-based intermittent programming and execution model from prior work~\cite{alpaca}, showing that on a suite of benchmarks from the literature and several new workloads, \sys often has higher performance and is more flexible to varied energy conditions. 
 \end{itemize}
 
 Section~\ref{sec:background} provides background on intermittent computing.
 Section~\ref{sec:overview} provides an overview of \sys, while
 Sections~\ref{sec:coalescing} and~\ref{sec:memory} describe \sys's coalescing
-and virtualization mechanisms.Section~\ref{sec:discussion} discusses \sys
-design issues.  Sections~\ref{sec:methodology} and~\ref{sec:eval} describe
-\sys's methodology and evaluation.  Section~\ref{sec:related} puts \sys in the
+and virtualization mechanisms. Section~\ref{sec:discussion} discusses \sys
+design issues. Sections~\ref{sec:methodology} and~\ref{sec:eval} describe
+\sys's methodology and evaluation. Section~\ref{sec:related} puts \sys in the
 context of related work and Section~\ref{sec:conc} concludes and discusses
 future work.
