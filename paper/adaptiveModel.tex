@@ -1,3 +1,22 @@
+\textcolor{red}{THIS BRAIN DUMP ABOUT THE EXECUTION MODEL - Placeholder}
+
+\sys execution model operates on task-based programming model, but It progresses on a dynamic, virtual task granularity. A virtual task can be either multiple static tasks \emph{coalesced} together, when the energy permits, or a sub-task, when it is necessary to preserve forward progress.
+
+\sys execution model decouples the process of coalescing task from the process to downsizing the virtual task size. This separation is necessary to prevent the system from suffering from repeated power failures when energy becomes scares after it was abandoned or when the energy required to finish a static task increases significantly as compared to the previous static tasks.
+ 
+\textcolor{red}{Not very clear. Here with downsizing you are referring to the target, but, based on the previous sentence, the reader might mistake it with the task splitting feature. The reader might not know yet the re-execution penalty problem, so it might be hard to get what you mean with decoupling the two processes.}
+
+For example, if \sys uses a linear adaptation strategy and it was progressing on 20 static task per a virtual task, then the system has to default back to a single static task per a virtual task it may need to reboot 20 times before preserving the progress of a single static task!
+
+\textcolor{red}{
+Here you are already suggesting (and disproving) a coalescing strategy, but the reader should be exposed to the challenges before doing this, in my opinion. Here instead I would mention why coalescing up is needed (to reduce the number of commits), and why coalescing down is necessary (to reduce the re-execution penalty), using something like this figure https://goo.gl/GiJgEz}
+
+
+This adaptive execution model estimates the energy - using a pure-software technique - to tune the size of the virtual task. Therefore, its virtual task upscaling and downscaling processes are independent and, in case it is needed due to scarce energy, it only takes two reboots to shrink the virtual task size to a single static task. \emph{The adaptive execution model of \sys is efficient because it is energy aware.}
+
+Coala's execution model is neither limited by a static task size to progress, nor by the commit size, i.e. the amount of data that needs to be saved to the non-volatile memory to preserve execution progress. Coala can partition compile-time tasks, if it fails on a single static task more than once, or merge them, if saving the state to non-volatile memory is redundant because a power failure is not expected soon. This unique technique makes the commit size proportional to the number of state-less instructions executed. In other words, if energy allows executing only a small chunk of code, the amount of data to be committed shrinks accordingly.
+
+
 
 %% Coalescing motivation
 Finding an optimal task size, given random energy conditions is an open question. Obviously, a static approach does not have the potential to answer it. Therefore, \sys champions runtime-based methods to approximate the ideal task size under random energy shots arrival. Furthermore, \sys advocates making intermittently powered software energy-aware is the key for \emph{efficient code execution and probability}. 
