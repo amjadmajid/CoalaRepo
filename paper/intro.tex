@@ -61,7 +61,7 @@ checkpoints~\citep{mementos,quickrecall} and sleep
 scheduling~\citep{dewdrop,hibernus,hibernusplusplus} help preserve execution
 progress, failures can leave non-volatile state incorrectly, partially updated,
 and may leave checkpointed volatile state inconsistent with non-volatile state.
-These inconsistencies cause intermittent executio to deviate from
+These inconsistencies cause intermittent execution to deviate from
 continuously-powered behavior, often leading to an unrecoverable
 application failure~\citep{dino,edb}. 
 
@@ -107,22 +107,23 @@ program state~\citep{chain,alpaca}.
 %
 The more task transitions a program executes at run time, the more overhead.
 
-A savvy programmer may thus create very large tasks in an attempt to
-minimize overhead by minimizing the number of task transitions.  However, a
-very large task may require more energy to complete than a device's fixed
-hardware energy buffer can hold.  Such a large task fails to completely execute
-assuming only buffered energy is available (i.e., assuming the worst case).
-While some environments may have sufficient harvestable energy replenish the
-capacitor during operation, enabling the task to complete, assuming cooperation
-from the physical environment to avoid non-termination is a risky programming
-proposition.  To eliminate this risk, existing systems require the programmer
-or compiler to decompose a  program into small tasks, all of which complete
-using only buffered energy.  These constraints on task sizing leave an
-unsatisfying dilemma: large, efficient tasks that risk non-termination, or
-small tasks that are guaranteed to complete, but incur a high task transition
-and commit overhead.  In this work, we propose a third way, using a novel
-technique called {\em dynamic task coalescing} that efficiently executes small
-tasks, avoiding unnecessary overheads and avoiding the risk of non-termination.
+A savvy programmer may thus create very large tasks in an attempt to minimize
+overhead by minimizing the number of task transitions.  However, a very large
+task may require more energy to complete than a device's fixed hardware energy
+buffer can hold.  Such a large task fails to completely execute assuming only
+buffered energy is available (i.e., assuming the worst case).  While some
+environments may have sufficient harvestable energy to replenish a device's
+capacitor during operation, prolonging the execution period and enabling the
+task to complete, assuming cooperation from the physical environment to avoid
+non-termination is a risky programming proposition.  To eliminate this risk,
+existing systems require the programmer or compiler to decompose a  program
+into small tasks, all of which complete using only buffered energy.  These
+constraints on task sizing leave an unsatisfying dilemma: large, efficient
+tasks that risk non-termination, or small tasks that are guaranteed to
+complete, but incur a high task transition and commit overhead.  In this work,
+we propose a third way, using a novel technique called {\em dynamic task
+coalescing} that efficiently executes small tasks, avoiding unnecessary
+overheads while avoiding the risk of non-termination.
 
 %Brandon: I moved Cleancut to the related work section.  THere's too much in the intro already
 
@@ -141,7 +142,7 @@ tasks, avoiding unnecessary overheads and avoiding the risk of non-termination.
 %This calls for at-runtime adaptive task division of any transiently-powered
 %application---namely \emph{task virtualization}.
 
-\textbf{Task Coalescing.} In this work, we introduce a new system called \sys, which executes a task-based
+In this work, we introduce a new system called \sys, which executes a task-based
 intermittent program by dynamically coalescing its tasks.
 \sys accepts any static decomposition (i.e., from the programmer or from a compiler) 
 and coalesces its tasks at runtime. Two consecutive, coalesced tasks execute  
@@ -198,7 +199,7 @@ them to non-volatile memory at the dynamic task boundary.
 %unmodified upon a power-interrupt and preserving its
 %consistency.
 
-\textbf{Task Splitting}: A static task decomposition model assumes that each
+A static task decomposition model assumes that each
 single task can execute to completion.  If the hardware energy buffer provides
 inadequate energy to execute each single task to completion, a program will not
 terminate~\cite{cleancut}. To avoid non-termination under adversarial 
@@ -221,41 +222,22 @@ instead risking non-termination.
 %automatic task decomposition allowed us to port several	applications to an
 %intermittent platform with a moderate effort.}
 
-\textbf{Contributions.} We develop \sys\footnote{To be released at
-\url{http://anonymized.link}}: the first task coalescing system for task-based
-programming models on intermittently-powered devices. The capabilities required
-for effective coalescing mark our contributions:
+\textbf{Contributions.} To summarize, \sys's main contributions are: 
+
 
 \begin{itemize}
-	\item \textcolor{red}{XXX} adaptive coalescing strategies for selecting boundaries to coalesce based on past execution behaviour;
-	\item Software memory virtualisation for transiently-powered devices that preserves atomicity of coalesced tasks;
-	\item Task splitting startegy that preserve forward progress and memory consistency;
+\item The first {\em adaptive} task-based intermittent execution model that dynamically coalesces tasks to avoid unnecessary commit overhead. 
+\item The first software memory virtualization mechanism for an intermittent system that \sys uses to preserve the atomicity of coalesced tasks.
+\item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
+\item A fully-realized prototype of \sys that runs on real energy-harvesting devices~\cite{wisp,capy}, to be released as open source after publication. 
+\item An evaluation directly comparing \sys to a state of the art task-based intermittent programming and execution model from prior work~\cite{alpaca}, showing that on a suite of benchmarks from the literature and several new workloads, \sys often has higher performance and is more flexible to varied energy conditions. 
 \end{itemize}
 
-%Existing programming and execution models may require more accesses to non-volatile memory (for multi-versioning)~\citep{dino,chain} or may preclude the use of volatile memory~\citep{ratchet}. Effective use of both volatile and non-volatile memory is important for \emph{efficiency}, because non-volatile memory has higher access energy and latency than SRAM~\citep{nvp}, and \emph{generality}, because devices often have much more FRAM than SRAM (e.g., 64 times more in~\citep{wolverine}). How to connect this trade-off with task virtualization remains an open question.
-
-%\textbf{Research Question and Contributions:} Specifically, we ask (i) how to use software support to \emph{dynamically adapt} the effective size of a task, while respecting programmer-specified task atomicity, and (ii) how to minimize run time and energy consumption while \emph{automatically maintaining memory consistency} during execution?
-
-%To address this question, we develop {\bf \sys}: a new programming and execution model efficiently executing tasks which avoids non-termination across a range of energy buffer sizes, without burdening the programmer\footnote{Code will be available via \href{http://anonymized.link}{http://anonymized.link}.}. To accomplish this, \sys introduces two new capabilities: 
-
-%\begin{itemize}
-%	\item {\bf Dynamic task coalescing:} \sys's task coalescing mechanism dynamically executes multiple tasks as a single task. A programmer or compiler can specify small tasks that will execute on a device with a small energy buffer. Coalescing tasks allows running the same tasks on a device with a larger energy buffer, avoiding run time overheads associated with ending one task and beginning another.
-%	%
-%	\item {\bf Volatile memory virtualization with transiently-powered device:} Colascing through task virtualization requires memory virtualization. \sys's uses SRAM as working memory, which \sys dynamically populates with pages of data from FRAM on demand, during a task's execution. When a task ends, \sys commits dirty pages to FRAM using DMA block copies, ensuring task atomicity and memory consistency. To the best of our knowledge this is the first time when memory virtualization has been demonstrated on a transient power budget.
-%\end{itemize}
-
-We evaluated \sys end-to-end on a real energy-harvesting device~\citep{wisp}
-running existing benchmarks~\citep{chain,alpaca} and new programs. A comparison
-to a state-of-the-art task-based system~\citep{chain,alpaca} showed that \sys
-recovers performance on conservative task decompositions missed by systems with
-static decomposition.
-%
-%and can flexibly target a variety of platforms without rewriting code.
-%
-%\todo{Provide concrete numeric results supporting this claim}{Amjad/Przemek}
-
-%In this work we also address the problem of task construction burden imposed on the programmer. That is, we introduce \sys's compiler that transforms arbitrary C code into a graph of tasks that reflects the original program's control- and data-flow constraints. The compiler identifies data shared by multiple of the newly created tasks and instruments reads and writes of those data so that \sys's memory virtualization mechanism keeps those data consistent. While \sys's complier is still \emph{limited in scope}, e.g. is unable to handle instruction jumps, normalized loops and recursions, it already eliminates the labour-intensive process of writing tasks~\citep{chain,alpaca}, i.e., hours of programmer time.
-
-%\sys's core contribution is the introduction of dynamic task coalescing mechanism. It allows the programmer or a compiler to intuitively decompose the program into small tasks that amortize fixed per-task overheads, yet present no risk of exceeding device energy capacity. As such a decomposition executes, \sys~{\em coalesces dynamically} consecutive tasks. Coalescing elides the commits of coalesced tasks by buffering multiple tasks' updates in an FRAM commit buffer. Periodically, as the span of the coalesced task grows, \sys ends coalescing and commits the state of the coalesced task. If a power failure interrupts a sequence of coalesced tasks, \sys adaptively reduces the number of tasks in that sequence that it will coalesce, committing sooner in future executions. Consequently, \sys's coalescing mechanism allows a program to execute efficiently across a range of energy buffer sizes, avoiding transition overheads in larger buffers, and ensuring progress in smaller buffers.
-
-%We propose and explore two data swapping strategies for intermittently-powered systems based on FRAM/SRAM architecture. The first strategy is {\em demand paging}, which swaps the SRAM page with a new page from FRAM, buffering the swapped-out page until commit. The second strategy is {\em buffered direct access}, which directly reads and writes FRAM relying on dynamic double-buffering to ensure memory is consistent at commit.
+Section~\ref{sec:background} provides background on intermittent computing.
+Section~\ref{sec:overview} provides an overview of \sys, while
+Sections~\ref{sec:coalescing} and~\ref{sec:memory} describe \sys's coalescing
+and virtualization mechanisms.Section~\ref{sec:discussion} discusses \sys
+design issues.  Sections~\ref{sec:methodology} and~\ref{sec:eval} describe
+\sys's methodology and evaluation.  Section~\ref{sec:related} puts \sys in the
+context of related work and Section~\ref{sec:conc} concludes and discusses
+future work.

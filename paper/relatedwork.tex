@@ -13,6 +13,21 @@ Recent task-based systems are Chain~\cite{chain} and Alpaca~\cite{alpaca}. Using
 
 \sys relates to the above efforts but is distinct in approach and mechanism. \sys relates closely to task-based models because \sys also relies on statically defined tasks to avoid checkpointing volatile state. \sys's automatic compilation spares the programmer's work of writing task-based code that prior systems demand. \sys's memory virtualization provides an alternative for ensuring memory consistency, optimized for bulk accesses to task-shared data with high locality. \sys's task coalescing optimization ameliorates the key overheads associated with prior systems.
 
+One approach to decrease the task count, without assuming a minimum level of
+incoming power always available, is to predict task energy consumption and
+choose a decomposition specific to the device capacitor size~\cite{cleancut}.
+However, statically predicting energy of arbitrary input-dependent code with
+peripheral access is a problem without a general solution. Furthermore, a
+static decomposition approach prevents portability across devices with
+different storage capacitors.
+
+\textcolor{red}{TODO: make this one paragraph with the CleanCut stuff.  add \cite{intel} work; separate by-programmer and by-compiler;
+both cases hit the energy estimation problem; also intel work proposes a method
+for decomposing into one of many decompositions, but does not give a good
+solution for choosing one} 
+
+
+
 \textbf{Memory Virtualization.} Prior work on embedded systems has studied a variety of memory virtualization strategies relating to \sys. TinyOS~\cite{levis2005tinyos} and nesC~\cite{nesc} support dynamic memory management. Later work extended the memory manager to support memory virtualization backed by flash memory~\cite{sensornetvm} and to ensure memory and type safety~\cite{tinyosmemorysafety}. SOS~\cite{sos}, Contiki~\cite{contiki}, and
 t-kernel~\cite{tkernel} also developed memory management abstractions that
 virtualize memory size and provide safe and indirect access. Mat\'e~\cite{mate} developed full virtual machines support for sensor nodes, virtualizing not just memory resources, but other states and peripherals. The goal of \sys is to provide consistent, intermittent execution, leveraging the benefits of efficient bulk copying. In contrast, prior efforts focused more on programmability and runtime reliability properties provided by virtual memory.
