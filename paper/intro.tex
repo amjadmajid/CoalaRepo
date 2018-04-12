@@ -16,26 +16,12 @@ Energy-harvesting devices create unique challenges because they operate {\em
 intermittently} when energy is
 available~\citep{hicks_isca_2017,lucia_snapl_2017}. An energy-harvesting device
 buffers energy in a small storage capacitor~\citep{gorlatova_tmc_2013,gunduz_commag_2014} and operates when a
-threshold amount of energy has accumulated. 
-%
-Harvestable energy sources are low-power (e.g., nW to $\mu$W) compared to a platform's operating
+threshold amount of energy has accumulated. Harvestable energy sources are low-power (e.g., nW to $\mu$W) compared to a platform's operating
 power level (hundreds of $\mu$W to mW). A device operates briefly until it depletes its buffered energy, after which, the device shuts
 down and recharges to operate again later. As an example, recharge times may be
 tens of seconds in radio frequency powered medical device~\cite[Fig.
-3c]{nadeau_naturebio_2017}.  The recharge and discharge time --- which corresponds to the device's inactive and active time --- varies with the energy buffering capacitor's~\cite{capybara} and some devices fail and restart operating $\approx$10 to
+3c]{nadeau_naturebio_2017}.  The recharge and discharge time---which corresponds to the device's inactive and active time---varies with the energy buffering capacitor's~\cite{capybara} and some devices fail and restart operating $\approx$10 to
 $\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.
-
-%\begin{figure}
-%	\begin{subfigure}[t]{.35\linewidth}
-%		\centering\large Figure
-%		\caption{\centering WISP~\citep{wisp} against an RFID antenna}\label{fig:1a}
-%	\end{subfigure}%
-%	\begin{subfigure}[t]{.65\linewidth}
-%		\centering\large Figure
-%		\caption{\centering Program X~\citep{hicks_mibench2_2016} (split into X and Y tasks~\citep{chain}) at two distances}\label{fig:1b}
-%    \end{subfigure}
-%	\caption{Impact of an inadequate task sizing on the computation speed of a moving transiently-powered device.}\label{fig:1}
-%\end{figure}
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
     \centering
@@ -74,19 +60,8 @@ expensive to design, verify, and manufacture.  New architectures are also
 inapplicable to existing systems~\citep{hicks_isca_2017,nvp}. Software
 approaches are simpler and applicable to existing devices today, but prior
 software approaches have a number of limitations that are the focus of the work
-in this paper.  A key limitation of prior software approaches that we address in this paper is the {\em inflexibility}
-of a program statically decomposed into tasks. 
+in this paper.  A key limitation of prior software approaches that we address in this paper is the {\em inflexibility} of a program statically decomposed into tasks. 
 
-%\textcolor{red}{tictpl is not HW, is it? also it doesn't deal with inconsistency; this paragraph doesn't include Hibernus, so it should not include CPTL either.} 
-
-% <<<<<<< HEAD
-% \begin{figure}
-% 	\includegraphics[width=.5\columnwidth]{figures/alpaca-war.pdf}
-% 	\caption{\label{fig:virtualization}Adaptive task division at run-time might lead to write-after-read dependencies (variable \ttfamily{x}) that do not exist with static task division.\todo{Box with Task 1,2,3 must be the same size as merged task; Merged task must be named as Task 4; x must be marked in text as having WAR; "Task X" name should be next to the task box; "Window" - small letter}{Sinan}}
-% \end{figure}
-% =======
-
-%Moved intel note to related work
 \textbf{Task Decomposition of Intermittent Programs.} {\em
 Task-based} programming and execution models require a
 programmer~\citep{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to
@@ -124,8 +99,6 @@ complete, but incur a high task transition and commit overhead.  In this work,
 we propose a third way, using a novel technique called {\em dynamic task
 coalescing} that efficiently executes small tasks, avoiding unnecessary
 overheads while avoiding the risk of non-termination.
-
-%Brandon: I moved Cleancut to the related work section.  THere's too much in the intro already
 
 %A key challenge is that the length of a software
 %task's execution is \emph{limited by the fixed total amount of energy} that a
@@ -165,7 +138,6 @@ the change in memory model necessary to not break atomicity.
 %\texttt{x=y}, the value \texttt{x} will be increased twice when the merged task
 %is restarted, that leads to an inconsistency.
 
-%
 %variables in non-volatile memory at \emph{run-time} that can
 %break the atomicity of the \emph{virtual task}. Consider the
 %example depicted in Fig.~\ref{fig:virtualization}: Tasks 1,
@@ -180,8 +152,7 @@ the change in memory model necessary to not break atomicity.
 %run-time---unfortunately Task 4 is \emph{no more atomic}
 %since its re-execution will not always produce the same
 %results.
-%
-%Brandon: Sentence too long.
+
 While a compiler can use static data privatization and commit instrumentation
 (i.e., redo-logging) to eliminate statically identifiable, inter-task data
 dependences~\citep{alpaca}, a \emph{dynamic} dependence between two coalesced
