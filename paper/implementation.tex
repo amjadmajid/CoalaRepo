@@ -65,7 +65,7 @@ In order to obtain unique page tags, some alignment requirements have to be met.
 
 Page fault and page swap (with DMA). When a page is not found in RAM, it is fetched from FRAM. No major changes since last version.
 
-\subsection{Scheduling and committing}
+\subsection{Scheduling and Committing}
 
 Target budget initialization. Upon a reboot, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy [...].
 
@@ -82,3 +82,5 @@ Intermediate commit and ultimate commit. When a coalesced task is successfully r
 \end{figure}
 
 Target budget update. Before starting a new coalesced task, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy [...].
+
+\textcolor{red}{API of the partial commit needs to be explained as well}

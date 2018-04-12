@@ -1,3 +1,5 @@
+\subsection{Task Coalescing}
+
 \begin{algorithm}
 	\caption{Coalescing}
 	\label{algo:genCoalescing}
@@ -37,7 +39,7 @@ The general structure of the proposed coalescing strategies is summaries in algo
 A coalescing strategy and its performance are defined by the functions: \\
 (i) \emph{$f_\text{reboot}$}: which updates the target budget after a reboot; (ii) \emph{$f_\text{weight}$}: which returns the weight of the task just executed and its unit; (iii) \emph{$f_\text{compl}$}: which updates the target budget after a successful completion of a dynamic coalesced task. The following sections detail the different strategies \sys proposes and the needs that originated from one strategy leading to the conception of another one.
 
-\subsection{SC: Slow Coalescing}
+\subsubsection{SC: Slow Coalescing}
 \label{subsec:slowCoalescing}
 
 \begin{figure}
@@ -50,7 +52,7 @@ A coalescing strategy and its performance are defined by the functions: \\
 The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfilled by a naive strategy, having the target budget $B$ to increase by $x$ static tasks after a successful completion of a coalesced task, and to decrease by the same number of tasks upon a reboot. In this case: $f_\text{reboot} = B - x$; $f_\text{weight} =  1$; $f_\text{compl} = B + x$; \\
 Due to the linear behavior of the target adaptation, this algorithm is slow in reacting to the changes in energy conditions; the energy required by a coalesced task or the available energy. In particular, this algorithm can experience a large number of \emph{repeated power} failures without forward progress.
 
-\subsection{HC: History-aware Coalescing}
+\subsubsection{HC: History-aware Coalescing}
 \label{subsec:hCCoalescing}
 
 \begin{figure}
@@ -61,17 +63,3 @@ Due to the linear behavior of the target adaptation, this algorithm is slow in r
 \end{figure}
 
 The History-aware algorithm uses its recent execution history as metric to estimate the optimal coalesce task size. Relying on the history of execution enables this algorithm to react very quickly to discharge rates variation. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
