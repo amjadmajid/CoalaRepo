@@ -10,16 +10,17 @@ efficient volatile SRAM rather than non-volatile FRAM, which is more costly to a
 as we showed in Figure~\ref{fig:framEnergy}. \sys runtime implements memory
 virtualization by moving pages of the address space from the large,
 non-volatile memory to a small, volatile memory on demand and writing all dirty
-pages back atomically. Since memory moves are at page granularity, \sys
-exploits hardware\hyp{}accelerated block copies.
+pages back to non-volatile memory atomically. Since memory moves at page granularity, \sys
+exploits hardware\hyp{}accelerated block copies using DMA.
 
 %\subsection{Paged Non-Volatile Virtual Memory} 
 
-As they are
-accessed by a task, pages are swapped from their home location
+Paging moves data between non-volatile and volatile memory. A page has a home
+location in non-volatile memory which we refer to as the page's {\tt store}.
+As a task accesses pages, they are swapped from their home location
 in the direct\hyp{}mapped non-volatile memory, called
-\texttt{\underline{store}} (underline denotes allocation in non-volatile
-memory) into the fully\hyp{}associative \texttt{working} page buffer in volatile memory. The
+\texttt{\underline{store}} (underlined locations are non-volatile) 
+into the fully\hyp{}associative \texttt{working} page buffer in volatile memory. The
 \texttt{working} buffer is allocated to take up the volatile memory that
 remains after space for stack is allocated.
 %
