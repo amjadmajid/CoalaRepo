@@ -69,25 +69,37 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 
 \sys program characterization is provide in Table~\ref{table:compiler_result}. \todo{Finalize this section}{Przemek}
 
-\begin{table}[t]
-	\centering
-	\footnotesize
-	\renewcommand{\tabcolsep}{1pt}
-	\begin{tabular}{|l|cc|cc|cc|cc|c|}
+\begin{table}
+	\begin{tabular}{| c | c | c | c | c |}
 		\hline
-		{} & \multicolumn{2}{c|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
-		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
+		Application & \multicolumn{2}{| c |}{Memory footprint} & No. tasks & SLOC \\
+		{} & \sys & Alpaca & {} & {} \\
 		\hline\hline
-		bc & 22 & 22 & 10 & 15 & 81 & 93 & 351 &588 & 3\\
-		cem & 3492 & 3242 & 12 & 9 & 92 & 123 & 388 &721 & 2\\
-		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 & 483 &762 & 6\\
-		rsa & 332 & 250 & 20 & 27 & 130 & 296 & 887 &1233 & 86\\
-		ar & 166 & 218 & 11 & 6 & 112 & 333 & 483 &762 & 34\\
-		sort & 104 & 104 & 4 & 2 & 70 & 23 & 180 & 287 & $<$1\\
-		dft$^\dagger$ & --- & --- & --- & --- & --- & --- & 222 & 293 & ---\\
-		%dd &  &  &  &  &  &  &  & 287 &  \\
+		\textbf{ar} & --- & --- & --- & ---\\
 		\hline
 	\end{tabular}
 		\caption{Comparison between \sys and Alpaca benchmarks.}
 		\label{table:compiler_result}\vspace{-0.5cm}
 \end{table}
+
+%\begin{table}[t]
+%	\centering
+%	\renewcommand{\tabcolsep}{1pt}
+%	\begin{tabular}{|l|cc|cc|cc|cc|c|}
+%		\hline
+%		{} & \multicolumn{2}{c|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
+%		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
+%		\hline\hline
+%		bc & 22 & 22 & 10 & 15 & 81 & 93 & 351 &588 & 3\\
+%		cem & 3492 & 3242 & 12 & 9 & 92 & 123 & 388 &721 & 2\\
+%		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 & 483 &762 & 6\\
+%		rsa & 332 & 250 & 20 & 27 & 130 & 296 & 887 &1233 & 86\\
+%		ar & 166 & 218 & 11 & 6 & 112 & 333 & 483 &762 & 34\\
+%		sort & 104 & 104 & 4 & 2 & 70 & 23 & 180 & 287 & $<$1\\
+%		dft$^\dagger$ & --- & --- & --- & --- & --- & --- & 222 & 293 & ---\\
+%		%dd &  &  &  &  &  &  &  & 287 &  \\
+%		\hline
+%	\end{tabular}
+%		\caption{Comparison between \sys and Alpaca benchmarks.}
+%		\label{table:compiler_result}\vspace{-0.5cm}
+%\end{table}
