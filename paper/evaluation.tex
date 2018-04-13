@@ -1,66 +1,38 @@
-\subsection{\sys Evaluation Results}
+Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
+
+\subsection{\sys Runtime Performance}
 \label{sec:results_evaluation}
 
-We evaluated \sys to show that it is easy to use and efficient across our
-benchmarks. %We evaluate \sys's ease of use by characterizing \sys's automatic task compiler. We evaluate \sys efficiency by comparing its runtime performance to Chain. We characterize \sys by studying how its performance varies due to coalescing and when using automatic task compilation versus manual task compilation.
+We evaluated \sys to show that it is easy to use and efficient across our benchmarks. We evaluate \sys efficiency by comparing its runtime performance to Alpaca. We characterize \sys by studying how its performance varies due to coalescing.
 
-%\begin{table}[t]
-%	\centering
-%	\footnotesize
-%	\begin{tabular}{|c|c|c|c|c|c|}
-%		\hline
-%		bc & cem & cuckoo & rsa & ar & sort \\
-%		\hline\hline
-%		3 & 2 & 6 & 86 & 34 & < 1 \\
-%		\hline
-%	\end{tabular}
-%	\caption{\sys compile time per application (seconds).}
-%\label{table:compile_time}
-%\end{table}
-%
-%\subsubsection{Task Coalescing Performance}
-%\label{sec:results_coalescing}
-
-%List of figures: 
-%\begin{itemize}
-%	\item Fig. 1: Viper only/per app/fixed power/(hand/complier)/no coalescing/clang [Resuls are ready by Kiwan]
-%	\item Fig. 2: Viper only/per app/per distance (fixed/20/40/60)/(hand/complier)/coalescing [Resuls are ready by Kiwan]
-%	\item Fig. 3a: (Viper Coalescing/Chain)/per app/per distance (fixed/20/40/60)/complier/clang [Resuls are ready by Kiwan]
-%	\item Fig. 3b: (Viper Coalescing/Chain)/per app/per distance (fixed/20/40/60)/complier/gcc [Resuls are not ready: Kiwan needs to make them]
-%	\item Fig. 4: exactly as Fig 12 in the paper (4 apps only)
-%	\item Fig. 5: average virtual task size/gcc/fixed distance/per app 
-%\end{itemize}
-
-\subsubsection{\sys Runtime Performance}
+\subsubsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
-\textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time
-of \sys's two coalescing strategies normalized to the run time without
+We first need to assess the performance of all coalescing strategies intriduced by us in Section~\ref{}.
+
+\textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time of \sys's two coalescing strategies normalized to the run time without
 coalescing. We show data from experiments with intermittent power, where intermittency was generated in software
 %\todo{Say briefly how we generate full reset with MSP430}{Amjad}
-by triggering a reset from software at intervals that were uniformly distributed with an average power availability and unavailability interval of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. 
-%
-The results show the benefit from coalescing for most applications, with the
+by triggering a reset from software at intervals that were uniformly distributed with an average power availability and unavailability interval of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. The results show the benefit from coalescing for most applications, with the
 exception of dft, where wasted work dominated the gains from coalescing.
  %\todo{why coalescing for dft does not work but in Fig. 9 does?}{Amjad}
 The difference in performance between HC and TSHC strategies is highly
 application-dependent, with some applications benefiting from size awareness
 while others suffering, due to decisions based on inaccurate prediction of the
-actual task energy consumption.
-The TSHC gains are particularly small (or negative) for applications with
-narrower range of task sizes in Figure~\ref{fig:task_profiling}.
+actual task energy consumption. The TSHC gains are particularly small (or negative) for applications with narrower range of task sizes in Figure~\ref{fig:task_profiling}.
 %\todo{say why this difference is small}{Amjad}.
 %For this reason we shall proceed with HD coalescing strategy in subsequent evaluations. 
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}
-	\caption{\textbf{\sys coalescing strategies performance per application on intermittent power compared to \sys without coalescing (`NONE').}}
-%\todo{Change WHD to TSHC and HD to HC}{Amjad}}
+	\caption{\sys coalescing strategies performance per application on intermittent power compared to \sys without coalescing. \todo{Add new figure; comment on the result}{Przemek}}
 	\label{fig:coalescing}
 \end{figure}
 
-\textbf{\sys versus Task-based Model.} We evaluate \sys's run time performance and compare \sys to the run time performance of Chain. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provision with RFID reader for continuous power, i.e. 0\,m RFID antenna/WISP distance (the first two bars of each group) and on intermittent power at 20\,cm and 40\,cm from the RFID antenna (the second two and third two bars of each group, respectively). The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Chain for most applications. The performance benefit is greatest for applications that have small tasks (bc, sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that have larger tasks (e.g. dft) or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or in the \emph{single} cem case, worse than) Chain. 
+\textbf{\sys versus Task-based Model.} We evaluate \sys's run time performance and compare \sys to the run time performance of Alpaca. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provision from the RF signal generator (refer to Section~\ref{}).
+
+The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Chain for most applications. The performance benefit is greatest for applications that have small tasks (bc, sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that have larger tasks (e.g. dft) or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or in the \emph{single} cem case, worse than) Chain. \todo{Rewrite conclusions}{Przemek}
 
 \begin{figure}
 	\centering
@@ -71,27 +43,10 @@ narrower range of task sizes in Figure~\ref{fig:task_profiling}.
 
 The data also illustrate that coalescing improves \sys's performance by eliminating the overhead of committing after each task. The performance benefit varies, providing up to 4.5x performance improvement. The cuckoo application (like other top-performers, bc and sort) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. cem, coalescing does not improve performance. The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case. 
 
-%\begin{table}
-%	\centering
-%	\footnotesize
-%	\begin{tabular}{|r|c|c|c|}
-%		\hline
-%		{} & bc & dft & cem \\
-%		\hline\hline
-%		Avg. no. coalesced tasks & 56 & 3 & 26 \\
-%		Avg. task size (MCU cycles) & 657 & 9680 & 722 \\
-%		\hline
-%	\end{tabular}
-%\caption{Average \sys virtual task size (at 60\,cm WISP to RFID antenna distance) per manually task split application.}
-%\label{tab:aveVirtuTaskSize}
-%\end{table}
+\textbf{Task Downscaling.} \todo{Provide text; add results}{Przemek}
 
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\columnwidth]{figures/averageVirtualTaskSize}
-%	\caption{Average \sys virtual task size at fixed power per application. Top (green): number of coalesced tasks; bottom (red): average size of real task.}
-%	\label{fig:aveVirtuTaskSize}
-%\end{figure}
+\subsection{Characterization of \sys Overhead}
+\label{sec:coala_overhead}
 
 %Then, we need to know how many tasks \sys can coalesce within a given execution scenario. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and the amount of tasks coalesced. Result is given in Table~\ref{tab:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. This will help \sys to find the best possible virtual task size to minimise its runtime.
 
@@ -109,8 +64,10 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 	\label{fig:page_size}
 \end{figure}
 
-%\subsubsection{\sys's Compiler}
-%\label{sec:result_compiler_time}
+\subsection{\sys Programs Characterization}
+\label{sec:results_program_characterization}
+
+\sys program characterization is provide in Table~\ref{table:compiler_result}. \todo{Finalize this section}{Przemek}
 
 \begin{table}[t]
 	\centering
@@ -131,40 +88,6 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 		%dd &  &  &  &  &  &  &  & 287 &  \\
 		\hline
 	\end{tabular}
-	\caption{\textbf{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns)}; $^\dagger$dft does not compile with Clang }\label{table:compiler_result}\vspace{-0.5cm}
+		\caption{Comparison between \sys and Alpaca benchmarks.}
+		\label{table:compiler_result}\vspace{-0.5cm}
 \end{table}
-
-%
-
-%\textbf{\sys Compiler Generated Code Characterization.} The behaviour and the efficiency metrics of the \sys compiler are given in Table~\ref{table:compiler_result}.  \todo{update table with new data}
-%
-%for each application, for manually written (Man.) and automatically compiled (Comp.) benchmarks the difference in the number of bytes of protected data (columns 2 and 3), the number of tasks (columns 4 and 5), the number of \sys protected data API access calls (columns 6 and 7), the lines of code in each application for \sys and Chain (columns 8 and 9), and compilation time using \sys's compiler (column 10).
-%
-%On average, compiler-generated code introduces about 0.3\% more bytes of protected data, suggesting that liveness analysis captures natural boundaries in the use of variables also caught by a manual implementation. Compiler-generated code generates about 16\% fewer tasks for applications, on average. The results indicate that the \sys compiler selects task boundaries differently than a programmer would manually, favoring fewer, larger tasks. The \sys compiler inserts protected data access operations conservatively when a variable {\em may} alias a protected variables, due to the limitations of pointer aliasing. Consequently, the \sys compiler introduces 48\% more protected data accesses than programmer-written code. The run time results in Section~\ref{sec:result_compiler_time} show that the increase in protected data accesses sometimes degrades performance. Overall, the data show that the compiler automatically generates tasks similarly to manually written tasks. Doing so, \sys's compiler reaps the static task benefits of \sys, but simplifies programming by sparing the programmer the job of task decomposition.
-
-%\textbf{Compile Time.} We measured compile time for \sys's compiler's automatic task generation for each application\footnote{We could not compile the dft application since LLVM inserts mathematical built-in functions (i.e. \texttt{\_\_muldf3}, \texttt{\_\_floatsidf}, \texttt{\_\_adddf3}) whose implementation were not provided by the LLVM MSP430 back-end.}. We compiled the applications on a 4-core virtual machine with 1\,GB of memory running Arch Linux on an Intel Core i5-6200U at 2.30\,GHz. We collected results using the Linux system time collected in seconds. Most of the compile time was spent computing pointer alias analysis, while calculating the possible live ranges of variables. Applications such as rsa that have a larger code size and manipulate more variables have a longer compilation time, due to a larger search space for pointer aliasing. Nonetheless, the compile time is orders of magnitude shorter than manually defining tasks, which requires hours of programmer time. %The characterization of \sys's compiler suggests that the \sys compiler enables simpler task-based intermittent programming for \sys.
-
-%\textbf{Run Time of \sys Compiler Code.} In addition to the characterization of the \sys compiler in Table~\ref{table:compiler_result}, we experimentally assessed the performance of the \sys compiler, compared to the performance of the manually written benchmarks, as written in prior work~\cite{alpaca,chain}. Figure~\ref{fig:comp_user} compares the performance of manually written benchmark code to the performance of code automatically compiled using \sys. The figure shows run time for both cases, normalized to the run time of the manually written program, running on continuous power. The data show that in all cases except for ar and rsa, the run time performance of compiled code generated by the \sys compiler has comparable performance to manually written code. With comparable performance in most cases, the data suggest that the \sys compiler not only makes programming simpler, but does so, in most cases, without a high run time overhead. In the cases of both ar and rsa, the code manipulates a large amount of data that is stored in an array and passed into functions by reference. We expect that the data being manipulated by reference is leading to a large amount of may-alias references in the compiler's analysis, which leads to a larger number of accesses to protected data in the automatically compiled code, compared to the manually written code.
-
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\columnwidth]{figures/comp_user}
-%	\caption{\textbf{\sys compiler code overhead measured in terms of execution time per application} (dft excluded as it was not compiled by \sys compiler, see Table~\ref{table:compiler_result}); WISP was powered continuously.}
-%	\label{fig:comp_user}
-%\end{figure}
-
-%\subsubsection{Case Study}
-%\label{sec:case_study}
-
-%The final experiment assessing usefulness of \sys's use in real application. For this we have a implemented an battery-less wirelessly-powered sound detector as an example. To the best of our knowledge, this is the first case study that demonstrates a intermittently-powered system supplied by harvested energy at runtime, which continuously interacts with real-life signals. 
-
-%The application aims at detecting a specific tone in the audio signal (in the implementation: 1\,kHz) based on on-the-fly audio measurement. For this we have connected an analog MEMS microphone~\cite{microphone} output to AUX3 port of WISP\,5.1 (while the microphone was powered directly by WISP, which was then wirelessly power-supplied by the RFID reader). Audio signal is sampled by the microcontroller's ADC and passed to the FFT function (internal function of the TI's Digital Signal Processing library~\cite{ti_dsp}) to find a tone above a predefined threshold. The output of the detection is signalled by the WISP on-board LED. The video of demonstrating the working system is available via \url{https://link_to_a_video}.
-
-%Expected results:
-%\begin{itemize}
-%	\item Compare execution time: \sys against Chain for X\,s long audio signal detection at two antenna distances
-%	\item Make a video of the demonstration 
-%\end{itemize}
- 
-%\todo{Check if we really need this application}{Brandon}
-%\todo{Provide results and text to this section---if time allows (this result is not critical)}{Amjad/Przemek}
