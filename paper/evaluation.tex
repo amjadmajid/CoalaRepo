@@ -1,72 +1,15 @@
 %We present the experimental results of \sys's performance. We start with describing the hardware environment (Section~\ref{sec:results_hardware}) followed by the software environment (Section~\ref{sec:results_software}) and we concluded by the evaluation results (Section~\ref{sec:results_evaluation}).
 
-We evaluated \sys using a WISP\,5.1~\cite{wisp5,wisp} energy-harvesting
-platform build around a MSP430FR5969~\cite{wolverine} MCU with 64\,kB of FRAM.
-We used a TI Flash Emulation Tool (FET)~\cite{fet} as a power supply during
-experiments with continuous power. For energy measurements, we used
-EDB~\cite{edb}. In experiments with wireless power, we powered the WISP using
-an RFID reader (Impinj R1000 with firmware version
-3.2.4.240~\cite{r1000_data_sheet}) connected to the Liard RFMAX S9028PCRJ
-8\,dBic~\cite{atlas2015}. We controlled the RFID reader from a workstation
-running Ubuntu 10.4 using \emph{sllurp}~\cite{sllrp_github}. We set the
-transmitted power of the RFID reader to 30\,dBm at 915\,MHz center frequency.
-For distance-controlled experiments, we affixed the WISP at varying lengths to
-hollow paper tubes placed flat on a lying antenna. Timing measurements
-were done using the Salea~\cite{saleae} logic analyzer.
+We evaluated \sys using a WISP\,5.1~\cite{wisp5,wisp} energy-harvesting platform build around a MSP430FR5969~\cite{wolverine} MCU with 64\,kB of FRAM. We used a TI Flash Emulation Tool (FET)~\cite{fet} as a power supply during experiments with continuous power. For energy measurements, we used EDB~\cite{edb}. In experiments with wireless power, we powered the WISP using an RFID reader (Impinj R1000 with firmware version 3.2.4.240~\cite{r1000_data_sheet}) connected to the Liard RFMAX S9028PCRJ 8\,dBic~\cite{atlas2015}. We controlled the RFID reader from a workstation running Ubuntu 10.4 using \emph{sllurp}~\cite{sllrp_github}. We set the transmitted power of the RFID reader to 30\,dBm at 915\,MHz center frequency. For distance-controlled experiments, we affixed the WISP at varying lengths to hollow paper tubes placed flat on a lying antenna. Timing measurements were done using the Salea~\cite{saleae} logic analyzer.
 
-For some experiments (noted below) we used an alternative setup where the
-MSP-TS430RGZ48C launchpad was used for continuous power experiments and used
-internal timer for measuring run time. For harvested energy, we used
-WISP\,5.0~\cite{wisp5,wisp} hardware and ThingMagic Astra-EX integrated RFID
-reader set at 30\,dBm transmission power at 915\,MHz. We used EDB~\cite{edb}
-to measure run time. Applications were cross-compiled using GCC and Clang (both version 3.8.0), allowing us to use LLVM for the \sys compiler. 
+For some experiments (noted below) we used an alternative setup where the MSP-TS430RGZ48C launchpad was used for continuous power experiments and used internal timer for measuring run time. For harvested energy, we used WISP\,5.0~\cite{wisp5,wisp} hardware and ThingMagic Astra-EX integrated RFID reader set at 30\,dBm transmission power at 915\,MHz. We used EDB~\cite{edb} to measure run time. Applications were cross-compiled using GCC and Clang (both version 3.8.0), allowing us to use LLVM for the \sys compiler. 
 
 \subsection{Benchmarks and Baseline}
 \label{sec:results_software}
 
-We compare \sys against state-of-the-art task-based runtime Chain~\cite{chain}.
-We do not compare \sys to other, earlier systems, such as DINO~\cite{dino} or
-Mementos~\cite{mementos} (cf. Section~\ref{sec:background_consistency}), as
-Chain is the only task-based execution model available to which we can compare
-\sys. 
+%We compare \sys against state-of-the-art task-based runtime Alpaca~\cite{alpaca}. We do not compare \sys against Chain~\cite{chain}, another task-based system, which is inferior to Alpaca in its performance. Also, we do not compare \sys to checkpointing-based systems, such as DINO~\cite{dino} or Mementos~\cite{mementos} (cf. Section~\ref{sec:background_consistency}), as both of them are build on top LLVM compiler, which performance is inferior to GCC compiler used in the evaluation of \sys \todo{Please check if the LLVM compiler argument makes sense}.
 
-We evaluated \sys using benchmarks from the literature~\cite{chain,alpaca} and
-several new programs: (i) \textbf{bc}: counts bits in byte pseudo-random string
-using several algorithms, and compares results for correctness; (ii)
-\textbf{cem}, which emulates an embedded temperature sensing engine and in
-which measurements are randomly generated and compressed using LZW with a fixed
-entry dictionary and fixed byte block; (iii) \textbf{cuckoo}: which implements
-a Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random
-numbers, then queries the filter to recover the sequence; (iv) \textbf{rsa}:
-which encrypts a fixed string with a stored key; (v) \textbf{ar}: which
-performs nearest neighbour classification of randomly generated data modelling a
-three-axis accelerometer. This set of benchmarks overlaps with those used
-in~\cite{chain,alpaca}. We implemented several new applications: (vi)
-\textbf{sort}: selection sort algorithm on a fixed sequence of numbers, and
-(vii) \textbf{dft}: discrete Fourier transform. All applications are compared
-in columns eight and nine of Table~\ref{table:compiler_result} showing the
-number of source lines of code compared to Chain.
-
-%\begin{table}[t]
-%	\centering
-%	\footnotesize
-%	\begin{tabular}{|c|c|c|}
-%		\hline
-%		Application & SLOC (\sys) & SLOC (Chain~\cite{chain})\\
-%		\hline\hline
-%		{bc} & 351 & 588 \\ %59\%
-%		{cem} & 388 & 721 \\ %53\%
-%		{cuckoo} & 483 & 762 \\ %63\%
-%		{rsa} & 887 & 1233 \\ %71\%
-%		{ar} & 483 & 762 \\ %63\%
-%		{dft} & {} & {} \\ %Two resolutions: 4 and 8 Bytes
-%		{dd} & {} & {} \\ %Data decompression size: 100 bytes
-%		{sort} & {} & {} \\
-%		\hline
-%	\end{tabular}
-%\caption{List of benchmark programs used in \sys evaluation; SLOC: source lines of code.}
-%\label{table:benchmark_list}
-%\end{table}
+%We evaluated \sys using benchmarks that originated from the MiBench testing suite~\cite{mibench,hicks_mibench2_2016}. Specifically, we have implemented three benchmarks used by Chain~\cite{chain} and Alpaca~\cite{alpaca} (source code: \cite{coala_website}), namely: \textbf{ar}: nearest neighbor classification of randomly generated data modeling a three-axis accelerometer; \textbf{bc}: counts bits in byte pseudo-random string using several algorithms, and compares results for correctness; \textbf{cuckoo}: Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence. Additionally, we have ported three new benchmarks from~\cite{mibench}, namely: \textbf{fft}: Fast Fourier Transform algorithm \todo{specify details of the implementation}; and \textbf{sort}: selection sort algorithm on a fixed sequence of numbers. \todo{justify the selection of these benchmarks} All applications are summarized in Table~\ref{table:compiler_result} in terms of memory footprint, source lines of code and number of tasks. \todo{update table with new data}
 
 \subsection{\sys Evaluation Results}
 \label{sec:results_evaluation}
@@ -201,10 +144,12 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 		%dd &  &  &  &  &  &  &  & 287 &  \\
 		\hline
 	\end{tabular}
-	\caption{\textbf{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns)}; $^\dagger$dft does not compile with Clang}\label{table:compiler_result}\vspace{-0.5cm}
+	\caption{\textbf{Comparison between \sys and Chain source code line number (SLOC column) and comparison between compiler-generated \sys code (Comp.) and hand-written \sys code (Man.) (other columns)}; $^\dagger$dft does not compile with Clang }\label{table:compiler_result}\vspace{-0.5cm}
 \end{table}
 
-\textbf{\sys Compiler Generated Code Characterization.} The behaviour and the efficiency metrics of the \sys compiler are given in Table~\ref{table:compiler_result}. 
+%
+
+\textbf{\sys Compiler Generated Code Characterization.} The behaviour and the efficiency metrics of the \sys compiler are given in Table~\ref{table:compiler_result}.  \todo{update table with new data}
 %
 %for each application, for manually written (Man.) and automatically compiled (Comp.) benchmarks the difference in the number of bytes of protected data (columns 2 and 3), the number of tasks (columns 4 and 5), the number of \sys protected data API access calls (columns 6 and 7), the lines of code in each application for \sys and Chain (columns 8 and 9), and compilation time using \sys's compiler (column 10).
 %
