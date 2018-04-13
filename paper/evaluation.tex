@@ -172,9 +172,9 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/ramPagsSizes}
-	\includegraphics[width=\columnwidth]{figures/pagefault}
-	\caption{\textbf{\sys normalized runtime for various page sizes, \{32, 64, $\ldots$,1024\}\,bytes, per application (top) and respective page faults (bottom)}; X = zero page faults; red bar: half-page swap, blue bar: full page swap (replacing pages in both FRAM and SRAM).}\vspace{-0.5cm}
+	\includegraphics[width=\columnwidth]{figures/page_exec-time}
+	\includegraphics[width=\columnwidth]{figures/pagePulls}
+	\caption{\textbf{\sys normalized runtime for various page sizes, \{32, 64,128,256\}\,bytes, per application (top) and respective page pulls (bottom)}).}\vspace{-0.5cm}
 %\todo{change X to 0, remove the definition of X from caption}{Amjad}}
 	\label{fig:page_size}
 \end{figure}
