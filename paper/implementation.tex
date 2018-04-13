@@ -58,6 +58,7 @@ Memory virtualization. Working (volatile) buffer, store and shadow (non-volatile
 Page allocation and page tags. When the application accesses a protected variable with RP or WP, Coala has to search for the variable in RAM first, and in non-volatile memory if it not found in RAM. Actually, the kernel searches for pages, not single variables. A page search can be very fast if each page is identified by a unique tag, and if every variable belonging to a page bears the tag in its address. Thus, retrieving a page tag from a protected variable’s address boils down to extracting the upper bits of the address itself. The remaining lower bits denote the variable’s offset in its page.
 
 \begin{figure}
+	\includegraphics[width=0.9\textwidth]{figures/graffle/paging.pdf}
 	\caption{Illustration of page tags \textcolor{red}{to be drawn}}
 \end{figure}
 
