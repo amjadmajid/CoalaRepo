@@ -257,7 +257,23 @@ locations in \texttt{\underline{store}}.
 %The non-volatile commit bit persists
 %across power failures and \sys repeatedly attempts to commit until it succeeds,
 %despite arbitrary power failures.
+\subsection{Dynamic vs. Static Privatization}
+\TODO{Put paragraph about Alpaca's static privatization algo vs. Coala's dynamic privatization algo}
+\TODO{pass by ref might not work the right way}
+\begin{verbatim}
 
+GLOBAL_(x)
+
+foo(*y){ 
+  *y++; 
+}
+
+TASK( ){ 
+  ... ;  
+  foo( &GV(x) ) ; 
+}
+
+\end{verbatim}
 %\subsection{Managing Paging Overhead}
 %
 %The efficiency of \sys's paging scheme relies on the fact that data in pages are contiguous, which makes them amenable to being manipulated by hardware assisted DMA bulk copy operations. To justify this design choice we experimentally evaluated the efficiency of using DMA block copies, compared to explicit, software copy loops. We copied blocks of data of different size between memory regions on a WISP~\cite{wisp} using a hand-written loop and using DMA (refer to Section~\ref{sec:results_hardware} for hardware setup details). Figure~\ref{fig:dmaTimeEnergy} shows that for moving large blocks of data like a page, hardware DMA is considerably better than software in both run time and energy efficiency. \sys's design moves data in pages, not individual words, leveraging the increased efficiency of DMA data movement.
