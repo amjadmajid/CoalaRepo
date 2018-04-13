@@ -3,10 +3,28 @@ Our hardware and software suite used to evaluate \sys novel intermittent executi
 \subsection{Intermittent Platform and Hardware Toolchain}
 \label{sec:results_hardware_software}
 
-We evaluated \sys in two power supply environments: (i)  \emph{intermittent} and (ii) \emph{fixed} (to benchmark the intermittent power supply results). In the experiments with intermittent power supply, we evaluated \sys using a WISP\,5.1~\cite{wisp5,wisp}---energy-harvesting platform build around a MSP430FR5969~\cite{wolverine} MCU with 64\,kB of FRAM. We powered the WISP using RF signal generator~\cite{} emitting 20\,dBm sinusoidal wave at 915\,MHz. \TODO{check if true} Signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic antenna~\cite{atlas2015}. For distance-controlled experiments, we affixed WISP at two paper protrusions around 10\,cm from the surface of the table (parallel to, and at the edge of, table surface). Antenna of the signal generator was facing WISP directly and located at three distances, $d=\{15, 30, 50\}$\,cm, from WISP. For task coalescing experiments, an additional distance of $d=60$\,cm was considered. Both antennas were parallel to each other and no physical objects were located between the WISP and signal generator antenna. For continuous power experiments we used an alternative setup with MSP-TS430RGZ48C launchpad~\cite{}, which had the same MCU as WISP. \TODO{Is this the right launchpad model?} In all the experiments the timing measurements were performed using the Saleae~\cite{saleae} logic analyzer. \TODO{How about paging measurements?}
+We evaluated \sys in two power supply environments: (i)  \emph{intermittent} and (ii) \emph{fixed} (to benchmark the intermittent power supply results). In the experiments with intermittent power supply, we evaluated \sys using a WISP\,5.1~\cite{wisp5,wisp}---energy-harvesting platform build around a MSP430FR5969~\cite{wolverine} MCU with 64\,kB of FRAM. We powered the WISP using RF signal generator~\cite{} emitting 20\,dBm sinusoidal wave at 915\,MHz.  Signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic antenna~\cite{atlas2015}. For distance-controlled experiments, we affixed WISP at two paper protrusions around 10\,cm from the surface of the table (parallel to, and at the edge of, table surface). Antenna of the signal generator was facing WISP directly and located at three distances, $d=\{15, 30, 50\}$\,cm, from WISP. For task coalescing experiments, an additional distance of $d=60$\,cm was considered. Both antennas were parallel to each other and no physical objects were located between the WISP and signal generator antenna. For continuous power experiments we used an alternative setup with MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad}, which had the same MCU as WISP. In all the experiments the timing measurements were performed using either the Saleae~\cite{saleae} logic analyzer (for intermittent power experiments) or TI Code Composer Studio (for fixed power experiments). Both type of experiments are explained in the following section.
 
 \subsection{Software Benchmarks}
 \label{sec:software_benchmarks}
+
+\begin{table}
+	\centering
+	\footnotesize
+	\begin{tabular}{| c | c |}
+		\hline
+		Application & Description \\
+		\hline\hline
+		\textbf{ar} & nearest neighbor classification of randomly generated data modeling a three-axis accelerometer\\
+		\textbf{bc} & counts bits in byte pseudo-random string using several algorithms, and compares results for correctness\\
+		\textbf{cuckoo} & Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence\\
+		\textbf{fft} & continuously repeating Fast Fourier Transform on three pre-generated 128 sample vector\\
+		\textbf{sort} & selection sort algorithm on a fixed sequence of numbers\\
+		\hline
+	\end{tabular}
+\caption{Suite of benchmark applications used in evaluating \sys performance. All applications have been chosen from MiBench testing suite~\cite{mibench,hicks_mibench2_2016}.}
+\label{table:benchmark_table}
+\end{table}
 
 We evaluated \sys using benchmarks that originated from the MiBench testing suite~\cite{mibench,hicks_mibench2_2016}. Specifically, we have implemented three benchmarks used by Chain~\cite{chain} and Alpaca~\cite{alpaca} (source code is accessible~\cite{coala_website}), namely: \textbf{ar}: nearest neighbor classification of randomly generated data modeling a three-axis accelerometer; \textbf{bc}: counts bits in byte pseudo-random string using several algorithms, and compares results for correctness; \textbf{cuckoo}: Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence. Additionally, we have ported three new benchmarks from~\cite{mibench}, namely: \textbf{fft}: continuously repeating Fast Fourier Transform on three pre-generated 128 sample vector; and \textbf{sort}: selection sort algorithm on a fixed sequence of numbers. \todo{justify the selection of these benchmarks} All applications are summarized in Table~\ref{table:compiler_result} in terms of memory footprint, source lines of code and number of tasks. \TODO{update table with new data}
 
