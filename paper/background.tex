@@ -136,4 +136,25 @@ To understand these non-volatile memory overheads, for the MSP430FR5969~\cite{ms
 
 Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware with a fixed energy buffering capacity. Buffer sizes from prior work vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short, task on a device with a larger buffer. The key problem is that using existing systems, by defining tasks statically for a fixed energy buffer, the programmer either risks non-termination or poor performance due to high overhead. \sys's {\em task coalescing}, described in Section~\ref{sec:task_coalescing}, is motivated by these observations.
 
-\textbf{Motivating the Design of \sys's Execution Model.} The challenge of \emph{efficiently} executing a program under frequent power failures, lies in the fact that the program needs to be energy aware. This challenge becomes even bigger when \emph{generality} is a design requirement, and consequently, the system must not require a specific hardware circuitry to offer its efficiency. \emph{Flexibility} is a key for wide adaptation, therefore, \sys's execution model should not limit the programmer to a subset of the functionality of the underlying software technology. \emph{\sys champions an efficient, general, and flexible intermittent execution.}
+
+
+\subsection {Motivating the Design of \sys's Execution Model.} 
+%% Coala’s model motivation
+The challenge of \emph{efficiently} executing a program under frequent power failures, lies in the fact that the program needs to be energy aware.  This challenge becomes even bigger when 
+Hardware support is not allowed to advocate the approach \emph{generality} and to eliminate hardware energy consumption overhead. Furthermore, \emph{flexibility} is a key for wide adaptation, therefore, \sys's execution model should not limit a programmer to a subset of the functionalities of the underlying software technology---\emph{\sys champions an efficient, general, and flexible intermittent execution.}
+
+%% How does Coala’s execution model progress?
+\sys execution model operates on task-based programming model, but It progresses on a dynamic, virtual task granularity. A virtual task can be either multiple static tasks \emph{coalesced} together, when the energy permits, or a sub-task, when it is necessary to preserve forward progress. However, as more tasks coalesce, their  collective commit overhead amortizes better, but the risk of wasting work also increases. If power fails during a long sequence of coalesced tasks, execution will restart from the last commit, i.e. the first task in the sequence, losing  the progress made by any of the coalesced tasks.  The challenge to coalescing tasks is determining how many tasks to coalesce before committing.
+
+
+
+%% How does Coala’s execution model decide on its step size when there is abandoned energy?
+\sys uses the recent execution history---pure software technique---as a metric to estimate the amount of the available energy and to set the adequate virtual task size accordingly. This fundamental feature prevents \sys from blind virtual task adaptation which can result in a repeated power failures problem. For example, If \sys enlarges the virtual task size by $x$ static tasks on a virtual task completion and reduces it by the same number of static tasks on a power reboot, then \sys may need to reboot, for instance, 10 times to reduce the virtual task size from 10 to one when $x=1$. 
+
+%% How does Coala’s execution model decide on its step size when there is scarce energy?
+
+Coala's execution model is neither limited by a static task size to progress, nor by the commit size, i.e. the amount of data that needs to be saved to the non-volatile memory to preserve execution progress. Coala can partition compile-time tasks, if it fails on a single static task more than once, or merge them, if saving the state to non-volatile memory is redundant because a power failure is not expected soon. This unique technique makes the commit size proportional to the number of state-less instructions executed. In other words, if energy allows executing only a small chunk of code, the amount of data to be committed shrinks accordingly.
+
+
+
+
