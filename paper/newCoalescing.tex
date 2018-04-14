@@ -1,5 +1,26 @@
 \subsection{Task Coalescing}
 
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coal_Intro_Figure.pdf}%coalescing_timeline
+	\caption{ When $N$ tasks coalesced $N-1$ commit operations is skipped.}
+	\label{fig:coalIntro}
+\end{figure}
+
+When incoming energy is sufficient to run multiple consecutive tasks,
+committing state after each task is wasteful. \sys mitigates this
+waste by deferring the expensive commits and performing them in a
+batch. In the resulting execution, several tasks are \emph{merged} into a
+single virtual task---a process we call \emph{coalescing}. 
+%
+When $N$ tasks are coalesced, $N-1$ boundaries are crossed and some number of
+pages are dirtied. The first $N-2$ executions of \transition statement skip
+committing dirty pages to non-volatile memory, leaving the work of committing
+pages modified by any of the $N$ tasks to the statement $N-1$.
+Coalescing is likely to reduce the total number of non-volatile memory
+accesses, because when coalesced tasks access the same pages of data, only the
+last version of the page needs to be committed.  \textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
+
 \begin{algorithm}
 	\caption{Coalescing}
 	\label{algo:genCoalescing}
@@ -52,14 +73,14 @@ A coalescing strategy and its performance are defined by the functions: \\
 The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfilled by a naive strategy, having the target budget $B$ to increase by $x$ static tasks after a successful completion of a coalesced task, and to decrease by the same number of tasks upon a reboot. In this case: $f_\text{reboot} = B - x$; $f_\text{weight} =  1$; $f_\text{compl} = B + x$; \\
 Due to the linear behavior of the target adaptation, this algorithm is slow in reacting to the changes in energy conditions; the energy required by a coalesced task or the available energy. In particular, this algorithm can experience a large number of \emph{repeated power} failures without forward progress.
 
-\subsubsection{HC: History-aware Coalescing}
-\label{subsec:hCCoalescing}
+% \subsubsection{HC: History-aware Coalescing}
+% \label{subsec:hCCoalescing}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/HCCoal}%coalescing_timeline
-	\caption{The History-aware coalescing algorithm  updates its coalescing target}
-	\label{fig:HCCoal}
-\end{figure}
+% \begin{figure}
+% 	\centering
+% 	\includegraphics[width=\columnwidth]{figures/HCCoal}%coalescing_timeline
+% 	\caption{The History-aware coalescing algorithm  updates its coalescing target}
+% 	\label{fig:HCCoal}
+% \end{figure}
 
-The History-aware algorithm uses its recent execution history as metric to estimate the optimal coalesce task size. Relying on the history of execution enables this algorithm to react very quickly to discharge rates variation. 
+% The History-aware algorithm uses its recent execution history as metric to estimate the optimal coalesce task size. Relying on the history of execution enables this algorithm to react very quickly to discharge rates variation. 
