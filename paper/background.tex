@@ -1,3 +1,25 @@
+\textcolor{red}{Text to be considered by: Brandon Przemek}
+
+\textcolor{red}{The challenge of \emph{efficiently} executing a program under frequent power failures, lies in the fact that the \emph{program needs to be energy aware}. \sys uses the recent execution history---pure software technique---as a metric to estimate the amount of the available energy and to set the adequate virtual task size accordingly. This fundamental feature prevents \sys from blind virtual task adaptation which can result in a repeated power failures problem. For example, If \sys enlarges the virtual task size by $x$ static tasks on a virtual task completion and reduces it by the same number of static tasks on a power reboot, then \sys may need to reboot, for instance, 10 times to reduce a virtual task size from 10 to one, when $x=1$}
+
+
+\textcolor{red}{Why hardware based checkpoint systems are static? and why \sys's partial commit is dynamic?}
+
+\textcolor{red}{(i) Stopping at arbitrary locations in the code may result in incorrect computation or even crash the program. If a system checkpoints between, for example, the DMA initialization and the DMA call the program will crash. One might think that a simple solution is to disable interrupts at these critical regions. Although this is the correct solution, the checkpoint-based system will "theoretically" stuck (non-termination problem) because it has to checkpoint at this exact location since it is a threshold-based system, so it is a static system. However, \sys's partial commit is not threshold based therefore it allows the programmer to disable interrupts at certain locations and it will partially commit around it.}
+
+\textcolor{red}{(ii) A Checkpoint system normally checkpoints all volatile data. Therefore, it suffers from moving large amount of data on each checkpoint. However, \sys's partial commit technique relies on a paging mechanism, which makes the size of the commit proportional to the number of state-less instructions executed. In other words, if energy allows executing only a small chunk of code, the amount of data to be committed shrinks accordingly. As such, \sys's execution model is neither limited by a static task size to progress, nor by the commit size,
+}
+
+\textcolor{red}{
+\emph{flexibility} is a key for wide adaptation, therefore, \sys's execution model should not limit a programmer to a subset of the functionalities of the underlying software technology}
+
+
+
+
+
+
+
+
 %Here, we provide background on energy harvesting systems and the intermittent software execution model. We then discuss the key limitations of existing task-based execution models for intermittent computing that \sys addresses.
 
 %\begin{figure}
