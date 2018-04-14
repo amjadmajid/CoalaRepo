@@ -1,11 +1,11 @@
 \subsection{Task Coalescing}
 
-\begin{figure}
+\begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/coal_Intro_Figure.pdf}%coalescing_timeline
-	\caption{ When $N$ tasks coalesced $N-1$ commit operations is skipped.}
+	\includegraphics[width=0.5\columnwidth]{figures/coal_Intro_Figure.pdf}
+	\caption{When $N$ tasks coalesced $N-1$ commit operations are skipped.}
 	\label{fig:coalIntro}
-\end{figure}
+\end{wrapfigure}
 
 When incoming energy is sufficient to run multiple consecutive tasks,
 committing state after each task is wasteful. \sys mitigates this
@@ -67,7 +67,7 @@ A coalescing strategy and its performance are defined by the functions: \\
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/slowCoal}
+	\includegraphics[width=0.5\columnwidth]{figures/slowCoal}
 	\caption{The {\em slow coalescing} algorithm \emph{linearly} updates its coalescing target.}
 	\label{fig:slowCoal}
 \end{wrapfigure}
