@@ -10,12 +10,11 @@
 
 #include <coala.h>
 
+// Only for profiling, removable otherwise
+#include <ctlflags.h>
 
-// Profiling defines and flags.
-#define PRF_PORT 3
-#define PRF_PIN  4
-#define RST_PIN  5
-#if RAISE_PIN
+// Profiling flags.
+#if ENABLE_PRF
 __nv uint8_t full_run_started = 0;
 __nv uint8_t first_run = 1;
 #endif
@@ -50,15 +49,15 @@ __nv static char bits[256] =
 };
 
 // Tasks.
-COALA_TASK(task_init, 2)
-COALA_TASK(task_select_func, 2)
-COALA_TASK(task_bit_count, 1)
-COALA_TASK(task_bitcount, 2)
-COALA_TASK(task_ntbl_bitcnt, 1)
-COALA_TASK(task_ntbl_bitcount, 2)
-COALA_TASK(task_BW_btbl_bitcount, 2)
-COALA_TASK(task_AR_btbl_bitcount, 2)
-COALA_TASK(task_bit_shifter, 2)
+COALA_TASK(task_init, 6)
+COALA_TASK(task_select_func, 5)
+COALA_TASK(task_bit_count, 5)
+COALA_TASK(task_bitcount, 8)
+COALA_TASK(task_ntbl_bitcnt, 6)
+COALA_TASK(task_ntbl_bitcount, 6)
+COALA_TASK(task_BW_btbl_bitcount, 5)
+COALA_TASK(task_AR_btbl_bitcount, 5)
+COALA_TASK(task_bit_shifter, 7)
 COALA_TASK(task_end, 1)
 
 // Task-shared protected variables.
@@ -80,7 +79,7 @@ void task_init()
     cp_reset();
 #endif
 
-#if RAISE_PIN
+#if ENABLE_PRF
     full_run_started = 1;
 #endif
 
@@ -396,12 +395,12 @@ void task_end()
     cp_reset();
 #endif
 
-#if RAISE_PIN
+#if ENABLE_PRF
     if (full_run_started) {
 #if AUTO_RST
         msp_reseter_halt();
 #endif
-        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        PRF_APP_END();
         full_run_started = 0;
         coala_force_commit();
 #if AUTO_RST
@@ -422,13 +421,9 @@ void init()
     msp_watchdog_disable();
     msp_gpio_unlock();
 
-#if RAISE_PIN
-    msp_gpio_clear(PRF_PORT, 4);
-    msp_gpio_clear(PRF_PORT, 5);
-    msp_gpio_clear(PRF_PORT, 6);
-    msp_gpio_dir_out(PRF_PORT, 4);
-    msp_gpio_dir_out(PRF_PORT, 5);
-    msp_gpio_dir_out(PRF_PORT, 6);
+#if ENABLE_PRF
+    PRF_INIT();
+    PRF_POWER();
 #endif
 
     // msp_clock_set_mclk(CLK_8_MHZ);
@@ -445,7 +440,13 @@ void init()
 #if AUTO_RST
     msp_reseter_auto_rand(RST_TIME);
 #endif
-    msp_gpio_set(PRF_PORT, RST_PIN);
+
+#if ENABLE_PRF
+    if (first_run) {
+        PRF_APP_BGN();
+        first_run = 0;
+    }
+#endif
 }
 
 int main(void)
@@ -453,13 +454,6 @@ int main(void)
     init();
 
     coala_init(task_init);
-
-#if RAISE_PIN
-    if (first_run) {
-        msp_gpio_spike(PRF_PORT, PRF_PIN);
-        first_run = 0;
-    }
-#endif
 
     coala_run();
 

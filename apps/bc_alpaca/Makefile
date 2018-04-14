@@ -1,10 +1,12 @@
 # Source and build directories
-PROJECT   := cem
-SRC_DIR   := ./
-BLD_DIR   := build
-MAKER_DIR := ../../maker
+PROJECT       := bc
+SRC_DIR       := ./
+BLD_DIR       := build
+CLANG_BLD_DIR := build_clang
+MAKER_DIR     := ../../maker
+LIB_DIR       := ../../libs
 
-# Edit env.mk as needed
+# Edit envCom.mk as needed
 include $(MAKER_DIR)/envCom.mk
 
 # Uncomment and edit if the path to msp430-gcc compiler is different
@@ -17,5 +19,10 @@ include $(MAKER_DIR)/envCom.mk
 # CFLAGS :=
 # LFLAGS :=
 # LIBS :=
+# LLVM_LIBS :=
 
+ifeq ($(TOOLCHAIN),clang)
+include $(MAKER_DIR)/apps.clang.mk
+else
 include $(MAKER_DIR)/apps.mk
+endif

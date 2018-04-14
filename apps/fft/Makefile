@@ -1,5 +1,5 @@
 # Source and build directories
-PROJECT       := bc
+PROJECT       := fft
 SRC_DIR       := ./
 BLD_DIR       := build
 CLANG_BLD_DIR := build_clang
@@ -15,10 +15,18 @@ include $(MAKER_DIR)/envCom.mk
 
 # Uncomment if additional flags, includes or libraries are needed
 # (other than the ones defined in maker/apps.mk)
-# INCLUDES :=
+
+INCLUDES := \
+	-I $(LIB_DIR)/dsplib/include \
+
 # CFLAGS :=
-# LFLAGS :=
-# LIBS :=
+
+LFLAGS := \
+	-L $(LIB_DIR)/dsplib/build \
+
+LIBS := \
+	-ldsp \
+
 # LLVM_LIBS :=
 
 ifeq ($(TOOLCHAIN),clang)

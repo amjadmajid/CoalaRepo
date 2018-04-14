@@ -11,12 +11,11 @@
 
 #include <coala.h>
 
+// Only for profiling, removable otherwise
+#include <ctlflags.h>
 
-// Profiling defines and flags.
-#define PRF_PORT 3
-#define PRF_PIN  4
-#define RST_PIN  5
-#if RAISE_PIN
+// Profiling flags.
+#if ENABLE_PRF
 __nv uint8_t full_run_started = 0;
 __nv uint8_t first_run = 1;
 #endif
@@ -48,21 +47,23 @@ typedef struct _lookup_count {
 } lookup_count_t;
 
 // Tasks.
-COALA_TASK(task_init, 5)
-COALA_TASK(task_init_array, 1)
-COALA_TASK(task_generate_key, 1)
-COALA_TASK(task_calc_indexes, 1)
-COALA_TASK(task_calc_indexes_index_1, 1)
-COALA_TASK(task_calc_indexes_index_2, 1)
+COALA_TASK(task_init, 50)
+COALA_TASK(task_generate_key, 3)
+COALA_TASK(task_calc_indexes, 3)
+COALA_TASK(task_calc_indexes_index_1, 3)
+COALA_TASK(task_calc_indexes_index_2, 4)
 COALA_TASK(task_insert, 1)
-COALA_TASK(task_add, 1)
-COALA_TASK(task_relocate, 1)
-COALA_TASK(task_insert_done, 1)
+COALA_TASK(task_add, 5)
+COALA_TASK(task_relocate, 5)
+COALA_TASK(task_insert_done, 5)
 COALA_TASK(task_lookup, 1)
-COALA_TASK(task_lookup_search, 1)
-COALA_TASK(task_lookup_done, 1)
+COALA_TASK(task_lookup_search, 4)
+COALA_TASK(task_lookup_done, 5)
 COALA_TASK(task_print_stats, 1)
 COALA_TASK(task_done, 1)
+
+// NOT USED.
+COALA_TASK(task_init_array, 1)
 
 // Task-shared protected variables.
 COALA_PV(fingerprint_t, _v_filter, NUM_BUCKETS);
@@ -112,7 +113,7 @@ void task_init()
     cp_reset();
 #endif
 
-#if RAISE_PIN
+#if ENABLE_PRF
     full_run_started = 1;
 #endif
 
@@ -474,14 +475,13 @@ void task_done()
     cp_reset();
 #endif
 
-#if RAISE_PIN
+#if ENABLE_PRF
     if (full_run_started) {
 #if AUTO_RST
         msp_reseter_halt();
 #endif
-        msp_gpio_spike(PRF_PORT, PRF_PIN);
+        PRF_APP_END();
         full_run_started = 0;
-        coala_force_commit();
 #if AUTO_RST
         msp_reseter_resume();
 #endif
@@ -501,13 +501,9 @@ void init()
     msp_watchdog_disable();
     msp_gpio_unlock();
 
-#if RAISE_PIN
-    msp_gpio_clear(PRF_PORT, 4);
-    msp_gpio_clear(PRF_PORT, 5);
-    msp_gpio_clear(PRF_PORT, 6);
-    msp_gpio_dir_out(PRF_PORT, 4);
-    msp_gpio_dir_out(PRF_PORT, 5);
-    msp_gpio_dir_out(PRF_PORT, 6);
+#if ENABLE_PRF
+    PRF_INIT();
+    PRF_POWER();
 #endif
 
     // msp_clock_set_mclk(CLK_8_MHZ);
@@ -522,25 +518,23 @@ void init()
 #endif
 
 #if AUTO_RST
-    msp_reseter_auto_rand(RST_TIME); // every 12 msec the MCU will be reseted
+    msp_reseter_auto_rand(RST_TIME);
 #endif
-    msp_gpio_set(PRF_PORT, RST_PIN);
 
-    srand(0);
+#if ENABLE_PRF
+    if (first_run) {
+        PRF_APP_BGN();
+        first_run = 0;
+    }
+#endif
 }
+
 
 int main(void)
 {
     init();
 
     coala_init(task_init);
-
-#if RAISE_PIN
-    if (first_run) {
-        msp_gpio_spike(PRF_PORT, PRF_PIN);
-        first_run = 0;
-    }
-#endif
 
     coala_run();
 

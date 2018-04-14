@@ -1,5 +1,5 @@
 # Source and build directories
-PROJECT       := bc
+PROJECT       := dijkstra
 SRC_DIR       := ./
 BLD_DIR       := build
 CLANG_BLD_DIR := build_clang

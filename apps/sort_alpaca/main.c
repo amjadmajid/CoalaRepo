@@ -1,12 +1,12 @@
 #include <msp430.h>
-#include <stdint.h>
+#include <stdlib.h>
 
 #include <mspReseter.h>
 #include <mspProfiler.h>
 #include <mspDebugger.h>
 #include <mspbase.h>
 
-#include <coala.h>
+#include <alpaca.h>
 
 // Only for profiling, removable otherwise
 #include <ctlflags.h>
@@ -22,20 +22,6 @@ __nv uint8_t first_run = 1;
 #endif
 
 #define LENGTH 100
-
-/*
-void sortAlgo(int arr[], int arrLen){
-    for (int i=0; i< arrLen-1;i++){
-        for(int j=i+1; j < arrLen; j++){
-            if(arr[i] >  arr[j]) { //ascending order
-                int temp = arr[j];
-                arr[j] = arr[i];
-                arr[i] = temp;
-            }
-        }
-    }
-}
-*/
 
 const uint16_t a1[LENGTH] = {
       3,   1,   4,   6,   9,   5,  10,   8,  16,  20,
@@ -64,106 +50,31 @@ const uint16_t a2[LENGTH] = {
 };
 
 // Tasks.
-COALA_TASK(task_init, 64)
-COALA_TASK(task_inner_loop, 5)
-COALA_TASK(task_outer_loop, 3)
-COALA_TASK(task_finish, 1)
+TASK(1, task_init)
+TASK(2, task_finish)
+TASK(3, task_outer_loop)
+TASK(4, task_inner_loop)
+
+/* This is originally done by the compiler */
+__nv uint8_t* data_src[LENGTH + 1];
+__nv uint8_t* data_dest[LENGTH + 1];
+__nv unsigned data_size[LENGTH + 1];
+GLOBAL_SB(uint16_t, array_bak, LENGTH);
+GLOBAL_SB(uint16_t, array_isDirty, LENGTH);
+GLOBAL_SB(uint16_t, outer_idx_bak);
+GLOBAL_SB(uint16_t, inner_idx_bak);
+GLOBAL_SB(uint8_t, iteration_bak);
+void clear_isDirty() {
+    // PRINTF("clear\r\n");
+    memset(&GV(array_isDirty, 0), 0, sizeof(_global_array_isDirty));
+}
+/* end */
 
 // Task-shared protected variables.
-COALA_PV(uint16_t, array, LENGTH);
-COALA_PV(uint16_t, outer_idx);
-COALA_PV(uint16_t, inner_idx);
-COALA_PV(uint8_t, iteration);
-
-uint16_t in_i, in_j, arr_i, arr_j;
-
-
-void task_init()
-{
-#if ENABLE_PRF
-    full_run_started = 1;
-#endif
-
-    WP(outer_idx) = 0;
-    WP(inner_idx) = 1;
-
-    const uint16_t* array_pt;
-
-    ++WP(iteration);
-    if (RP(iteration) & 0x01) {
-        array_pt = a1;
-    } else {
-        array_pt = a2;
-    }
-
-    uint16_t idx;
-    for (idx = 0; idx < LENGTH; idx++) {
-        WP(array[idx]) = array_pt[idx];
-    }
-
-    coala_next_task(task_inner_loop);
-}
-
-
-void task_inner_loop()
-{
-    uint16_t i, j, x_i, x_j, temp;
-
-    i = RP(outer_idx);
-    j = RP(inner_idx);
-
-    x_i = RP(array[i]);
-    x_j = RP(array[j]);
-
-    if (x_i > x_j) {
-        temp = x_j;
-        x_j =  x_i;
-        x_i =  temp;
-    }
-
-    WP(array[i]) = x_i;
-    WP(array[j]) = x_j;
-    ++WP(inner_idx);
-
-    if (RP(inner_idx) < LENGTH) {
-        coala_next_task(task_inner_loop);
-    } else {
-        coala_next_task(task_outer_loop);
-    }
-}
-
-
-void task_outer_loop()
-{
-    ++WP(outer_idx);
-    WP(inner_idx) = RP(outer_idx) + 1;
-
-    if (RP(outer_idx) < LENGTH - 1) {
-        coala_next_task(task_inner_loop);
-    } else {
-        coala_next_task(task_finish);
-    }
-}
-
-
-void task_finish()
-{
-#if ENABLE_PRF
-    if (full_run_started) {
-#if AUTO_RST
-        msp_reseter_halt();
-#endif
-        PRF_APP_END();
-        full_run_started = 0;
-        coala_force_commit();
-#if AUTO_RST
-        msp_reseter_resume();
-#endif
-    }
-#endif
-
-    coala_next_task(task_init);
-}
+GLOBAL_SB(uint16_t, array, LENGTH);
+GLOBAL_SB(uint16_t, outer_idx);
+GLOBAL_SB(uint16_t, inner_idx);
+GLOBAL_SB(uint8_t, iteration);
 
 
 void init()
@@ -200,13 +111,110 @@ void init()
 }
 
 
-int main(void)
+void task_init()
 {
-    init();
+#if ENABLE_PRF
+    full_run_started = 1;
+#endif
 
-    coala_init(task_init);
+    PRIV(iteration);
 
-    coala_run();
+    GV(outer_idx) = 0;
+    GV(inner_idx) = 1;
 
-    return 0;
+    const uint16_t* array_pt;
+
+    ++GV(iteration_bak);
+    if (GV(iteration_bak) & 0x01) {
+        array_pt = a1;
+    } else {
+        array_pt = a2;
+    }
+
+    uint16_t idx;
+    for (idx = 0; idx < LENGTH; idx++) {
+        GV(array, idx) = array_pt[idx];
+    }
+
+    COMMIT(iteration);
+    TRANSITION_TO(task_inner_loop);
 }
+
+
+void task_inner_loop()
+{
+    PRIV(inner_idx);
+
+    uint16_t i, j, x_i, x_j, temp;
+
+    i = GV(outer_idx);
+    j = GV(inner_idx_bak);
+
+    DY_PRIV(array, i);
+    x_i = GV(array_bak, i);
+
+    DY_PRIV(array, j);
+    x_j = GV(array_bak, j);
+
+    if (x_i > x_j) {
+        temp = x_j;
+        x_j =  x_i;
+        x_i =  temp;
+    }
+
+    GV(array_bak, i) = x_i;
+    DY_COMMIT(array, i);
+
+    GV(array_bak, j) = x_j;
+    DY_COMMIT(array, j);
+
+    ++GV(inner_idx_bak);
+
+    if (GV(inner_idx_bak) < LENGTH) {
+        COMMIT(inner_idx);
+        TRANSITION_TO(task_inner_loop);
+    } else {
+        COMMIT(inner_idx);
+        TRANSITION_TO(task_outer_loop);
+    }
+}
+
+
+void task_outer_loop()
+{
+    PRIV(outer_idx);
+
+    ++GV(outer_idx_bak);
+    GV(inner_idx) = GV(outer_idx_bak) + 1;
+
+    if (GV(outer_idx_bak) < LENGTH - 1) {
+        COMMIT(outer_idx);
+        TRANSITION_TO(task_inner_loop);
+    } else {
+        COMMIT(outer_idx);
+        TRANSITION_TO(task_finish);
+    }
+}
+
+
+void task_finish()
+{
+#if ENABLE_PRF
+    if (full_run_started) {
+#if AUTO_RST
+        msp_reseter_halt();
+#endif
+        PRF_APP_END();
+        full_run_started = 0;
+#if AUTO_RST
+        msp_reseter_resume();
+#endif
+    }
+#endif
+
+    TRANSITION_TO(task_init);
+}
+
+
+ENTRY_TASK(task_init)
+INIT_FUNC(init)
