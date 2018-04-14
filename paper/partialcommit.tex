@@ -1,4 +1,5 @@
-\subsection{Task Downsizing} %Partial Commit/Partial Execution
+\subsection{Task Downsizing}
+\label{sec:task_downsizing}
 
 \begin{figure}
 	\caption{\textcolor{red}{Figure to describe partial commit is needed}}
@@ -6,16 +7,16 @@
 
 \subsubsection{When Task Downsizing is Triggered}
 
-If power fails consecutively twice before the system can complete one single static task, it means that the static task requires more energy than currently available in a discharge cycle, so it is necessary to have a mechanism to execute a chunk of the task, save the partial progress through the task, and continue try to run the rest of the task.  If a power failure occurs after saving partial task progress, the system makes forward progress, albeit without task atomicity. Coala may save partial task progress multiple times before completing a very long task.  To avoid the fail-stop case of non-termination, Coala's partial commit mechanism will split tasks that have not been marked as atomic by the programer.
+If power fails consecutively twice before the system can complete one single static task, it means that the static task requires more energy than currently available in a discharge cycle, so it is necessary to have a mechanism to execute a chunk of the task, save the partial progress through the task, and continue try to run the rest of the task. If a power failure occurs after saving partial task progress, the system makes forward progress, albeit without task atomicity. \sys may save partial task progress multiple times before completing a very long task. To avoid the fail-stop case of non-termination, \sys's partial commit mechanism will split tasks that have not been marked as atomic by the programmer.
 
 A partial commit saves the stack, registers and the volatile pages to the non-volatile memory.
 
-Coala starts with a big random guess and down-scales it using a binary search until it succeeds in preserving the partial execution progress. The obtained value is the initial seed for the next partial commit procedure.
+\sys starts with a big random guess and down-scales it using a binary search until it succeeds in preserving the partial execution progress. The obtained value is the initial seed for the next partial commit procedure.
 
 \textcolor{red}{More variables describing the partial commit algorithm: we do not explore as many options for partial commit as we do for coalescing}
 
-\subsection{Why partial commit is not Coala's default behavior}
+\subsection{Why partial commit is not \sys's default behavior}
 
-\emph{Static deployment of partial commit stubs} This approach reduces programmer effort - they still need to apply Coala's API and distribute trigger points for partial commits - but it introduces an additional overhead by saving the stack and the register file each time it commits the pages. 
+\emph{Static deployment of partial commit stubs} This approach reduces programmer effort---they still need to apply \sys's API and distribute trigger points for partial commits---but it introduces an additional overhead by saving the stack and the register file each time it commits the pages. 
 
 \emph{Dynamic deployment of partial commit stubs:} This approach does not rely on any information from the programmer to trigger the commit process. However, it utilizes a trial and error approach to optimize the commit rate over the entire program execution time. Therefore, it suffers from a large cumulative re-execution penalty.  
