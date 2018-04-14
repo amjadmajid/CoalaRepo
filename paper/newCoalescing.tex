@@ -46,11 +46,13 @@ last version of the page needs to be committed.  \textcolor{red}{maybe is possib
 \end{algorithm}
 
 %% Coalescing motivation
-Finding an optimal task size, given random energy conditions is an open question. Obviously, a static approach does not have the potential to answer it. Therefore, \sys champions runtime-based methods to approximate the ideal task size under random energy shots arrival. Furthermore, \sys advocates making intermittently powered software energy-aware is the key for \emph{efficient code execution and probability}. 
-%However, given the extremely limited recourses any optimization technique must adhere to the principle of simplicity, otherwise it introduces a non-tolerable overhead. 
+
+% Finding an optimal task size, given random energy conditions is an open question. Obviously, a static approach does not have the potential to answer it. Therefore, \sys champions runtime-based methods to approximate the ideal task size under random energy shots arrival. Furthermore, \sys advocates making intermittently powered software energy-aware is the key for \emph{efficient code execution and probability}. 
+ 
 
 % %% address the challenge and define the optimal task
-\sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
+
+% \sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
 
 % %% How does Coala approximates an ideal task
 \sys adapts its virtual execution by mean of \emph{coalescing} static tasks, when energy permits, to optimally execute an intermittently powered program. It devises a number of coalescing algorithms, and states that a good coalescing strategy must moderate the risk of wasted work (re-execution penalty) and capitalize on benefits of deferred commits. To describe the proposed strategies we will use the following parameters: \\
@@ -73,8 +75,8 @@ A coalescing strategy and its performance are defined by the functions: \\
 The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfilled by a naive strategy, having the target budget $B$ to increase by $x$ static tasks after a successful completion of a coalesced task, and to decrease by the same number of tasks upon a reboot. In this case: $f_\text{reboot} = B - x$; $f_\text{weight} =  1$; $f_\text{compl} = B + x$; \\
 Due to the linear behavior of the target adaptation, this algorithm is slow in reacting to the changes in energy conditions; the energy required by a coalesced task or the available energy. In particular, this algorithm can experience a large number of \emph{repeated power} failures without forward progress.
 
-% \subsubsection{HC: History-aware Coalescing}
-% \label{subsec:hCCoalescing}
+\subsubsection{EC: Energy-aware Coalescing}
+\label{subsec:ECoalescing}
 
 % \begin{figure}
 % 	\centering
