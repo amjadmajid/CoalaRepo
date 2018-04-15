@@ -38,13 +38,13 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \
 
 \textbf{New Tasks.} The API method \texttt{COALA\_TASK} statically allocates a non-volatile constant variable holding the task weight, and declares a void function with the name passed as an argument.
 
-\textbf{New Protected Variables.} The API method \texttt{COALA\_PV} statically allocates (and aligns in memory) a non-volatile variable, whose address will be used by \texttt{RP} and \texttt{WP} API methods to locate the most recent location of the variable itself, which could be either the location of the variable in volatile memory or its location in a non-volatile memory.
+\noindent \textbf{New Protected Variables.} The API method \texttt{COALA\_PV} statically allocates (and aligns in memory) a non-volatile variable, whose address will be used by \texttt{RP} and \texttt{WP} API methods to locate the most recent location of the variable itself, which could be either the location of the variable in volatile memory or its location in a non-volatile memory.
 
-\textbf{Task Transitions.} By calling \texttt{COALA\_NEXT\_TASK} API method, the programmer tells \sys's scheduler what task to execute next. The \sys kernel implementation is built on the assumption that the currently executing task is not interrupted, and only once it completes the next task is run. \todo{Provide information on the implementation - this paragraph repeats simply what previous section did}{Carlo}
+\noindent \textbf{Task Transitions.} By calling \texttt{COALA\_NEXT\_TASK} API method, the programmer tells \sys's scheduler what task to execute next. The \sys kernel implementation is built on the assumption that the currently executing task is not interrupted, and only once it completes the next task is run. \todo{Provide information on the implementation - this paragraph repeats simply what previous section did}{Carlo}
 
-\textbf{Protected Reads and Writes.} When \texttt{RP} and \texttt{WP} API mentods are used, \sys searches the volatile memory for the page the protected variable belongs to. If such page is not found in RAM, then a page fault occurs, and the page is fetched from the non-volatile memory. The two functions return a handle to the variable's volatile memory location. Unlike \texttt{RP}, \texttt{WP} marks the page being written as dirty, so that it can be committed to its non-volatile location.
+\noindent \textbf{Protected Reads and Writes.} When \texttt{RP} and \texttt{WP} API mentods are used, \sys searches the volatile memory for the page the protected variable belongs to. If such page is not found in RAM, then a page fault occurs, and the page is fetched from the non-volatile memory. The two functions return a handle to the variable's volatile memory location. Unlike \texttt{RP}, \texttt{WP} marks the page being written as dirty, so that it can be committed to its non-volatile location.
 
-\textbf{Initialization and Origin Task.} The behavior of the API method \texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the addition that all the preliminary kernel initializations are performed inside this function. Moreover, the origin task is scheduled only upon the first boot.
+\noindent \textbf{Initialization and Origin Task.} The behavior of the API method \texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the addition that all the preliminary kernel initializations are performed inside this function. Moreover, the origin task is scheduled only upon the first boot.
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
@@ -53,27 +53,28 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \
 	\label{fig:coala_state_machine}
 \end{wrapfigure}
 
-\textbf{Execution.} The application control is passed to \sys's scheduler by calling \texttt{COALA\_RUN} at the end of the main function. A high-level state machine of the scheduler is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure; provide more text on the execution}{Carlo}.
+\noindent \textbf{Execution.} The application control is passed to \sys's scheduler by calling \texttt{COALA\_RUN} at the end of the main function. A high-level state machine of the scheduler is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure; provide more text on the execution}{Carlo}.
 
 \subsection{\sys Paging Implementation}
 
-\textcolor{red}{THIS IS UNEDITED AND SHOULD NOT BE READ YET - Placeholder}
+\noindent \textbf{Memory Virtualization.} The memory virtualization is implemented using three buffers: (i) working (volatile) buffer, (ii) store (non-volatile) buffer and (iii) shadow (non-volatile) buffers. \todo{More explanation required here}{Carlo}
 
-Memory virtualization. Working (volatile) buffer, store and shadow (non-volatile) buffers. No major changes since last version.
-
-Page allocation and page tags. When the application accesses a protected variable with RP or WP, Coala has to search for the variable in RAM first, and in non-volatile memory if it not found in RAM. Actually, the kernel searches for pages, not single variables. A page search can be very fast if each page is identified by a unique tag, and if every variable belonging to a page bears the tag in its address. Thus, retrieving a page tag from a protected variable’s address boils down to extracting the upper bits of the address itself. The remaining lower bits denote the variable’s offset in its page.
+\noindent \textbf{Page Allocation and Page Tags.} When the \sys application accesses a protected variable with either \texttt{RP} or \texttt{WP}, \sys has to search for the variable in RAM first, and then in a non-volatile memory if it not found in RAM. In reality, the \sys kernel searches for pages, not single variables. A page search can be very fast if each page is identified by a unique tag, and if every variable belonging to a page bears the tag in its address. Thus, retrieving a page tag from a protected variable's address boils down to extracting the upper bits of the address itself. The remaining lower bits denote the variable's offset in its page. The complete process is depicted in Figure~\ref{figure:coala_page_tags}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{figures/graffle/paging.pdf}
-	\caption{Illustration of \sys page tags.}
+	\caption{Illustration of \sys page tags mechanism.}
+	\label{figure:coala_page_tags}
 \end{figure}
 
-In order to obtain unique page tags, some alignment requirements have to be met. First, the page size $S$ has to be a power of two. Moreover, pages in non-volatile memory have to be aligned by $S$. In the example above, $S$ is 256, and every page’s first address is a multiple of 256. Note that, by aligning pages by $2n$, the alignment is also valid for all sizes $2^x$ with $x \leq n$.
+We note that in order to obtain unique page tags, some alignment requirements have to be met. First, the page size $S$ has to be the power of two. Moreover, pages in non-volatile memory have to be aligned by $S$. Note that, by aligning pages by $2^n$, the alignment is also valid for all sizes $2^x$, where $x \leq n$.
 
-Page fault and page swap (with DMA). When a page is not found in RAM, it is fetched from FRAM. No major changes since last version.
+\noindent \textbf{DMA Page Fault and Page Swap.} When a page is not found in RAM, it is fetched from FRAM. \todo{More explanation required here}{Carlo}
 
 \subsection{\sys Scheduling and Committing}
+
+\textcolor{red}{THIS IS UNEDITED AND SHOULD NOT BE READ YET - Placeholder}
 
 Target budget initialization. Upon a reboot, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy [...].
 
