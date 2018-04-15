@@ -48,7 +48,7 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
-	%\includegraphics[width=0.5\columnwidth]{figures/graffle/overview.pdf}
+	%\includegraphics[width=0.5\columnwidth]{figures/graffle/state-machine.pdf}
 	\caption{\sys state machine implementation \todo{Draw a figure}{Sinan, Carlo}}
 	\label{fig:coala_state_machine}
 \end{wrapfigure}
@@ -74,22 +74,23 @@ We note that in order to obtain unique page tags, some alignment requirements ha
 
 \subsection{\sys Scheduling and Committing}
 
-\textcolor{red}{THIS IS UNEDITED AND SHOULD NOT BE READ YET - Placeholder}
+\noindent \textbf{Target Budget Initialization.} Upon a reboot, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy. \todo{expand text}{Carlo}
 
-Target budget initialization. Upon a reboot, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy [...].
+\noindent \textbf{Coalescing State Recall.} The last (coalesced) task has to be recalled. More specifically, the function pointer of the last coalesced task has to be retrieved from a non-volatile memory, where is had been saved during the last successful commit. \todo{expand text}{Carlo}
 
-Coalescing state recall. The last (coalesced) task has to be recalled. More specifically, the function pointer of the last coalesced task has to be retrieved from NV memory, where is had been saved during the last successful commit. [...].
+\noindent \textbf{Partial Execution Restoration.} In case there is a valid partial execution checkpoint, the program has to resume from there \todo{expand text}{Carlo}
 
-Partial execution restoration. In case there is a valid partial execution checkpoint, the program has to resume from there [...].
+\noindent \textbf{Coalesced Scheduling.} \todo{expand text}{Carlo}
 
-Coalesced scheduling. Static tasks are coalesced and run [...].
+\noindent \textbf{Intermediate Commit and Ultimate Commit.} When a coalesced task is successfully run to completion, all the dirty pages in SRAM have to be persistently saved to a non-volatile memory. Since last version, no major changes were made to the intermediate commit (SRAM to shadow buffer), but an optimization was applied to the ultimate commit (shadow buffer to store buffer). Store buffer and shadow buffer used to be physically separated in memory. Now, the role of a block of memory (i.e. a page) is interchangeable, meaning that, during the ultimate commit, the shadow buffer pages that were written during the previous commit phase become store buffer pages, and their relative store buffer pages become shadow buffer pages. A page’s role is retrieved using an indirection table, i.e. an array that holds a zero for all the pages whose store buffer resides in the lower memory block, and a one for all the pages whose store buffer is located in the upper memory block. This allows for a lighter commit process, since fewer page moves are performed.
 
-Intermediate commit and ultimate commit. When a coalesced task is successfully run to completion, all the dirty pages in SRAM have to be persistently saved to non-volatile memory. Since last version, no major changes were made to the intermediate commit (SRAM to shadow buffer), but an optimization was applied to the ultimate commit (shadow buffer to store buffer). Store buffer and shadow buffer used to be physically separated in memory. Now, the role of a block of memory (i.e. a page) is interchangeable, meaning that, during the ultimate commit, the shadow buffer pages that were written during the previous commit phase become store buffer pages, and their relative store buffer pages become shadow buffer pages. A page’s role is retrieved using an indirection table, i.e. an array that holds a zero for all the pages whose store buffer resides in the lower memory block, and a one for all the pages whose store buffer is located in the upper memory block. This allows for a lighter commit process, since fewer page moves are performed.
+\begin{wrapfigure}{t!}{0.5\textwidth}
+	\centering
+	%\includegraphics[width=0.5\columnwidth]{figures/graffle/commits-illustration.pdf}
+	\caption{Intermediate commit and ultimate commit Illustration \todo{to be drawn}{sinan}}
+	\label{fig:intermediate_ultimate-commit}
+\end{wrapfigure}
 
-\begin{figure}
-	\caption{Intermediate commit and ultimate commit Illustration \textcolor{red}{to be drawn}}
-\end{figure}
+\noindent \textbf{Target Budget Update.} Before starting a new coalesced task, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy. \todo{expand text}{Carlo}
 
-Target budget update. Before starting a new coalesced task, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy [...].
-
-\textcolor{red}{API of the partial commit needs to be explained as well}
+\todo{API of the partial commit needs to be explained as well}{Carlo}
