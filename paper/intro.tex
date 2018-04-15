@@ -5,7 +5,7 @@
 
 
 Advances in processor efficiency along with the development of
-energy-harvesting systems has created a new category of devices that require
+energy-harvesting systems have created a new category of devices that require
 neither a battery nor a tethered power
 supply~\citep{prasad_comst_2014,lucia_snapl_2017,soyata_csm_2016}. These
 devices operate using ambient energy, such as radio frequency
@@ -27,7 +27,7 @@ power level (hundreds of $\mu$W to mW). A device operates briefly until it deple
 down and recharges to operate again later---corresponds to {\em intermittent execution model}~\citep{dino,lucia_snapl_2017} composed of
 operation-power failure-restart cycles. As an example, recharge times may be
 tens of seconds in radio frequency powered medical device~\cite[Fig.
-3c]{nadeau_naturebio_2017}.  The recharge and discharge time---which corresponds to the device's inactive and active time---varies with the energy buffering capacitor's~\cite{capybara} and some devices fail and restart operating $\approx$10 to
+3c]{nadeau_naturebio_2017}. The recharge and discharge time---which corresponds to the device's inactive and active time---varies with the energy buffering capacitor~\cite{capybara} and some devices fail and restart operating $\approx$10 to
 $\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.  
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
@@ -48,16 +48,16 @@ progress, failures can leave non-volatile state incorrectly, partially updated,
 and may leave checkpointed volatile state inconsistent with non-volatile state.
 These inconsistencies cause intermittent execution to deviate from
 continuously-powered behavior, often leading to an unrecoverable
-application failure~\citep{dino,edb}. Prior work developed two main approaches to dealing with data inconsistency for
+application failure~\citep{dino,edb}. Prior work developed two main approaches to deal with data inconsistency for
 intermittently-powered devices: (i) \emph{software-based programming and
 execution models}~\citep{dino,ratchet,chain,alpaca} and (ii)
 \emph{hardware-based computer architecture
-support}~\citep{hicks_isca_2017,idetic,nvp}.  Complex architectural changes are
-expensive to design, verify, and manufacture.  New architectures are also
+support}~\citep{hicks_isca_2017,idetic,nvp}. Complex architectural changes are
+expensive to design, verify, and manufacture. New architectures are also
 inapplicable to existing systems~\citep{hicks_isca_2017,nvp}. Software
 approaches are simpler and applicable to existing devices today, but prior
 software approaches have a number of limitations that are the focus of the work
-in this paper.  A key limitation of prior software approaches that we address in this paper is the {\em inflexibility} of a program statically decomposed into tasks. 
+in this paper. A key limitation of prior software approaches that we address in this paper is the {\em inflexibility} of a program statically decomposed into tasks. 
 
 \textbf{Task Decomposition of Intermittent Programs.} {\em
 Task-based} programming and execution models require a
@@ -80,22 +80,22 @@ program state~\citep{chain,alpaca}.
 %
 The more task transitions a program requires, the more commit overhead is incurred by the system at run-time.
 
-A savvy programmer may thus create very large tasks in an attempt to minimize
-overhead by minimizing the number of task transitions.  However, a very large
+A savvy programmer may thus create very large tasks in an attempt to reduce
+overhead by minimizing the number of task transitions. However, a very large
 task may require more energy to complete than a device's fixed hardware energy
-buffer can hold.  Such a large task fails to completely execute assuming only
-buffered energy is available (i.e., assuming the worst case).  While some
+buffer can hold. Such a large task fails to completely execute assuming only
+buffered energy is available (i.e., assuming the worst case). While some
 environments may have sufficient harvestable energy to replenish a device's
 capacitor during operation, prolonging the execution period and enabling the
 task to complete, assuming cooperation from the physical environment to avoid
-non-termination is a risky programming proposition.  To eliminate this risk,
-existing systems require the programmer or compiler to decompose a  program
-into small tasks, all of which complete using only buffered energy.  These
+non-termination is a risky programming proposition. To eliminate this risk,
+existing systems require the programmer or compiler to decompose a program
+into small tasks, all of which complete using only buffered energy. These
 constraints on task sizing leave an unsatisfying dilemma: large, efficient
 tasks that risk non-termination, or small tasks that are guaranteed to
-complete, but incur a high task transition and commit overhead.  In this work,
+complete, but incur a high task transition and commit overhead. In this work,
 we propose a third way, using a novel technique called {\em adaptive execution by dynamic task
-coalescing/splitting} that efficiently executes small tasks, avoiding unnecessary overheads while avoiding the risk of non-termination.
+coalescing/splitting} that efficiently executes small tasks, trimming unnecessary overheads while avoiding the risk of non-termination.
 
 %A key challenge is that the length of a software
 %task's execution is \emph{limited by the fixed total amount of energy} that a
@@ -117,12 +117,12 @@ intermittent program by dynamically coalescing/splitting its tasks.
 \sys accepts any static decomposition (i.e., from the programmer or from a compiler) 
 and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute  
 with no commit or task transition overhead between them, instead performing
-task-end commit actions at the end second task only.
+task-end commit actions at the end of the second task only.
 %
 When there is sufficient energy to execute both tasks, two distinct, small
 tasks are effectively executed as a single large task, preserving the atomicity
-of both.  If power fails during a coalesced task, execution restarts from the
-{\em first} of the coalesced tasks.  Figure~\ref{fig:coalesce} (top)
+of both. If power fails during a coalesced task, execution restarts from the
+{\em first} of the coalesced tasks. Figure~\ref{fig:coalesce} (top)
 illustrates how dynamic coalescing changes the earlier execution and highlights
 the change in memory model necessary to not break atomicity. On the other hand, a large task that requires more energy to complete than a device's fixed energy buffer is split by \sys to enable task termination, as depicted in Figure~\ref{fig:coalesce} (bottom).
 
@@ -156,7 +156,7 @@ tasks requires dynamic privatization and commit actions.
 %
 To ensure consistency and respect inter-task dependences, \sys uses a novel
 approach to \emph{memory virtualization} that buffers non-volatile variable
-updates in volatile memory during coalesced task execution, before committing
+updates in volatile memory during a coalesced task execution, before committing
 them to non-volatile memory at the dynamic task boundary.
 %
 %Therefore, we require a \emph{new execution
@@ -166,15 +166,14 @@ them to non-volatile memory at the dynamic task boundary.
 %unmodified upon a power-interrupt and preserving its
 %consistency.
 A static task decomposition model assumes that each
-single task can execute to completion.  If the hardware energy buffer provides
+single task can execute to completion. If the hardware energy buffer provides
 inadequate energy to execute each single task to completion, a program will not
-terminate~\cite{cleancut_2018}. To avoid non-termination under adversarial 
+terminate~\cite{cleancut_2018}. To avoid non-termination under adversarial
 energy conditions, \sys uses a timer-based {\em partial task commit} mechanism.
-Partial commit avoids non-termination by committing the intermediate state of a long-running
-task that has repeatedly failed and restarted.  Partial commit violates
+Partial execution avoids non-termination by committing the intermediate state of a long-running
+task that has repeatedly failed and restarted. Partial execution violates
 task atomicity, but preserves forward progress; if a programmer knows that
-task atomicity is crucial to correctness, they can disable partial commit
-instead risking non-termination.
+task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
 
 %Task coalescing removes the burden from the programmer, because it accepts any
 %task decomposition and improves it dynamically. To further reduce the
@@ -195,7 +194,7 @@ instead risking non-termination.
 \item The first software memory virtualization mechanism for an intermittent system that \sys uses to preserve the atomicity of coalesced tasks.
 \item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
 \item A fully-realized prototype of \sys that runs on real energy-harvesting devices, to be released as open source after publication\footnote{The \sys repository will be accessible via~\cite{coala_website} immediately after publication.}. 
-\item An evaluation directly comparing \sys to a state of the art task-based intermittent programming and execution model from prior work, showing that on a suite of benchmarks from the literature and several new workloads, \sys often has higher performance and is more flexible to varied energy conditions. 
+\item An evaluation directly comparing \sys to a state of the art task-based intermittent programming and execution model from prior work, showing that on a suite of benchmarks from the literature and several new workloads, \sys often has higher performance and is more flexible to diverse energy conditions. 
 \end{itemize}
 
 Section~\ref{sec:background} provides background on intermittent computing.
