@@ -1,4 +1,4 @@
-\textcolor{red}{highlight the difference between Alpaca GCC and Alpaca Clang. Alpaca GCC is about 30\%-40\% faster than Alpaca Clang. Writing Alpaca program by hand is a very trick thing and it is very error prone. Reason: a programmer needs to identify the write-after-read dependencies, change variables' names, and modify instructions accordingly, in general writing Alpaca code by hand is not a recommended, for that a compiler is needed}
+%\textcolor{red}{highlight the difference between Alpaca GCC and Alpaca Clang. Alpaca GCC is about 30\%-40\% faster than Alpaca Clang. Writing Alpaca program by hand is a very trick thing and it is very error prone. Reason: a programmer needs to identify the write-after-read dependencies, change variables' names, and modify instructions accordingly, in general writing Alpaca code by hand is not a recommended, for that a compiler is needed}
 
 Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
 
@@ -7,7 +7,9 @@ Our evaluation illustrates key findings about \sys. We show that: \todo{Make a l
 \subsection{\sys Runtime Performance}
 \label{sec:results_evaluation}
 
-Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time) considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code.
+Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code. 
+
+\sys is compared to Alpaca runtime. We remind the reader that the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC. The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
 
 \subsubsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
