@@ -1,3 +1,5 @@
+\textcolor{red}{ highlight the difference between Alpaca GCC and Alpaca Clang. Alpaca GCC is about 30\%-40\% faster than Alpaca Clang. Writing Alpaca program by hand is a very trick thing and it is very error prone. Reason: a programmer needs to identify the write-after-read dependencies, change variables' names, and modify instructions accordingly, in general writing Alpaca code by hand is not a recommended, for that a compiler is needed}
+
 Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
 
 \subsection{\sys Runtime Performance}
@@ -8,7 +10,7 @@ We evaluated \sys to show that it is easy to use and efficient across our benchm
 \subsubsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
-We first need to assess the performance of all coalescing strategies intriduced by us in Section~\ref{}.
+We first need to assess the performance of all coalescing strategies introduced by us in Section~\ref{}.
 
 \textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time of \sys's two coalescing strategies normalized to the run time without
 coalescing. We show data from experiments with intermittent power, where intermittency was generated in software
