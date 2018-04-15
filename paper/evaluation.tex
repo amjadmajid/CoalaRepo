@@ -1,28 +1,4 @@
-
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/overallOverhead}
-	\caption{ overall overhead breakdown: nc: No Coalecing, sc: Slow Coalescing, ea: Energy Aware coalescing \todo{}{Przemek}}
-	\label{fig:overallOverheadBreakdown}
-\end{figure}
-
-
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
-	\caption{ Coalescing algorithm efficiency:  nc: No Coalecing, sc: Slow Coalescing, ea: Energy Aware coalescing, eat: Energy \& Task Aware coalescing \todo{}{Przemek}}
-	\label{fig:coalEfficiency}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/memAccess}
-	\caption{ Memory access overhead breakdown:  nc: No Coalecing, sc: Slow Coalescing, ea: Energy Aware coalescing \todo{}{Przemek}}
-	\label{fig:coalEfficiency}
-\end{figure}
-
 Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
-
 
 \subsection{\sys Runtime Performance}
 \label{sec:results_evaluation}
@@ -74,6 +50,33 @@ The data also illustrate that coalescing improves \sys's performance by eliminat
 \label{sec:coala_overhead}
 
 %Then, we need to know how many tasks \sys can coalesce within a given execution scenario. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and the amount of tasks coalesced. Result is given in Table~\ref{tab:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. This will help \sys to find the best possible virtual task size to minimise its runtime.
+
+\indent \textbf{Overall \sys Overhead Breakdown.} The result is presented in Figure~\ref{fig:overallOverheadBreakdown}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/overallOverhead}
+	\caption{Overall \sys overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
+	\label{fig:overallOverheadBreakdown}
+\end{figure}
+
+\textbf{\sys Coalescing Algorithm Efficiency.} The result is presented in Figure~\ref{fig:coalEfficiency}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
+	\caption{\sys coalescing algorithm efficiency; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing, eta: energy and task-aware coalescing.}
+	\label{fig:coalEfficiency}
+\end{figure}
+
+\textbf{\sys Memory Access Overhead Breakdown.} The result is presented in Figure~\ref{fig:coalmemory}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/memAccess}
+	\caption{\sys memory access overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
+	\label{fig:coalmemory}
+\end{figure}
 
 \subsubsection{\sys Paging Performance}
 \label{sec:results_memory_management}
