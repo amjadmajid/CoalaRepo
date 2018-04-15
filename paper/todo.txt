@@ -8,3 +8,4 @@
 
 *Expand coalescing explanation
 
+* profile the apps 
