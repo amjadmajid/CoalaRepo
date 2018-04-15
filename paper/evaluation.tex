@@ -5,40 +5,34 @@ Our evaluation illustrates key findings about \sys. We show that: \todo{Make a l
 
 Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code. 
 
-\sys is compared to Alpaca runtime. We remind the reader that the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC. The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
+\sys is compared to Alpaca runtime. We remind the reader that the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC (see Section~\ref{sec:implementation}). The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
 
 \subsubsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
 We characterize \sys by studying how its performance varies due to task adaptation. We start with evaluating the task coalescing mechanism.
 
-\textbf{Coalescing Strategies.} We first need to assess the performance of all coalescing strategies introduced by us in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's two coalescing strategies normalized to the run time without coalescing. We show data from experiments with intermittent power, where intermittency was generated in software
-%\todo{Say briefly how we generate full reset with MSP430}{Amjad}
-by triggering a reset from software at intervals that were uniformly distributed with an average power availability and unavailability interval of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. The results show the benefit from coalescing for most applications, with the
-exception of dft, where wasted work dominated the gains from coalescing.
- %\todo{why coalescing for dft does not work but in Fig. 9 does?}{Amjad}
-The difference in performance between HC and TSHC strategies is highly
-application-dependent, with some applications benefiting from size awareness
-while others suffering, due to decisions based on inaccurate prediction of the
-actual task energy consumption. The TSHC gains are particularly small (or negative) for applications with narrower range of task sizes in Figure~\ref{fig:task_profiling}.
-%\todo{say why this difference is small}{Amjad}.
-%For this reason we shall proceed with HD coalescing strategy in subsequent evaluations. 
+\textbf{Coalescing Strategies Performance.} We first need to assess the performance of all coalescing strategies introduced by us in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. We show data from experiments measured at 15\,cm WISP/RF generator antenna distance. 
 
+The results show the benefit from coalescing for all applications. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (smart) compared to task-aware only (fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}.
+
+%\begin{wrapfigure}{t!}{0.5\textwidth}
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}
 	\caption{\sys coalescing strategies performance per application on intermittent power compared to \sys without coalescing. \todo{Add new figure; comment on the result}{Przemek}}
 	\label{fig:coalescing}
 \end{figure}
+%\end{wrapfigure}
 
-\textbf{\sys versus Task-based Model.} We evaluate \sys's run time performance and compare \sys to the run time performance of Alpaca. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provision from the RF signal generator (refer to Section~\ref{}).
+\textbf{\sys versus Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the run time performance of Alpaca. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
 
-The data show the average execution time of each application run repeatedly for 20 seconds, with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Chain for most applications. The performance benefit is greatest for applications that have small tasks (bc, sort, cuckoo) at all distances on intermittent power and with fixed power. In applications that have larger tasks (e.g. dft) or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or in the \emph{single} cem case, worse than) Chain. \todo{Rewrite conclusions}{Przemek}
+The data show the average execution time of each application with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is greatest for applications that have small tasks (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}) at all distances on intermittent power. In applications that have larger tasks or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coala_alpaca_gcc}
-	\caption{\textbf{Performance of \sys applications (divided manually into tasks) at multiple WISP to RFID reader antenna distances}: fixed power (0\,m to the antenna) and \{0.2, 0.4\}\,m (left, center and right-most bar per application, respectively), compared against Chain (results normalized).}
+	\caption{Performance of \sys applications at multiple WISP to RF generator antenna distances ()\{0.15, 0.3, 0.5\}\,m (left, center and right-most bar per application, respectively), compared against Alpaca (results normalized).}
 	\label{fig:runtime}
 \end{figure}
 
@@ -46,7 +40,7 @@ The data also illustrate that coalescing improves \sys's performance by eliminat
 
 \textbf{Task Downscaling.} \todo{Provide text; add results}{Przemek}
 
-\subsection{Characterization of \sys Overhead}
+\subsubsection{Characterization of \sys Overhead}
 \label{sec:coala_overhead}
 
 %Then, we need to know how many tasks \sys can coalesce within a given execution scenario. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and the amount of tasks coalesced. Result is given in Table~\ref{tab:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. This will help \sys to find the best possible virtual task size to minimise its runtime.
