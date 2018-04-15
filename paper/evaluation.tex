@@ -1,19 +1,20 @@
-\textcolor{red}{ highlight the difference between Alpaca GCC and Alpaca Clang. Alpaca GCC is about 30\%-40\% faster than Alpaca Clang. Writing Alpaca program by hand is a very trick thing and it is very error prone. Reason: a programmer needs to identify the write-after-read dependencies, change variables' names, and modify instructions accordingly, in general writing Alpaca code by hand is not a recommended, for that a compiler is needed}
+\textcolor{red}{highlight the difference between Alpaca GCC and Alpaca Clang. Alpaca GCC is about 30\%-40\% faster than Alpaca Clang. Writing Alpaca program by hand is a very trick thing and it is very error prone. Reason: a programmer needs to identify the write-after-read dependencies, change variables' names, and modify instructions accordingly, in general writing Alpaca code by hand is not a recommended, for that a compiler is needed}
 
 Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
+
+%\sys is efficient and easy to use across our benchmarks. 
 
 \subsection{\sys Runtime Performance}
 \label{sec:results_evaluation}
 
-We evaluated \sys to show that it is easy to use and efficient across our benchmarks. We evaluate \sys efficiency by comparing its runtime performance to Alpaca. We characterize \sys by studying how its performance varies due to coalescing.
+Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time) considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code.
 
 \subsubsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
-We first need to assess the performance of all coalescing strategies introduced by us in Section~\ref{}.
+We characterize \sys by studying how its performance varies due to task adaptation. We start with evaluating the task coalescing mechanism.
 
-\textbf{Coalescing Strategies.} Figure~\ref{fig:coalescing} shows the run time of \sys's two coalescing strategies normalized to the run time without
-coalescing. We show data from experiments with intermittent power, where intermittency was generated in software
+\textbf{Coalescing Strategies.} We first need to assess the performance of all coalescing strategies introduced by us in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's two coalescing strategies normalized to the run time without coalescing. We show data from experiments with intermittent power, where intermittency was generated in software
 %\todo{Say briefly how we generate full reset with MSP430}{Amjad}
 by triggering a reset from software at intervals that were uniformly distributed with an average power availability and unavailability interval of 15\,ms and 10\,ms respectively. Each application ran with the same generated pattern for the fairness of comparison. The results show the benefit from coalescing for most applications, with the
 exception of dft, where wasted work dominated the gains from coalescing.
@@ -74,10 +75,21 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 \begin{table}
 	\begin{tabular}{| c | c | c | c | c |}
 		\hline
-		Application & \multicolumn{2}{| c |}{Memory footprint} & No. tasks & SLOC \\
+		\multirow{2}{*}{Application} & \multicolumn{2}{ c |}{Memory footprint} & \multirow{2}{*}{No. tasks} & \multirow{2}{*}{SLOC} \\
+		\cline{2-3}
 		{} & \sys & Alpaca & {} & {} \\
 		\hline\hline
-		\textbf{ar} & --- & --- & --- & ---\\
+				\textbf{ar} & --- & --- & --- & ---\\
+		\hline
+				\textbf{bc} & --- & --- & --- & ---\\
+		\hline
+				\textbf{cuckoo} & --- & --- & --- & ---\\
+		\hline
+				\textbf{dijkstra} & --- & --- & --- & ---\\
+		\hline
+				\textbf{fft} & --- & --- & --- & ---\\
+		\hline
+				\textbf{sort} & --- & --- & --- & ---\\
 		\hline
 	\end{tabular}
 		\caption{Comparison between \sys and Alpaca benchmarks.}
