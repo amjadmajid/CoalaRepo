@@ -1,4 +1,4 @@
-\textcolor{red}{BRAIN DUMP ABOUT THE EXECUTION MODEL - Placeholder}
+\subsection {Motivating the Design of \sys's Execution Model.} The challenge of \emph{efficiently} executing a program under frequent power failures, lies in the fact that the program needs to be energy aware. This challenge becomes even bigger when \emph{generality} is a design requirement, and consequently, the system must not require a specific hardware circuitry to offer its efficiency. \emph{Flexibility} is a key for wide adaptation, therefore, \sys's execution model should not limit the programmer to a subset of the functionality of the underlying software technology. \emph{\sys champions an efficient, general, and flexible intermittent execution.}
 
 \sys execution model operates on task-based programming model, but It progresses on a dynamic, virtual task granularity. A virtual task can be either multiple static tasks \emph{coalesced} together, when the energy permits, or a sub-task, when it is necessary to preserve forward progress.
 
@@ -40,3 +40,6 @@ To This end, we can conclude that a good coalescing algorithm has to separate it
 % We need to justify our choice of using the history of execution in the Coala sections. (generality of the software approach, and avoiding additional circuitry ...)
 
 \textcolor{red}{explain the idea behind the need for task splitting and how it must be done such that it is not limited by the commit size itself}
+
+
+
