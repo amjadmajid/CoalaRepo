@@ -10,7 +10,7 @@
 		\centering \includegraphics[width=\columnwidth]{figures/crc_example_war}
 		\caption{Execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
 	\end{subfigure}
-	\caption{\textbf{Code example demonstrating effect of write after read on volatile memory checkpointing.}}\label{fig:code_demo_incosistency}
+	\caption{\textbf{Code example demonstrating checkpointing gives rise to data inconsistency.}}\label{fig:code_demo_incosistency}
 \end{wrapfigure}
 %\end{figure}
 
@@ -18,13 +18,13 @@
 \label{sec:background_harvesting}
 
 Energy harvesting devices operate using energy extracted from sources such as radio frequency transmissions and solar energy. These devices elide tethered power or a battery, instead collecting energy into a capacitor, operating when sufficient energy accumulates, and upon depleting the energy, turning off and recharging.
-\TODO{We need a figure that shows what intermittent execution looks like.}
+%\TODO{We need a figure that shows what intermittent execution looks like.}
 %
 %Batteryless operation has a number of important advantages, making intermittent computing an important research domain. Supplying power to billions~\cite{gartner_iot} of embedded computers using batteries is not sustainable. The European Commission estimates that more than 160 kilotons of consumer batteries enter the European Union annually~\cite{eu_batteries_2016}. Batteries are an environmental risk, are fragile, are limited in their number of charge/discharge cycles, and may require costly physical maintenance that is difficult or impossible deployed (e.g. in space~\cite{kicksat}). By contrast, super-capacitors are durable, promising millions of charge/discharge cycles~\cite[Sec. I]{ongaro_pwre_2012}. The main limitation in moving to capacitor-based energy storage is that capacitor energy density---and consequently operating discharge time---is orders of magnitude less than a battery. 
 %
 %Given current technology development, battery-less systems are best suited for very long-term sensing and monitoring where access to recharge is either prohibitive or impossible. These include battery-less image capture and processing~\cite{naderiparizi_rfid_2015}, animal monitoring~\cite{thomas_jbcs_2012} or implantable~\cite{rodriguez_tbcs_2015} and digestible~\cite{nadeau_naturebio_2017} sensors.
 %
-Many platforms enable intermittent, battery-less energy harvesting-based computation. For instance, computational RFIDs---open-source TI MSP430-based~\cite{wolverine} WISP~\cite{wisp5} (with its variants such as WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones such as~\cite{medusa_farsens_2017}. Other intermittently-powered platforms include ambient backscatter tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less phone~\cite{talla_imwut_2017}. 
+There are several energy harvesting battery-less hardware platforms. For instance, computational RFIDs---open-source TI MSP430-based~\cite{wolverine} WISP~\cite{wisp5} (with its variants such as WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones such as~\cite{medusa_farsens_2017}. Other platforms include ambient backscatter tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less phone~\cite{talla_imwut_2017}. 
 
 %In all of the above, the main source of energy harvested is the electromagnetic radiation in the radio frequency range (ambient transmitters such as high power TV transmitters~\cite{liu_sigcomm_2013} or dedicated RFID antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}). Naturally, other forms of energy harvesting sources exist, including temperature gradient, (micro-)motions, light/sun radiation, vibrations, and body fluid flow (blood, gastric acid). Several recent surveys discussing energy harvesting, low-power, embedded systems and intermittent computing at a high level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
 
@@ -33,13 +33,14 @@ Many platforms enable intermittent, battery-less energy harvesting-based computa
 \subsection{Intermittent Execution}
 \label{sec:background_consistency}
 
-\textcolor{red}{reference work by Intel~\cite{baghsorkhi_cgo_2018}}
+%\textcolor{red}{reference work by Intel~\cite{baghsorkhi_cgo_2018}}
 
 %Energy-harvesting devices execute software according to the {\em intermittent execution model}. Physically, a device charges until a threshold, operates briefly until its energy is depleted, shuts down recharges, and repeats the cycle.
 %
-Software running on an energy-harvesting device executes {\em intermittently} because buffered energy is only available \emph{sometimes}. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. Energy-harvesters provide input power orders of magnitude less than operating power, making recharging negligible during operation.
-
-Intermittent execution is different from continuous execution. A power failure clears volatile  state (registers, stack, and globals) and non-volatile memory (e.g., FRAM) persists. At a failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos,quickrecall}, sometimes using hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
+Software running on an energy-harvesting device executes {\em intermittently} because energy sources are not always available to harvest and buffer sufficient operational energy. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. 
+%Energy-harvesters provide input power orders of magnitude less than operating power, making recharging negligible during operation.
+%Intermittent execution is different from continuous execution. 
+A power failure clears volatile  state (registers, stack, and globals) and non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos,quickrecall}, sometimes using hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
 
 %\begin{figure}
 %	\centering
@@ -49,16 +50,17 @@ Intermittent execution is different from continuous execution. A power failure c
 %	\label{fig:code_demo_incosistency}
 %\end{figure}
 
-Checkpoints of volatile state preserve intermittent progress, but do not ensure data consistency~\cite{dino,chain,ratchet}. Data may become inconsistent if an attempt to execute some computation {\em writes} to a non-volatile variable, then power fails, then a second attempt to re-execute the same computation incorrectly {\em reads} the value written in the first attempt, rather than the variable's original value. The situation occurs when code includes a WAR dependence between operations that manipulate non-volatile variables~\cite{ratchet,dino,alpaca}.
-
-Figure~\ref{fig:code_demo_incosistency} illustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}. The code computes the CRC for an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
-
-Despite checkpointing at line 3 in Fig.~\ref{fig:crc_example}, the code may compute  $\texttt{data}$ incorrectly because of the read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5. Figure~\ref{fig:crc_example_war} shows an intermittent execution. The second iteration writes $\texttt{Rmnd}$, but power fails before the checkpoint. After restarting, line 9 reads the updated value of $\texttt{Rmnd}$, producing an incorrect $\texttt{data}$ value. Checkpoint-based systems risk violating memory consistency~\cite{dino}. To maintain consistency, prior systems~\cite{dino,ratchet} {\em version} a subset of non-volatile data with the checkpoint. Task-based systems~\cite{chain,alpaca}, which we focus on, ensure consistency using programmer, compiler, and runtime support.
+Checkpoints of volatile state preserve intermittent progress, but do not ensure data consistency~\cite{dino,chain,ratchet}. Data may become inconsistent if an attempt to execute some computation {\em writes} to a non-volatile variable, then power fails, then a second attempt to re-execute the same computation incorrectly {\em reads} the value written in the first attempt, rather than the variable's original value. The situation occurs when code includes a WAR dependence between operations that manipulate non-volatile variables~\cite{ratchet,dino,alpaca}---see Figure~\ref{fig:code_demo_incosistency} that illustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}.
+%Figure~\ref{fig:code_demo_incosistency} illustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}. The code computes the CRC for an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
+%Despite checkpointing at line 3 in Fig.~\ref{fig:crc_example}, the code may compute  $\texttt{data}$ incorrectly because of the read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5. Figure~\ref{fig:crc_example_war} shows an intermittent execution. The second iteration writes $\texttt{Rmnd}$, but power fails before the checkpoint. After restarting, line 9 reads the updated value of $\texttt{Rmnd}$, producing an incorrect $\texttt{data}$ value. Checkpoint-based systems risk violating memory consistency~\cite{dino}. 
+To maintain consistency, prior systems~\cite{dino,ratchet} {\em version} a subset of non-volatile data with the checkpoint. Task-based systems~\cite{chain,alpaca}, which we focus on, ensure consistency using programmer, compiler, and runtime support.
 
 \subsection{Task-based Intermittent Programming}
 \label{section:background_task_computing}
 
-Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to decompose their program into tasks. A task is a function with no caller containing arbitrary computation, sensing, and communication. A programmer describes task control-flow as a {\em task graph}. Task flow happens at programmer demarcated transition points that may be conditional on program values. Task-based programming abstractions guarantee that tasks execute {\em atomically}, regardless of power failures. Task-based runtime systems ensure task-atomic semantics by ensuring that repeated task executions are idempotent. The key to idempotence is ensuring that non-volatile updates made by an interrupted task are never visible to a future task execution.  
+Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to decompose their program into tasks. A task is a function with no caller containing arbitrary computation, sensing, and communication. A programmer describes task control-flow as a {\em task graph}. Task flow happens at programmer demarcated transition points that may be conditional on program values. 
+%Task-based programming abstractions guarantee that tasks execute {\em atomically}, regardless of power failures. 
+Task-based runtime systems ensure task-atomic semantics by ensuring that repeated task executions are idempotent. The key to idempotence is ensuring that non-volatile updates made by an interrupted task are never visible to a future task execution.  
 
 There are several run time strategies to ensuring task idempotence. One approach~\cite{alpaca}, is to identify non-volatile data involved in WAR dependences in a task (like DINO~\cite{dino} and Ratchet~\cite{ratchet} did for checkpoints), execute the task using private copies of those data, and commit the private copies on task completion. Another way is to statically create multiple versions of non-volatile data shared by tasks and ensure that no task reads and writes the same version~\cite{chain}. Regardless of the strategy, task-based systems execute statically-defined tasks atomically, completing in one or more attempt. 
 
@@ -84,7 +86,7 @@ There are several run time strategies to ensuring task idempotence. One approach
 \subsubsection{Costs of Task-based Models}
 \label{sec:cost_task-based}
 
-Despite its advantages, the task-based programming model for intermittently-powered computing devices has its limitations. Two major ones being: {\em memory overhead} and {\em inflexibility to changing energy conditions}.
+Despite their advantages, the task-based programming models have their limitations. Two major ones being: {\em memory overhead} and {\em inflexibility to dynamic energy harvesting conditions}.
 
 \textbf{Memory Consistency Enforcement Overhead.} Intermittent execution models incur overheads to checkpoint data~\cite{dino,ratchet,quickrecall,mementos}, manage channels~\cite{chain}, or privatize and commit data~\cite{alpaca}. Table~\ref{table:chechpoint_comparison} compares overheads for recent intermittent execution models (cf. \cite[Sec. 2.4]{alpaca}.) The mechanism responsible for overhead in each model varies, but the bulk of overhead in all models is a manipulating non-volatile memory. Checkpointing moves data to and from non-volatile memory, channel accesses manipulate non-volatile data~\cite{chain}, privatization copies from and commits to non-volatile memory~\cite{alpaca}, and idempotence solutions~\cite{ratchet} use {\em only} non-volatile memory.  
 
