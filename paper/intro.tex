@@ -94,7 +94,7 @@ into small tasks, all of which complete using only buffered energy.  These
 constraints on task sizing leave an unsatisfying dilemma: large, efficient
 tasks that risk non-termination, or small tasks that are guaranteed to
 complete, but incur a high task transition and commit overhead.  In this work,
-we propose a third way, using a novel technique called {\em adaptive task-execution by dynamic task
+we propose a third way, using a novel technique called {\em adaptive execution by dynamic task
 coalescing/splitting} that efficiently executes small tasks, avoiding unnecessary overheads while avoiding the risk of non-termination.
 
 %A key challenge is that the length of a software
@@ -112,19 +112,19 @@ coalescing/splitting} that efficiently executes small tasks, avoiding unnecessar
 %This calls for at-runtime adaptive task division of any transiently-powered
 %application---namely \emph{task virtualization}.
 
-In this work, we introduce a new system called \sys, which executes a task-based
-intermittent program by dynamically coalescing its tasks.
+This paper introduces a new system called \sys, which executes a task-based
+intermittent program by dynamically coalescing/splitting its tasks.
 \sys accepts any static decomposition (i.e., from the programmer or from a compiler) 
-and coalesces its tasks at runtime. Two consecutive, coalesced tasks execute  
+and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute  
 with no commit or task transition overhead between them, instead performing
 task-end commit actions at the end second task only.
 %
 When there is sufficient energy to execute both tasks, two distinct, small
 tasks are effectively executed as a single large task, preserving the atomicity
 of both.  If power fails during a coalesced task, execution restarts from the
-{\em first} of the coalesced tasks.  Figure~\ref{fig:coalesce} (bottom)
+{\em first} of the coalesced tasks.  Figure~\ref{fig:coalesce} (top)
 illustrates how dynamic coalescing changes the earlier execution and highlights
-the change in memory model necessary to not break atomicity.
+the change in memory model necessary to not break atomicity. On the other hand, a large task that requires more energy to complete than a device's fixed energy buffer is split by \sys to enable task termination, as depicted in Figure~\ref{fig:coalesce} (bottom).
 
 %Brandon: This is too detailed for the intro:
 %Unfortunately, naively merging two atomic tasks might produce a non-atomic
@@ -149,8 +149,7 @@ the change in memory model necessary to not break atomicity.
 %run-time---unfortunately Task 4 is \emph{no more atomic}
 %since its re-execution will not always produce the same
 %results.
-
-While a compiler can use static data privatization and commit instrumentation
+\textbf{Challenges.} While a compiler can use static data privatization and commit instrumentation
 (i.e., redo-logging) to eliminate statically identifiable, inter-task data
 dependences~\citep{alpaca}, a \emph{dynamic} dependence between two coalesced
 tasks requires dynamic privatization and commit actions. 
@@ -166,7 +165,6 @@ them to non-volatile memory at the dynamic task boundary.
 %dynamically at run-time---keeping the non-volatile memory
 %unmodified upon a power-interrupt and preserving its
 %consistency.
-
 A static task decomposition model assumes that each
 single task can execute to completion.  If the hardware energy buffer provides
 inadequate energy to execute each single task to completion, a program will not
