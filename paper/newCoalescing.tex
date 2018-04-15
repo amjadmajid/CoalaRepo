@@ -115,10 +115,12 @@ The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfil
 \item $f_\text{weight}(T_\text{i}) =  1$; 
 \item $f_\text{compl}(B,H_\text{c},H_\text{p}) = B + x$; 
 \end{itemize}
-Due to the linear behavior of the target adaptation, this algorithm is slow in reacting to the changes in energy conditions; the energy required by a coalesced task or the available energy. In particular, this algorithm can experience a large number of \emph{repeated power} failures without forward progress.
+Due to the linear behavior of the target adaptation, this algorithm is slow in reacting to the changes in energy conditions; the energy required by a coalesced task or the available energy. In particular, this algorithm can experience a large number of \emph{repeated power} failures without forward progress. 
 
 \subsubsection{Energy-aware Coalescing}
 \label{subsec:ECoalescing}
+This algorithm tunes its target budget based on the recent history of execution. It takes advantage of the guarantees that the energy buffer offers on a fresh start by coalescing many static tasks. Then it approaches the expected power failure carefully by reduces the task target size by x\%, amongst 25\%, 50\% and 75\% the 50\% shows the best performance and therefore it is the default of \sys. If the algorithm concludes that it wrongly estimated the time of the power failure, it will force target re-tuning based on the new history of execution. 
+
 
 \begin{wrapfigure}{}{0.5\textwidth}
 	\centering
