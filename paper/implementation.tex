@@ -3,7 +3,7 @@ We proceed with the explanation of the implementation of \sys programming model.
 \subsection{\sys Application Programming Interface}
 \label{sec:coala_api}
 
-Coala's API adds only five syntactic constructs to a C-based language: (i) \texttt{COALA\_TASK}: declaration of a new task, (ii) \texttt{COALA\_NEXT\_TASK}: declaration of the next task to be scheduled after the currently executing one completes, (iii) \texttt{COALA\_PV}: declaration of a new protected variable, (iv) \texttt{RP}: declaration of a protected variable read, and (v) \texttt{WP}: declaration of a protected variable write. Moreover, the programmer is required to explicitly call two \sys API functions inside the main program body: (i) \texttt{COALA\_INIT}: to pass as an argument the global initialization task to run upon the first boot , and (ii) \texttt{COALA\_RUN}: which hands the control to \sys's scheduler. Finally, when the programmer intends to \texttt{typedef} a \texttt{struct} to use it as a protected variable, she/he need to declare each structure's member by using the \texttt{COALA\_SM} macro to ensure proper memory alignment required by \sys's page handler.
+Coala's API adds only five syntactic constructs to a C-based language: (i) \texttt{COALA\_TASK}, to declare a new task, (ii) \texttt{COALA\_NEXT\_TASK}, to mark the next task to be run after the currently executing one completes, (iii) \texttt{COALA\_PV}, to declare a new protected variable, (iv) \texttt{RP} and \texttt{WP}, to mark protected variables' reads and writes, and (v) \texttt{COALA\_SM}, to declare \texttt{typedef}'d \texttt{struct} members, when used as protected variables, to ensure proper memory alignment required by \sys's page handler. Moreover, the programmer is required to explicitly call two API functions inside the main program body: (i) \texttt{COALA\_INIT}, to pass as an argument the global initialization task to run upon the first boot, and (ii) \texttt{COALA\_RUN}, which hands the control to \sys's task manager.
 
 Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \todo{Add example of a Coala program}{Carlo, Przemek} These methods trigger specific \sys kernel functions, whose explanation is given in the following sections.
 
@@ -13,24 +13,24 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \
 	\hline
 	{Method} & {Arguments} \\
 	\hline\hline
-	\texttt{COALA\_INIT}(t) & $t \in \mathbf{T}$: task to be scheduled on a first boot \\
+	\texttt{COALA\_INIT}($t$) & $t \in \mathbf{T}$: task to be scheduled on the first boot \\
 	\hline
 	\texttt{COALA\_RUN}() & --- \\
 	\hline
 	\texttt{COALA\_TASK}($t$, $w_t$) & $t \in \mathbf{T}$: new task name, $w_t$: weight of task $t$ \\
 	\hline
-	\texttt{COALA\_NEXT\_TASK}($t$) & $t \in \mathbf{T}$ : next task to be scheduled\\
+	\texttt{COALA\_NEXT\_TASK}($t$) & $t \in \mathbf{T}$ : task to be run next \\
 	\hline
-	\texttt{COALA\_PV}($p$, $v$ [, $s$]) & $p$: variable type, $v \in \mathbf{V}$: new protected variable name, $s$: array size\\
+	\texttt{COALA\_PV}($p$, $v$ [, $s$]) & $p$: variable type, $v \in \mathbf{V}$: new protected variable name, $s$: array size \\
 	\hline
-	$u$ := \texttt{RP}($v$) & $v \in \mathbf{V}$: protected variable to be read, $u$: value \\
+	$u$ := \texttt{RP}($v$) & $v \in \mathbf{V}$: protected variable to be read, $u$: destination operand \\
 	\hline	
-	\texttt{WP}($v$) := $u$ &  $v \in \mathbf{V}$: protected variable to be written, $u$: value \\
+	\texttt{WP}($v$) := $u$ &  $v \in \mathbf{V}$: protected variable to be written, $u$: source operand \\
 	\hline
 	\texttt{COALA\_SM}($p$, $m$ [, $s$]) & $p$: \texttt{struct} member's type, $m$: \texttt{struct} member's name, $s$: array size \\
 	\hline
 \end{tabular}
-\caption{Summary of \sys API; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
+\caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
 \label{table:coala_api}
 \end{table}
 
@@ -38,11 +38,11 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \
 
 \textbf{New Tasks.} The API method \texttt{COALA\_TASK} statically allocates a non-volatile constant variable holding the task weight, and declares a void function with the name passed as an argument.
 
-\noindent \textbf{New Protected Variables.} The API method \texttt{COALA\_PV} statically allocates (and aligns in memory) a non-volatile variable, whose address will be used by \texttt{RP} and \texttt{WP} API methods to locate the most recent location of the variable itself, which could be either the location of the variable in volatile memory or its location in a non-volatile memory.
+\noindent \textbf{New Protected Variables.} The API method \texttt{COALA\_PV} statically allocates (and aligns in memory) a non-volatile variable, whose address will be used by \texttt{RP} and \texttt{WP} API methods to locate the most recent location of the variable itself, which could be either the location of the variable in volatile memory or its location in non-volatile memory.
 
-\noindent \textbf{Task Transitions.} By calling \texttt{COALA\_NEXT\_TASK} API method, the programmer tells \sys's scheduler what task to execute next. The \sys kernel implementation is built on the assumption that the currently executing task is not interrupted, and only once it completes the next task is run. \todo{Provide information on the implementation - this paragraph repeats simply what previous section did}{Carlo}
+\noindent \textbf{Task Transitions.} By calling \texttt{COALA\_NEXT\_TASK}, the programmer tells \sys's task manager which task to execute next. The implementation of \sys is built on the assumption that the currently executing task is not interrupted, and only once it completes the next task is run.
 
-\noindent \textbf{Protected Reads and Writes.} When \texttt{RP} and \texttt{WP} API mentods are used, \sys searches the volatile memory for the page the protected variable belongs to. If such page is not found in RAM, then a page fault occurs, and the page is fetched from the non-volatile memory. The two functions return a handle to the variable's volatile memory location. Unlike \texttt{RP}, \texttt{WP} marks the page being written as dirty, so that it can be committed to its non-volatile location.
+\noindent \textbf{Protected Reads and Writes.} When \texttt{RP} and \texttt{WP} API methods are used, \sys searches the volatile memory for the page the protected variable belongs to. If such page is not found in RAM, then a page fault occurs, and the page is fetched from the non-volatile memory. The two functions return a handle to the variable's volatile memory location. Unlike \texttt{RP}, \texttt{WP} marks the page being written as dirty, so that it can be copied to its non-volatile location during the commit phase.
 
 \noindent \textbf{Initialization and Origin Task.} The behavior of the API method \texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the addition that all the preliminary kernel initializations are performed inside this function. Moreover, the origin task is scheduled only upon the first boot.
 
@@ -53,7 +53,7 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \
 	\label{fig:coala_state_machine}
 \end{wrapfigure}
 
-\noindent \textbf{Execution.} The application control is passed to \sys's scheduler by calling \texttt{COALA\_RUN} at the end of the main function. A high-level state machine of the scheduler is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure; provide more text on the execution}{Carlo}.
+\noindent \textbf{Execution.} The application control is passed to \sys's execution manager by calling \texttt{COALA\_RUN} at the end of the main function. A high-level state machine of the execution manager is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure reflecting the following description}{Sinan, Carlo}. Upon reboot, the coalescing target is initialized according to the coalescing strategy. Then, the second phase of the commit is resumed, in case the last power failure occurred during this operation. The shadow buffer list is cleared, and the metadata of the volatile buffer is initialized. The pointer to the last coalescing task is recalled from non-volatile memory. Before running, Coala checks whether there is any partial execution to resume, in which case the volatile state, including the PC, is restored. Otherwise, coalescing starts: the current budget is replenished; tasks are run, the history is increased and the current budget is decreased; when the latter is zero, coalescing stops, the pointer to the next task is saved and the commit phase starts. Coalescing resumes after commit phase two ends and the target is updated based on the coalescing strategy. \todo{Go over keywords (coalescing target, current budget, commit phases etc.) and make them consistent with the rest of the paper}{Amjad, Carlo}
 
 \subsection{\sys Paging Implementation}
 
