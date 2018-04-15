@@ -22,7 +22,7 @@ Coalescing reduces the total number of non-volatile memory
 accesses, because when coalesced tasks access the same pages of data, only the
 last version of the page needs to be committed.  
 \textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
-
+%
 \textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
 arbitrary number of consecutive tasks. However, as more tasks coalesce, their
 collective commit overhead amortizes better, but the risk of wasting work also
@@ -56,6 +56,7 @@ tasks is determining how many tasks to coalesce before committing.
 				\State $H_\text{c} \gets H_\text{c} + W$
 	        \EndWhile
 	        % \State $B$ \gets \Call{f\_compl}{$\texttt{B},\texttt{H_\text{c}},\texttt{H_\text{p}}$}
+	         \State $B \leftarrow $ \Call{$f_\text{reboot}$}{B, $H_\text{c}$,$H_\text{p}$}
 	        \State \Call{commit\_to\_fram}{}
         \EndWhile
 	\end{algorithmic}
@@ -68,10 +69,13 @@ energy consumed by all tasks in the group, i.e. the size of the dynamic task.
 A good coalescing strategy must moderate the risk of wasted work and capitalize
 on benefits of deferred commits by adapting the target size of the dynamic task
 to the energy available at runtime. 
-
-To describe the proposed strategies we will use the following parameters: \\
-(i) \textit{target budget B}: total number of static tasks to be coalesced; (ii) \textit{current budget $B_\text{c}$}: remaining number of tasks to be coalesced before committing to non-volatile memory; (iii) \textit{history H}: up on reboot, it is the number of executed static tasks between the last two power interrupts. While executing, it is the number of executed static tasks since the last power interrupt.
-
+%
+To describe the proposed strategies we will use the following parameters:
+\begin{itemize}
+\item target budget $B$: total number of static tasks to be coalesced.
+\item current budget $B_\text{c}$: remaining number of tasks to be coalesced before committing to non-volatile memory; 
+\item history $H$: up on reboot, it is the number of executed static tasks between the last two power interrupts. While executing, it is the number of executed static tasks since the last power interrupt.
+\end{itemize}
 
 %% Coalescing motivation
 
