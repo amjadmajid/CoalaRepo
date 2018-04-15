@@ -1,45 +1,44 @@
-\textcolor{red}{THIS IS UNEDITED AND SHOULD NOT BE READ YET - Placeholder}
-	
-Coala's API adds only 5 syntactic constructs to C-based languages: \texttt{COALA\_TASK}, used to declare a new task; \texttt{COALA\_PV}, used to declare a new protected variable; \texttt{COALA\_NEXT\_TASK} used to mark the next task to be scheduled after the currently executing one completes; \texttt{RP}, used to mark a protected variable read; \texttt{WP}, used to mark a protected variable write.
+We proceed with the explanation of the implementation of \sys programming model. \sys implementation is light and adds very little on top of a plain C language.
 
-Moreover, the programmer is required to explicitly call two API functions inside the main body: \texttt{COALA\_INIT}, passing the global initialization task to run upon the first boot as argument; \texttt{COALA\_RUN}, which hands the control to Coala's scheduler.
+\subsection{\sys Application Programming Interface}
+\label{sec:coala_api}
 
-Finally, when the programmes intends to typedef a struct, to use it as a protected variable, they need to declare each structure's member by using the following macro: \texttt{COALA\_SM}, used to ensure proper memory alignment required by Coala's page handler.
+Coala's API adds only five syntactic constructs to a C-based language: (i) \texttt{COALA\_TASK}: declaration of a new task, (ii) \texttt{COALA\_NEXT\_TASK}: declaration of the next task to be scheduled after the currently executing one completes, (iii) \texttt{COALA\_PV}: declaration of a new protected variable, (iv) \texttt{RP}: declaration of a protected variable read, and (v) \texttt{WP}: declaration of a protected variable write. Moreover, the programmer is required to explicitly call two \sys API functions inside the main program body: (i) \texttt{COALA\_INIT}: to pass as an argument the global initialization task to run upon the first boot , and (ii) \texttt{COALA\_RUN}: which hands the control to \sys's scheduler. Finally, when the programmer intends to \texttt{typedef} a \texttt{struct} to use it as a protected variable, she/he need to declare each structure's member by using the \texttt{COALA\_SM} macro to ensure proper memory alignment required by \sys's page handler.
 
-The following table summarizes Coala's API methods and their arguments. $T$ denotes the set of all tasks, while $V$ denotes the set of all protected variables. These methods trigger specific kernel functions, whose detailed implementation is given in the next paragraph.
+Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. \todo{Add example of a Coala program}{Carlo, Przemek} These methods trigger specific \sys kernel functions, whose explanation is given in the following sections.
 
 \begin{table}
 \centering
-\begin{tabular}{| c | c |}
+\begin{tabular}{| r | p{0.7\columnwidth} |}
 	\hline
-	\textbf{Method} & \textbf{Arguments} \\
+	{Method} & {Arguments} \\
 	\hline\hline
-	\texttt{COALA\_TASK}($t$, $w_t$) & $t \in T$: new task name, $w_t$: weight of task $t$ \\
+	\texttt{COALA\_INIT}(t) & $t \in \mathbf{T}$: task to be scheduled on a first boot \\
 	\hline
-	\texttt{COALA\_PV}(type, $v$ [, size]) & type: var. type, $v \in V$: new protected var. name, size (optional)  array size\\
+	\texttt{COALA\_RUN}() & --- \\
 	\hline
-	\texttt{COALA\_NEXT\_TASK}($t$) & $t \in T$ : next task to schedule\\
+	\texttt{COALA\_TASK}($t$, $w_t$) & $t \in \mathbf{T}$: new task name, $w_t$: weight of task $t$ \\
 	\hline
-	$u$ := RP($v$) & $v \in V$: protected variable to be read, $u$: value \\
+	\texttt{COALA\_NEXT\_TASK}($t$) & $t \in \mathbf{T}$ : next task to be scheduled\\
+	\hline
+	\texttt{COALA\_PV}($p$, $v$ [, $s$]) & $p$: variable type, $v \in \mathbf{V}$: new protected variable name, $s$: array size\\
+	\hline
+	$u$ := \texttt{RP}($v$) & $v \in \mathbf{V}$: protected variable to be read, $u$: value \\
 	\hline	
-	WP($v$) := $u$ &  $v \in V$: protected variable to be written, $u$: value \\
+	\texttt{WP}($v$) := $u$ &  $v \in \mathbf{V}$: protected variable to be written, $u$: value \\
 	\hline
-	\texttt{COALA\_INIT}(t) & $t \in T$: task to be scheduled on first boot \\
-	\hline
-	\texttt{COALA\_RUN}() & {} \\
-	\hline
-	\texttt{COALA\_SM}(type, $m$ [, size]) &  type: struct member's type, $m$: struct member's name, size (optional): array size \\
+	\texttt{COALA\_SM}($p$, $m$ [, $s$]) & $p$: \texttt{struct} member's type, $m$: \texttt{struct} member's name, $s$: array size \\
 	\hline
 \end{tabular}
-\caption{Coala API}
+\caption{Summary of \sys API; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
 \label{table:coala_api}
 \end{table}
 
-An example usage of Coala’s API is given in the following code snippet. (TBW)
+\subsection{\sys Kernel Functions Implementation}
 
-\subsection{Kernel functions implementation}
+\textcolor{red}{THIS IS UNEDITED AND SHOULD NOT BE READ YET - Placeholder}
 
-New tasks. The API method \texttt{COALA\_TASK} statically allocates a non-volatile constant variable holding the task weight, and declares a void function with the name passed as an argument.
+\textbf{New tasks.} The API method \texttt{COALA\_TASK} statically allocates a non-volatile constant variable holding the task weight, and declares a void function with the name passed as an argument.
 
 New protected variables. The API method \texttt{COALA\_PV} statically allocates (and aligns in memory) a non-volatile variable, whose address will be used by RP and WP to locate the most recent location of the variable itself, which could be either the location of the variable in volatile memory or its location in non-volatile memory.
 
@@ -51,7 +50,7 @@ Initialization and origin task. The behavior of the method \texttt{COALA\_INIT} 
 
 Execution. The application control is passed to Coala’s scheduler by calling \texttt{COALA\_RUN} at the end of the main function. A high-level state machine of the scheduler is depicted in Figure \textcolor{red}{[draw and ref figure]}. Depending on the coalescing algorithm, state transitions follow a different pattern.
 
-\subsection{Paging}
+\subsection{\sys Paging}
 
 Memory virtualization. Working (volatile) buffer, store and shadow (non-volatile) buffers. No major changes since last version.
 
@@ -66,7 +65,7 @@ In order to obtain unique page tags, some alignment requirements have to be met.
 
 Page fault and page swap (with DMA). When a page is not found in RAM, it is fetched from FRAM. No major changes since last version.
 
-\subsection{Scheduling and Committing}
+\subsection{\sys Scheduling and Committing}
 
 Target budget initialization. Upon a reboot, the target budget (or target coalesced task size) has to be updated depending on the coalescing strategy [...].
 
