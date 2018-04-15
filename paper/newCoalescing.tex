@@ -56,8 +56,8 @@ tasks is determining how many tasks to coalesce before committing.
 				\State $H_\text{c} \gets H_\text{c} + W$
 	        \EndWhile
 	        % \State $B$ \gets \Call{f\_compl}{$\texttt{B},\texttt{H_\text{c}},\texttt{H_\text{p}}$}
-	         \State $B \leftarrow $ \Call{$f_\text{reboot}$}{B, $H_\text{c}$,$H_\text{p}$}
-	        \State \Call{commit\_to\_fram}{}
+	         \State $B \leftarrow $ \Call{$f_\text{compl}$}{B, $H_\text{c}$,$H_\text{p}$}
+	        \State \Call{commit\_to\_fram}{\null}
         \EndWhile
 	\end{algorithmic}
 \end{algorithm}
