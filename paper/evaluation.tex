@@ -1,3 +1,26 @@
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/overallOverhead}
+	\caption{ overall overhead breakdown: nc: No Coalecing, sc: Slow Coalescing, ea: Energy Aware coalescing \todo{}{Przemek}}
+	\label{fig:overallOverheadBreakdown}
+\end{figure}
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
+	\caption{ Coalescing algorithm efficiency:  nc: No Coalecing, sc: Slow Coalescing, ea: Energy Aware coalescing, eat: Energy \& Task Aware coalescing \todo{}{Przemek}}
+	\label{fig:coalEfficiency}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\columnwidth]{figures/memAccess}
+	\caption{ Memory access overhead breakdown:  nc: No Coalecing, sc: Slow Coalescing, ea: Energy Aware coalescing \todo{}{Przemek}}
+	\label{fig:coalEfficiency}
+\end{figure}
+
 \textcolor{red}{highlight the difference between Alpaca GCC and Alpaca Clang. Alpaca GCC is about 30\%-40\% faster than Alpaca Clang. Writing Alpaca program by hand is a very trick thing and it is very error prone. Reason: a programmer needs to identify the write-after-read dependencies, change variables' names, and modify instructions accordingly, in general writing Alpaca code by hand is not a recommended, for that a compiler is needed}
 
 Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
