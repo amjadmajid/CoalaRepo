@@ -1,12 +1,12 @@
 \subsection{Task Coalescing}
 \label{sec:task_coalescing}
 
-\begin{wrapfigure}{t!}{0.5\textwidth}
-	\centering
-	\includegraphics[width=0.5\columnwidth]{figures/coal_Intro_Figure.pdf}
-	\caption{When $N$ tasks coalesced $N-1$ commit operations are skipped.}
-	\label{fig:coalIntro}
-\end{wrapfigure}
+% \begin{wrapfigure}{t!}{0.5\textwidth}
+% 	\centering
+% 	\includegraphics[width=0.5\columnwidth]{figures/coal_Intro_Figure.pdf}
+% 	\caption{When $N$ tasks coalesced $N-1$ commit operations are skipped.}
+% 	\label{fig:coalIntro}
+% \end{wrapfigure}
 
 When incoming energy is sufficient to run multiple consecutive tasks,
 committing state after each task is wasteful. \sys mitigates this
@@ -18,11 +18,26 @@ When $N$ tasks are coalesced, $N-1$ boundaries are crossed and some number of
 pages are dirtied. The first $N-2$ executions of \transition statement skip
 committing dirty pages to non-volatile memory, leaving the work of committing
 pages modified by any of the $N$ tasks to the statement $N-1$.
-Coalescing is likely to reduce the total number of non-volatile memory
+Coalescing reduces the total number of non-volatile memory
 accesses, because when coalesced tasks access the same pages of data, only the
-last version of the page needs to be committed.  \textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
+last version of the page needs to be committed.  
+\textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
 
-\begin{algorithm}
+\textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
+arbitrary number of consecutive tasks. However, as more tasks coalesce, their
+collective commit overhead amortizes better, but the risk of wasting work also
+increases. If power fails during a long sequence of coalesced tasks, execution
+will restart from the last commit, i.e. the first task in the sequence, losing
+the progress made by any of the coalesced tasks.  The challenge to coalescing
+tasks is determining how many tasks to coalesce before committing.
+%
+%During execution, an executing task is either a {\em coalesced} task, which
+%does not commit its state before transitioning or a {\em committing} task,
+%which does commit its state before transitioning.
+
+\textbf{Task Coalescing Strategies.} 
+%
+\begin{algorithm}[t]
 	\caption{Coalescing}
 	\label{algo:genCoalescing}
 	\scriptsize
@@ -45,6 +60,18 @@ last version of the page needs to be committed.  \textcolor{red}{maybe is possib
         \EndWhile
 	\end{algorithmic}
 \end{algorithm}
+%
+%
+The likelihood that a task group will complete depends on the total amount of
+energy consumed by all tasks in the group, i.e. the size of the dynamic task.
+%
+A good coalescing strategy must moderate the risk of wasted work and capitalize
+on benefits of deferred commits by adapting the target size of the dynamic task
+to the energy available at runtime. 
+
+To describe the proposed strategies we will use the following parameters: \\
+(i) \textit{target budget B}: total number of static tasks to be coalesced; (ii) \textit{current budget $B_\text{c}$}: remaining number of tasks to be coalesced before committing to non-volatile memory; (iii) \textit{history H}: up on reboot, it is the number of executed static tasks between the last two power interrupts. While executing, it is the number of executed static tasks since the last power interrupt.
+
 
 %% Coalescing motivation
 
@@ -56,20 +83,19 @@ last version of the page needs to be committed.  \textcolor{red}{maybe is possib
 % \sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
 
 % %% How does Coala approximates an ideal task
-\sys adapts its virtual execution by mean of \emph{coalescing} static tasks, when energy permits, to optimally execute an intermittently powered program. It devises a number of coalescing algorithms, and states that a good coalescing strategy must moderate the risk of wasted work (re-execution penalty) and capitalize on benefits of deferred commits. To describe the proposed strategies we will use the following parameters: \\
-(i) \textit{target budget B}: total number of units to coalesce; (ii) \textit{current budget $B_\text{c}$}: remaining number of tasks to be coalesced before committing to non-volatile memory; (iii) \textit{history H}: total number of tasks executed in the current discharge cycle, initialized to the number of executed tasks in the last power cycle. 
+
 
 The general structure of the proposed coalescing strategies is summaries in algorithm~\ref{algo:genCoalescing}, where where $H_\text{p}$, $H_\text{c}$, $B$ and $B_\text{c}$ represent past history, current history, target budget and current budget, respectively. $T_\text{i}$ is the i-th task being executed and $W$ is its weight.
 A coalescing strategy and its performance are defined by the functions: \\
 (i) \emph{$f_\text{reboot}$}: which updates the target budget after a reboot; (ii) \emph{$f_\text{weight}$}: which returns the weight of the task just executed and its unit; (iii) \emph{$f_\text{compl}$}: which updates the target budget after a successful completion of a dynamic coalesced task. The following sections detail the different strategies \sys proposes and the needs that originated from one strategy leading to the conception of another one.
 
-\subsubsection{Slow Coalescing}
-\label{subsec:slowCoalescing}
+\subsubsection{Energy-blind Coalescing}
+\label{subsec:energyBlind}
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/slowCoal}
-	\caption{The {\em slow coalescing} algorithm \emph{linearly} updates its coalescing target.}
+	\caption{The {\em energy blind coalescing} algorithm \emph{linearly} updates its coalescing target.}
 	\label{fig:slowCoal}
 \end{wrapfigure}
 
@@ -79,11 +105,37 @@ Due to the linear behavior of the target adaptation, this algorithm is slow in r
 \subsubsection{Energy-aware Coalescing}
 \label{subsec:ECoalescing}
 
-% \begin{figure}
-% 	\centering
-% 	\includegraphics[width=\columnwidth]{figures/HCCoal}%coalescing_timeline
-% 	\caption{The History-aware coalescing algorithm  updates its coalescing target}
-% 	\label{fig:HCCoal}
-% \end{figure}
 
-% The History-aware algorithm uses its recent execution history as metric to estimate the optimal coalesce task size. Relying on the history of execution enables this algorithm to react very quickly to discharge rates variation. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
