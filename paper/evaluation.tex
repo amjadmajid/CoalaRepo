@@ -1,4 +1,3 @@
-
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/overallOverhead}
@@ -30,7 +29,9 @@ Our evaluation illustrates key findings about \sys. We show that: \todo{Make a l
 \subsection{\sys Runtime Performance}
 \label{sec:results_evaluation}
 
-Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time) considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code.
+Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code. 
+
+\sys is compared to Alpaca runtime. We remind the reader that the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC. The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
 
 \subsubsection{\sys Task Adaptation}
 \label{sec:result_coalescing}

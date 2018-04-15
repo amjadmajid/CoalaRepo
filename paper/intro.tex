@@ -24,25 +24,22 @@ available~\citep{hicks_isca_2017,lucia_snapl_2017}. An energy-harvesting device
 buffers energy in a small storage capacitor~\citep{gorlatova_tmc_2013,gunduz_commag_2014} and operates when a
 threshold amount of energy has accumulated. Harvestable energy sources are low-power (e.g., nW to $\mu$W) compared to a platform's operating
 power level (hundreds of $\mu$W to mW). A device operates briefly until it depletes its buffered energy, after which, the device shuts
-down and recharges to operate again later. As an example, recharge times may be
+down and recharges to operate again later---corresponds to {\em intermittent execution model}~\citep{dino,lucia_snapl_2017} composed of
+operation-power failure-restart cycles. As an example, recharge times may be
 tens of seconds in radio frequency powered medical device~\cite[Fig.
 3c]{nadeau_naturebio_2017}.  The recharge and discharge time---which corresponds to the device's inactive and active time---varies with the energy buffering capacitor's~\cite{capybara} and some devices fail and restart operating $\approx$10 to
-$\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.
+$\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.  
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
     \centering
     \includegraphics[width=0.5\textwidth]{figures/graffle/intro-figure.pdf}
-    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits and buffering updates to non-volatile (NV) variables in volatile (V) memory.}
+    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits. On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
     \label{fig:coalesce}
 \end{wrapfigure}
 
-\textbf{Data Consistency in Intermittent Computing.}  Software in an
-energy-harvesting system operates according to the {\em intermittent execution
-model}~\citep{dino,lucia_snapl_2017}, which corresponds to the
-operation-failure-restart cycles of an energy-harvesting device. In an
-intermittent software execution, an {\em operating period} proceeds for an
-arbitrary duration (dictated by energy availability) before being interrupted
-by a {\em failure period}. In a failure period, a device loses the volatile
+\textbf{Data Consistency in Intermittent Computing.}  
+%Software in an energy-harvesting system operates according to the {\em intermittent execution model}~\citep{dino,lucia_snapl_2017}, which corresponds to the operation-failure-restart cycles of an energy-harvesting device. In an intermittent software execution, an {\em operating period} proceeds for anarbitrary duration (dictated by energy availability) before being interruptedby a {\em failure period}. In a failure period, 
+Upon power failures, a device loses the volatile
 state in its registers, stack, SRAM, and retains the state of any non-volatile
 memory, such as FRAM or Flash. While capturing periodic
 checkpoints~\citep{mementos,quickrecall} and sleep
@@ -51,9 +48,7 @@ progress, failures can leave non-volatile state incorrectly, partially updated,
 and may leave checkpointed volatile state inconsistent with non-volatile state.
 These inconsistencies cause intermittent execution to deviate from
 continuously-powered behavior, often leading to an unrecoverable
-application failure~\citep{dino,edb}. 
-
-Prior work developed two main approaches to dealing with data inconsistency for
+application failure~\citep{dino,edb}. Prior work developed two main approaches to dealing with data inconsistency for
 intermittently-powered devices: (i) \emph{software-based programming and
 execution models}~\citep{dino,ratchet,chain,alpaca} and (ii)
 \emph{hardware-based computer architecture
@@ -68,8 +63,9 @@ in this paper.  A key limitation of prior software approaches that we address in
 Task-based} programming and execution models require a
 programmer~\citep{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to
 statically decompose a program into a collection of {\em tasks}.  A task can
-include arbitrary computation and these existing systems guarantee that each
-tasks executes {\em atomically}, despite arbitrarily-timed power failures.  
+include arbitrary computation that should be executed despite arbitrarily-timed power failures.
+%and these existing systems guarantee that each
+%tasks executes {\em atomically}, despite arbitrarily-timed power failures.  
 %
 The programmer explicitly expresses task-to-task control flow, or the compiler
 converts existing program control-flow into task-to-task control flow to sequence 
@@ -79,10 +75,10 @@ Figure~\ref{fig:coalesce} (top) illustrates how a program's tasks execute and
 shows how tasks can impose a run-time overhead. 
 %
 At each task transition, the system incurs an overhead to track and atomically
-commit modifications to the non-volatile memory, to maintain consistency of
+\emph{commit} modifications to the non-volatile memory, to maintain consistency of
 program state~\citep{chain,alpaca}.  
 %
-The more task transitions a program executes at run time, the more overhead.
+The more task transitions a program requires, the more commit overhead is incurred by the system at run-time.
 
 A savvy programmer may thus create very large tasks in an attempt to minimize
 overhead by minimizing the number of task transitions.  However, a very large
@@ -98,9 +94,8 @@ into small tasks, all of which complete using only buffered energy.  These
 constraints on task sizing leave an unsatisfying dilemma: large, efficient
 tasks that risk non-termination, or small tasks that are guaranteed to
 complete, but incur a high task transition and commit overhead.  In this work,
-we propose a third way, using a novel technique called {\em dynamic task
-coalescing} that efficiently executes small tasks, avoiding unnecessary
-overheads while avoiding the risk of non-termination.
+we propose a third way, using a novel technique called {\em adaptive execution by dynamic task
+coalescing/splitting} that efficiently executes small tasks, avoiding unnecessary overheads while avoiding the risk of non-termination.
 
 %A key challenge is that the length of a software
 %task's execution is \emph{limited by the fixed total amount of energy} that a
