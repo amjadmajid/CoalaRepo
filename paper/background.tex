@@ -10,7 +10,7 @@
 		\centering \includegraphics[width=\columnwidth]{figures/crc_example_war}
 		\caption{Execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
 	\end{subfigure}
-	\caption{\textbf{Code example demonstrating checkpointing gives rise to data inconsistency.}}\label{fig:code_demo_incosistency}
+	\caption{Code example demonstrating checkpointing gives rise to data inconsistency.}\label{fig:code_demo_incosistency}
 \end{wrapfigure}
 %\end{figure}
 
@@ -84,7 +84,7 @@ Despite their advantages, the task-based programming models have their limitatio
 		Region Formation~\cite{baghsorkhi_cgo_2018} & \textcolor{red}{XXX} \\
 		\hline
 	\end{tabular}
-	\caption{\textbf{Memory consistency enforcement overheads of intermittent execution models;} \emph{PC}: program counter, \emph{channel data}: variables explicitly task-shared by the programmer, \emph{WAR variables}: variables involved in WAR dependences (\emph{NV}: non-volatile).}
+	\caption{Memory consistency enforcement overheads of intermittent execution models; \emph{PC}: program counter, \emph{channel data}: variables explicitly task-shared by the programmer, \emph{WAR variables}: variables involved in WAR dependences (\emph{NV}: non-volatile).}
 	\label{table:chechpoint_comparison}
 \end{table}
 
