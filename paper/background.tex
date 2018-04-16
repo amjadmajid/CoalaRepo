@@ -64,6 +64,11 @@ Task-based runtime systems ensure task-atomic semantics by ensuring that repeate
 
 There are several run time strategies to ensuring task idempotence. One approach~\cite{alpaca}, is to identify non-volatile data involved in WAR dependences in a task (like DINO~\cite{dino} and Ratchet~\cite{ratchet} did for checkpoints), execute the task using private copies of those data, and commit the private copies on task completion. Another way is to statically create multiple versions of non-volatile data shared by tasks and ensure that no task reads and writes the same version~\cite{chain}. Regardless of the strategy, task-based systems execute statically-defined tasks atomically, completing in one or more attempt. 
 
+\subsubsection{Costs of Task-based Models}
+\label{sec:cost_task-based}
+
+Despite their advantages, the task-based programming models have their limitations. Two major ones being: {\em memory consistency enforcement overhead} and {\em inflexibility to dynamic energy harvesting conditions}.
+
 \begin{table}
 	\centering
 	\footnotesize
@@ -83,26 +88,25 @@ There are several run time strategies to ensuring task idempotence. One approach
 	\label{table:chechpoint_comparison}
 \end{table}
 
-\subsubsection{Costs of Task-based Models}
-\label{sec:cost_task-based}
-
-Despite their advantages, the task-based programming models have their limitations. Two major ones being: {\em memory overhead} and {\em inflexibility to dynamic energy harvesting conditions}.
 
 \textbf{Memory Consistency Enforcement Overhead.} Intermittent execution models incur overheads to checkpoint data~\cite{dino,ratchet,quickrecall,mementos}, manage channels~\cite{chain}, or privatize and commit data~\cite{alpaca}. Table~\ref{table:chechpoint_comparison} compares overheads for recent intermittent execution models (cf. \cite[Sec. 2.4]{alpaca}.) The mechanism responsible for overhead in each model varies, but the bulk of overhead in all models is a manipulating non-volatile memory. Checkpointing moves data to and from non-volatile memory, channel accesses manipulate non-volatile data~\cite{chain}, privatization copies from and commits to non-volatile memory~\cite{alpaca}, and idempotence solutions~\cite{ratchet} use {\em only} non-volatile memory.  
+% We do not need to emphasize the following figure! (Sinan)
+%\begin{figure}
+%\begin{subfigure}[t]{.49\columnwidth}
+%	\centering \includegraphics[width=\columnwidth]{figures/fram_write}
+%	\caption{Cost of \emph{write} operation}
+%\end{subfigure}%
+%\begin{subfigure}[t]{.49\columnwidth}
+%	\centering \includegraphics[width=\columnwidth]{figures/fram_read}
+%	\caption{Cost of \emph{read} operation}
+%\end{subfigure}
+%	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.} \textcolor{red}{figures need to be merged into one}}\label{fig:framEnergy}
+%\end{figure}
+However, a non-volatile memory access consumes around 1.5 times the energy of a volatile access~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek}. 
+%To understand these non-volatile memory overheads, for the MSP430FR5969~\cite{msp430datasheet} MCU we measured the energy consumption of volatile (SRAM) and non-volatile (FRAM) memory operations. We used EDB~\cite{edb} to monitor voltage drop on a capacitor powering the device across 1600 read and write accesses to each memory type, randomizing to avoid caching. Figure~\ref{fig:framEnergy} summarizes the data, showing that a non-volatile memory access consumes around 1.5 times the energy of a volatile access in this device. This observation is also consistent with the TI specification~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek} 
+One of the primary motivation of \sys is to promote accessing SRAM more frequently rather than FRAM in order to reduce memory access energy overhead and  to increase the time between power failures. 
 
-\begin{figure}
-\begin{subfigure}[t]{.49\columnwidth}
-	\centering \includegraphics[width=\columnwidth]{figures/fram_write}
-	\caption{Cost of \emph{write} operation}
-\end{subfigure}%
-\begin{subfigure}[t]{.49\columnwidth}
-	\centering \includegraphics[width=\columnwidth]{figures/fram_read}
-	\caption{Cost of \emph{read} operation}
-\end{subfigure}
-	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.} \textcolor{red}{figures need to be merged into one}}\label{fig:framEnergy}
-\end{figure}
-
-To understand these non-volatile memory overheads, for the MSP430FR5969~\cite{msp430datasheet} MCU we measured the energy consumption of volatile (SRAM) and non-volatile (FRAM) memory operations. We used EDB~\cite{edb} to monitor voltage drop on a capacitor powering the device across 1600 read and write accesses to each memory type, randomizing to avoid caching. Figure~\ref{fig:framEnergy} summarizes the data, showing that a non-volatile memory access consumes around 1.5 times the energy of a volatile access in this device. This observation is also consistent with the TI specification~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek} In an intermittent device, energy cost corresponds to decreased run time between power failures. The cost of non-volatile memory motivates \sys, which virtualizes memory to primarily use SRAM.
+%The cost of non-volatile memory motivates \sys, which virtualizes memory to primarily use SRAM.
 
 %The above result reassures the intuitive observation that a decrease of checkpoint frequency (CP) decreases the energy cost associated with each state preservation method and reduces operation cost which in most simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$, where PL is the cost of program execution without checkpointing. On the other hand, this increases task/checkpoint re-execution time. The ideal solution is a runtime that \emph{adaptively} changes task size during runtime, which however exposes a second problem.
 
