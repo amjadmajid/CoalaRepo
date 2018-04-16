@@ -5,26 +5,23 @@ important category of intermittent computing devices. The emergence of
 intermittent computing hardware platforms has led to the development of tooling
 and instrumentation for such systems building~\cite{hester_sensys_2014,hester_sensys_2015,edb,stork,wisent}.
 
-\textbf{Intermittent Execution Environments.} Early work on energy-harvesting runtime systems assumed simple, small computations not exceeding a predictable burst of energy~\cite{dewdrop} or long power-cycles/priority-based scheduling~\cite{sorber_sensys_2007}. These efforts did not consider data consistency with intermittence. Works supporting intermittent computing using dynamic, on-demand checkpoints include Mementos~\cite{mementos}, Quickrecall~\cite{quickrecall}, Hibernus++~\cite{hibernusplusplus} and HarvOS~\cite{mottola2017harvos}. Dynamic checkpointing systems may checkpoint
-at any point, making it difficult to implement application-level atomicity
-requirements. Moreover, some require hardware to measure stored energy, incurring energy cost. Moreover, these systems do not checkpoint non-volatile state, compromising memory consistency. DINO~\cite{dino} selectively versions non-volatile memory and checkpoints volatile state, ensuring progress and memory consistency. Rachet~\cite{ratchet} assumes all memory is non-volatile and checkpoints volatile state. Clang~\cite{hicks_isca_2017} takes a Ratchet-like approach leveraging special hardware, eliminating checkpointing and versioning overhead. 
+\textbf{Checkpointing-Based Execution Environments.} Early work on energy-harvesting runtime systems assumed simple, small computations not exceeding a predictable burst of energy~\cite{dewdrop} or long power-cycles/priority-based scheduling~\cite{sorber_sensys_2007}. These efforts did not consider data consistency with intermittence. Works supporting intermittent computing using dynamic, on-demand checkpoints include Mementos~\cite{mementos}, DINO~\cite{dino}, Quickrecall~\cite{quickrecall}, Hibernus++~\cite{hibernusplusplus}, Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} and HarvOS~\cite{mottola2017harvos}. Dynamic checkpointing systems may checkpoint at any point, making it difficult to implement application-level atomicity requirements. Among aforementioned prior work, Mementos does not checkpoint non-volatile state---compromising memory consistency. To overcome this, DINO selectively versions non-volatile memory and checkpoints the volatile state, ensuring both progress and memory consistency. However, checkpointing, in general is not scalable since its time and energy cost grows with the size of the volatile memory---giving possibility to exceed device's energy budget. QuickRecall, Clank and Ratchet propose a relatively lightweight checkpointing since they can only be
+applied to devices with  non-volatile memory only and they require leveraging special hardware.  
 
-Recent task-based systems are Chain~\cite{chain} and Alpaca~\cite{alpaca}. Using static tasks, they eliminate checkpointing volatile state. Using channel-based memory models~\cite{chain} or automatic privatization and redo-logging~\cite{alpaca} they avoid checkpointing overheads. Moreover, task-based models facilitate specifying application-level atomicity properties.
+% Moreover, some require hardware to measure stored energy, incurring energy cost. The major drawback of these systems is that they do not checkpoint non-volatile state, compromising memory consistency. In order to overcome this, DINO~\cite{dino} selectively versions non-volatile memory and checkpoints volatile state, ensuring progress and memory consistency. Rachet~\cite{ratchet} assumes all memory is non-volatile and checkpoints volatile state. Clank~\cite{hicks_isca_2017} takes a Ratchet-like approach leveraging special hardware, reducing checkpointing and versioning overhead. 
 
-\sys relates to the above efforts but is distinct in approach and mechanism. \sys relates closely to task-based models because \sys also relies on statically defined tasks to avoid checkpointing volatile state. \sys's automatic compilation spares the programmer's work of writing task-based code that prior systems demand. \sys's memory virtualization provides an alternative for ensuring memory consistency, optimized for bulk accesses to task-shared data with high locality. \sys's task coalescing optimization ameliorates the key overheads associated with prior systems.
+\textbf{Task-Based Execution Environments.} Recent task-based systems are Chain~\cite{chain}, Alpaca~\cite{alpaca} and Mayfly~\cite{hester_sensys_2017}. Using static tasks, they eliminate checkpointing volatile state. Using channel-based memory models~\cite{chain,hester_sensys_2017} or automatic privatization and redo-logging~\cite{alpaca} they avoid checkpointing overheads. Moreover, task-based models facilitate specifying application-level atomicity properties. \sys relates to the above efforts but is distinct in approach and mechanism. \sys relates closely to task-based models because \sys also relies on statically defined tasks to avoid checkpointing volatile state. 
+%\sys's automatic compilation spares the programmer's work of writing task-based code that prior systems demand. 
+\sys's memory virtualization provides an alternative for ensuring memory consistency, optimized for bulk accesses to task-shared data with high locality. \sys's task coalescing optimization ameliorates the key overheads associated with prior systems.
 
-One approach to decrease the task count, without assuming a minimum level of
+\textbf{Optimal Task Division.}One approach to optimize the task division, without assuming a minimum level of
 incoming power always available, is to predict task energy consumption and
-choose a decomposition specific to the device capacitor size~\cite{cleancut}.
-However, statically predicting energy of arbitrary input-dependent code with
-peripheral access is a problem without a general solution. Furthermore, a
-static decomposition approach prevents portability across devices with
-different storage capacitors.
+choose a static decomposition specific to the device capacitor size~\cite{cleancut_2018}. Another approach is to enumerate different versions of a program with different task sizes ranging from conservatively small to confidently large by using compiler support and selecting the best among them ~\cite{baghsorkhi_cgo_2018}. However, statically predicting energy of arbitrary input-dependent code with peripheral access is a problem without a general solution. Furthermore, a static decomposition approach prevents portability across devices with different storage capacitors.
 
-\textcolor{red}{TODO: make this one paragraph with the CleanCut stuff.  add \cite{intel} work; separate by-programmer and by-compiler;
-both cases hit the energy estimation problem; also intel work proposes a method
-for decomposing into one of many decompositions, but does not give a good
-solution for choosing one} 
+%\textcolor{red}{TODO: make this one paragraph with the CleanCut stuff.  add \cite{intel} work; separate by-programmer and by-compiler;
+%both cases hit the energy estimation problem; also intel work proposes a method
+%for decomposing into one of many decompositions, but does not give a good
+%solution for choosing one} 
 
 
 
