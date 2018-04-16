@@ -12,31 +12,45 @@ Our aim is to assess \sys as detailed as possible. For this we have characterize
 
 We characterize \sys by studying how its performance varies due to task adaptation. We start with evaluating the task coalescing mechanism.
 
-\textbf{Coalescing Strategies Performance.} We first need to assess the performance of all coalescing strategies introduced in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. \todo{Check if this normalization is true}{Przemek} We show data from experiments measured at 15\,cm WISP to RF generator antenna distance. The results show the benefit from coalescing for all applications. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (EA, smart) compared to task-aware only (TA, fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}. \todo{Provide more justification}{Przemek}
+\todo{what is the page size for all apps selected?}{Przemek}
+
+\textbf{Coalescing Strategies Performance.} We first need to assess the performance of all coalescing strategies introduced in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. \todo{Check if this normalization is true}{Przemek} We show data from experiments measured at 15\,cm WISP to RF generator antenna distance. 
+
+The results show the benefit from coalescing for all applications. Coalescing improves \sys's performance by eliminating the overhead of committing after each task. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (EA, smart) compared to task-aware only (TA, fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}. \todo{Provide more justification}{Przemek}
+
+The \textbf{cuckoo} application (like other top-performers, \textbf{bc} and \textbf{sort}) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. \textbf{ar}, coalescing does not improve performance. 
+
+%The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case.
 
 %\begin{wrapfigure}{t!}{0.5\textwidth}
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}
-	\caption{\sys coalescing strategies performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing. \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system. \todo{no coalescing missing; change names of algos; reduce Y width by 40\%; names of apps bold}{Przemek}}
+	\caption{\sys coalescing strategies performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing. \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system. \todo{no coalescing missing; change names of algos; reduce Y width by 40\%; names of apps bold and capitalized}{Przemek}}
 	\label{fig:coalescing}
 \end{figure}
 %\end{wrapfigure}
 
-\textbf{\sys versus Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the run time performance of Alpaca. Results are given in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
+\textbf{\sys versus non-adaptive Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the performance of Alpaca runtime, i.e. a non-adaptive task-based system. Results are presented in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
 
-The data show the average execution time of each application with runtimes normalized to \sys's average. The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is greatest for applications that have small tasks (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}) at all distances on intermittent power. In applications that have larger tasks or access more different memory pages, \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca.
+The data show the average execution time of each application with runtimes normalized to \sys's average. \todo{verify this statement}{Przemek} The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is the greatest for applications that perform repeating read and write operations, particularly if involving arrays (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}). This effect is seen at all distances on intermittent power. In applications with protected variables (or array elements) accessed next to each other but residing in different SRAM or FRAM pages \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca (\textbf{ar}, \textbf{dijkstra}). This effect will be investigated in detail in the next section when we will look deep into \sys overhead. 
+
+Another critical observation is that \textbf{fft} benchmark did not complete at any distance larger than 0.15\,cm. As we will show now, \sys tast downscaling mechanism will be able to solve this issue.  
 
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coala_alpaca_gcc}
-	\caption{Performance of \sys applications at multiple WISP to RF generator antenna distances ()\{0.15, 0.3, 0.5\}\,m (left, center and right-most bar per application, respectively), compared against Alpaca (results normalized).}
+	\caption{Performance of \sys applications at multiple WISP to RF generator antenna distances \{0.15, 0.3, 0.5\}\,m (left, center and right-most bar per application, respectively), compared against Alpaca (results normalized). Results show that \sys performs on average better than Alpaca for majority of the benchmarks. For specific benchmarks \sys performs worse than Alpaca \todo{state why it is sometimes worse}{Przemek} \todo{Add non-coalescing result; names of apps bold; reduce Y axis by 40\%; tiny spaces in-between bars for the same app}{Amjad}}
 	\label{fig:runtime}
 \end{figure}
 
-The data also illustrate that coalescing improves \sys's performance by eliminating the overhead of committing after each task. The performance benefit varies, providing up to 4.5x performance improvement. The cuckoo application (like other top-performers, bc and sort) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. cem, coalescing does not improve performance. The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case. 
+\textbf{Task Downscaling.} The result is presented in Figure~\ref{fig:task_downscaling} \todo{Provide text; add results}{Przemek}
 
-\textbf{Task Downscaling.} \todo{Provide text; add results}{Przemek}
+\begin{figure}
+	\centering
+	\caption{Task downscaling performance. \todo{Generate taks downscaling figure}{Carlo, Amajda}}
+	\label{fig:task_downscaling}
+\end{figure}	
 
 \subsubsection{Characterization of \sys Overhead}
 \label{sec:coala_overhead}
@@ -45,19 +59,23 @@ The data also illustrate that coalescing improves \sys's performance by eliminat
 
 \indent \textbf{Overall \sys Overhead Breakdown.} The result is presented in Figure~\ref{fig:overallOverheadBreakdown}.
 
+\todo{replace slow coalescing with steady coalescing}{Przemek}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/overallOverhead}
-	\caption{Overall \sys overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
+	\caption{Overall \sys overhead breakdown; NC: no coalescing, SC: slow coalescing, EA: energy-aware coalescing. \todo{names of coalescing strategies in capitals; names of apps bold; reduce figure size by 40\%; app -> application; \& -> and; overall overhead breakdown -> overhead breakdown}{Amjad}}
 	\label{fig:overallOverheadBreakdown}
 \end{figure}
 
 \textbf{\sys Coalescing Algorithm Efficiency.} The result is presented in Figure~\ref{fig:coalEfficiency}.
 
+Fixed power or intermittent?
+
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
-	\caption{\sys coalescing algorithm efficiency; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing, eta: energy and task-aware coalescing.}
+	\caption{\sys coalescing algorithm efficiency; NC: no coalescing, SC: slow coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. \todo{names of coalescing strategies in capitals; names of apps bold; reduce figure size by 40\%; app -> application; \& -> and;  colaescing algorithm efficiency -> overhead breakdown}{Amjad}}
 	\label{fig:coalEfficiency}
 \end{figure}
 
@@ -66,7 +84,7 @@ The data also illustrate that coalescing improves \sys's performance by eliminat
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/memAccess}
-	\caption{\sys memory access overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
+	\caption{\sys memory access overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing. \todo{names of coalescing strategies in capitals; names of apps bold; reduce figure size by 40\%; Memory access over -> overhead breakdown}{Amjad}}
 	\label{fig:coalmemory}
 \end{figure}
 
@@ -79,8 +97,7 @@ We evaluated the effect that paging with different page sizes has on \sys's perf
 	\centering
 	\includegraphics[width=\columnwidth]{figures/page_exec-time}
 	\includegraphics[width=\columnwidth]{figures/pagePulls}
-	\caption{\textbf{\sys normalized runtime for various page sizes, \{32, 64,128,256\}\,bytes, per application (top) and respective page pulls (bottom)}).}\vspace{-0.5cm}
-%\todo{change X to 0, remove the definition of X from caption}{Amjad}}
+	\caption{\sys normalized runtime for various page sizes, \{32, 64,128,256\}\,bytes, per application (top) and respective page pulls (bottom)).\todo{add page numbers below for each bar for page faults; \# -> No. page faults; app names in bold; reduce Y size by 40\%; small space after 128 and 256 in top graph; white background}{Amjad}}
 	\label{fig:page_size}
 \end{figure}
 
