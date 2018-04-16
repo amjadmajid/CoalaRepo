@@ -52,43 +52,47 @@ The result in Figure~\ref{fig:coalescing} recapitulates the result presented in 
 %\begin{figure}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/coalStrategies}
-	\caption{\sys coalescing strategies (EA and ETA) performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing (NC). \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system. \todo{NC, EA, ETA labels below bars}{Amjad}}
+	\caption{\sys coalescing strategies (EA and ETA) performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing (NC). \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system.}
 	\label{fig:coalescing}
 %\end{figure} 
 \end{wrapfigure}
 
 \textbf{\sys versus non-adaptive Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the performance of Alpaca runtime, i.e. a non-adaptive task-based system. Results are presented in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
 
-\begin{figure}
+\begin{wrapfigure}{t!}{0.5\textwidth}
+%\begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/coala_alpaca_gcc}
+	\includegraphics[width=0.5\columnwidth]{figures/coala_alpaca_gcc}
 	\caption{Performance of \sys applications at multiple WISP to RF generator antenna distances \{0.15, 0.3, 0.5\}\,m (left, center and right-most bar per application, respectively), compared against Alpaca (results normalized) for ETA coalescing strategy. Results show that \sys performs on average better than Alpaca for majority of the benchmarks. For specific benchmarks \sys performs worse than Alpaca \todo{state why it is sometimes worse}{Carlo}}
 	\label{fig:runtime}
-\end{figure}
+%\end{figure}
+\end{wrapfigure}
 
-The data show the average execution time of each application with runtimes normalized to \sys's average. \todo{verify this statement}{Przemek} The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is the greatest for applications that perform repeating read and write operations, particularly if involving arrays (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}). This effect is seen at all distances on intermittent power. In applications with protected variables (or array elements) accessed next to each other but residing in different SRAM or FRAM pages \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca (\textbf{ar}, \textbf{dijkstra}). This effect will be investigated in detail in the next section when we will look deep into \sys overhead. 
+The data show the average execution time of each application with runtimes normalized to \sys's average. \todo{verify this statement}{Przemek} The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is the greatest for applications that perform repeating read and write operations, particularly if involving arrays (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}). This effect is seen at all distances on intermittent power. In applications with protected variables (or array elements) accessed next to each other but residing in different SRAM or FRAM pages \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca (\textbf{ar}, \textbf{dijkstra}). 
 
 Another critical observation is that \textbf{fft} benchmark did not complete at any distance larger than 0.15\,cm. As we will show now, \sys task downscaling mechanism will be able to solve this issue.  
 
-\textbf{Task Downscaling Execution Time.} We have enabled task downscaling and measured the execution time for \textbf{fft} benchmark at all distances that this benchmark could not execute (refer again to Figure~\ref{fig:coalescing} and $\infty$ marks). \sys could execute the benchmark successfully with the execution time of X, Y and Z for distances $d=\{0.3, 0.5. 0.6\}$\,cm, respectively.
+\textbf{Task Downscaling Execution Time.} We have enabled task downscaling and measured the execution time for \textbf{fft} benchmark at all distances that this benchmark could not execute (refer again to Figure~\ref{fig:coalescing} and $\infty$ marks). \sys could execute the benchmark successfully with the execution time of X\,s at a distances of $d= 0.6$\,m, i.e. the one that exceeds the furthest distance ($d=0.5$\,m) presented in Figure~\ref{fig:runtime}, respectively.
 
 \subsection{\sys Paging Performance}
 \label{sec:results_memory_management}
 
-We evaluated the effect that paging with different page sizes has on \sys's performance and we show data in Figure~\ref{fig:page_size}; The top plot shows the run time performance normalized to the best per-application performance, using pages of different sizes in \sys, indicated with the labels at each bar; the bottom plot shows the number of page faults for the same set of executions normalized to the maximum of each set. We measured performance as MCU clock cycles using values read out by TI's CCS IDE. The results show a clear ``bathtub curve'' in the performance of each application, as the number of page faults varies. The data show that across application there is a page size that minimizes \emph{both} execution time. We observe that the page size is not the same for each application, although 64 byte pages perform well for all applications. The increased rate of page faults is responsible for the overhead with small page sizes; smaller pages require accessing more different pages, leading to higher paging costs. With larger page sizes, the overhead is higher than with moderate pages, too. The explanation for these higher overheads is that large pages have a higher commit cost. Even if an application accesses few memory locations, \sys pages data at full page size, degrading performance by sometimes paging in and out unnecessary data. The data reveal a reasonable default page size of 64 bytes and when developing an application, a developer should consider varying the page size to moderate poor performance.
+We have also evaluated the effect that paging with different page sizes has on \sys's performance. We show data in Figure~\ref{fig:page_size}; The left plot shows the run time performance normalized to the best per-application performance, using pages of different sizes in \sys; the right plot shows the number of page faults for the same set of executions normalized to the maximum of each set. We measured performance as MCU clock cycles using values read out by TI's Code Composer Studio IDE. 
+
+\textbf{Effect of Page Size on \sys Runtime.} The results (Figure~\ref{fig:page_size}, left) show a ``bathtub curve'' in the performance of each application (the effect would be more profound with a larger set of pages than we considered), as the number of page faults varies. The data show that across application there is a page size that minimizes \emph{both} execution time. We observe that the page size is not the same for each application, although 128\,B pages perform well for all applications. 
+
+\textbf{Page Size versus Page Faults in \sys Runtime.} The increased rate of page faults (Figure~\ref{fig:page_size}, right) is responsible for the overhead with small page sizes; smaller pages require accessing more different pages, leading to higher paging costs. With larger page sizes, the overhead is higher than with moderate pages, too. The explanation for these higher overheads is that large pages have a higher commit cost. Even if an application accesses few memory locations, \sys pages data at full page size, degrading performance by sometimes paging in and out unnecessary data. The data reveal a reasonable default page size of 128\,B and when developing an application, a programmer should consider varying the page size to moderate poor performance.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.49\columnwidth]{figures/page_exec-time}
 	\includegraphics[width=0.49\columnwidth]{figures/pagePulls}
-	\caption{\sys normalized runtime for various page sizes, \{32, 64,128,256\}\,bytes, per application (top) and respective page pulls (bottom).}
+	\caption{\sys normalized runtime for various page sizes, \{32, 64,128,256\}\,B (left) and respective page pulls (bottom) for all benchmarks.}
 	\label{fig:page_size}
 \end{figure}
 
 %\subsection{\sys Memory Footprint?}
 %\label{sec:results_program_characterization}
-%
-%\sys program characterization is provide in Table~\ref{table:compiler_result}. \todo{Finalize this section}{Przemek}
 %
 %\begin{table}
 %	\begin{tabular}{| c | c | c | c | c |}
