@@ -205,7 +205,7 @@ Since dynamic checks incur overhead on every read and write, it has a higher
 overhead for accessing memory than a static approach,
 e.g., Alpaca, where a system statically analyze the memory operation and try to insert only optimal
 number of memory protection code (usually at the beginning of each task). 
-%
+
 However, \sys's dynamic paging has several benefits over static approach.
 First, static approach has limitations, prohibiting certain types of programming pattern. For example,
 in the presence of arbitrary pointer operation, function calls using function pointer, or an interrupt
