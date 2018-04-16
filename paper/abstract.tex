@@ -14,7 +14,7 @@ To address this challenge, this paper introduces \sys, an \emph{adaptive} task-b
 % main benefits of Coala
 \sys defaults to progress on a multi-tasks scale, when energy permits (\emph{efficiency}), and on a sub-task scale when needed (\emph{guarantee}).
 % I really hope it will support our claims!! haha
-Results show that \sys is more efficient than the current state-of-art execution model by \textcolor{red}{X times}.
+Results show that \sys is more efficient than the current state-of-art execution model by up to a factor of two.
 
 % old PLDI abstract 
 %Computation consistency on intermittently-powered devices can be ensured by: (i) checkpointing, where the volatile state of a program is frequently saved to non-volatile memory, or (ii) via tasks, where a programmer splits the code into small idempotent sections. Results so far suggest that a task-based approach performs better than checkpointing. However, existing tasks-based approaches do not adapt to changing energy levels and storage. This makes the code inefficient (when executed on a larger energy buffer than intended) or can potentially completely disable the program (in the opposite case). Therefore, we present \sys: a task-based execution runtime, enabling code portability by means of a new concept of task coalescing. If a code is written for a very small energy buffer, \sys is able to dynamically coalesce these tasks and constructs a bigger (virtual) task to improve execution times up to 4.5 times compared to static task code.
