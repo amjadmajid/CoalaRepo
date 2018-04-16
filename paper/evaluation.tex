@@ -3,7 +3,7 @@ Our evaluation illustrates key findings about \sys. We show that: \todo{Make a l
 \subsection{\sys Runtime Performance}
 \label{sec:results_evaluation}
 
-Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering task adaptation: task coalescing and downscaling. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code. 
+Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering core task adaptation mechanisms of \sys: \emph{task coalescing} and \emph{task downscaling}. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code. 
 
 \sys is compared to Alpaca runtime. We remind the reader that the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC (see Section~\ref{sec:implementation}). The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
 
@@ -12,15 +12,13 @@ Our aim is to assess \sys as detailed as possible. For this we have characterize
 
 We characterize \sys by studying how its performance varies due to task adaptation. We start with evaluating the task coalescing mechanism.
 
-\textbf{Coalescing Strategies Performance.} We first need to assess the performance of all coalescing strategies introduced by us in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. We show data from experiments measured at 15\,cm WISP/RF generator antenna distance. 
-
-The results show the benefit from coalescing for all applications. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (smart) compared to task-aware only (fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}.
+\textbf{Coalescing Strategies Performance.} We first need to assess the performance of all coalescing strategies introduced in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. \todo{Check if this normalization is true}{Przemek} We show data from experiments measured at 15\,cm WISP to RF generator antenna distance. The results show the benefit from coalescing for all applications. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (EA, smart) compared to task-aware only (TA, fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}. \todo{Provide more justification}{Przemek}
 
 %\begin{wrapfigure}{t!}{0.5\textwidth}
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}
-	\caption{\sys coalescing strategies performance per application on intermittent power compared to \sys without coalescing. \todo{Add new figure; comment on the result}{Przemek}}
+	\caption{\sys coalescing strategies performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing. \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system. \todo{no coalescing missing; change names of algos; reduce Y width by 40\%; names of apps bold}{Przemek}}
 	\label{fig:coalescing}
 \end{figure}
 %\end{wrapfigure}
