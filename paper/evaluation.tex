@@ -22,14 +22,14 @@ The \textbf{cuckoo} application (like other top-performers, \textbf{bc} and \tex
 
 %The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case.
 
-%\begin{wrapfigure}{t!}{0.5\textwidth}
-\begin{figure}
+\begin{wrapfigure}{t!}{0.5\textwidth}
+% \begin{figure}
 	\centering
-	\includegraphics[width=\columnwidth]{figures/coalStrategies}
+	\includegraphics[width=0.5\columnwidth]{figures/coalStrategies}
 	\caption{\sys coalescing strategies performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing. \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system. \todo{no coalescing missing; change names of algos; reduce Y width by 40\%; names of apps bold and capitalized}{Przemek}}
 	\label{fig:coalescing}
-\end{figure}
-%\end{wrapfigure}
+% \end{figure}
+\end{wrapfigure}
 
 \textbf{\sys versus non-adaptive Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the performance of Alpaca runtime, i.e. a non-adaptive task-based system. Results are presented in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
 
