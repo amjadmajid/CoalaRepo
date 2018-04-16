@@ -110,15 +110,16 @@ This paper introduces a new system called \sys, which executes a task-based
 intermittent program by dynamically coalescing/splitting its tasks.
 \sys accepts any static decomposition (i.e., from the programmer or from a compiler) 
 and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute  
-with no commit or task transition overhead between them, instead performing
+with no commit overhead between them, instead performing
 task-end commit actions at the end of the second task only.
 %
 When there is sufficient energy to execute both tasks, two distinct, small
 tasks are effectively executed as a single large task, preserving the atomicity
 of both. If power fails during a coalesced task, execution restarts from the
 {\em first} of the coalesced tasks. Figure~\ref{fig:coalesce} (top)
-illustrates how dynamic coalescing changes the earlier execution and highlights
-the change in memory model necessary to not break atomicity. On the other hand, a large task that requires more energy to complete than a device's fixed energy buffer is split by \sys to enable task termination, as depicted in Figure~\ref{fig:coalesce} (bottom).
+illustrates how dynamic coalescing removes unnecessary overhead and shortens intermittent program execution. 
+On the other hand, a large task that requires more energy to complete than a device buffered energy 
+is split by \sys to enable task termination and preserve execution progress, as depicted in Figure~\ref{fig:coalesce} (bottom).
 
 %Brandon: This is too detailed for the intro:
 %Unfortunately, naively merging two atomic tasks might produce a non-atomic
