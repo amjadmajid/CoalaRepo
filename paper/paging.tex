@@ -24,7 +24,7 @@ exploits hardware\hyp{}accelerated block copies using DMA.
 \begin{figure}
 	\centering
 	\includegraphics[width=\textwidth]{figures/graffle/paging.pdf}
-	\caption{Illustration of task-virtual memory interaction in \sys. Tasks only interact with the working buffer in SRAM (indicated as page buffer). The shadow buffer is used to hold the dirty bages. The indirection table is used to speed-up page two-phase commit operation: it eliminates the copy operation in the second phase.}
+	\caption{Illustration of task-virtual memory interaction in \sys. Tasks only interact with the working buffer in SRAM (indicated as page buffer). The shadow buffer is used to hold the dirty bages. The indirection table is used to speed-up two-phase commit operation: it eliminates the copy operation in the second phase.}
 	\label{figure:coala_page_tags}
 \end{figure}
 
