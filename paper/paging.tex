@@ -1,3 +1,5 @@
+\textcolor{red}{[additional motivation for coala memory virtualization] we should emphasize that Coala programming model removes the burden of identifying the write-after-read dependencies from the programmer  as compared to Chain. And it does not require a specific compiler that cannot consider a runtime dependent behavior like Interrupts service handling to guarantee memory protection, as in Alpaca.}
+
 \sys exposes non-volatile memory for \emph{protected} variables to
 the application as a virtual address space partitioned into pages.
 \emph{Paged virtual memory} is a key enabler of task coalescing since it keeps the non-volatile memory consistent despite dynamic WAR dependencies incurred by coalesced code regions. Thanks to memory virtualization, \sys have the freedom to move application's data between volatile and non-volatile memory transparently.
