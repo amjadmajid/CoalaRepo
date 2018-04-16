@@ -7,8 +7,8 @@ Section~\ref{sec:evaluation} and characterize the benchmark applications.
 \subsection{Intermittently-powered Platform and Experimental Setup}
 \label{sec:results_hardware_software}
 
-We used two platforms to evaluate \sys: (1) an \emph{intermittently-powered}
-energy-harvesting device, and (2) a \emph{continuously-powered} evaluation
+We used two platforms to evaluate \sys: (i) an \emph{intermittently-powered}
+energy-harvesting device, and (i) a \emph{continuously-powered} evaluation
 board.
 %
 Every benchmark listed in the next section was run repeatedly on
@@ -23,8 +23,7 @@ The WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
 non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
 configured to 1\,MHz clock speed.
 %
-We powered the WISP using an RF signal generator~\cite{} \todo{Add reference
-to signal generator}{Przemek} emitting  a 20-\,dBm sinusoidal wave at 915\,MHz.
+We powered the WISP using an RF signal generator emitting  a 20-\,dBm sinusoidal wave at 915\,MHz.
 The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
 antenna~\cite{atlas2015}.
 %
@@ -32,11 +31,11 @@ The antenna was oriented towards and in parallel with the WISP antenna, and
 no objects obstructed the path.
 %
 We affixed the WISP with a paper harness at the edge of a table, so that the
-WISP was parallel to the table surface at a height of 10~cm.
+WISP was parallel to the table surface at a height of 10\,cm.
 %
 For distance-controlled experiments we positioned the signal generator
 antenna at a fixed distance from the WISP. The distances were $d=\{15, 30,
-50\}$\,cm for the main experiments and 60~cm for the task downscaling
+50\}$\,cm for the main experiments and 60\,cm for the task downscaling
 experiments.
 %
 To obtain execution time, the software toggled GPIO pins at sections of the code
@@ -133,12 +132,7 @@ GCC.
 %
 Our experiments show that manually-instrumented Alpaca code compiled with GCC
 is about 30\%-40\% faster than Alpaca code instrumented automatically by the
-Alpaca LLVM compiler pass and compiled with LLVM.
-%
-\todo{Provide concrete numbers for all applications}{Amjad}
-%
-This performance difference is due to the early experimental state of the
-MSP430 backend for LLVM.
+Alpaca LLVM compiler pass and compiled with LLVM. This performance difference is due to the early experimental state of the MSP430 backend for LLVM.
 %
 By compiling both systems with the same compiler (GCC), we ensure that our
 comparison in Section~\ref{sec:evaluation} is fair.
