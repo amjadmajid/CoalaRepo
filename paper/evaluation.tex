@@ -2,7 +2,7 @@
 	%\begin{figure}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/coalEfficiency}
-	\caption{Normalized \sys time usage for all coalescing strategies compared to non-coalesced \sys with overall \sys overhead breakdown; NC: no coalescing, EB: energy-blind coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. All \sys coalescing strategies significantly reduce the overhead of (task) commits. EA and ETA perform much better than EB a they reduce re-execution further.}
+	\caption{Normalized \sys time usage for all coalescing strategies compared to non-coalesced \sys with overall \sys overhead breakdown; NC: no coalescing, EB: energy-blind coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. All \sys coalescing strategies significantly reduce the overhead of (task) commits. EA and ETA perform much better than EB a they reduce re-execution further. \todo{replace user code with task code; increase font by two more points everywhere}{Amjad}}
 	\label{fig:overallOverheadBreakdown}
 	%\end{figure}
 \end{wrapfigure}
@@ -30,7 +30,7 @@ The result is presented in Figure~\ref{fig:overallOverheadBreakdown}. We clearly
 	\centering
 	\includegraphics[width=0.49\columnwidth]{figures/overallOverhead}
 	\includegraphics[width=0.49\columnwidth]{figures/memAccess}
-	\caption{\sys coalescing algorithm efficiency. Left: load split per task manipulation step; right: detailed breakdown of memory access presented in the left figure); NC: no coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing.}
+	\caption{\sys coalescing algorithm efficiency. Left: load split per task manipulation step; right: detailed breakdown of memory access presented in the left figure); NC: no coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. \todo{Check if Y axis names are correct; replace task code with user code}{Amjad, Carlo}}
 	\label{fig:coalEfficiency}
 \end{figure}
 
@@ -42,22 +42,18 @@ Looking into Figure~\ref{fig:coalEfficiency} (left) we see that no coalescing (N
 \subsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
-We characterize \sys by studying how its execution time varies due to task adaptation. We look at \sys in isolation and in comparison to Alpaca.]
+We characterize \sys by studying how its execution time varies due to task adaptation. We look at \sys in isolation and in comparison to Alpaca.
 
-\textbf{Coalescing Strategies Performance.}  Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. \todo{Check if this normalization is true}{Przemek} We show data from experiments measured at 15\,cm WISP to RF generator antenna distance. 
+\textbf{\sys Coalescing Execution Time.}  Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies for all benchmarks normalized to the \sys runtime without coalescing. We show data from experiments measured in the same was as for the results in Section~\ref{sec:coala_overhead}. 
 
-The results show the benefit from coalescing for all applications. Coalescing improves \sys's performance by eliminating the overhead of committing after each task. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (EA, smart) compared to task-aware only (TA, fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}. \todo{Provide more justification}{Przemek}
-
-The \textbf{cuckoo} application (like other top-performers, \textbf{bc} and \textbf{sort}) has small tasks that \sys can easily coalesce to eliminate many commits. In contrast, for some applications, e.g. \textbf{ar}, coalescing does not improve performance. 
-
-%The reason for cem's poor performance is that cem uses a large LZW dictionary structure that spans multiple pages, but has very little {\em locality}. The absence of locality means that coalesced tasks do not access the same pages, and as a result, do not amortize commit overhead. The lack of locality causes performance to regress to be similar to the non-coalescing case.
+The result in Figure~\ref{fig:coalescing} recapitulates the result presented in Figure~\ref{fig:overallOverheadBreakdown} showing the benefit in \emph {normalized runtime} from coalescing (for EA and ETA case) for all applications compared to non-coalescing (NC) case. Coalescing improves \sys's performance by eliminating the overhead of committing after each task. The difference in performance between coalescing and no coalescing is, however, highly application-dependent. Then, the gain from energy and task-aware strategy (ETA) compared to energy-aware only (EA) are almost non-existent for applications, except for \textbf{fft}, i.e. the one with with large tasks. Furthermore, the \textbf{cuckoo} application (like other top-performers, \textbf{bc} and \textbf{sort}) has small tasks that \sys can easily coalesce to eliminate many commits.
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
 %\begin{figure}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/coalStrategies}
-	\caption{\sys coalescing strategies performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing. \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system.}
-	\label{fig:coalescing} norm per no coalescinhg	
+	\caption{\sys coalescing strategies (EA and ETA) performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing (NC). \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system. \todo{NC, EA, ETA labels below bars}{Amjad}}
+	\label{fig:coalescing}
 %\end{figure} 
 \end{wrapfigure}
 
