@@ -2,7 +2,7 @@
 	%\begin{figure}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/coalEfficiency}
-	\caption{Normalized \sys runtime for all coalescing strategies compared to non-coalesced \sys with overall \sys overhead breakdown; NC: no coalescing, EB: energy-blind coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. All \sys coalescing strategies significantly reduce the overhead of (task) commits. EA and ETA perform much better than EB a they reduce re-execution further.}
+	\caption{Normalized \sys time usage for all coalescing strategies compared to non-coalesced \sys with overall \sys overhead breakdown; NC: no coalescing, EB: energy-blind coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. All \sys coalescing strategies significantly reduce the overhead of (task) commits. EA and ETA perform much better than EB a they reduce re-execution further.}
 	\label{fig:overallOverheadBreakdown}
 	%\end{figure}
 \end{wrapfigure}
@@ -18,37 +18,33 @@ We remind the reader that \sys is compared to Alpaca runtime and the benchmarks 
 \subsection{Characterization of \sys Overhead}
 \label{sec:coala_overhead}
 
-We start with the assessment of \sys Overhead for all benchmarks. This will lead us to the selection of the best set of coalescing strategies.
+We start with the assessment of \sys Overhead for all benchmarks. This will lead us to the selection of the best set of coalescing strategies to proceed with.
 
-\indent \textbf{\sys Coalescing Algorithm Efficiency.} We have measured the time spent on executing (i) user code, (ii) task re-execution and (iii) task commits for all coalescing strategies (EB, EA, and ETA) and all benchmarks. We compared our results to non-coalescing \sys (NC). The experiment was performed at 15\,cm WISP to RF generator antenna distance and normalized \todo{to what}{Przemek}. The result is presented in Figure~\ref{fig:overallOverheadBreakdown}. We clearly see that any \sys coalescing strategy reduces the cost of task commit for \emph{all} benchmarks. EA and ETA strategies reduce the re-execution cost of tasks further. For this reason we proceed with the investigation of \sys without considering EB coalescing.
+\indent \textbf{\sys Coalescing Algorithm Efficiency.} We have measured the time spent on executing (i) user code, (ii) task re-execution and (iii) task commits for all coalescing strategies (EB, EA, and ETA) and all benchmarks. We compared our results to non-coalescing \sys (NC). The experiment was performed at 15\,cm WISP to RF generator antenna distance and normalized per benchmark. All benchmarks were using a 256\,B memory page size except for \textbf{bc} which was using 16\,B page. Those page sizes were selected for a large set of potential page sizes and were found to maximize the performance of the respective benchmark. Detailed investigation of \sys paging performance will be given in Section~\ref{sec:results_memory_management}.
 
-\textbf{Overall \sys Overhead Breakdown.} The result is presented in Figure~\ref{fig:coalEfficiency}.
+The result is presented in Figure~\ref{fig:overallOverheadBreakdown}. We clearly see that any \sys coalescing strategy reduces the cost of task commit for \emph{all} benchmarks. EA and ETA strategies reduce the re-execution cost of tasks further. For this reason we proceed with the investigation of \sys without considering EB coalescing.
+
+\textbf{Overall \sys Overhead Breakdown.} We now proceed with investigating how \sys manipulates task commits: task transitions and memory accesses (including breakdown per SRAM and FRAM access). The result for all benchmarks are measured in the same way as for the results presented earlier (i.e. given in Figure~\ref{fig:overallOverheadBreakdown}) and using the same page sizes as in the earlier experiment. The result is presented in Figure~\ref{fig:coalEfficiency}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.49\columnwidth]{figures/overallOverhead}
 	\includegraphics[width=0.49\columnwidth]{figures/memAccess}
-	\caption{\sys coalescing algorithm efficiency; NC: no coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. Left: normalized runtime, Right: memory access breakdown.}
+	\caption{\sys coalescing algorithm efficiency. Left: load split per task manipulation step; right: detailed breakdown of memory access presented in the left figure); NC: no coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing.}
 	\label{fig:coalEfficiency}
 \end{figure}
 
-\textbf{\sys Memory Access Overhead Breakdown.} The result is presented in Figure~\ref{fig:coalmemory}.
+Looking into Figure~\ref{fig:coalEfficiency} (left) we see that no coalescing (NC) \sys has a huge cost of task transitions and commits (which recapitulates the result presented in Figure~\ref{fig:overallOverheadBreakdown}). For both coalescing strategies (EA and ETA) memory access constitutes about 30\% of the whole \sys runtime across all benchmarks.
 
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\columnwidth]{figures/memAccess}
-%	\caption{\sys memory access overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
-%	\label{fig:coalmemory}
-%\end{figure}
+\textbf{\sys Memory Access Overhead Breakdown.} Let us now look into the results on the \sys memory operation process, i.e. we will show specifically which parts of memory from Figure~
+\ref{fig:coalEfficiency} (left) are accessed. The result is presented in Figure~\ref{fig:coalEfficiency} (right). We immediately see that majority of operations are targeting the last SRAM page and very little operations on the FRAM pages. There are very few operations involving other SRAM pages than the last one (only visible for \textbf{cuckoo} and \textbf{dijkstra}). 
 
 \subsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
-We characterize \sys by studying how its performance varies due to task adaptation. We start with evaluating the task coalescing mechanism.
+We characterize \sys by studying how its execution time varies due to task adaptation. We look at \sys in isolation and in comparison to Alpaca.]
 
-\todo{what is the page size for all apps selected?}{Przemek}
-
-\textbf{Coalescing Strategies Performance.} We first need to assess the performance of all coalescing strategies introduced in Section~\ref{sec:task_coalescing}. Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. \todo{Check if this normalization is true}{Przemek} We show data from experiments measured at 15\,cm WISP to RF generator antenna distance. 
+\textbf{Coalescing Strategies Performance.}  Figure~\ref{fig:coalescing} shows the run time of \sys's three coalescing strategies normalized to the \sys runtime without coalescing. \todo{Check if this normalization is true}{Przemek} We show data from experiments measured at 15\,cm WISP to RF generator antenna distance. 
 
 The results show the benefit from coalescing for all applications. Coalescing improves \sys's performance by eliminating the overhead of committing after each task. The difference in performance between all strategies is highly application-dependent. The gain from energy and task-aware strategy (EA, smart) compared to task-aware only (TA, fast) are particularly small (or negative) for applications with large task sizes, i.e. \textbf{fft}. \todo{Provide more justification}{Przemek}
 
@@ -61,8 +57,8 @@ The \textbf{cuckoo} application (like other top-performers, \textbf{bc} and \tex
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/coalStrategies}
 	\caption{\sys coalescing strategies performance per application on intermittent power (RF generator at 15\,cm from the WISP) compared to \sys without coalescing. \sys task coalescing strategy provides significant improvements (from 0.25, \textbf{ar}, up to 0.70, \textbf{sort}) compared to a non-coalesced system.}
-	\label{fig:coalescing}
-%\end{figure}
+	\label{fig:coalescing} norm per no coalescinhg	
+%\end{figure} 
 \end{wrapfigure}
 
 \textbf{\sys versus non-adaptive Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the performance of Alpaca runtime, i.e. a non-adaptive task-based system. Results are presented in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
