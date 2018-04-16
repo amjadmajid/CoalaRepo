@@ -1,13 +1,17 @@
 \sys exposes non-volatile memory for \emph{protected} variables to
 the application as a virtual address space partitioned into pages.
-Paged virtual memory is a key enabler of task coalescing, which
-we described in Section~\ref{sec:task_coalescing}. Virtualization simplifies
-coalescing, because the system gets the freedom to move application's data
-between volatile and non-volatile memory transparently.
+\emph{Paged virtual memory} is a key enabler of task coalescing since it keeps the non-volatile memory consistent despite dynamic WAR dependencies incurred by coalesced code regions. Thanks to memory virtualization, \sys have the freedom to move application's data between volatile and non-volatile memory transparently.
 %
-\sys manages memory such that application tasks operate primarily from
-efficient volatile SRAM rather than non-volatile FRAM, which is more costly to access than SRAM,
-as we showed in Figure~\ref{fig:framEnergy}. \sys runtime implements memory
+%,. Virtualization simplifies
+%coalescing, because the system gets the freedom to move application's data
+%between volatile and non-volatile memory transparently.
+%
+To this end, \sys isolates FRAM from the tasks of the application so that they interface only SRAM---which is cheaper to read/write as we indicated in Section~\ref{sec:background}.
+%
+%manages memory such that application tasks operate primarily from
+%efficient volatile SRAM rather than non-volatile FRAM, which is more costly to access than SRAM,
+%as we showed in Figure~\ref{fig:framEnergy}. 
+\sys runtime implements memory
 virtualization by moving pages of the address space from the large,
 non-volatile memory to a small, volatile memory on demand and writing all dirty
 pages back to non-volatile memory atomically. Since memory moves at page granularity, \sys
@@ -15,7 +19,14 @@ exploits hardware\hyp{}accelerated block copies using DMA.
 
 %\subsection{Paged Non-Volatile Virtual Memory} 
 
-Paging moves data between non-volatile and volatile memory. A page has a home location in non-volatile memory which we refer to as the page's \texttt{\underline{store}} (underlined locations are non-volatile).
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{figures/graffle/paging.pdf}
+	\caption{Illustration of task-virtual memory interaction in \sys. Tasks only interact with the working buffer in SRAM (indicated as page buffer). The shadow buffer is used to hold the dirty bages. The indirection table is used to speed-up page two-phase commit operation: it eliminates the copy operation in the second phase.}
+	\label{figure:coala_page_tags}
+\end{figure}
+
+\textbf{System Overview.} The overall picture of the paging operations is illustrated in Figure~\ref{figure:coala_page_tags}. Paging moves data between non-volatile and volatile memory. A page has a home location in non-volatile memory which we refer to as the page's \texttt{\underline{store}} (underlined locations are non-volatile).
 As a task accesses pages, they are swapped from their home location
 into the fully\hyp{}associative \texttt{working} page buffer in volatile memory. The \texttt{working} buffer is allocated to take up the volatile memory that remains after space for stack is allocated.
 %
