@@ -1,9 +1,58 @@
-Our implementation of \sys makes no system assumptions: we execute \sys on a \emph{real} low-power embedded computing platform powered by a \emph{real} intermittent energy harvesting source. This approach shall lead to undisputed set of \sys performance metrics. 
+We prototype \sys and use its API to implement a set of benchmark
+applications representative of the embedded domain. We build the applications
+and deploy the binaries onto a real energy-harvesting device. In this section
+we describe the setup for the experiments presented in
+Section~\ref{sec:evaluation} and characterize the benchmark applications.
 
-\subsection{Intermittent Platform and Hardware Toolchain}
+\subsection{Intermittently-powered Platform and Experimental Setup}
 \label{sec:results_hardware_software}
 
-We evaluated \sys in two power supply environments: (i)  \emph{intermittent} and (ii) \emph{fixed} (to benchmark the intermittent power supply results). In the experiments with intermittent power supply, we evaluated \sys using a WISP\,5.1~\cite{wisp5,wisp}---energy-harvesting platform build around a MSP430FR5969~\cite{wolverine} MCU with with 64\,kB of non-volatile (FRAM) memory and and 2\,kB of volatile memory (SRAM). MCU was operating at 1\,MHz clock cycle. We powered the WISP using RF signal generator~\cite{} \todo{Add reference to signal generator}{Przemek} emitting 20\,dBm sinusoidal wave at 915\,MHz.  Signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic antenna~\cite{atlas2015}. For distance-controlled experiments, we affixed WISP at two paper protrusions around 10\,cm from the surface of the table (parallel to, and at the edge of, the table surface). Antenna of the signal generator was facing WISP directly and located at three distances, $d=\{15, 30, 50\}$\,cm, from WISP. For the task downscaling experiments, an additional distance of $d=60$\,cm was considered. Both antennas were parallel to each other and no physical objects were located between the WISP and the signal generator antenna. Every benchmark we used (refer to next section) was run repeatedly for X\,s and the result was averaged for the duration of the experiment. \todo{check if this is correct}{Carlo} For continuous power experiments we used an alternative setup with MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad}, which had the same MCU as WISP. In all the experiments the timing measurements were performed using either the Saleae~\cite{saleae} logic analyzer (for intermittent power experiments) or TI Code Composer Studio (for fixed power experiments). \todo{provide version and more details on TI CCS}{Przemek} Both type of experiments are explained in the following section.
+We used two platforms to evaluate \sys: (1) an \emph{intermittently-powered}
+energy-harvesting device, and (2) a \emph{continuously-powered} evaluation
+board.
+%
+Every benchmark listed in the next section was run repeatedly for X\,s on
+each platform and the result was averaged for the duration of the experiment.
+\todo{check if this is correct}{Carlo}
+
+Experiments on the intermittently-powered platform used the
+WISP\,5.1~\cite{wisp5,wisp} RF-powered energy-harvesting device.
+%
+The WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
+non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
+configured to 1\,MHz clock speed.
+%
+We powered the WISP using an RF signal generator~\cite{} \todo{Add reference
+to signal generator}{Przemek} emitting 20\,dBm sinusoidal wave at 915\,MHz.
+The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
+antenna~\cite{atlas2015}.
+%
+The antenna was oriented towards and in parallel with the WISP antenna, and
+no objects obstructed the path.
+%
+We affixed the WISP with a paper harness at the edge of a table, so that the
+WISP was parallel to the table surface at a height of 10~cm.
+%
+For distance-controlled experiments we positioned the signal generator
+antenna at a fixed distance from the WISP. The distances were $d=\{15, 30,
+50\}$\,cm for the main experiments and 60~cm for the task downscaling
+experiments.
+%
+To obtain execution time, the software toggled GPIO pins at the beginning and
+end of the application, and the Saleae~\cite{saleae} logic analyzer measured
+the interval between edges in the signal.
+
+The experiments which are not sensitive to the behavior of an
+energy-harvesting power supply were conducted on an MSP-EXP430FR5969
+launchpad~\cite{MSP-EXP430FR5969_launchpad} board powered continuously with a
+power supply.
+%
+This platform has the same MCU as the WISP.
+%
+Execution time was measured using the instrumentation features in TI Code
+Composer Studio IDE.
+%
+\todo{provide version and more details on TI CCS}{Przemek}
 
 \subsection{Software Benchmarks}
 \label{sec:software_benchmarks}
@@ -11,31 +60,94 @@ We evaluated \sys in two power supply environments: (i)  \emph{intermittent} and
 \begin{table}
 	\centering
 	\footnotesize
-	\begin{tabular}{| r | p{0.85\columnwidth} |}
+	\begin{tabular}{| r|r|r | p{0.65\columnwidth} |}
 		\hline
-		Application & Description \\
+		Application & No. tasks & SLOC & Description \\
 		\hline\hline
-		\textbf{ar} & nearest neighbor classification of randomly generated data modeling a three-axis accelerometer\\
+        \textbf{ar} & & & Activity recognition using a nearest neighbor
+classifier with a deterministic input from a randomly-generated sequence of
+accelerometer data\\
 		\hline
-		\textbf{bc} & counts bits in byte pseudo-random string using several algorithms, and compares results for correctness\\
+        \textbf{bc} & & & Counts set bits in a pseudo-random sequence of bytes
+using several algorithms and compares results for correctness\\
 		\hline
-		\textbf{cuckoo} & Bloom-filter-like Cuckoo filter: first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence\\
+        \textbf{cuckoo} & & & Inserts and queries a sequence of pseudo-random
+values in a Cuckoo filter, a set membership data structure with deletion\\
 		\hline
-		\textbf{dijkstra} &  Dijkstra algorithm executed continously on a predefined adjecency matrix\\
+        \textbf{dijkstra} &  & & Dijkstra shortest path algorithm executed on a
+predefined adjacency matrix\\
 		\hline
-		\textbf{fft} & continuously repeating Fast Fourier Transform on three pre-generated 128 sample vector\\
+        \textbf{fft} & & & Fast Fourier Transform on three pre-generated 128
+sample vectors\\
 		\hline
-		\textbf{sort} & selection sort algorithm on a fixed sequence of numbers\\
+		\textbf{sort} & & & Selection sort of a fixed sequence of numbers\\
 		\hline
 	\end{tabular}
-\caption{Suite of benchmark applications used in evaluating \sys performance. All applications have been chosen from MiBench testing suite~\cite{mibench,hicks_mibench2_2016}.\todo{Consider adding more information here}{Przemek, Carlo}}
+\caption{Description and characteristics of benchmark applications used to
+evaluate \sys.}
 \label{table:benchmark_table}
 \end{table}
 
-We evaluated \sys using six benchmarks summarized in Table~\ref{table:benchmark_table}, with their implementation is available via~\cite{coala_website}. Five benchmarks originate from the MiBench testing suite~\cite{mibench,hicks_mibench2_2016}: three benchmarks (\textbf{ar}, \textbf{bc}, \textbf{cuckoo}) were already implemented by Chain~\cite{chain} and Alpaca~\cite{alpaca}, while two (\textbf{dijkstra}, \textbf{fft}\footnote{Specifically, we re-implemented FFT based on the TI's accelerated FFT library~\cite{}.\todo{add reference}{Przemek}}) are added as new. The final one (\textbf{sort}) has been written from scratch. \todo{justify the selection of these benchmarks}{Przemek, Carlo, Amjad, Brandon} All applications were compiled using GCC version 3.8.0. \todo{Check if this still holds. provide optimization flag}{Przemek} 
+We evaluated \sys using six benchmarks summarized in
+Table~\ref{table:benchmark_table}. %
+Three benchmarks (\textbf{ar}, \textbf{bc}, \textbf{cuckoo}) are from prior
+work~\cite{chain,alpaca} and three benchmarks (\textbf{dijkstra},
+\textbf{fft}, \textbf{sort}) are new implementations of applications
+from the MiBench suite~\cite{mibench,hicks_mibench2_2016}. The
+\textbf{fft} implementation is based on the Accelerated FFT library from
+TI~\cite{ti-fft}.
+%
+\todo{add reference}{Przemek}
+%
+All applications were compiled using TI GCC~\cite{ti-gcc} version 3.8.0 with
+\texttt{-O1}.
+%
+\todo{Check if this still holds. provide optimization flag}{Przemek} 
+%
+The source code for all benchmarks is released at \cite{coala_website}.
+
 
 %Specifically, we have implemented three benchmarks used by Chain~\cite{chain} and Alpaca~\cite{alpaca} (source code is accessible~\cite{coala_website}), namely: \textbf{ar}: nearest neighbor classification of randomly generated data modeling a three-axis accelerometer; \textbf{bc}: counts bits in byte pseudo-random string using several algorithms, and compares results for correctness; \textbf{cuckoo}: Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence. Additionally, we have ported three new benchmarks from~\cite{mibench}, namely: \textbf{dijkstra}: Dijkstra algorithm executed continously on a predefined adjecency matrix; \textbf{fft}: continuously repeating Fast Fourier Transform on three pre-generated 128 sample vector; and \textbf{sort}: selection sort algorithm on a fixed sequence of numbers. \todo{justify the selection of these benchmarks}
 
-\textbf{Comparison with Alpaca and Alpaca Compiler Limitations.} We compare \sys against state-of-the-art task-based runtime Alpaca~\cite{alpaca}. For correct comparison, all benchmarks of \sys were divided into tasks in the same way as Alpaca. Since original Alpaca runtime was written in Clang, we had to transform every benchmark manually into GCC-complaint code. \todo{Provide more information about porting to GCC from LLVM}{Brandon, Carlo} This was a time-consuming process since a programmer needs to identify WAR dependencies \todo{check if we use WAR or write-after-read or anything else}{Przemek}, then change variables' names and modify instructions accordingly. Nota bene, our experiments based on the benchmarks we used here show that Alpaca compiled with GCC is about 30\%-40\% faster than Alpaca compiled with Clang. \todo{Provide concrete numbers for all applications}{Amjad} The speed improvement we got for Alpaca with GCC is however sacrificed by the above-mentioned error-prone manual code transformation process for which no compiler support exists thus far. \sys \emph{does not require any of such transformations}.
+\textbf{Comparison with Alpaca using the GCC compiler.} We compare
+\sys against Alpaca~\cite{alpaca}, a state-of-the-art task-based system for
+intermittent computing. For a fair comparison the task decomposition is the
+same in both \sys and Alpaca implementations of the benchmarks. We compare
+both systems using GCC, the compiler with the best performance for the
+MSP430 architecture.
 
-\textbf{Comparison of \sys against other Systems.} We do not compare \sys against Chain~\cite{chain}, another task-based system, which is inferior to Alpaca in its performance. Also, we do not compare \sys to checkpointing-based systems, such as DINO~\cite{dino} or Mementos~\cite{mementos} (cf. Section~\ref{sec:background_consistency}). \todo{Provide reasons why we do not compare against checkpointing}{Brandon}.
+Since Alpaca's compiler pass is implemented only for LLVM, we could not use it
+to instrument the benchmarks and compile them with GCC. Instead, we
+\emph{manually} performed the instrumentation done by the compiler pass.
+We performed the instrumentation at the source level, adding C
+statements to the program, instead of at the level of binary
+intermediate-representation (LLVM IR) as the compiler pass would. The result is
+equivalent from the perspective of overheads. The
+instrumentation consists of identifying write-after-read dependencies and
+adding code and memory allocations to make a private copy of the
+affected variables. For array variables, instrumentation also includes adding
+code and memory allocations to track the first write to the array.
+
+Manual instrumentation of Alpaca code is not a general approach, but only
+served as a practical alternative to porting the compiler pass from LLVM to
+GCC.
+%
+Our experiments show that manually-instrumented Alpaca code compiled with GCC
+is about 30\%-40\% faster than Alpaca code instrumented automatically by the
+Alpaca LLVM compiler pass and compiled with LLVM.
+%
+\todo{Provide concrete numbers for all applications}{Amjad}
+%
+This performance difference is due to the early experimental state of the
+MSP430 backend for LLVM.
+%
+By compiling both systems with the same compiler (GCC), we ensure that our
+comparison in Section~\ref{sec:evaluation} is fair.
+
+% Unnecessary
+%\textbf{Comparison of \sys against other Systems.} We do not compare \sys
+%against Chain~\cite{chain}, another task-based system, which is inferior to
+%Alpaca in its performance. Also, we do not compare \sys to
+%checkpointing-based systems, such as DINO~\cite{dino} or
+%Mementos~\cite{mementos} (cf. Section~\ref{sec:background_consistency}).
+%\todo{Provide reasons why we do not compare against checkpointing}{Brandon}.
