@@ -59,24 +59,18 @@ The result in Figure~\ref{fig:coalescing} recapitulates the result presented in 
 
 \textbf{\sys versus non-adaptive Task-based Model.} We now evaluate \sys's run time performance and compare \sys to the performance of Alpaca runtime, i.e. a non-adaptive task-based system. Results are presented in Figure~\ref{fig:runtime}. For each application we measured its execution time using real wireless power provisioned from the RF signal generator at three distances (refer again to Section~\ref{sec:implementation}).
 
-The data show the average execution time of each application with runtimes normalized to \sys's average. \todo{verify this statement}{Przemek} The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is the greatest for applications that perform repeating read and write operations, particularly if involving arrays (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}). This effect is seen at all distances on intermittent power. In applications with protected variables (or array elements) accessed next to each other but residing in different SRAM or FRAM pages \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca (\textbf{ar}, \textbf{dijkstra}). This effect will be investigated in detail in the next section when we will look deep into \sys overhead. 
-
-Another critical observation is that \textbf{fft} benchmark did not complete at any distance larger than 0.15\,cm. As we will show now, \sys tast downscaling mechanism will be able to solve this issue.  
-
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coala_alpaca_gcc}
-	\caption{Performance of \sys applications at multiple WISP to RF generator antenna distances \{0.15, 0.3, 0.5\}\,m (left, center and right-most bar per application, respectively), compared against Alpaca (results normalized). Results show that \sys performs on average better than Alpaca for majority of the benchmarks. For specific benchmarks \sys performs worse than Alpaca \todo{state why it is sometimes worse}{Przemek}}
+	\caption{Performance of \sys applications at multiple WISP to RF generator antenna distances \{0.15, 0.3, 0.5\}\,m (left, center and right-most bar per application, respectively), compared against Alpaca (results normalized) for ETA coalescing strategy. Results show that \sys performs on average better than Alpaca for majority of the benchmarks. For specific benchmarks \sys performs worse than Alpaca \todo{state why it is sometimes worse}{Carlo}}
 	\label{fig:runtime}
 \end{figure}
 
-\textbf{Task Downscaling.} The result is presented in Figure~\ref{fig:task_downscaling} \todo{Provide text; add results}{Przemek}
+The data show the average execution time of each application with runtimes normalized to \sys's average. \todo{verify this statement}{Przemek} The results show that \sys provides a performance benefit compared to Alpaca for most applications (all except for \textbf{ar} and \textbf{cuckoo}). The performance benefit is the greatest for applications that perform repeating read and write operations, particularly if involving arrays (\textbf{bc}, \textbf{sort}, \textbf{dijkstra}). This effect is seen at all distances on intermittent power. In applications with protected variables (or array elements) accessed next to each other but residing in different SRAM or FRAM pages \sys incurs overhead from memory virtualization that cause its performance to be comparable to (or worse than) Alpaca (\textbf{ar}, \textbf{dijkstra}). This effect will be investigated in detail in the next section when we will look deep into \sys overhead. 
 
-\begin{figure}
-	\centering
-	\caption{Task downscaling performance. \todo{Generate taks downscaling figure}{Carlo, Amajda}}
-	\label{fig:task_downscaling}
-\end{figure}	
+Another critical observation is that \textbf{fft} benchmark did not complete at any distance larger than 0.15\,cm. As we will show now, \sys task downscaling mechanism will be able to solve this issue.  
+
+\textbf{Task Downscaling Execution Time.} We have enabled task downscaling and measured the execution time for \textbf{fft} benchmark at all distances that this benchmark could not execute (refer again to Figure~\ref{fig:coalescing} and $\infty$ marks). \sys could execute the benchmark successfully with the execution time of X, Y and Z for distances $d=\{0.3, 0.5. 0.6\}$\,cm, respectively.
 
 \subsection{\sys Paging Performance}
 \label{sec:results_memory_management}
