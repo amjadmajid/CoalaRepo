@@ -11,9 +11,10 @@ We used two platforms to evaluate \sys: (1) an \emph{intermittently-powered}
 energy-harvesting device, and (2) a \emph{continuously-powered} evaluation
 board.
 %
-Every benchmark listed in the next section was run repeatedly for X\,s on
-each platform and the result was averaged for the duration of the experiment.
-\todo{check if this is correct}{Carlo}
+Every benchmark listed in the next section was run repeatedly on
+each platform for a more or less long time window, depending on the benchmark,
+to capture a diverse power trace and produce a high number of complete runs of all applications.
+The results were averaged across the duration of the experiment.
 
 Experiments on the intermittently-powered platform used the
 WISP\,5.1~\cite{wisp5,wisp} RF-powered energy-harvesting device.
@@ -23,7 +24,7 @@ non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
 configured to 1\,MHz clock speed.
 %
 We powered the WISP using an RF signal generator~\cite{} \todo{Add reference
-to signal generator}{Przemek} emitting 20\,dBm sinusoidal wave at 915\,MHz.
+to signal generator}{Przemek} emitting  a 20-\,dBm sinusoidal wave at 915\,MHz.
 The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
 antenna~\cite{atlas2015}.
 %
@@ -38,8 +39,8 @@ antenna at a fixed distance from the WISP. The distances were $d=\{15, 30,
 50\}$\,cm for the main experiments and 60~cm for the task downscaling
 experiments.
 %
-To obtain execution time, the software toggled GPIO pins at the beginning and
-end of the application, and the Saleae~\cite{saleae} logic analyzer measured
+To obtain execution time, the software toggled GPIO pins at sections of the code
+under profile, and the Saleae~\cite{saleae} logic analyzer measured
 the interval between edges in the signal.
 
 The experiments which are not sensitive to the behavior of an
@@ -99,12 +100,10 @@ TI~\cite{ti-fft}.
 %
 \todo{add reference}{Przemek}
 %
-All applications were compiled using TI GCC~\cite{ti-gcc} version 3.8.0 with
-\texttt{-O1}.
+All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 with
+\texttt{-O1} as optimization flag.
 %
-\todo{Check if this still holds. provide optimization flag}{Przemek} 
-%
-The source code for all benchmarks is released at \cite{coala_website}.
+The source code for all benchmarks will be released at \cite{coala_website}.
 
 
 %Specifically, we have implemented three benchmarks used by Chain~\cite{chain} and Alpaca~\cite{alpaca} (source code is accessible~\cite{coala_website}), namely: \textbf{ar}: nearest neighbor classification of randomly generated data modeling a three-axis accelerometer; \textbf{bc}: counts bits in byte pseudo-random string using several algorithms, and compares results for correctness; \textbf{cuckoo}: Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence. Additionally, we have ported three new benchmarks from~\cite{mibench}, namely: \textbf{dijkstra}: Dijkstra algorithm executed continously on a predefined adjecency matrix; \textbf{fft}: continuously repeating Fast Fourier Transform on three pre-generated 128 sample vector; and \textbf{sort}: selection sort algorithm on a fixed sequence of numbers. \todo{justify the selection of these benchmarks}
