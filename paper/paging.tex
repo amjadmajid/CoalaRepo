@@ -38,7 +38,7 @@ When any dirty page is swapped out from the \texttt{working} buffer due to evict
 %
 Unlike prior work~\cite{chain,alpaca} that moves scattered variables one at a time between volatile and non-volatile memory, \sys's page-based design moves contiguous blocks of data.
 %
-\sys takes full advantage of hardware\hyp{}accelerated block copies using Direct Memory Access (DMA) hardware in common microcontrollers --- e.g. 5x fewer cycles on MSP430FRxxxx.
+\sys takes full advantage of hardware\hyp{}accelerated block copies using Direct Memory Access (DMA) hardware in common microcontrollers --- e.g. 5$\times$ fewer cycles on MSP430FRxxxx.
 
 \subsection{Address Translation and Variable Access}
 
@@ -72,7 +72,7 @@ After address translation, \sys attempts to access the protected variable's loca
 %
 If the accessed variable's page tag is not found in the page buffer, the operation incurs a {\em page fault} (Line 4). At a page fault, \sys must swap out one of the pages that is resident in the page buffer (to the non-volatile \texttt{\underline{shadow}}) if \texttt{working} is full, and swap in the variable's page.
 %
-The byte is accessed in the page buffer at the index of the resident page and the variable's page offset (Lines 5-6).
+The byte is accessed in the page buffer at the index of the resident page and the variable's page offset (Lines 5--6).
 
 %Algorithm~\ref{algo:rwar} shows pseudo-code of \texttt{RVAR} and we omit a listing for {\tt WVAR} as it is very similar except it writes the memory location and returns nothing. If the page tag of the variable \texttt{var} is not found in \texttt{working} (e.g. Lines 2--3), there is a page fault that requires a new page to be swapped in to the page buffer.
 
