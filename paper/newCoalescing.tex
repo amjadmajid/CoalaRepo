@@ -1,4 +1,4 @@
-Energy-aware task coalescing strategies gain \sys efficiency, and the flexible time-based task splitting strategy enables \sys to progress where its counterparts fail.
+Energy-aware task coalescing strategies bring \sys efficiency, and the flexible time-based task splitting strategy enables \sys to progress where its counterparts fail.
 
 \subsection{Task Coalescing}
 \label{sec:task_coalescing}
@@ -10,12 +10,7 @@ Energy-aware task coalescing strategies gain \sys efficiency, and the flexible t
 % 	\label{fig:coalIntro}
 % \end{wrapfigure}
 
-\noindent When incoming energy is sufficient to run multiple consecutive tasks,
-committing state after each task is wasteful. \sys mitigates this
-waste by deferring the expensive commits and performing them in a
-batch. In the resulting execution, several tasks are \emph{merged} into a
-single virtual task---a process we call \emph{coalescing}. 
-
+When incoming energy is sufficient to run multiple consecutive tasks, committing state after each task is wasteful. \sys mitigates this waste by deferring the expensive commits and performing them in a batch. In the resulting execution, several tasks are \emph{merged} into a single virtual task---a process we call \emph{coalescing}. 
 
 \noindent When $N$ tasks are coalesced, $N-1$ boundaries are crossed and some number of
 pages are dirtied. The first $N-2$ executions of \transition statement skip
@@ -137,32 +132,5 @@ The Energy-aware coalescing algorithm overcomes the limitations of the previous 
 
 \subsubsection{Energy- and Task-aware Coalescing (ETA)}
 \label{subsec:energyTaskAware}
-There are two factors that affect the accuracy of predicting a power interrupt. The stability of the incoming energy and the static tasks sizes distribution. If the task sizes are not uniformly distributed then the algorithm estimation might be off by a relatively large margin, for example, if there are two tasks of size $1s$ and $10s$ then EA will count them as two and might estimate that the target should be of size two static tasks. However, if the following two tasks, on one hand, are of size $1s$ then the algorithm will waste energy on unnecessary commits. On the other hand, if the following two tasks were of size $10s$ then the algorithm might fail, on the second task, and lose progress of $+10$ tasks. To overcome this limitation the counting process of ETA algorithm takes tasks' weight into consideration to approximate a uniform task size distribution, from the counting process perspective. As such ETA algorithm adapts the characterization of the EA algorithm by changing the weight function to be, $f_\text{weight}(T_\text{i}) =  W_\text{i}$; 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+There are two factors that affect the accuracy of predicting a power interrupt. The stability of the incoming energy and the static tasks sizes distribution. If the task sizes are not uniformly distributed then the algorithm estimation might be off by a relatively large margin. For example, if there are two tasks of size $1s$ and $10s$ then EA will count them as two and might estimate that the target should be of size two static tasks. However, if the following two tasks, on one hand, are of size $1s$ then the algorithm will waste energy on unnecessary commits. On the other hand, if the following two tasks were of size $10s$ then the algorithm might fail, on the second task, and lose progress of $+10$ tasks. To overcome this limitation the counting process of ETA algorithm takes tasks' weight into consideration to approximate a uniform task size distribution, from the counting process perspective. As such ETA algorithm adapts the characterization of the EA algorithm by changing the weight function to be $f_\text{weight}(T_\text{i}) = W_\text{i}$.
