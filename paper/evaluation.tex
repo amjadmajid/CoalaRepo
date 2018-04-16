@@ -1,13 +1,47 @@
-Our evaluation illustrates key findings about \sys. We show that: \todo{Make a list of core findings here once results are solid}{Przemek}
+\begin{wrapfigure}{t!}{0.5\textwidth}
+	%\begin{figure}
+	\centering
+	\includegraphics[width=0.5\columnwidth]{figures/coalEfficiency}
+	\caption{Normalized \sys runtime for all coalescing strategies compared to non-coalesced \sys with overall \sys overhead breakdown; NC: no coalescing, EB: energy-blind coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. All \sys coalescing strategies significantly reduce the overhead of (task) commits. EA and ETA perform much better than EB a they reduce re-execution further.}
+	\label{fig:overallOverheadBreakdown}
+	%\end{figure}
+\end{wrapfigure}
 
-\subsection{\sys Runtime Performance}
-\label{sec:results_evaluation}
+Our results illustrate key findings about \sys. We show through extensive qualitative and quantitative evaluation that (i) \sys \emph{provides computation progress} at the partial task level, guaranteeing execution at the worst intermittent energy conditions where state-of-the-art runtimes fail; (ii) usually \emph{improve execution speed} of applications compared to the state-of-the-art runtimes; (iii) \sys through coalescing mechanism \emph{reduces the memory protection overhead} significantly; and (iv) that \sys is \emph{more generic to use} and allows to interact with code written for non-intermittent devices much easier. 
 
-Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering core task adaptation mechanisms of \sys: \emph{task coalescing} and \emph{task downscaling}. We also characterize \sys overhead showing precisely what is the source of \sys superior performance. Additionally, we characterize \sys code. 
+\textbf{Key Performance Indicators.} Our aim is to assess \sys as detailed as possible. For this we have characterized \sys runtime performance (execution time), based on a set of benchmarks, considering core task adaptation mechanisms of \sys: \emph{task coalescing} and \emph{task downscaling}. We also characterize \sys overhead showing precisely what is the source of \sys superior performance investigating task re-execution and commit penalty and memory page access patterns.
 
-\sys is compared to Alpaca runtime. We remind the reader that the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC (see Section~\ref{sec:implementation}). The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
+We remind the reader that \sys is compared to Alpaca runtime and the benchmarks for Alpaca were hand-transformed in a time-consuming manual process from Clang (LLVM-generated code) to GCC (see Section~\ref{sec:implementation}). The manual code transformation was required as \sys was written with GCC in mind, and Alpaca cannot support any other complier than LLVM.
 
-\subsubsection{\sys Task Adaptation}
+%Then, we need to know how many tasks \sys can coalesce within a given execution scenario. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and the amount of tasks coalesced. Result is given in Table~\ref{tab:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. This will help \sys to find the best possible virtual task size to minimise its runtime.
+
+\subsection{Characterization of \sys Overhead}
+\label{sec:coala_overhead}
+
+We start with the assessment of \sys Overhead for all benchmarks. This will lead us to the selection of the best set of coalescing strategies.
+
+\indent \textbf{\sys Coalescing Algorithm Efficiency.} We have measured the time spent on executing (i) user code, (ii) task re-execution and (iii) task commits for all coalescing strategies (EB, EA, and ETA) and all benchmarks. We compared our results to non-coalescing \sys (NC). The experiment was performed at 15\,cm WISP to RF generator antenna distance and normalized \todo{to what}{Przemek}. The result is presented in Figure~\ref{fig:overallOverheadBreakdown}. We clearly see that any \sys coalescing strategy reduces the cost of task commit for \emph{all} benchmarks. EA and ETA strategies reduce the re-execution cost of tasks further. For this reason we proceed with the investigation of \sys without considering EB coalescing.
+
+\textbf{Overall \sys Overhead Breakdown.} The result is presented in Figure~\ref{fig:coalEfficiency}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.49\columnwidth]{figures/overallOverhead}
+	\includegraphics[width=0.49\columnwidth]{figures/memAccess}
+	\caption{\sys coalescing algorithm efficiency; NC: no coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing. Left: normalized runtime, Right: memory access breakdown.}
+	\label{fig:coalEfficiency}
+\end{figure}
+
+\textbf{\sys Memory Access Overhead Breakdown.} The result is presented in Figure~\ref{fig:coalmemory}.
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=\columnwidth]{figures/memAccess}
+%	\caption{\sys memory access overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
+%	\label{fig:coalmemory}
+%\end{figure}
+
+\subsection{\sys Task Adaptation}
 \label{sec:result_coalescing}
 
 We characterize \sys by studying how its performance varies due to task adaptation. We start with evaluating the task coalescing mechanism.
@@ -52,43 +86,7 @@ Another critical observation is that \textbf{fft} benchmark did not complete at 
 	\label{fig:task_downscaling}
 \end{figure}	
 
-\subsubsection{Characterization of \sys Overhead}
-\label{sec:coala_overhead}
-
-%Then, we need to know how many tasks \sys can coalesce within a given execution scenario. We ran a subset of applications (split by tasks manually) with continuous power supply and measured the size of tasks for each application and the amount of tasks coalesced. Result is given in Table~\ref{tab:aveVirtuTaskSize}. We see clearly that \sys manages to coalesce more tasks as individual tasks are small. As the size of individual task increases, e.g., as in the case of dft application, the number of coalesced tasks is also small. This result clearly shows that for the benefit of coalescing and for code portability, initial code should be split by \emph{as small tasks as possible}. This will help \sys to find the best possible virtual task size to minimise its runtime.
-
-\indent \textbf{Overall \sys Overhead Breakdown.} The result is presented in Figure~\ref{fig:overallOverheadBreakdown}.
-
-\todo{replace slow coalescing with steady coalescing}{Przemek}
-
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/overallOverhead}
-	\caption{Overall \sys overhead breakdown; NC: no coalescing, SC: slow coalescing, EA: energy-aware coalescing.}
-	\label{fig:overallOverheadBreakdown}
-\end{figure}
-
-\textbf{\sys Coalescing Algorithm Efficiency.} The result is presented in Figure~\ref{fig:coalEfficiency}.
-
-Fixed power or intermittent?
-
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
-	\caption{\sys coalescing algorithm efficiency; NC: no coalescing, SC: slow coalescing, EA: energy-aware coalescing, ETA: energy and task-aware coalescing.}
-	\label{fig:coalEfficiency}
-\end{figure}
-
-\textbf{\sys Memory Access Overhead Breakdown.} The result is presented in Figure~\ref{fig:coalmemory}.
-
-\begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/memAccess}
-	\caption{\sys memory access overhead breakdown; nc: no coalescing, sc: slow coalescing, ea: energy-aware coalescing.}
-	\label{fig:coalmemory}
-\end{figure}
-
-\subsubsection{\sys Paging Performance}
+\subsection{\sys Paging Performance}
 \label{sec:results_memory_management}
 
 We evaluated the effect that paging with different page sizes has on \sys's performance and we show data in Figure~\ref{fig:page_size}; The top plot shows the run time performance normalized to the best per-application performance, using pages of different sizes in \sys, indicated with the labels at each bar; the bottom plot shows the number of page faults for the same set of executions normalized to the maximum of each set. We measured performance as MCU clock cycles using values read out by TI's CCS IDE. The results show a clear ``bathtub curve'' in the performance of each application, as the number of page faults varies. The data show that across application there is a page size that minimizes \emph{both} execution time. We observe that the page size is not the same for each application, although 64 byte pages perform well for all applications. The increased rate of page faults is responsible for the overhead with small page sizes; smaller pages require accessing more different pages, leading to higher paging costs. With larger page sizes, the overhead is higher than with moderate pages, too. The explanation for these higher overheads is that large pages have a higher commit cost. Even if an application accesses few memory locations, \sys pages data at full page size, degrading performance by sometimes paging in and out unnecessary data. The data reveal a reasonable default page size of 64 bytes and when developing an application, a developer should consider varying the page size to moderate poor performance.
