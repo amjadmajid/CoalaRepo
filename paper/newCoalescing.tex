@@ -123,7 +123,7 @@ The Energy-aware coalescing algorithm overcomes the limitations of the previous 
 
 \begin{itemize}
 \item $f_\text{reboot}(B) = floor(H / 2);$
-\item $f_\text{weight}(T_\text{i}) =  W_\text{i}$; 
+\item $f_\text{weight}(T_\text{i}) =  1$; 
 \item $f_\text{coalesc\_task\_maker}(B) = floor(H / 2);$ 
 \end{itemize}
 
@@ -135,9 +135,9 @@ The Energy-aware coalescing algorithm overcomes the limitations of the previous 
 \end{wrapfigure}
 
 
-\subsubsection{Energy- and Task-aware Coalescing (EA)}
+\subsubsection{Energy- and Task-aware Coalescing (ETA)}
 \label{subsec:energyTaskAware}
-
+There are two factors that affect the accuracy of predicting a power interrupt. The stability of the incoming energy and the static tasks sizes distribution. If the task sizes are not uniformly distributed then the algorithm estimation might be off by a relatively large margin, for example, if there are two tasks of size $1s$ and $10s$ then EA will count them as two and might estimate that the target should be of size two static tasks. However, if the following two tasks, on one hand, are of size $1s$ then the algorithm will waste energy on unnecessary commits. On the other hand, if the following two tasks were of size $10s$ then the algorithm might fail, on the second task, and lose progress of $+10$ tasks. To overcome this limitation the counting process of ETA algorithm takes tasks' weight into consideration to approximate a uniform task size distribution, from the counting process perspective. As such ETA algorithm adapts the characterization of the EA algorithm by changing the weight function to be, $f_\text{weight}(T_\text{i}) =  W_\text{i}$; 
 
 
 
