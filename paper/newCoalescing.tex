@@ -117,9 +117,9 @@ Since this algorithm relies on an \emph{energy blind counting process} that enla
 The Energy-aware coalescing algorithm overcomes the limitations of the previous algorithm, with out losing generality or requiring hardware support, by using the recent execution history as a metric---pure software technique---to estimate the available energy and to set the size of the coalescing task accordingly. Moreover, it takes advantage of the guarantees that the energy buffer offers on a fresh start by coalescing many static tasks. Then it approaches the expected power failure carefully by reduces the task target size by x\%, amongst 25\%, 50\% and 75\% the 50\% shows the best performance and therefore it is the default of \sys. if twice the number of the estimated tasks has been executed in the same power discharging cycle the algorithm concludes a wrong power failure time estimation has happened and enforce target re-tuning based on its new history. The EA algorithm is characterized by the following functions: 
 
 \begin{itemize}
-\item $f_\text{reboot}(B) = floor(H / 2);$
+\item $f_\text{reboot}(B) = \lfloor(H / 2)\rfloor;$
 \item $f_\text{weight}(T_\text{i}) =  1$; 
-\item $f_\text{coalesc\_task\_maker}(B) = floor(H / 2);$ 
+\item $f_\text{coalesc\_task\_maker}(B) = \lfloor(H / 2)\rfloor;$ 
 \end{itemize}
 
 \begin{wrapfigure}{}{0.5\textwidth}
