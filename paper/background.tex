@@ -40,7 +40,7 @@ There are several energy harvesting battery-less hardware platforms. For instanc
 Software running on an energy-harvesting device executes {\em intermittently} because energy sources are not always available to harvest and buffer sufficient operational energy. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer: a larger buffer allows longer operating periods. 
 %Energy-harvesters provide input power orders of magnitude less than operating power, making recharging negligible during operation.
 %Intermittent execution is different from continuous execution. 
-A power failure clears volatile  state (registers, stack, and globals) and non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos,quickrecall}, sometimes using hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic}. 
+A power failure clears volatile  state (registers, stack, and globals) and non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos}, sometimes using hardware support~\cite{mementos,mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}. 
 
 %\begin{figure}
 %	\centering
