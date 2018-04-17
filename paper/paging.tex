@@ -197,23 +197,48 @@ Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Li
 %The non-volatile commit bit persists
 %across power failures and \sys repeatedly attempts to commit until it succeeds,
 %despite arbitrary power failures.
-\subsection{Dynamic vs. Static Privatization}
-\TODO{Put paragraph about Alpaca's static privatization algo vs. Coala's dynamic privatization algo}
-\TODO{pass by ref might not work the right way}
-\begin{verbatim}
+\subsection{Dynamic Paging of \sys}
 
-GLOBAL_(x)
+One design choice \sys made was to insert dynamic check for paging on every
+possible problematic memory operation using {\tt RP} and {\tt WP} macros.
+Since dynamic checks incur overhead on every read and write, it has a higher
+overhead for accessing memory than a static approach,
+e.g., Alpaca, where a system statically analyze the memory operation and try to insert only optimal
+number of memory protection code (usually at the beginning of each task). 
 
-foo(*y){ 
-  *y++; 
-}
+However, \sys's dynamic paging has several benefits over static approach.
+First, static approach has limitations, prohibiting certain types of programming pattern. For example,
+in the presence of arbitrary pointer operation, function calls using function pointer, or an interrupt
+within a task, the system cannot statically analyze the memory behavior. Thus, static
+approaches either prohibits the programmer from using certain programming pattern~\cite{alpaca}, 
+or will have to conservatively insert memory protection code that can be unnecessary.
+Second, static approach cannot handle task coalescing, because with coalescing the scope to be
+searched statically is not determined at compile time. 
+By choosing to check every memory access dynamically, \sys supports programming pattern that
+Alpaca does not support, such as arbitrary pointer operation, while also being able to
+support task coalescing, which yields extra performance benefits.
+%
+%Moreover, if the programmer wants to optimize for high performance, it is possible for the
+%programmer to place {\tt RP} and {\tt WP} only minimally by carefully examining the code.
+%We argue that the 
 
-TASK( ){ 
-  ... ;  
-  foo( &GV(x) ) ; 
-}
 
-\end{verbatim}
+%\TODO{Put paragraph about Alpaca's static privatization algo vs. Coala's dynamic privatization algo}
+%\TODO{pass by ref might not work the right way}
+%\begin{verbatim}
+%
+%GLOBAL_(x)
+%
+%foo(*y){ 
+%  *y++; 
+%}
+%
+%TASK( ){ 
+%  ... ;  
+%  foo( &GV(x) ) ; 
+%}
+%
+%\end{verbatim}
 %\subsection{Managing Paging Overhead}
 %
 %The efficiency of \sys's paging scheme relies on the fact that data in pages are contiguous, which makes them amenable to being manipulated by hardware assisted DMA bulk copy operations. To justify this design choice we experimentally evaluated the efficiency of using DMA block copies, compared to explicit, software copy loops. We copied blocks of data of different size between memory regions on a WISP~\cite{wisp} using a hand-written loop and using DMA (refer to Section~\ref{sec:results_hardware} for hardware setup details). Figure~\ref{fig:dmaTimeEnergy} shows that for moving large blocks of data like a page, hardware DMA is considerably better than software in both run time and energy efficiency. \sys's design moves data in pages, not individual words, leveraging the increased efficiency of DMA data movement.
