@@ -4,7 +4,7 @@
 	\includegraphics[width=0.5\columnwidth]{figures/coalEfficiency}
     \caption{Breakdown of overhead for the proposed coalescing strategies
 relative to the baseline without coalescing.
-NC: no coalescing, EO: energy-Oblivious coalescing, HG: history-guided coalescing, WHG:
+NC: no coalescing, EO: energy-oblivious coalescing, HG: history-guided coalescing, WHG:
 energy- and task-aware coalescing. All coalescing strategies reduce total
 overhead and maximize useful work. HG and WHG perform better than EO.}
 	\label{fig:overallOverheadBreakdown}
@@ -220,7 +220,7 @@ virtualization that causes its performance to be comparable to (or worse than)
 Alpaca (\textbf{ar}, \textbf{cuckoo}).
 
 The \textbf{fft} benchmark did not complete at distances larger than
-15\,cm~\footnote{At distances greater than 15~cm, energy incoming during
+15\,cm\footnote{At distances greater than 15\,cm, energy incoming during
 execution is negligible and stored energy is insufficient to complete some of
 the static tasks.} with neither Alpaca, nor \sys \emph{without the downsizing
 mechanism}. This is marked with $\infty$ signs in Figure~\ref{fig:coalescing}
@@ -232,10 +232,10 @@ application.
 
 In a separate experiment, we have enabled task downsizing in \sys and measured
 the execution time for \textbf{fft} benchmark at 60\,cm from the signal
-generator antenna --- even \emph{farther} than the distance at which this
+generator antenna---even \emph{farther} than the distance at which this
 benchmark failed to terminate in the previous experiment. \sys executed the
 benchmark successfully without (NC) and with coalescing (WHG). The application
-took longer to complete than at a shorter distance of 15~cm in the previous
+took longer to complete than at a shorter distance of 15\,cm in the previous
 experiment, because of smaller (negligible) incoming energy at the larger
 distance. The variant without coalescing (NC) slowed down by 2.16$\times$ and the
 variant with WHG coalescing slowed down by 2.31$\times$ slower, but at both
@@ -243,9 +243,6 @@ distances, WHG completed faster than NC.
 %
 For comparison, the run time with Alpaca is effectively infinite at this
 distance, which is a consequence of its non-adaptive static tasks.
-
-
-	
 
 \subsection{Virtual Memory Performance}
 \label{sec:results_memory_management}
