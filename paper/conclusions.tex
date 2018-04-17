@@ -1,5 +1,13 @@
-This paper presented \sys: a new task-based runtime for intermittently-powered devices that does not require any hardware support. \sys core new features are: (i)  adaptive task coalescing---enabling fast execution despite changing energy arrivals and enabling re-use of the same code on intermittent systems with varying energy reservoirs, (ii) memory virtualization---improving the execution speeds of broad set of benchmarks executed on popular energy-harvesting embedded platform, and (iii) automatic task-generation---removing programmer from the program re-composition to the intermittent domain \emph{almost completely}. \sys, with its task creation/execution automation, responses to the need that all existing predecessors of \sys advocated.
-
-%We believe that \sys is a next major step in enabling computing community to enter the intermittent-power domain without big learning investments.
-
-%Next step in \sys design is the introduction of features needed to implement first fully-operational operating system for transiently-powered devices.
+Software for intermittently-powered energy-harvesting devices requires a
+runtime system for performing computations across power failures.  \sys is a
+new task-based runtime system that fulfills this need.  \sys's distinguishing
+feature is its adaptability to changing energy conditions at runtime.  When
+more energy is available, \sys makes faster progress through the computation by
+coalescing statically-defined tasks together according to one of three proposed
+policies. When less energy is available, progress is latched at sub-task
+granularity. \sys's virtual memory system ensures that program state in
+non-volatile memory remains consistent and amortizes the cost of state transfer
+between volatile and non-volatile memory.  Our evaluation across embedded
+applications on a real energy-harvesting device demonstrates the utility of
+adaptive coalescing and downsizing, as well as the practicality of the proposed
+implementation.
