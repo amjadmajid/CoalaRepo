@@ -314,6 +314,7 @@ correctly access their original memory locations in \texttt{\underline{store}}.
 % 	%\caption{Two-phase commit}
 % 	\label{algo:commit}
 % 	\scriptsize
+
 \begin{algorithm}[t]
 	\caption{Two-phase commit}
 	\label{algo:commit}
@@ -357,9 +358,7 @@ correctly access their original memory locations in \texttt{\underline{store}}.
 \sys asks the programmer to use its {\tt RP} and {\tt WP} paging API methods on
 every access to a protected variable (cf. Section~\ref{sec:coala_api}).  These
 API invocations present a risk of high overhead because there is a dynamic
-check on every read and write. An alternative approach explored by prior
-work~\cite{alpaca} relied on a compiler to analyze memory operations and try to
-insert memory protection code mostly at the beginning of a task, leaving most
+check on every read and write. An alternative approach~\cite{alpaca} relied on a compiler to analyze memory operations and try to insert memory protection code mostly at the beginning of a task, leaving most
 memory accesses uninstrumented.  
 
 Despite the risk of per-access overhead, \sys's dynamic memory protection
