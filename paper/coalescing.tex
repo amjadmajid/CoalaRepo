@@ -127,7 +127,7 @@ runtime.
 	\scriptsize
 	%\small
 	\begin{algorithmic}[1]
-        \State $B \leftarrow $ \Call{$f_\text{reboot}$}{$H$}
+        \State $B \leftarrow $ \Call{$f_\text{reboot}$}{$x$}
         \State $H \gets 0$ 
         \While{$\texttt{true}$}       
 	        \State $ i \gets 0$
@@ -256,7 +256,7 @@ default for HG, because one half had the highest performance.
 The HG algorithm is characterized by the following functions: 
 
 \begin{itemize}
-\item $f_\text{reboot}(B) = \lfloor(H / 2)\rfloor;$
+\item $f_\text{reboot}(H) = \lfloor(H / 2)\rfloor;$
 \item $f_\text{weight}(T_\text{i}) =  1$; 
 \item $f_\text{commit}(B) = \lfloor(B / 2)\rfloor;$ 
 \end{itemize}
