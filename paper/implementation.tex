@@ -49,16 +49,16 @@ resume task execution.
 declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.
 
-\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
-variable statically allocates and aligns a protected non-volatile variable. The
-variable must then be accessed \texttt{RP} and \texttt{WP} API methods at
-runtime to ensure correct operation.
-
 \textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} immediately
 transfers control to a specified next task and this API can be invoked along
 any arbitrary control path (i.e., to dynamically determine the next task).
 Like prior work~\cite{chain,dino,ratchet}, \sys's task control-flow model
 assumes that an executing task is never interrupted. 
+
+\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
+variable statically allocates and aligns a protected non-volatile variable. The
+variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at
+runtime to ensure correct operation.
 
 \textbf{Protected Reads and Writes.} The programmer uses the \texttt{RP} and \texttt{WP} API
 methods to access protected variables.  These methods cause \sys to find a variable's page.
@@ -126,7 +126,7 @@ in the working memory, the memory manager fetches it from non-volatile memory.
 \sys uses address-based page tagging to make finding a variable efficient.  The
 upper bits of a variable's memory address identify its page, and the lower bits
 denote the variable's offset in its page. The total number of pages in memory,
-$p$, determines the number of tag bits, which is $log(P)$.
+$p$, determines the number of tag bits, which is $\log P$.
 
 Page tagging imposes a data alignment requirement.
 Page size $S$ must be a power of two. 
@@ -135,7 +135,7 @@ Pages must be aligned to an $S$-byte boundary.
 %
 We experimented with 32-, 64-, 128- and 256-byte pages, an 8kB non-volatile \texttt{\underline{shadow}} buffer and
 an 8kB non-volatile \texttt{\underline{store}}, and a volatile working buffer
-of 1kB, which is half of the total SRAM size. 
+of 1kB, which is half of the total SRAM size in the MSP430FR6989 microcontroller.
 %\begin{figure}
 %	\centering
 %	\includegraphics[width=\textwidth]{figures/graffle/paging.pdf}
