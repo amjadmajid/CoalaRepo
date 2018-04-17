@@ -21,7 +21,7 @@ and (iii) \emph{provides computation progress} at the sub-task granularity,
 preventing non-termination at adverse energy conditions where state-of-the-art
 runtimes fail. We measured the execution time of the benchmarks implemented
 using \sys with each variant of the two proposed adaptation mechanisms:
-\emph{task coalescing} and \emph{task downscaling}. We compared \sys's best
+\emph{task coalescing} and \emph{task downsizing}. We compared \sys's best
 configurations against a state-of-the art system, Alpaca~\cite{alpaca}. We have
 also broken down \sys's overhead to explain the source of \sys's improved
 performance.
@@ -211,7 +211,7 @@ energy source.}
 We now compare \sys's performance to Alpaca~\cite{alpaca}---a
 \emph{non-adaptive} task-based system with tasks fixed at compile time.
 Figure~\ref{fig:runtime} (right) shows the average execution time of each
-application for Coala and Alpaca, normalized to the latter. The results show
+application for \sys and Alpaca, normalized to the latter. The results show
 that \sys provides a performance benefit compared to Alpaca for most
 applications, with the exception of \textbf{ar} and \textbf{cuckoo} at some
 distances.  The speedup is greatest for applications with repeated write after
@@ -226,15 +226,15 @@ Alpaca (\textbf{ar}, \textbf{cuckoo}).
 The \textbf{fft} benchmark did not complete at distances larger than
 15\,cm~\footnote{At distances greater than 15~cm, energy incoming during
 execution is negligible and stored energy is insufficient to complete some of
-the static tasks.} with neither Alpaca, nor Coala \emph{without the downscaling
+the static tasks.} with neither Alpaca, nor \sys \emph{without the downsizing
 mechanism}. This is marked with $\infty$ signs in Figure~\ref{fig:coalescing}
 (left).  This non-terminating condition cannot be avoided in Alpaca, due to the
 fixed, non-adaptive nature of its tasks.  In contrast, our next experiment
-shows how \sys's task downscaling adaptation mechanism eliminates this
+shows how \sys's task downsizing adaptation mechanism eliminates this
 non-termination, without changing the static tasks and without recompiling the
 application.
 
-In a separate experiment, we have enabled task downscaling in \sys and measured
+In a separate experiment, we have enabled task downsizing in \sys and measured
 the execution time for \textbf{fft} benchmark at 60\,cm from the signal
 generator antenna --- even \emph{farther} than the distance at which this
 benchmark failed to terminate in the previous experiment. \sys executed the
