@@ -233,7 +233,7 @@ coalescing strategy.  Each white box is a task and each red box is a commit.
 Time goes left to right and consecutive white boxes with no intervening commit
 are coalesced tasks.  A gray box is a task interrupted by a power failure.  At
 the top, the figure shows the $i^{th}$ execution period, which has a history
-value of $H^{(i)} = 6$.  $B$ is initially three and decreases to one.  Once the
+value of $H^{(i)} = 4$.  $B$ is initially two and decreases to one.  Once the
 value of $B$ reaches one, HG is, in effect, expecting a power failure,
 justifying the decrease in the coalescing target.  After the power failure, HG
 first updates the history $H = H^{i+1} = 8$.  HG then uses the value of $H$ to
