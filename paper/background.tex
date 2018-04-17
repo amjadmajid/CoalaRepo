@@ -179,19 +179,13 @@ checkpointing or transitioning between tasks too often than needed.
 %
 Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is challenging both to the
 programmer and the compiler, since estimating the exact energy use of an arbitrary code is complicated.
-Consequently, existing systems either risks non-termination to achieve high performance, or 
-use conservatively small tasks that result in poor performance. 
-When {\em porting} apps from one device to another, the problem gets much worse.
-An excessively costly task on a device with a small energy buffer may be a relatively short task on a device with a larger buffer, and vice versa. 
-Buffer sizes from prior work on intermittently-powered computing hardware vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo},
-exemplifying the problem.
+When {\em porting} apps from one device to another, the problem gets much worse because
+an excessively costly task on one device may be a relatively short task on a device with a larger buffer, and vice versa. 
+Buffer sizes of different platforms vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo},
+complicating the problem.
 %
-As a solution, \sys's execution model is based on {\em task coalescing} and {\em task downscaling}.  
-Coalescing dynamically merges multiple tasks based on execution behavior to amortize the overhead between tasks if tasks are small.
-Downscaling breaks up a single task into multiple subtasks that commit individually to avoid executing a single task that is too 
-large to complete using the device's buffered energy.  Section~\ref{sec:task_adaptation} describes \sys's adaptive coalescing and 
-downscaling mechanisms in detail. The main enabler for \sys's adaptation is its novel \emph{memory virtualization} mechanism, 
-which is described in Section~\ref{sec:memory_virtulaization}.
+As a solution, \sys's execution model presents {\em task coalescing}, which merges multiple tasks to amortize the overhead
+when tasks are too small, and {\em task downscaling}, which breaks up a task when the task is too large. 
 %When a task and its successor both complete, the two tasks were interleaved by a task boundary that preserves progress and state (i.e., checkpoint or commit). However, absent a power failure, the work to preserve state was {\em unnecessary}, incurring overhead on the tasks' executions. Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware (no support from dedicated circuitry to measure the state of energy buffer) with a fixed energy buffering capacity. Buffer sizes from prior work on intermittently-powered computing hardware vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short task on a device with a larger buffer. The key problem is that using existing systems, by defining tasks statically for a fixed energy buffer, the programmer either risks non-termination or poor performance due to high overhead. \sys's execution model based on {\em task coalescing} and {\em task downscaling}.  Coalescing dynamically merges multiple tasks based on execution behavior to amortize the cost of committing each task separately. Downscaling breaks up a single task into multiple subtasks that commit individually to avoid executing a single task that is too large to complete using the device's buffered energy.  Section~\ref{sec:task_adaptation}describes \sys's adaptive coalescing and downscaling mechanisms in detail. The main enabler for \sys's adaptation is its novel \emph{memory virtualization} mechanism, which is described in Section~\ref{sec:memory_virtulaization}.
 
 %\textbf{Motivating the Design of \sys's Execution Model.} The challenge of \em{efficiently} executing a program under frequent power failures, lies in the fact the the program needs to be energy aware. This challenge becomes even bigger when \em{generality} is a design requirement and such the system must not require a specific hardware circuitry to offer its efficiency. \em{Fllexibility} is key for wide adaptation, therefore, \sys's execution model should not limit the programmer to a subset of the functionality of the underlying software technology. \em{\sys champions an efficient, general, and flexible intermittent execution.}
