@@ -162,10 +162,14 @@ a \emph{first-in-first-out} (FIFO) replacement policy (Lines 2 and 12).
 While we opted for the simplicity of FIFO, any other replacement policy, such
 as Least Recently Used (LRU) could work in its place.
 
-%\begin{algorithm}
-\begin{wrapfigure}{t}{0.5\textwidth}
-\fbox{\parbox{\linewidth}{
-	\captionof{algorithm}{\texttt{PageFault}(tag $t$)}
+% \begin{algorithm}
+% \begin{wrapfigure}{t}{0.5\textwidth}
+% \fbox{\parbox{}{
+% 	\captionof{algorithm}{\texttt{PageFault}(tag $t$)}
+% 	\label{algo:pagefault}
+% 	\scriptsize
+\begin{algorithm}
+	\caption{\texttt{PageFault}(tag $t$)}
 	\label{algo:pagefault}
 	\scriptsize
 	%\small
@@ -188,10 +192,13 @@ as Least Recently Used (LRU) could work in its place.
             \Comment{Get from backing store}
 		\EndIf 
         \State $i_\text{victim} \gets (i_\text{victim} + 1) \mod |\texttt{pageBufLength}|$ \Comment{FIFO evict}
-%	\end{algorithmic}
-%\end{algorithm}
-	\end{algorithmic}}}
-\end{wrapfigure}
+	\end{algorithmic}
+\end{algorithm}
+
+% 	\end{algorithmic}
+% \end{algorithm}
+	% \end{algorithmic}}}
+% \end{wrapfigure}
 
 If a task modified any byte in the victim page (i.e., using \texttt{WP}), then
 the page is dirty.  If the page being swapped out is not dirty and the page
@@ -301,10 +308,14 @@ correctly access their original memory locations in \texttt{\underline{store}}.
 %despite arbitrary power failures.
 
 %\begin{algorithm}[t]
-\begin{wrapfigure}{t}{0.5\textwidth}
-\fbox{\parbox{\linewidth}{
-	\captionof{algorithm}{Two-phase commit}
-	%\caption{Two-phase commit}
+% \begin{wrapfigure}{t}{0.5\textwidth}
+% \fbox{\parbox{\linewidth}{
+% 	\captionof{algorithm}{Two-phase commit}
+% 	%\caption{Two-phase commit}
+% 	\label{algo:commit}
+% 	\scriptsize
+\begin{algorithm}[t]
+	\caption{Two-phase commit}
 	\label{algo:commit}
 	\scriptsize
 	%\small
@@ -334,10 +345,10 @@ correctly access their original memory locations in \texttt{\underline{store}}.
             \EndIf 
             \State $\texttt{\underline{shadowCount}} \gets 0$, $i_\text{victim} \gets 0$
         \EndProcedure
-%	\end{algorithmic}
-%\end{algorithm}
-	\end{algorithmic}}}
-\end{wrapfigure}
+	\end{algorithmic}
+\end{algorithm}
+% 	\end{algorithmic}}}
+% \end{wrapfigure}
 
 
 
