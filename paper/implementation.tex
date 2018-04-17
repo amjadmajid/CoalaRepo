@@ -1,11 +1,21 @@
-We proceed with the explanation of the implementation of \sys programming model, which is light and whose API adds very little on top of a plain C language.
+We implemented \sys's programming and execution model as a runtime library and API that a programmer can use to make a plain C program intermittence-safe using \sys.
 
 \subsection{Application Programming Interface}
 \label{sec:coala_api}
 
-Coala's API adds only five syntactic constructs to a C-based language: (i) \texttt{COALA\_TASK}, to declare a new task, (ii) \texttt{COALA\_NEXT\_TASK}, to mark the next task to be run after the currently executing one completes, (iii) \texttt{COALA\_PV}, to declare a new protected variable, (iv) \texttt{RP} and \texttt{WP}, to mark protected variables' reads and writes, and (v) \texttt{COALA\_SM}, to declare \texttt{typedef}'d \texttt{struct} members, when used as protected variables, to ensure proper memory alignment required by \sys's page handler. Moreover, the programmer is required to explicitly call two API functions inside the main program body: (i) \texttt{COALA\_INIT}, to pass as an argument the global initialization task to run upon the first boot, and (ii) \texttt{COALA\_RUN}, which hands the control to \sys's task manager.
+Coala's API adds only five syntactic constructs to a C-based language.
+\texttt{COALA\_TASK} is a function annotation that declares a function to be a
+task. \texttt{COALA\_NEXT\_TASK}, indicates the task to run next, after an
+executing task completes.  \texttt{COALA\_PV} declare a new protected variable.
+The programmer uses \texttt{RP} and \texttt{WP}, to read and write protected
+respectively.  \texttt{COALA\_SM} identifies protected \texttt{struct} fields
+and tells \sys to ensure that the struct fields are page-aligned in memory.
+The programmer is required to explicitly call two API functions at the start of
+{\tt main()}: \texttt{COALA\_INIT}, which does global initialization upon first
+boot and \texttt{COALA\_RUN} which hands the control to \sys's task manager to
+resume task execution.
 
-Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. These methods trigger specific \sys kernel functions, whose explanation is given in the following sections.
+Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments.
 
 \begin{table}
 \centering
@@ -34,17 +44,34 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. T
 \label{table:coala_api}
 \end{table}
 
-\subsection{Kernel Functions}
+\subsection{API Details}
 
-\textbf{New Tasks.} The API method \texttt{COALA\_TASK} statically allocates a non-volatile constant variable holding the task weight, and declares a void function with the name passed as an argument.
+\textbf{New Tasks.} The \texttt{COALA\_TASK} annotation on a function
+declaration statically allocates a non-volatile constant variable holding a
+task's weight and declares that the function is a task.
 
-\textbf{New Protected Variables.} The API method \texttt{COALA\_PV} statically allocates (and aligns in memory) a non-volatile variable, whose address will be used by \texttt{RP} and \texttt{WP} API methods to locate the most recent location of the variable itself, which could be either the location of the variable in volatile memory or its location in non-volatile memory.
+\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
+variable statically allocates and aligns a protected non-volatile variable. The
+variable must then be accessed \texttt{RP} and \texttt{WP} API methods at
+runtime to ensure correct operation.
 
-\textbf{Task Transitions.} By calling \texttt{COALA\_NEXT\_TASK}, the programmer tells \sys's task manager which task to execute next. The implementation of \sys is built on the assumption that the currently executing task is not interrupted, and only once it completes the next task is run.
+\textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} immediately
+transfers control to a specified next task and this API can be invoked along
+any arbitrary control path (i.e., to dynamically determine the next task).
+Like prior work~\cite{chain,dino,ratchet}, \sys's task control-flow model
+assumes that an executing task is never interrupted. 
 
-\textbf{Protected Reads and Writes.} When \texttt{RP} and \texttt{WP} API methods are used, \sys searches the volatile memory for the page the protected variable belongs to. If such page is not found in RAM, then a page fault occurs, and the page is fetched from the non-volatile memory. The two functions return a handle to the variable's volatile memory location. Unlike \texttt{RP}, \texttt{WP} marks the page being written as dirty, so that it can be copied to its non-volatile location during the commit phase.
+\textbf{Protected Reads and Writes.} The programmer uses the \texttt{RP} and \texttt{WP} API
+methods to access protected variables.  These methods cause \sys to find a variable's page.
+If the page is not resident in working memory, the method leads to a page fault,
+which fetches the page from non-volatile memory. Unlike \texttt{RP},
+\texttt{WP} marks the variable's page as dirty, allowing for efficient 
+commit back to non-volatile memory. 
 
-\textbf{Initialization and Origin Task.} The behavior of the API method \texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the addition that all the preliminary kernel initializations are performed inside this function. Moreover, the origin task is scheduled only upon the first boot.
+\textbf{Initialization.} The behavior of the API method
+\texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the
+addition that all the preliminary kernel initializations are performed inside
+this function. 
 
 %\begin{wrapfigure}{t!}{0.5\textwidth}
 %	\centering
@@ -55,17 +82,61 @@ Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments. T
 
 %A high-level state machine of the execution manager is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure reflecting the following description}{Sinan, Carlo}. 
 
-\textbf{Execution.} The application control is passed to \sys's execution manager by calling \texttt{COALA\_RUN} at the end of the main function. Upon reboot, the coalescing target is initialized according to the coalescing strategy. Then, the second phase of the commit is resumed, in case the last power failure occurred during this operation. The shadow buffer list is cleared, and the metadata of the volatile buffer is initialized. The pointer to the last coalescing task is recalled from non-volatile memory. Before running, \sys checks whether there is any partial execution to resume, in which case the volatile state, including the program counter, is restored. Otherwise, coalescing starts: the current budget is replenished; tasks are run, the history is increased and the current budget is decreased; when the latter is zero, coalescing stops, the pointer to the next task is saved and the commit phase starts. Coalescing resumes after commit phase two ends and the target is updated based on the coalescing strategy. \todo{Go over keywords (coalescing target, current budget, commit phases etc.) and make them consistent with the rest of the paper}{Amjad, Carlo}
+\textbf{Execution.} The programmer passes control to \sys's task scheduler 
+by calling \texttt{COALA\_RUN} after device initialization. 
+%
+First the scheduler updates the coalescing target using the coalescing
+strategy.  Second, the scheduler resumes a commit, if one is in progress. Third,
+the scheduler clears the list of dirty shadow pages. The scheduler then 
+sets the program counter to the next task to run, which \sys tracks in  
+non-volatile memory.  
+%
+Before executing the task, \sys checks whether there is a partially committed
+task to resume, which requires \sys to restore volatile state, including the program
+counter.  
+%
+If there is no in-progress, partially committed task, \sys starts executing and
+coalescing tasks. 
+%\todo{Go over keywords (coalescing target, current budget, commit phases etc.) and make them consistent with the rest of the paper}{Amjad, Carlo}
 
 \subsection{Paging}
 \label{sec:impl:paging}
 
-As described in Section~\ref{sec:memory_virtulaization}, \sys's memory virtualization is implemented using three buffers: \texttt{working} (volatile) buffer, \texttt{\underline{store}} (non-volatile) buffer and \texttt{\underline{shadow}} (non-volatile) buffer. The \texttt{\underline{store}} buffer holds the latest safe copy of all the pages, and it is read-only up to, and including, the ultimate commit. Upon reboot, the \texttt{working} buffer is empty, and it gets filled with pages from non-volatile memory on demand. All reads and writes to protected variables happen in volatile memory. The \texttt{\underline{shadow}} buffer serves as an intermediate non-volatile buffer where dirty, volatile pages are copied during the intermediate commit. Moreover, it contains pages evicted from SRAM when a \emph{full page fault} occurs.
+As described in Section~\ref{sec:memory_virtulaization}, \sys's memory
+virtualization scheme uses three buffers: a volatile \texttt{working} buffer, a
+non-volatile main memory \texttt{\underline{store}}, and a non-volatile
+\texttt{\underline{shadow}} page buffer. 
+%
+The main memory \texttt{\underline{store}} holds the last committed copy of all 
+pages. 
+%
+After reboot, the \texttt{working} buffer is empty. Execution fills 
+the working buffer with pages as the program accesses them. 
+%
+The program primarily reads and writes data paged into the volatile working memory. 
+%
+The non-volatile \texttt{\underline{shadow}} buffer serves as an intermediate,
+non-volatile backing store for dirty pages evicted from the space-constrained
+working buffer. 
 
-When a \sys application accesses a protected variable with either \texttt{RP} or \texttt{WP}, \sys has to search for the variable in RAM first, and then, if not found, in non-volatile memory. In reality, the page manager searches for pages, not single variables. A page search can be very fast if each page is identified by a unique tag, and if every variable belonging to a page bears the tag in its address. Thus, retrieving a page tag from a protected variable's address boils down to extracting the upper bits of the address itself. The remaining lower bits denote the variable's offset in its page. 
-%The complete process is depicted in Figure~\ref{figure:coala_page_tags} \todo{this figure doesn't really show page tags and offsets, but paging in general}.
-We note that, in order to obtain unique page tags, some alignment requirements have to be met. First, the page size $S$ has to be a power of two. Moreover, pages have to be aligned by $S$. Note that, by aligning pages by $2^n$, the alignment is also valid for all sizes $2^x$, where $x \leq n$. For our experiments, we used 32-, 64-, 128- and 256-byte pages. 16\,KB were allocated in non-volatile memory for \texttt{\underline{shadow}} and \texttt{\underline{store}} (8\,KB each), and the volatile page buffer was 1\,KB, half the total SRAM size. The main advantage of having large pages is searches through page buffers are shorter. On the other hand, page swaps are more bulky.
+To access a protected variable with either \texttt{RP}
+or \texttt{WP}, \sys searches for the variable in its working buffer first. If
+found, the program accesses the data in the working buffer.  If the page is not 
+in the working memory, the memory manager fetches it from non-volatile memory. 
+%
+\sys uses address-based page tagging to make finding a variable efficient.  The
+upper bits of a variable's memory address identify its page, and the lower bits
+denote the variable's offset in its page. The total number of pages in memory,
+$p$, determines the number of tag bits, which is $log(P)$.
 
+Page tagging imposes a data alignment requirement.
+Page size $S$ must be a power of two. 
+%
+Pages must be aligned to an $S$-byte boundary. 
+%
+We experimented with 32-, 64-, 128- and 256-byte pages, an 8kB non-volatile \texttt{\underline{shadow}} buffer and
+an 8kB non-volatile \texttt{\underline{store}}, and a volatile working buffer
+of 1kB, which is half of the total SRAM size. 
 %\begin{figure}
 %	\centering
 %	\includegraphics[width=\textwidth]{figures/graffle/paging.pdf}
@@ -75,20 +146,42 @@ We note that, in order to obtain unique page tags, some alignment requirements h
 
 % It is important to mention that store and shadow buffers are virtual. By default, \sys allocates two memory banks for pages, $B0$ and $B1$, and all the pages have their store copy in $B0$. A dirty page that during the intermediate commit, or due to eviction, is copied to its shadow location in $B1$, will end up having its store location in $B1$ after the ultimate commit. Thus, during the ultimate commit
 
-\subsection{Coalescing Loop and Commit Phase}
+\subsection{Coalescing and Commit}
 
-As described above, the main coalescing loop alternates between executing tasks and saving progress. Static tasks are coalesced as long as the current budget is not null, after which the two commit phases are triggered, the coalescing target is updated and the current budget is replenished.
 
-\textbf{Intermediate Commit and Ultimate Commit.} The reason why the commit process is split in two phases is two fold: \emph{ensure consistency} by using atomic operations, and \emph{preserve performance} by enabling an incremental commit mechanism. When a coalesced task is successfully run to completion, all the dirty pages in SRAM have to be persistently saved to the non-volatile shadow buffer. This is what we call \emph{intermediate commit}: it has to be completed in one shot, and if power fails during this phase the application will have to resume from the beginning of the last coalesced task. When the intermediate commit is done, a flag can be atomically raised to signify that a valid, persistent copy of dirty pages is available in non-volatile memory. From this point on, the commit process can be resumed even if power fails.
-To understand the last phase, referred to as \emph{ultimate commit}, it has to be mentioned that store and shadow buffers are virtual. By default, \sys allocates two memory banks for non-volatile pages, $M_0$ and $M_1$, and all the pages have their initial store copy in $M_0$. A dirty page that during the intermediate commit, or due to eviction, is copied to its shadow location in $M_x$, will end up having its store location in $M_x$ after the ultimate commit. In other words, during the ultimate commit dirty pages are not physically moved, instead their store and shadow locations are swapped. This trick makes \sys save some energy during this phase, avoiding redundant page moves. As for page swaps, the intermediate commit makes use of the on-board DMA.
+\sys uses a two-phase commit process to atomically commit pages despite
+possible power interruptions during commit.  When a coalesced task completes,
+\sys backs up dirty pages in volatile working memory to the non-volatile
+shadow buffer using DMA. 
+%
+If power fails while backing up these pages, commit fails and the execution
+resumes from the last committed point.  After backing up pages from working
+memory to the shadow buffer, \sys sets a flag that indicates an on-going atomic
+commit.  At this point, commit is irrevocable and will continue until it
+completes despite power failures.   
+%
+Each page is double buffered, with one copy always in the shadow page buffer
+and one copy always in the main memory store.  \sys uses double buffering to
+commit dirty pages efficiently by swapping which buffer is which, without
+copying any data.
+%
 
-\subsection{Partial Execution}
+\subsection{Task Downscaling}
 
-Among \sys's novelties, the task-splitting feature is the most effective when it comes to preservation of forward progress. Its implementation adds very little computational overhead, and is supported by a hardware timer running ``in the background'', whose energy consumption is extremely low, i,e. $\approx$3\,$\mu$A/MHz~\cite{msp430datasheet}. The goal is to interrupt a static task if it cannot be run to a completion with a full capacitor's energy, commit its partial results, save volatile state and program counter and continue. 
+\sys's task downscaling preserves forward progress by partially committing an
+ongoing, non-terminating task. 
+%
+Partial commit relies on the existence of a hardware timer, which is a very
+common feature in a typical MCU and consumes very little energy (i.e.,
+$\approx$3\,$\mu$A/MHz~\cite{msp430datasheet}).  
 
-\textbf{Partial Commit Algorithm.} \sys speculates and assumes that a static task is too large and has to be split when power fails two times consecutively in the same static task, and the coalescing target is one, because, after the first power failure, the large task is run with a fresh energy budget. To ``split'' a static task, \sys schedules a timer interrupt. If this interrupt occurs before the capacitor is depleted, \sys commits all the dirty volatile pages (using the two-phase commit explained above), saves stack and volatile registers to non-volatile memory and then continues with the task. In case a power failure occurs after this operation, but before the static task completes, the execution at the next reboot starts exactly where \sys had saved the partial execution. A task can be split in multiple sub-tasks, as many as needed to progress forward. The timer interrupt is initially scheduled to fire after a large time interval. If power fails before the interrupt fires, \sys reduces the interval. If the partial execution is committed successfully, \sys enlarges the interval. These adjustments follow a binary search technique, and make the interval converge very fast to a value optimal for preserving forward progress and avoiding redundant commits.
-
-\textbf{Discussion.} For some applications, specific pieces of a task cannot be split and have to be run atomically. For instance, when sampling an analog signal, continuity between samples has to be ensured, otherwise the digital array would represent a wrong, non-continuous input signal. In such cases, the programmer can use two dedicated API guards before and after the atomic piece of code, namely \texttt{COALA\_DISABLE\_PE} and \texttt{COALA\_ENABLE\_PE}, to respectively halt and resume the partial execution timer.
+ \textbf{Partial Commit and Task Atomicity.} Some applications prevent
+downscaling a task because of a need for task atomicity.  For example, sampling
+an analog signal requires consecutive samples at a known interval, or the
+digitally sampled signal is meaningless.  In such a case, the programmer can
+disable partial commit for a task or a span of code, marking  the code with a
+pair of \texttt{COALA\_DISABLE\_PE} and \texttt{COALA\_ENABLE\_PE} annotations.
+These annotations respectively halt and resume the partial execution timer.
 
 %\begin{wrapfigure}{t!}{0.5\textwidth}
 %	\centering
