@@ -1,20 +1,21 @@
-We implemented \sys's programming and execution model as a runtime library and API that a programmer can use to make a plain C program intermittence-safe using \sys.
+We implemented \sys's programming and execution model as a runtime library and API that a programmer can use to make a plain C program intermittence-safe.
 
 \subsection{Application Programming Interface}
 \label{sec:coala_api}
 
 Coala's API adds only five syntactic constructs to a C-based language, summarized
 in Table~\ref{table:coala_api}.
-\texttt{COALA\_TASK} is a function annotation that declares a function to be a
-task. \texttt{COALA\_NEXT\_TASK}, indicates the task to run next, after an
-executing task completes.  \texttt{COALA\_PV} declare a new protected variable.
-The programmer uses \texttt{RP} and \texttt{WP}, to read and write protected
-respectively.  \texttt{COALA\_SM} identifies protected \texttt{struct} fields
-and tells \sys to ensure that the struct fields are page-aligned in memory.
-The programmer is required to explicitly call two API functions at the start of
-{\tt main()}: \texttt{COALA\_INIT}, which does global initialization upon first
-boot and \texttt{COALA\_RUN} which hands the control to \sys's task manager to
-resume task execution.
+
+%\texttt{COALA\_TASK} is a function annotation that declares a function to be a
+%task. \texttt{COALA\_NEXT\_TASK}, indicates the task to run next, after an
+%executing task completes.  \texttt{COALA\_PV} declare a new protected variable.
+%The programmer uses \texttt{RP} and \texttt{WP}, to read and write protected
+%respectively.  \texttt{COALA\_SM} identifies protected \texttt{struct} fields
+%and tells \sys to ensure that the struct fields are page-aligned in memory.
+%The programmer is required to explicitly call two API functions at the start of
+%{\tt main()}: \texttt{COALA\_INIT}, which does global initialization upon first
+%boot and \texttt{COALA\_RUN} which hands the control to \sys's task manager to
+%resume task execution.
 
 \begin{table}
 \centering
@@ -43,7 +44,7 @@ resume task execution.
 \label{table:coala_api}
 \end{table}
 
-\subsection{API Details}
+%\subsection{API Details}
 
 \textbf{New Tasks.} The \texttt{COALA\_TASK} annotation on a function
 declaration statically allocates a non-volatile constant variable holding a
