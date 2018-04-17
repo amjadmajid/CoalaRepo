@@ -1,25 +1,57 @@
 \textcolor{red}{[additional motivation for coala memory virtualization] we should emphasize that Coala programming model removes the burden of identifying the write-after-read dependencies from the programmer  as compared to Chain. And it does not require a specific compiler that cannot consider a runtime dependent behavior like Interrupts service handling to guarantee memory protection, as in Alpaca.}
 
-\sys exposes non-volatile memory for \emph{protected} variables to
-the application as a virtual address space partitioned into pages.
-\emph{Paged virtual memory} is a key enabler of task coalescing since it keeps the non-volatile memory consistent despite dynamic WAR dependencies incurred by coalesced code regions. Thanks to memory virtualization, \sys have the freedom to move application's data between volatile and non-volatile memory transparently.
+\sys's {\em virtual memory manager} exposes non-volatile memory for
+\emph{protected} variables to the application as a virtual address space
+partitioned into pages.  
+%
+A program's tasks read and write these protected variables, using them like any
+other data in the program. 
+%
+The virtual memory manager automatically finds a variable in its page and  
+allows a task to directly manipulate its value.
+%
+When a task completes, the virtual memory manager ensures that updated pages 
+are committed to main memory and visible to subesequently executed tasks.
+%
+If a power failure interrupts a task, the virtual memory manager ensures that
+the task sees consistent memory state when it restarts its execution. 
+%
+The virtual memory manager ensures consistency even if a task or a sequence of tasks include WAR dependences that could compromise consistency~\cite{ratchet,dino}.
+%
+%
 %
 %,. Virtualization simplifies
 %coalescing, because the system gets the freedom to move application's data
 %between volatile and non-volatile memory transparently.
 %
-To this end, \sys isolates FRAM from the tasks of the application so that they interface only SRAM---which is cheaper to read/write as we indicated in Section~\ref{sec:background}.
+
+\sys's virtual memory manager \sys abstracts non-volatile storage (e.g.,
+variables in FRAM) from tasks, which simply manipulate protected variables.
+%
+Protected variables remain consistent and are durable across power failures.
+%
+While ensuring variables remain durable, \sys avoids accessing non-volatile
+memory when possible, by copying pages of data into a {\em working memory} in the device's SRAM, which
+has a lower latency and energy cost to access than the device's FRAM (as we
+showed in Section~\ref{sec:background}).
+%
+%
+On a commit, \sys atomically copies all updated (i.e., ``dirty'') pages from their
+space in the working memory back into their location in the non-volatile
+memory.
+%
+SRAM has a limited size and there is an extended working memory containing {\em
+shadow pages} in the larger FRAM.  A shadow page stores the data from an
+updated pages that need to be committed back to non-volatile memory, but that
+exceeded the size of the volatile working memory. 
 %
 %manages memory such that application tasks operate primarily from
 %efficient volatile SRAM rather than non-volatile FRAM, which is more costly to access than SRAM,
 %as we showed in Figure~\ref{fig:framEnergy}. 
-\sys runtime implements memory
-virtualization by moving pages of the address space from the large,
-non-volatile memory to a small, volatile memory on demand and writing all dirty
-pages back to non-volatile memory atomically. Since memory moves at page granularity, \sys
-exploits hardware\hyp{}accelerated block copies using DMA.
+\sys moves pages of data efficiently using hardware accelerated Direct Memory
+Access (DMA) support, which copies a block of memory from one place to another
+as a single operation. 
 
-%\subsection{Paged Non-Volatile Virtual Memory} 
 
 \begin{figure}
 	\centering
@@ -28,23 +60,51 @@ exploits hardware\hyp{}accelerated block copies using DMA.
 	\label{figure:coala_page_tags}
 \end{figure}
 
-\textbf{System Overview.} The overall picture of the paging operations is illustrated in Figure~\ref{figure:coala_page_tags}. Paging moves data between non-volatile and volatile memory. A page has a home location in non-volatile memory which we refer to as the page's \texttt{\underline{store}} (underlined locations are non-volatile).
-As a task accesses pages, they are swapped from their home location
-into the fully\hyp{}associative \texttt{working} page buffer in volatile memory. The \texttt{working} buffer is allocated to take up the volatile memory that remains after space for stack is allocated.
+\textbf{System Overview.} Figure~\ref{figure:coala_page_tags} provides an
+overall view of \sys's virtual memory management system.  A page has a home
+location in non-volatile memory which we refer to as the page's
+\texttt{\underline{store}} (underlined locations are non-volatile).  When a
+task accesses a page, the memory manager swaps the page from its home location
+into the fully\hyp{}associative \texttt{working} buffer that is stored in
+volatile memory.  The \texttt{working} buffer is allocated to take up the
+volatile memory that remains after space for stack is allocated.
 %
-\sys uses a two-phase commit to write dirty pages from the \texttt{working} buffer back to their home location in \texttt{\underline{store}} atomically, ensuring data consistency even with power failures.
+\sys uses a two-phase commit to write dirty pages from the \texttt{working}
+buffer back to their home location in \texttt{\underline{store}} atomically,
+ensuring data consistency even in the presence of a power failure during commit.
 %
-When any dirty page is swapped out from the \texttt{working} buffer due to eviction or task transition from last coalesced task, the first phase writes the page to a direct\hyp{}mapped non-volatile \texttt{\underline{shadow}} buffer, and the second phase writes it from \texttt{\underline{shadow}} to \texttt{\underline{store}}.
+The memory manager is forced to swap out a dirty page from the \texttt{working} buffer 
+when a task accesses a page that is not in the working buffer, and there is no
+free page in the working buffer (i.e., a page fault). On a page fault, \sys
+moves the page to a direct\hyp{}mapped non-volatile \texttt{\underline{shadow}}
+page buffer. Later, to commit the page, \sys writes it from its
+\texttt{\underline{shadow}} location back to its home location in
+\texttt{\underline{store}}.
 %
-Unlike prior work~\cite{chain,alpaca} that moves scattered variables one at a time between volatile and non-volatile memory, \sys's page-based design moves contiguous blocks of data.
+%BML: this point is true, but without caches, it is not a performance factor, so I removed it.
+%Unlike prior work~\cite{chain,alpaca} that moves scattered variables one at a
+%time between volatile and non-volatile memory, \sys's page-based design moves
+%contiguous blocks of data.
 %
-\sys takes full advantage of hardware\hyp{}accelerated block copies using Direct Memory Access (DMA) hardware in common microcontrollers --- e.g. 5$\times$ fewer cycles on MSP430FRxxxx.
+%BML: this seems gratuitous because DMA is very common and we've already introduced it.
+%\sys takes full advantage of hardware\hyp{}accelerated block copies using
+%Direct Memory Access (DMA) hardware in common microcontrollers --- e.g.
+%5$\times$ fewer cycles on MSP430FRxxxx.
 
 \subsection{Address Translation and Variable Access}
 
-A \sys task must access protected non-volatile variables through a restricted memory interface, as will be described in Section~\ref{sec:coala_api}. The interface includes \texttt{RP(var)}, to read the value of variable {\tt var}, and \texttt{WP(var)} to assign a value to variable {\tt var}. The implementation of {\tt RP} is shown in Algorithm~\ref{algo:rwar}, and {\tt WP}'s implementation is similar except for marking the accessed page as dirty.
+A \sys task must access protected non-volatile variables through \sys's
+restricted memory interface, which Section~\ref{sec:coala_api} describes in
+detail.  The interface includes \texttt{RP(var)}, to read the value of variable
+{\tt var}, and \texttt{WP(var)} to assign a value to variable {\tt var}. The
+implementation of {\tt RP} is shown in Algorithm~\ref{algo:rwar}, and {\tt
+WP}'s implementation is similar except that {\tt WP} marks the accessed page as
+dirty.
 %
-{\tt RP} and {\tt WP} operations translate a variable's physical address in non-volatile memory into a \emph{virtual address} in the page buffer in volatile memory. In \sys, a virtual address is composed of a \emph{page tag} that identifies the page and a \emph{page offset} that identifies a byte.
+{\tt RP} and {\tt WP} operations translate a variable's physical address in
+non-volatile memory into a \emph{virtual address} in the page buffer in
+volatile memory. In \sys, a virtual address is composed of a \emph{page tag}
+that identifies the page and a \emph{page offset} that identifies a byte.
 
 %How an $a$-bit memory address decomposes into a tag and an offset depends on the number (and size) of each page of protected memory. To address {\tt p} pages of size {\tt s}, a tag comprises $log(p)$ bits, the offset comprises $log(s)$ bits and $log(p) + log(s) = a$. For example, in a 16-bit address space (i.e., 16\,kB of protected memory) with 512 pages of 128 bytes each, a page's tag is the high-order nine bits of the address and a byte's page offset is the remaining 7 bits.
 
@@ -64,15 +124,24 @@ A \sys task must access protected non-volatile variables through a restricted me
 	\end{algorithmic}
 \end{algorithm}
 
-After address translation, \sys attempts to access the protected variable's location in the volatile paging buffer. \sys keeps track of the page tags for the pages currently resident in the paging buffer. When a task accesses a variable, it compares the variable's page tag to tags of the pages in {\tt working} (Line 2).
+After address translation, \sys attempts to access the protected variable's
+location in the volatile paging buffer. \sys keeps track of the page tags for
+the pages currently resident in the paging buffer. When a task accesses a
+variable, it compares the variable's page tag to tags of the pages in {\tt
+working} (Line 2).
 %
 %If the accessed variable's page is resident in the page buffer,
 %then the tag of one of the pages in this buffer is equal to the accessed
 %variable's page tag.
 %
-If the accessed variable's page tag is not found in the page buffer, the operation incurs a {\em page fault} (Line 4). At a page fault, \sys must swap out one of the pages that is resident in the page buffer (to the non-volatile \texttt{\underline{shadow}}) if \texttt{working} is full, and swap in the variable's page.
+If the accessed variable's page tag is not found in the page buffer, the
+operation incurs a {\em page fault} (Line 4). At a page fault, \sys must swap
+out one of the pages that is resident in the page buffer (to the non-volatile
+\texttt{\underline{shadow}}) if \texttt{working} is full, and swap in the
+variable's page.
 %
-The byte is accessed in the page buffer at the index of the resident page and the variable's page offset (Lines 5--6).
+The byte is accessed in the page buffer at the index of the resident page and
+the variable's page offset (Lines 5--6).
 
 %Algorithm~\ref{algo:rwar} shows pseudo-code of \texttt{RVAR} and we omit a listing for {\tt WVAR} as it is very similar except it writes the memory location and returns nothing. If the page tag of the variable \texttt{var} is not found in \texttt{working} (e.g. Lines 2--3), there is a page fault that requires a new page to be swapped in to the page buffer.
 
@@ -105,9 +174,28 @@ The byte is accessed in the page buffer at the index of the resident page and th
 	\end{algorithmic}
 \end{algorithm}
 
-If the \texttt{working} buffer is full, a page fault on a memory access requires \sys to swap out one of the pages in the volatile buffer, the \emph{victim page}, preserving updates made to that page, and to copy the accessed page of protected data into the page buffer. Algorithm~\ref{algo:pagefault} shows how \sys handles a page fault. A victim page in the \texttt{working} buffer is selected for eviction according to \emph{first-in-first-out} replacement policy (Lines 2 and 12). If the page being swapped out is not dirty and the page being accessed had not been dirtied and swapped out to the \texttt{shadow} buffer since last boot, then handling a page fault consists of copying the accessed page from \texttt{\underline{store}} into the \texttt{working} buffer (Line 11). Otherwise, the page fault handler must take the following extra steps.
+If the \texttt{working} buffer is full, a page fault on a memory access
+requires \sys to swap out one of the pages in the volatile buffer (a 
+\emph{victim page}) preserving updates made to that page, and to copy the
+accessed page of protected data into the working buffer.
+Algorithm~\ref{algo:pagefault} shows how \sys handles a page fault. A victim
+page in the \texttt{working} buffer is selected for eviction according to
+a \emph{first-in-first-out} replacement policy (Lines 2 and 12). If the page
+being swapped out is not dirty and the page being accessed had not been dirtied
+and swapped out to the \texttt{shadow} buffer since last boot, then handling a
+page fault consists of copying the accessed page from
+\texttt{\underline{store}} into the \texttt{working} buffer (Line 11).
+Otherwise, the page fault handler must take the following extra steps.
 %
-If a task modified any byte in the victim page (i.e., using \texttt{WP}), then the page is dirty. Before swapping in the accessed page, \sys must first preserve the updated values in the dirty page so that they can be committed back to their locations in memory when the dynamic task ends (but not earlier). To preserve dirty values, \sys copies the victim page to the non-volatile \texttt{\underline{shadow}} buffer (Line 5) and records the page's tag in a non-volatile list (Lines 6-7) to support iteration over shadow pages having traversing all slots in the buffer, necessary in the second phase of the commit.
+If a task modified any byte in the victim page (i.e., using \texttt{WP}), then
+the page is dirty. Before swapping in the accessed page, \sys must first
+preserve the updated values in the dirty page so that they can be committed
+back to their locations in memory when the dynamic task ends (but not earlier).
+To preserve dirty values, \sys copies the victim page to the non-volatile
+\texttt{\underline{shadow}} buffer (Line 5) and records the page's tag in a
+non-volatile list (Lines 6-7) to support iteration over shadow pages having
+traversing all slots in the buffer, necessary in the second phase of the
+commit.
 %
 %Dirty pages remain in {\tt \underline{shadow}} buffer until the
 %dynamic task completes, at which point \sys commits the modified
