@@ -126,7 +126,7 @@ in the working memory, the memory manager fetches it from non-volatile memory.
 \sys uses address-based page tagging to make finding a variable efficient.  The
 upper bits of a variable's memory address identify its page, and the lower bits
 denote the variable's offset in its page. The total number of pages in memory,
-$p$, determines the number of tag bits, which is $log(P)$.
+$p$, determines the number of tag bits, which is $\log P$.
 
 Page tagging imposes a data alignment requirement.
 Page size $S$ must be a power of two. 
