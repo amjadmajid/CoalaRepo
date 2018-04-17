@@ -114,8 +114,7 @@ The source code for all benchmarks will be released at \cite{coala_website}.
 \sys against Alpaca~\cite{alpaca}, a state-of-the-art task-based system for
 intermittent computing. For a fair comparison the task decomposition is the
 same in \sys and Alpaca implementations of the benchmarks. We compare
-both systems using GCC, the compiler with the best performance for the
-MSP430 architecture.
+both systems using GCC.
 
 Since Alpaca's compiler pass is implemented only for LLVM, we could not use
 that implementation to instrument the benchmarks and compile them with GCC.
@@ -126,8 +125,8 @@ intermediate-representation (LLVM IR) as the compiler pass would. The result is
 equivalent from the perspective of overheads. The instrumentation consists of
 identifying write-after-read dependencies and adding code and memory
 allocations to make a private copy of the affected variables. For array
-variables, instrumentation also includes adding code and memory allocations to
-track the first write to the array.
+variables, instrumentation also includes adding code for 
+dynamically tracking the array access.
 
 Manual instrumentation of Alpaca code is not a general approach, but only
 served as a practical alternative to porting the compiler pass from LLVM to
