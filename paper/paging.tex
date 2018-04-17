@@ -108,21 +108,25 @@ that identifies the page and a \emph{page offset} that identifies a byte.
 
 %How an $a$-bit memory address decomposes into a tag and an offset depends on the number (and size) of each page of protected memory. To address {\tt p} pages of size {\tt s}, a tag comprises $log(p)$ bits, the offset comprises $log(s)$ bits and $log(p) + log(s) = a$. For example, in a 16-bit address space (i.e., 16\,kB of protected memory) with 512 pages of 128 bytes each, a page's tag is the high-order nine bits of the address and a byte's page offset is the remaining 7 bits.
 
-\begin{algorithm}[t]
-	\caption{\texttt{RP}(variable $v$)}
+%\begin{algorithm}[t]
+\begin{wrapfigure}{t}{0.4\textwidth}
+\fbox{\parbox{\linewidth}{
+	\captionof{algorithm}{\texttt{RP}(variable $v$)}
 	\label{algo:rwar}
 	\scriptsize
 	%\small
 	\begin{algorithmic}[1]
 		\State $t \leftarrow \Call{GetTag}{v}$ 
-        \State $i \gets \{ j\ |\ \Call{GetTag}{\texttt{working}[j]} = t \}$ \Comment{Look in the page buffer}
-		\If { $i = \emptyset$ } \Comment{Is the variable in a resident page?}
-		\State	$i \gets \Call{PageFault}{t}$ \Comment{Page in from non-volatile memory}
+        \State $i \gets \{ j\ |\ \Call{GetTag}{\texttt{working}[j]} = t \}$ \Comment{Search page}
+		\If { $i = \emptyset$ } \Comment{Var in a resident page?}
+		\State	$i \gets \Call{PageFault}{t}$ \Comment{Swap page in}
 		\EndIf
 		\State $o \leftarrow \Call{GetOffset}{v}$ 		
-		\State \Return \texttt{working}[$i$][$o$]  \Comment{Return directly from page buffer}
-	\end{algorithmic}
-\end{algorithm}
+		\State \Return \texttt{working}[$i$][$o$]  \Comment{Return from page}
+%	\end{algorithmic}
+%\end{algorithm}
+	\end{algorithmic}}}
+\end{wrapfigure}
 
 After address translation, \sys attempts to access the protected variable's
 location in the volatile paging buffer. \sys keeps track of the page tags for
@@ -147,32 +151,36 @@ the variable's page offset (Lines 5--6).
 
 \subsection{Page Faults and Page Swapping}
 
-\begin{algorithm}
-	\caption{\texttt{PageFault}(tag $t$)}
+%\begin{algorithm}
+\begin{wrapfigure}{t}{0.5\textwidth}
+\fbox{\parbox{\linewidth}{
+	\captionof{algorithm}{\texttt{PageFault}(tag $t$)}
 	\label{algo:pagefault}
 	\scriptsize
 	%\small
 	\begin{algorithmic}[1]
-        \State \LeftComment{$i_\text{victim}$: volatile index to next free slot or page to be evicted, set to 0 at boot}
-        \State \LeftComment{\texttt{\underline{shadowCount}}: non-volatile, reset to 0 on boot unless in phase 2 commit}
+        \State \LeftComment{$i_\text{victim}$: index to free slot or page to be evicted, initially 0}
+        \State \LeftComment{\texttt{\underline{shadowCount}}: non-volatile, 0 on boot unless in phase 2 commit}
         \State $t_\text{victim} \gets \Call{Tag}{\texttt{working}[i_\text{victim}]}$
-		\If {\Call{isDirty}{working[$i_\text{victim}$]} }	\Comment{Are we evicting a dirty page?}
+		\If {\Call{isDirty}{working[$i_\text{victim}$]} }	\Comment{Evicting a dirty page?}
 		\State $\texttt{\underline{shadow}}[t_\text{victim}] \xleftarrow{\text{DMA}} \texttt{working}[i_\text{victim}]$
             \Comment{Swap out the page}
-        \If {$t_\text{victim} \not\in \texttt{\underline{shadowList}}$} \Comment{Keep track as list for quick traversal}
+        \If {$t_\text{victim} \not\in \texttt{\underline{shadowList}}$} \Comment{Keep track for quick traversal}
             \State $\texttt{\underline{shadowList}}[\texttt{shadowCount++}] \gets t_\text{victim}$
         \EndIf
 		\EndIf
-		\If {\Call{exists}{\underline{shadow}[$t$]}} \Comment{Had the page been swapped out earlier?}
+		\If {\Call{exists}{\underline{shadow}[$t$]}} \Comment{Page swapped out earlier?}
 		\State $\texttt{working}[i_\text{victim}] \xleftarrow{\text{DMA}} \texttt{\underline{shadow}}[t]$
-            \Comment{Get page from commit buffer}
+            \Comment{Get from commit buffer}
 		\Else
 		\State $\texttt{working}[i_\text{victim}] \xleftarrow{\text{DMA}} \texttt{\underline{store}}[t]$
-            \Comment{Get page from backing store}
+            \Comment{Get from backing store}
 		\EndIf 
-        \State $i_\text{victim} \gets (i_\text{victim} + 1) \mod |\texttt{pageBufLength}|$ \Comment{FIFO eviction policy}
-	\end{algorithmic}
-\end{algorithm}
+        \State $i_\text{victim} \gets (i_\text{victim} + 1) \mod |\texttt{pageBufLength}|$ \Comment{FIFO evict}
+%	\end{algorithmic}
+%\end{algorithm}
+	\end{algorithmic}}}
+\end{wrapfigure}
 
 If the \texttt{working} buffer is full, a page fault on a memory access
 requires \sys to swap out one of the pages in the volatile buffer (a 
@@ -261,13 +269,16 @@ swapping pointers in an indirection table that maintains the pages as a double
 buffer.  Section~\ref{sec:implementation} describes double buffering in more
 detail.
 
-\begin{algorithm}[t]
+%\begin{algorithm}[t]
+\begin{wrapfigure}{t}{0.5\textwidth}
+\fbox{\parbox{\linewidth}{
+	\captionof{algorithm}{\texttt{PageFault}(tag $t$)}
 	\caption{Two-phase commit}
 	\label{algo:commit}
 	\scriptsize
 	%\small
 	\begin{algorithmic}[1]
-        \Procedure{CommitPhase1}{} \Comment{Invoked from \texttt{next\_task} on last coalesced task}
+        \Procedure{CommitPhase1}{} \Comment{On last coalesced task}
             \For {$i \in 0..|\texttt{working}|-1$}
                 \State $t \gets \Call{Tag}{\texttt{working}[i]}$
                 \State $\texttt{\underline{shadow}}[\Call{Tag}{\texttt{working}[i]}] \xleftarrow{\text{DMA}} \texttt{working}[i]$
@@ -276,9 +287,9 @@ detail.
             \EndFor
             \State \Call{CommitPhase2}{}
         \EndProcedure
-        \Procedure{CommitPhase2}{}
+        \Procedure{CommitPhase2}{} \Comment{\texttt{\underline{commitIndex}} 0 on first boot}
             \State $\texttt{\underline{committing}} \gets \textbf{true}$
-            \While{\texttt{\underline{commitIndex}} < \texttt{\underline{shadowCount}}} \Comment{\texttt{\underline{commitIndex}} set to 0 at first boot}
+            \While{\texttt{\underline{commitIndex}} < \texttt{\underline{shadowCount}}}
                 \State $t \gets \texttt{\underline{shadowList}}[\texttt{\underline{commitIndex}}]$
                 \State \Call{commitToStore}{\texttt{\underline{shadow}}[t]}
                 \State $\texttt{\underline{commitIndex}} \gets \texttt{\underline{commitIndex}} + 1$
@@ -287,13 +298,15 @@ detail.
             \State $\texttt{\underline{commitIndex}} \gets 0$
             \State $\texttt{\underline{committing}} \gets \textbf{false}$
         \EndProcedure
-        \Procedure{OnBoot}{} \Comment{Invoked on every boot, before transitioning to a task}
+        \Procedure{OnBoot}{} \Comment{Invoked on every boot}
             \If { \texttt{\underline{committing}} } \Call{CommitPhase2}{}
             \EndIf 
             \State $\texttt{\underline{shadowCount}} \gets 0$, $i_\text{victim} \gets 0$
         \EndProcedure
-	\end{algorithmic}
-\end{algorithm}
+%	\end{algorithmic}
+%\end{algorithm}
+	\end{algorithmic}}}
+\end{wrapfigure}
 
 %\subsection{Paging Example}
 %
