@@ -1,13 +1,13 @@
-\sys is a new programming and execution model for intermittent computing on energy-harvesting devices. \sys addresses the challenges outlined in Section~\ref{sec:background} to make task-based intermittent programs {\em programmable} and {\em efficient}. \sys accomplishes this goal with a constellation of a new programming model and run time software system support, that supports dynamically adaptive task-based execution. Figure~\ref{fig:system_overview} shows an overview of \sys.
-
-\textbf{\sys Programming and Execution Model.}  To use \sys, a programmer first writes plain, imperative C code. The programmer then must decompose the program into tasks. To manually decompose a program into tasks, the programmer designates a set of functions as tasks, sequences control-flow between these tasks, and annotates memory accesses that manipulate data shared by multiple tasks. In other words, it requires reasoning similar to prior task-based systems~\cite{chain,alpaca}. 
-
 \begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/graffle/overview.pdf}
 	\caption{\sys top-level view. \sys is composed of two core components: \emph{Task Scheduler} and \emph{Memory Manager}.\todo{Redraw figure to map new terms}{Carlo}}
 	\label{fig:system_overview}
 \end{wrapfigure}
+
+\sys is a new programming and execution model for intermittent computing on energy-harvesting devices. \sys addresses the challenges outlined in Section~\ref{sec:background} to make task-based intermittent programs {\em programmable} and {\em efficient}. \sys accomplishes this goal with a constellation of a new programming model and run time software system support, that supports dynamically adaptive task-based execution. Figure~\ref{fig:system_overview} shows an overview of \sys.
+
+\textbf{\sys Programming and Execution Model.}  To use \sys, a programmer first writes plain, imperative C code. The programmer then must decompose the program into tasks. To manually decompose a program into tasks, the programmer designates a set of functions as tasks, sequences control-flow between these tasks, and annotates memory accesses that manipulate data shared by multiple tasks. In other words, it requires reasoning similar to prior task-based systems~\cite{chain,alpaca}. 
 
 A programmer may also opt to use compiler support to automatically decompose a program into tasks, leveraging recent work~\cite{cleancut_2018,baghsorkhi_cgo_2018}. Without loss of generality, we assume throughout this work that the programmer manually decomposed the program into tasks; \sys's behavior with automatically decomposed code would be identical.
 
