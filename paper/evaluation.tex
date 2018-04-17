@@ -261,6 +261,17 @@ effects of page size.
 
 %\textbf{Effect of Page Size on Runtime.}
 
+\begin{figure}
+	\centering
+	\includegraphics[width=0.49\columnwidth]{figures/page_exec-time}
+	\includegraphics[width=0.49\columnwidth]{figures/pagePulls}
+    \caption{Effect of page size on execution time (left) and on the number of
+page faults (right). The execution time is normalized to the lowest in each set
+of page sizes.}
+	\label{fig:page_size}
+\end{figure}
+
+
 \subsubsection{Effect of Page Size on Runtime}
 
 Figure~\ref{fig:page_size} (left) shows the execution time as a function
@@ -303,16 +314,6 @@ amount of data accessed by \textbf{bc}, as well as its working set, is small.
 Even with the smallest page, all accesses are contained within that page, and
 no page faults occur. Without any page faults to begin with, increasing the
 page size has no effect.
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.49\columnwidth]{figures/page_exec-time}
-	\includegraphics[width=0.49\columnwidth]{figures/pagePulls}
-    \caption{Effect of page size on execution time (left) and on the number of
-page faults (right). The execution time is normalized to the lowest in each set
-of page sizes.}
-	\label{fig:page_size}
-\end{figure}
 
 %\subsection{\sys Memory Footprint?}
 %\label{sec:results_program_characterization}
