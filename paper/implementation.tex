@@ -3,7 +3,8 @@ We implemented \sys's programming and execution model as a runtime library and A
 \subsection{Application Programming Interface}
 \label{sec:coala_api}
 
-Coala's API adds only five syntactic constructs to a C-based language.
+Coala's API adds only five syntactic constructs to a C-based language, summarized
+in Table~\ref{table:coala_api}.
 \texttt{COALA\_TASK} is a function annotation that declares a function to be a
 task. \texttt{COALA\_NEXT\_TASK}, indicates the task to run next, after an
 executing task completes.  \texttt{COALA\_PV} declare a new protected variable.
@@ -14,8 +15,6 @@ The programmer is required to explicitly call two API functions at the start of
 {\tt main()}: \texttt{COALA\_INIT}, which does global initialization upon first
 boot and \texttt{COALA\_RUN} which hands the control to \sys's task manager to
 resume task execution.
-
-Table~\ref{table:coala_api} summarizes \sys's API methods and their arguments.
 
 \begin{table}
 \centering
