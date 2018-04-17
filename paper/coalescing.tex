@@ -211,7 +211,7 @@ coalescing target that allows completion.
 %
 
 A key limitation of this algorithm lies in the equality of the target decrease
-in $f_\text{reboot}(B)$ and the increase in $f_\text{reboot}(B)$.  If, after
+in $f_\text{reboot}(B)$ and the increase in $f_\text{commit}(B)$.  If, after
 some number $k$ successful commits the target must decrease back to its
 original value before the $k$ commits, the algorithm must then decrease $B$ by
 $k \times x$.  To accumulate this decrease, this strategy requires $k$ power
@@ -224,7 +224,7 @@ decreasing by $k \times x$, but only after a long time.
 The History-Guided (HG) coalescing strategy adapts the coalescing target more
 quickly, addressing a key limitation of the EO coalescing strategy.  
 %
-EA gives each task unity weight, as with EO.  
+HG gives each task unity weight, as with EO.  
 %
 HG differs from EO in how it updates $B$ on commit, and after a power failure.
 %
@@ -253,7 +253,7 @@ default for HG, because one half had the highest performance.
 	\label{fig:energyAware}
 \end{wrapfigure}
 
-The EA algorithm is characterized by the following functions: 
+The HG algorithm is characterized by the following functions: 
 
 \begin{itemize}
 \item $f_\text{reboot}(B) = \lfloor(H / 2)\rfloor;$
