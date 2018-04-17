@@ -172,7 +172,7 @@ the a task's weight.  A strategy's commit update function, $f_\text{commit}$,
 updates $B$ after a successful commit. The following sections detail several
 possible coalescing strategies that we developed for \sys. 
 
-\subsubsection{Energy-oblivious Coalescing (EB)}
+\subsubsection{Energy-oblivious Coalescing (EO)}
 \label{subsec:energyBlind}
 
 A very simple {\em energy-oblivious} coalescing strategy treats all tasks as
@@ -223,11 +223,11 @@ decreasing by $k \times x$, but only after a long time.
 \subsubsection{History-Guided Coalescing (HG)}
 \label{subsec:energyAware}
 The History-Guided (HG) coalescing strategy adapts the coalescing target more
-quickly, addressing a key limitation of the EB coalescing strategy.  
+quickly, addressing a key limitation of the EO coalescing strategy.  
 %
-EA gives each task unity weight, as with EB.  
+EA gives each task unity weight, as with EO.  
 %
-HG differs from EB in how it updates $B$ on commit, and after a power failure.
+HG differs from EO in how it updates $B$ on commit, and after a power failure.
 %
 HG assumes that as the duration of execution since a power failure increases,
 the amount of energy remaining decreases, and the risk of failing during a long
@@ -271,7 +271,7 @@ update $B$, setting $B$ equal to four and continuing execution.
 \begin{wrapfigure}{}{0.5\textwidth}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/energy-aware-coal.pdf}
-	\caption{placeholder}
+	\caption{The {\em history-guided coalescing} algorithm uses its recent history of execution to estimate the available amount of energy and set the coalescing target accordingly.}
 	\label{fig:energyAware}
 \end{wrapfigure}
 
@@ -288,7 +288,7 @@ target.
 Each different task in the program consumes a different amount of energy to
 execute to completion.  
 %
-The EB and HG coalescing strategies assume each task has uniform energy cost:
+The EO and HG coalescing strategies assume each task has uniform energy cost:
 for these strategies, $B$ simply corresponds to a target {\em count} of tasks
 coalesced, regardless of the individual cost of each task.
 %
@@ -303,7 +303,7 @@ WHG tracks the sum of the weights of tasks in a coalesced sequence of tasks.
 When the sum of weights reaches $B$, the target, WHG commits the coalesced
 task.
 %
-WHG differs extends EB and HG to explicitly account for the variation in energy
+WHG differs extends EO and HG to explicitly account for the variation in energy
 cost of a program's tasks, eliminating the assumption that all tasks do the
 same work, which is a key limitation.
 %
