@@ -180,28 +180,33 @@ requires \sys to swap out one of the pages in the volatile buffer (a
 accessed page of protected data into the working buffer.
 Algorithm~\ref{algo:pagefault} shows how \sys handles a page fault. A victim
 page in the \texttt{working} buffer is selected for eviction according to
-a \emph{first-in-first-out} replacement policy (Lines 2 and 12). If the page
-being swapped out is not dirty and the page being accessed had not been dirtied
-and swapped out to the \texttt{shadow} buffer since last boot, then handling a
-page fault consists of copying the accessed page from
-\texttt{\underline{store}} into the \texttt{working} buffer (Line 11).
-Otherwise, the page fault handler must take the following extra steps.
+a \emph{first-in-first-out} (FIFO) replacement policy (Lines 2 and 12). 
+%
+While we opted for the simplicity of FIFO, any other replacement policy, such
+as Least Recently Used (LRU) could work in its place.
 %
 If a task modified any byte in the victim page (i.e., using \texttt{WP}), then
-the page is dirty. Before swapping in the accessed page, \sys must first
-preserve the updated values in the dirty page so that they can be committed
-back to their locations in memory when the dynamic task ends (but not earlier).
-To preserve dirty values, \sys copies the victim page to the non-volatile
+the page is dirty.  If the page being swapped out is not dirty and the page
+being accessed had not been dirtied and swapped out to the \texttt{shadow}
+buffer since the last reboot, then handling a page fault requires copying the
+accessed page from its home in the  \texttt{\underline{store}} into the
+\texttt{working} buffer (Line 11).  Otherwise, the page fault handler must take
+the following extra steps.
+%
+Before swapping in the accessed page, \sys must first preserve the updated
+values in the dirty page so that they can be committed back to their locations
+in memory when the task commits (but not earlier).  To preserve the dirty
+values, \sys copies the victim page to the non-volatile
 \texttt{\underline{shadow}} buffer (Line 5) and records the page's tag in a
-non-volatile list (Lines 6-7) to support iteration over shadow pages having
-traversing all slots in the buffer, necessary in the second phase of the
-commit.
+non-volatile commit list (Lines 6-7). \sys uses the commit list to iterate over shadow pages 
+at commit time, to copy the contents of shadow pages back to the main memory {\tt store}. 
 %
 %Dirty pages remain in {\tt \underline{shadow}} buffer until the
 %dynamic task completes, at which point \sys commits the modified
 %pages from {\tt \underline{shadow}} back to \texttt{\underline{store}}.
 %
-If the accessed page was previously modified and swapped out since the last boot (Line 8), the most recent version of the page is in {\tt
+If the accessed page was previously modified and swapped out since the last
+power failure (Line 8), the most recent version of the page is in {\tt
 \underline{shadow}}, not \texttt{\underline{store}} (Line 9).
 
 %As
@@ -220,15 +225,41 @@ If the accessed page was previously modified and swapped out since the last boot
 
 \subsection{Atomic Two-Phase Commit of Dirty Pages}
 
-When the last task in a coalesced group completes, \sys must commit \emph{all} dirty pages in the \texttt{working} buffer and the swapped out pages in \texttt{\underline{shadow}} buffer back to their original locations in \texttt{\underline{store}}. If a task is allowed to (re-)execute after only \emph{some} pages have been committed to \texttt{\underline{store}}, that task might see protected variables in an inconsistent state.
+When the last task in a sequence of coalesced tasks completes, \sys must commit
+\emph{all} dirty pages in the \texttt{working} buffer and in the
+\texttt{\underline{shadow}} buffer, copying them back to their original
+locations in the main memory \texttt{\underline{store}}. If a task were allowed
+to (re-)execute after only some pages have been committed to
+\texttt{\underline{store}}, the task might see protected variables in an
+inconsistent state; \sys's two-phase commit prevents this inconsistency.
 
-To make the commit atomic, \sys commits the pages in two phases, implemented by Algorithm~\ref{algo:commit}.
+To make the commit atomic, \sys commits the pages in two phases, implemented by
+Algorithm~\ref{algo:commit}.
 %
-The first phase copies dirty pages from the \texttt{working} buffer to the non-volatile \texttt{\underline{shadow}} buffer (Line 4). The second phase commits pages from \texttt{\underline{shadow}} to \texttt{\underline{store}} (Line 12).
-If power fails during the first phase, the whole commit is aborted, and the dynamic coalesced task restarts from its first static task. If power fails in the second phase, the commit will be safely resumed on next boot.
-The non-volatile metadata for the second phase are: the \texttt{\underline{committing}} bit, which is set before the first page is committed (Line 9) and cleared after the last page is committed (Line 16); \texttt{\underline{shadowCount}} counter, which is cleared once the phase completes (Line 14); \texttt{\underline{commitIndex}}, which indexes the next page to be committed (Line 11) and is cleared at the end of the phase (Line 15).
-
-\sys non-volatile \texttt{\underline{shadowList/shadowCount/commitIndex}} implementation is a more efficient alternative to a simpler implementation that keeps a valid bit in each entry of \texttt{\underline{shadow}} and, on every boot into second phase, traverses all entries, committing the pages with a set bit, and clearing the bit. During the second commit phase, pages are not physically copied from \texttt{\underline{shadow}} to \texttt{\underline{store}}, but a table pointing at the right buffer for each page is updated. This is explained in more details in Section~\ref{sec:implementation}.
+The first phase copies dirty pages from the \texttt{working} buffer to the
+non-volatile \texttt{\underline{shadow}} buffer (Line 4). The second phase
+commits pages from \texttt{\underline{shadow}} to \texttt{\underline{store}}
+(Line 12).  If power fails during the first phase, the whole commit is aborted,
+and the execution restarts from the most recently committed point (i.e., from
+the first task in a coalesced sequence of tasks). If power fails in the second
+phase, the commit process safely resumes on reboot.  The second phase of commit
+depends on some run-time metadata. The \texttt{\underline{committing}} bit
+indicates that a commit is in progress and is set before the first page is
+committed (Line 9) and cleared after the last page is committed (Line 16).  The
+\texttt{\underline{shadowCount}} records the number of dirty shadow pages to
+commit and \sys clears the counter when commit completes (Line 14).  The
+\texttt{\underline{commitIndex}} indexes the next page to be committed (Line
+11) and \sys clears the index at the end of the phase (Line 15).
+%
+\sys's commit is efficient because it maintains an index dirty pages instead of
+iterating through all potentially dirty pages to check a dirty bit during
+commit. 
+%
+\sys's implementation is also efficient because the memory manager does not
+copy from \texttt{\underline{shadow}} to \texttt{\underline{store}}, instead
+swapping pointers in an indirection table that maintains the pages as a double
+buffer.  Section~\ref{sec:implementation} describes double buffering in more
+detail.
 
 \begin{algorithm}[t]
 	\caption{Two-phase commit}
@@ -277,9 +308,16 @@ The non-volatile metadata for the second phase are: the \texttt{\underline{commi
 
 %\subsection{Memory Consistency}
 
-\textbf{Memory Consistency.} \sys's paging mechanism ensures that a task only ever executes using consistent protected data. During task execution, modifications to protected data do not affect their original memory locations, because a task reads and writes the volatile \texttt{working} buffer only, and modified pages are kept in \texttt{\underline{shadow}} until commit.
-A power failure erases the contents of the page buffer, preventing a re-executing task from observing updates in the page buffer from a previous execution attempt.
-Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Line 14), ensures that all accesses to protected variables in subsequent tasks correctly access their original memory locations in \texttt{\underline{store}}.
+\textbf{Memory Consistency.} \sys's paging mechanism ensures that a task only
+ever executes using consistent protected data. During task execution,
+modifications to protected data do not affect their original memory locations,
+because a task reads and writes the volatile \texttt{working} buffer only, and
+modified pages are kept in \texttt{\underline{shadow}} until commit.  A power
+failure erases the contents of the page buffer, preventing a re-executing task
+from observing updates in the page buffer from a previous execution attempt.
+Clearing \texttt{\underline{shadowCount}} as part of the second phase commit
+(Line 14), ensures that all accesses to protected variables in subsequent tasks
+correctly access their original memory locations in \texttt{\underline{store}}.
 \sys assumes that the write to a non-volatile word in memory is atomic.
 %
 %The non-volatile commit bit persists
@@ -287,24 +325,22 @@ Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Li
 %despite arbitrary power failures.
 \subsection{Dynamic Paging of \sys}
 
-One design choice \sys made was to insert dynamic check for paging on every
-possible problematic memory operation using {\tt RP} and {\tt WP} macros.
-Since dynamic checks incur overhead on every read and write, it has a higher
-overhead for accessing memory than a static approach,
-e.g., Alpaca, where a system statically analyze the memory operation and try to insert only optimal
-number of memory protection code (usually at the beginning of each task). 
+\sys asks the programmer to use its {\tt RP} and {\tt WP} paging API methods on
+every access to a protected variable.  These API invocations present a risk of
+high overhead because there is a dynamic check on every read and write. An
+alternative approach explored by prior work~\cite{alpaca} relied on a compiler
+to analyze memory operations and try to insert memory
+protection code mostly at the beginning of a task, leaving most memory accesses uninstrumented.  
 
-However, \sys's dynamic paging has several benefits over static approach.
-First, static approach has limitations, prohibiting certain types of programming pattern. For example,
-in the presence of arbitrary pointer operation, function calls using function pointer, or an interrupt
-within a task, the system cannot statically analyze the memory behavior. Thus, static
-approaches either prohibits the programmer from using certain programming pattern~\cite{alpaca}, 
-or will have to conservatively insert memory protection code that can be unnecessary.
-Second, static approach cannot handle task coalescing, because with coalescing the scope to be
-searched statically is not determined at compile time. 
-By choosing to check every memory access dynamically, \sys supports programming pattern that
-Alpaca does not support, such as arbitrary pointer operation, while also being able to
-support task coalescing, which yields extra performance benefits.
+Despite the risk of per-access overhead, \sys's dynamic memory protection
+scheme brings several benefits over a static approach.  First, the limitations
+of static analysis preclude some uses of pointers due to potential pointer
+aliasing. For example, in the presence of arbitrary pointer operation, a
+function call using a function pointer, or an interrupt within a task, the
+system cannot statically analyze the memory behavior.   Second, a static approach
+cannot handle task coalescing because a protected variable's lifetime (i.e., from first use to commit) is unknown 
+at compile time. \sys's dynamic, per-access instrumentation supports arbitrary use of pointers 
+and enables task coalescing.
 %
 %Moreover, if the programmer wants to optimize for high performance, it is possible for the
 %programmer to place {\tt RP} and {\tt WP} only minimally by carefully examining the code.
