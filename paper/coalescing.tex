@@ -175,13 +175,6 @@ possible coalescing strategies that we developed for \sys.
 \subsubsection{Energy-oblivious Coalescing (EB)}
 \label{subsec:energyBlind}
 
-\begin{wrapfigure}{t!}{0.5\textwidth}
-	\centering
-	\includegraphics[width=0.5\columnwidth]{figures/slowCoal}
-	\caption{The {\em energy-oblivious coalescing} algorithm \emph{linearly} updates its coalescing target.}
-	\label{fig:energyBlind}
-\end{wrapfigure}
-
 A very simple {\em energy-oblivious} coalescing strategy treats all tasks as
 having unity weight and varies the size of a coalesced task linearly. In such a
 scheme, the number of tasks to coalesce, $B$, increases by a constant $x$ when
@@ -194,6 +187,14 @@ failure).  The characteristic operations of the energy-oblivious strategy are:
 \item $f_\text{weight}(T_\text{i}) =  1$; 
 \item $f_\text{commit}(B) = B + x$; 
 \end{itemize}
+
+\begin{wrapfigure}{t!}{0.5\textwidth}
+	\centering
+	\includegraphics[width=0.5\columnwidth]{figures/slowCoal}
+	\caption{The {\em energy-oblivious coalescing} algorithm \emph{linearly} updates its coalescing target.}
+	\label{fig:energyBlind}
+\end{wrapfigure}
+
 
 The energy-oblivious strategy reacts slowly to the variation in the energy
 required to execute different tasks and to the in the effective quantum of
