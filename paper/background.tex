@@ -151,10 +151,10 @@ state~\cite{dino, mementos, ratchet, hicks_isca_2017} to non-volatile memory at
 every checkpoint.  Task-based models, which do not take checkpoints, back up a
 subset of non-volatile data to maintain memory consistency using, e.g.,
 redo-logging.  Table~\ref{table:chechpoint_comparison} summarizes the data that
-gets copies to and from the non-volatile memory in service of memory
+gets copied to and from the non-volatile memory in service of memory
 consistency and progress preservation.  Ratchet~\cite{ratchet} and
 Clank~\cite{hicks_isca_2017}, which require all memory to be non-volatile
-perform high frequency non-volatile memory accesses, in to checkpointing
+perform high frequency non-volatile memory accesses, into checkpointing
 frequently.
 
 %Intermittent execution models incur overheads to checkpoint data~\cite{dino,ratchet,quickrecall,mementos}, manage channels~\cite{chain}, or privatize and commit data~\cite{alpaca}. Table~\ref{table:chechpoint_comparison} compares overheads for recent intermittent execution models (cf. \cite[Sec. 2.4]{alpaca}.) The mechanism responsible for overhead in each model varies, but the bulk of overhead in all models is a manipulating non-volatile memory. Checkpointing moves data to and from non-volatile memory, channel accesses manipulate non-volatile data~\cite{chain}, privatization copies from and commits to non-volatile memory~\cite{alpaca}, and idempotence solutions~\cite{ratchet} use {\em only} non-volatile memory.  
@@ -216,8 +216,8 @@ failures.
 \textbf{Incorrectly Sized Tasks.} Compiler-inserted checkpoints or
 programmer-defined tasks can both both incorrect and non-terminating or
 inefficient.  If code between consecutive checkpoints or in a task (we refer to
-both scenarios as ''code in a task'' in this section) consumes {\em more}
-energy than the fixed, maximum energy that the device can buffer, then the task
+both scenarios as ''code in a task'' in this section) consumes {\em more} than the fixed,
+maximum energy that the device can buffer, then the task
 will never be able to complete using buffered energy.  Such a task is
 non-terminating, {\em prevents forward progress}, and makes the program
 incorrect. 
