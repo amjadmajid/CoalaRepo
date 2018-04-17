@@ -91,7 +91,7 @@ sample vectors\\
 		\hline
 	\end{tabular}
 \caption{Description and characteristics of benchmark applications used to
-evaluate \sys.}
+evaluate \sys. \todo{SLOC and Number of Tasks}{Amjad}}
 \label{table:benchmark_table}
 \end{table}
 
@@ -113,21 +113,21 @@ The source code for all benchmarks will be released at \cite{coala_website}.
 \textbf{Comparison with Alpaca using the GCC compiler.} We compare
 \sys against Alpaca~\cite{alpaca}, a state-of-the-art task-based system for
 intermittent computing. For a fair comparison the task decomposition is the
-same in both \sys and Alpaca implementations of the benchmarks. We compare
+same in \sys and Alpaca implementations of the benchmarks. We compare
 both systems using GCC, the compiler with the best performance for the
 MSP430 architecture.
 
-Since Alpaca's compiler pass is implemented only for LLVM, we could not use it
-to instrument the benchmarks and compile them with GCC. Instead, we
-\emph{manually} performed the instrumentation done by the compiler pass.
-We performed the instrumentation at the source level, adding C
+Since Alpaca's compiler pass is implemented only for LLVM, we could not use
+that implementation to instrument the benchmarks and compile them with GCC.
+Instead, we \emph{manually} performed the instrumentation done by the compiler
+pass.  We performed the instrumentation at the source level, adding C
 statements to the program, instead of at the level of binary
 intermediate-representation (LLVM IR) as the compiler pass would. The result is
-equivalent from the perspective of overheads. The
-instrumentation consists of identifying write-after-read dependencies and
-adding code and memory allocations to make a private copy of the
-affected variables. For array variables, instrumentation also includes adding
-code and memory allocations to track the first write to the array.
+equivalent from the perspective of overheads. The instrumentation consists of
+identifying write-after-read dependencies and adding code and memory
+allocations to make a private copy of the affected variables. For array
+variables, instrumentation also includes adding code and memory allocations to
+track the first write to the array.
 
 Manual instrumentation of Alpaca code is not a general approach, but only
 served as a practical alternative to porting the compiler pass from LLVM to
