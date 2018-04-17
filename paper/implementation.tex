@@ -46,29 +46,29 @@ in Table~\ref{table:coala_api}.
 
 %\subsection{API Details}
 
-\textbf{New Tasks.} The \texttt{COALA\_TASK} annotation on a function
+\noindent\textbf{New Tasks.} The \texttt{COALA\_TASK} annotation on a function
 declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.
 
-\textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} immediately
+\noindent\textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} immediately
 transfers control to a specified next task and can be invoked along
 any control path to dynamically determine the next task.
 Like prior work~\cite{chain,dino,ratchet}, \sys's control-flow model
 assumes that an executing task is not interruptible by asynchronous events.  
 
-\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
+\noindent\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
 variable statically allocates and aligns a protected non-volatile variable. The
 variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at
 runtime to ensure correct operation.
 
-\textbf{Protected Reads and Writes.} The programmer uses the \texttt{RP} and \texttt{WP} API
+\noindent\textbf{Protected Reads and Writes.} The programmer uses the \texttt{RP} and \texttt{WP} API
 methods to access protected variables.  These methods cause \sys to find a variable's page.
 If the page is not resident in working memory, the method leads to a page fault,
 which fetches the page from non-volatile memory. Unlike \texttt{RP},
 \texttt{WP} marks the variable's page as dirty, allowing for efficient 
 commit back to non-volatile memory. 
 
-\textbf{Initialization.} The behavior of the API method
+\noindent\textbf{Initialization.} The behavior of the API method
 \texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the
 addition of performing preliminary kernel initializations, including hardware setup.
 
@@ -81,7 +81,7 @@ addition of performing preliminary kernel initializations, including hardware se
 
 %A high-level state machine of the execution manager is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure reflecting the following description}{Sinan, Carlo}. 
 
-\textbf{Execution.} The programmer passes control to \sys's task scheduler 
+\noindent\textbf{Execution.} The programmer passes control to \sys's task scheduler 
 by calling \texttt{COALA\_RUN} after device initialization. 
 %
 First the scheduler updates the coalescing target using the coalescing
