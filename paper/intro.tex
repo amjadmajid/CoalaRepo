@@ -30,13 +30,6 @@ tens of seconds in radio frequency powered medical device~\cite[Fig.
 3c]{nadeau_naturebio_2017}. The recharge and discharge time---which corresponds to the device's inactive and active time---varies with the energy buffering capacitor~\cite{capybara} and some devices fail and restart operating $\approx$10 to
 $\approx$100 times per second~\citep{tan_infocom_2016,mementos,nvp}.  
 
-\begin{wrapfigure}{t!}{0.4\textwidth}
-    \centering
-    \includegraphics[width=0.4\textwidth]{figures/intro-figure.pdf}
-    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits (denoted as \texttt{cmt} in the figure). On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
-    \label{fig:coalesce}
-\end{wrapfigure}
-
 \textbf{Data Consistency in Intermittent Computing.}  
 %Software in an energy-harvesting system operates according to the {\em intermittent execution model}~\citep{dino,lucia_snapl_2017}, which corresponds to the operation-failure-restart cycles of an energy-harvesting device. In an intermittent software execution, an {\em operating period} proceeds for anarbitrary duration (dictated by energy availability) before being interruptedby a {\em failure period}. In a failure period, 
 Upon power failures, a device loses the volatile
@@ -58,6 +51,13 @@ inapplicable to existing systems~\citep{hicks_isca_2017,nvp}. Software
 approaches are simpler and applicable to existing devices today, but prior
 software approaches have a number of limitations that are the focus of the work
 in this paper. A key limitation of prior software approaches that we address in this paper is the {\em inflexibility} of a program statically decomposed into tasks. 
+
+\begin{wrapfigure}{t!}{0.4\textwidth}
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/intro-figure.pdf}
+    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits (denoted as \texttt{cmt} in the figure). On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
+    \label{fig:coalesce}
+\end{wrapfigure}
 
 \textbf{Task Decomposition of Intermittent Programs.} {\em
 Task-based} programming and execution models require a
