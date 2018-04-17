@@ -97,8 +97,33 @@ runtime.
 %
 %
 % Modifiying Carlo's pseudo code a little 
-\begin{algorithm}[t]
-	\caption{Coalescing}
+%\begin{algorithm}[t]
+%	\caption{Coalescing}
+%	\label{algo:genCoalescing}
+%	\scriptsize
+%	%\small
+%	\begin{algorithmic}[1]
+%        \State $B \leftarrow $ \Call{$f_\text{reboot}$}{$H$}
+%        \State $H \gets 0$ 
+%        \While{$\texttt{true}$}       
+%	        \State $ i \gets 0$
+%	        %
+%	        \While{$ i <= B$}
+%		        \State \Call{execute\_task}{$T_\texttt{i}$}
+%		        \State $W \leftarrow $ \Call{$f_\text{weight}$}{$T_\text{i}$}
+%		        \State $i \gets i + W$
+%				\State $H \gets H + W$
+%	        \EndWhile
+%	        %
+%	        \State \Call{commit\_to\_fram}{\null}
+%	        \State $B \leftarrow $ \Call{$f_\text{commit}$}{$B$}
+%        \EndWhile
+%	\end{algorithmic}
+%\end{algorithm}
+
+\begin{wrapfigure}{t}{0.3\textwidth}
+\fbox{\parbox{\linewidth}{
+	\captionof{algorithm}{Coalescing}
 	\label{algo:genCoalescing}
 	\scriptsize
 	%\small
@@ -118,8 +143,10 @@ runtime.
 	        \State \Call{commit\_to\_fram}{\null}
 	        \State $B \leftarrow $ \Call{$f_\text{commit}$}{$B$}
         \EndWhile
-	\end{algorithmic}
-\end{algorithm}
+	\end{algorithmic}}}
+\end{wrapfigure}
+%	\begin{subfigure}[t]{\linewidth}
+%	\end{subfigure}
 %
 %
 Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing
