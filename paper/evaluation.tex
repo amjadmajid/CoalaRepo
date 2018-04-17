@@ -4,9 +4,9 @@
 	\includegraphics[width=0.5\columnwidth]{figures/coalEfficiency}
     \caption{Breakdown of overhead for the proposed coalescing strategies
 relative to the baseline without coalescing.
-NC: no coalescing, EB: energy-blind coalescing, EA: energy-aware coalescing, ETA:
+NC: no coalescing, EO: energy-Oblivious coalescing, HG: history-guided coalescing, WHG:
 energy- and task-aware coalescing. All coalescing strategies reduce total
-overhead and maximize useful work. EA and ETA perform better than EB.}
+overhead and maximize useful work. HG and WHG perform better than EO.}
 	\label{fig:overallOverheadBreakdown}
 	%\end{figure}
 \end{wrapfigure}
@@ -31,8 +31,8 @@ performance.
 \subsubsection{Overhead Reduced by Coalescing}
 \label{sec:overhead-coalescing}
 
-For each coalescing strategy from Section~\ref{sec:task_adaptation} (EB, EA,
-and ETA) and for a baseline without coalescing (NC), we have measured the time
+For each coalescing strategy from Section~\ref{sec:task_adaptation} (EO, HG,
+and WHG) and for a baseline without coalescing (NC), we have measured the time
 spent on (i) executing useful task code, including \sys's overhead on access to
 protected variables, (ii) re-executing task code after a power failure, and
 (iii) committing state to non-volatile memory at the end of each (coalesced)
@@ -56,11 +56,11 @@ task.
 Across all benchmarks, all coalescing strategies reduce more commit overhead
 than the re-execution overhead they add.
 %
-This net overhead reduction is greatest in EA and ETA strategies compared
-to the EB strategy. We attribute this discrepancy to EB's slow adjustment
+This net overhead reduction is greatest in HG and WHG strategies compared
+to the EO strategy. We attribute this discrepancy to EO's slow adjustment
 of the target task size without regard to execution history.
 %
-In the subsequent experiments, we focus on the better-performing EA and ETA
+In the subsequent experiments, we focus on the better-performing HG and WHG
 strategies.
 
 
@@ -70,8 +70,8 @@ strategies.
 	\includegraphics[width=0.49\columnwidth]{figures/memAccess}
 	\caption{\sys kernel overhead: a breakdown of time spent in
 the application and in the runtime (left) and a breakdown of protected memory
-accesses into three types with different costs. NC: no coalescing, EA:
-energy-aware coalescing, ETA: energy- and task-aware coalescing.}
+accesses into three types with different costs. NC: no coalescing, HG:
+history-guided coalescing, WHG: weighted history-guided coalescing.}
 	\label{fig:coalEfficiency}
 \end{figure}
 
@@ -94,7 +94,7 @@ However, coalescing increases the cost of each access to a protected variable,
 since work in the address translation in the paging system increases as the
 task size grows.
 %
-For both coalescing strategies (EA and ETA) accesses to protected variables
+For both coalescing strategies (HG and WHG) accesses to protected variables
 constitute about 30\% of the runtime overhead. Dynamic address translation
 necessary on each protected access is the most critical bottleneck for \sys.
 
@@ -137,7 +137,7 @@ then compare the best variant to Alpaca.
 \subsubsection{\sys Speedup with Coalescing}
 
 Figure~\ref{fig:coalescing} shows the \sys run time with two coalescing
-strategies (EA, ETA) normalized to the run time without coalescing (NC).
+strategies (HG, WHG) normalized to the run time without coalescing (NC).
 %
 The experimental setup is the same as that in Section~\ref{sec:coala_overhead}.
 %
@@ -152,7 +152,7 @@ However, the magnitude of the speedup is (1) highly application-dependent and
 (2) largely similar across the two coalescing strategies, with the exception of
 \textbf{fft}.
 %
-In some cases (\textbf{bc}, \textbf{cuckoo}, \textbf{sort}) the energy-aware
+In some cases (\textbf{bc}, \textbf{cuckoo}, \textbf{sort}) the history-guided
 feature in the coalescing algorithm is counter-productive.
 %
 This occurs in task decompositions with a uniform task energy, where counting
@@ -160,7 +160,7 @@ tasks disregarding their energy provides an equal amount of information with a
 smaller effort.
 %
 In \textbf{fft}, tasks are not uniform, and accounting for task energies is
-beneficial. In fact, the lack of task energy awareness is detrimental: with EA
+beneficial. In fact, the lack of task energy awareness is detrimental: with HG
 \textbf{fft} runs slower than without any coalescing (NC).
 %
 The speedup is highest for \textbf{bc}, \textbf{cuckoo}, \textbf{dijkstra} and
@@ -171,8 +171,8 @@ eliminating many unnecessary commits.
 	\includegraphics[width=0.5\columnwidth]{figures/coalStrategies}%
 	\includegraphics[width=0.5\columnwidth]{figures/coala_alpaca_gcc}
     \caption{\sys's coalescing performance. Left: Application execution time
-with coalescing strategies (EA and ETA) normalized to the execution time
-without coalescing. Right: Execution time with the ETA variant of \sys,
+with coalescing strategies (HG and WHG) normalized to the execution time
+without coalescing. Right: Execution time with the WHG variant of \sys,
 normalized to the execution time with Alpaca, as a function of distance to the
 energy source.}
 	\label{fig:coalescing}
@@ -183,7 +183,7 @@ energy source.}
 %	%\begin{figure}
 %	\centering
 %	\includegraphics[width=0.5\columnwidth]{figures/coalStrategies}
-%	\caption{Coalescing strategies (EA and ETA) run time per application on intermittent power (RF generator at 15\,cm from the WISP), compared to \sys without coalescing (NC). Coalescing provides significant improvements: from 0.25 (\textbf{ar}) up to 0.70 (\textbf{sort}) compared to a non-coalescing system.}
+%	\caption{Coalescing strategies (HG and WHG) run time per application on intermittent power (RF generator at 15\,cm from the WISP), compared to \sys without coalescing (NC). Coalescing provides significant improvements: from 0.25 (\textbf{ar}) up to 0.70 (\textbf{sort}) compared to a non-coalescing system.}
 %	\label{fig:coalescing}
 %	%\end{figure} 
 %\end{wrapfigure}
@@ -192,7 +192,7 @@ energy source.}
 %	%\begin{figure}
 %	\centering
 %	\includegraphics[width=0.5\columnwidth]{figures/coala_alpaca_gcc}
-%    \caption{Application execution time with the ETA variant of \sys,
+%    \caption{Application execution time with the WHG variant of \sys,
 %normalized to the execution time with Alpaca, as a function of distance to the
 %signal generator antenna. \sys outperforms Alpaca on the majority but not all
 %of the benchmarks.}
@@ -234,12 +234,12 @@ In a separate experiment, we have enabled task downsizing in \sys and measured
 the execution time for \textbf{fft} benchmark at 60\,cm from the signal
 generator antenna --- even \emph{farther} than the distance at which this
 benchmark failed to terminate in the previous experiment. \sys executed the
-benchmark successfully without (NC) and with coalescing (ETA). The application
+benchmark successfully without (NC) and with coalescing (WHG). The application
 took longer to complete than at a shorter distance of 15~cm in the previous
 experiment, because of smaller (negligible) incoming energy at the larger
 distance. The variant without coalescing (NC) slowed down by 2.16$\times$ and the
-variant with ETA coalescing slowed down by 2.31$\times$ slower, but at both
-distances, ETA completed faster than NC.
+variant with WHG coalescing slowed down by 2.31$\times$ slower, but at both
+distances, WHG completed faster than NC.
 %
 For comparison, the run time with Alpaca is effectively infinite at this
 distance, which is a consequence of its non-adaptive static tasks.
