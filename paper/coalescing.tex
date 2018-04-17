@@ -1,4 +1,7 @@
-Energy-aware task coalescing strategies bring \sys efficiency, and the flexible time-based task splitting strategy enables \sys to progress where its counterparts fail.
+\sys's design includes a novel task scheduler that uses efficient,
+energy-aware task coalescing to amortize task overheads, and uses a timer-based
+task-splitting mechanism to avoid non-termination of tasks too long
+for a device's energy buffer. 
 
 \subsection{Task Coalescing}
 \label{sec:task_coalescing}
@@ -10,24 +13,51 @@ Energy-aware task coalescing strategies bring \sys efficiency, and the flexible 
 % 	\label{fig:coalIntro}
 % \end{wrapfigure}
 
-When incoming energy is sufficient to run multiple consecutive tasks, committing state after each task is wasteful. \sys mitigates this waste by deferring the expensive commits and performing them in a batch. In the resulting execution, several tasks are \emph{merged} into a single virtual task---a process we call \emph{coalescing}. 
+When a device's buffered energy is sufficient to run multiple consecutive tasks
+without a power failure, committing state after each task is an unnecessary
+overhead.   \sys eliminates this overhead by {\em coalescing} a sequence of
+consecutive tasks. \sys coalesces a sequence of tasks by deferring the commit
+operations for all tasks to the end of the sequence, performing their commits
+as a batch.  In general, committing involves moving state manipulated by a task
+into its permanent location in non-volatile main memory.  In particular, \sys's
+commit procedure copies dirty pages of memory that a task updated between fast,
+volatile working memory and slower, non-volatile main memory; we defer the
+details of paging and commit to Section~\ref{sec:memory_virtualization}.
 
-\noindent When $N$ tasks are coalesced, $N-1$ boundaries are crossed and some number of
-pages are dirtied. The first $N-2$ executions of \transition statement skip
-committing dirty pages to non-volatile memory, leaving the work of committing
-pages modified by any of the $N$ tasks to the statement $N-1$.Therefore, coalescing static tasks is a twofold benefit: (i) it reduces the total number of non-volatile memory
-accesses when variables are accessed many times within a coalesced task and committed only conly at the coalesced task boundery; (ii) it fasten applicaiton exeution be skipping unnecessary data commits operations when there is abandond energy. 
+When \sys coalesces a sequence of $N$ tasks, \sys avoids the cost of commit at
+the first $N-1$ boundaries.   The first $N-1$ inter-task transitions leave
+dirty pages in working memory, deferring the work of committing dirty modified
+until the commit of the last task in the sequence.  Coalescing tasks brings a
+double benefit. First, coalescing reduces the total number of relatively
+high-latency, high-energy non-volatile memory accesses because tasks primarily
+access variables in relatively low-latency, low-energy volatile memory.
+Second, coalescing eliminates the unnecessary instructions that implement task
+commit, which our measurements in Section~\ref{sec:evaluation} show constitute
+a substantial run-time overhead.
 
-\textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
+%it fasten applicaiton exeution be skipping unnecessary data commits operations
+%when there is abandond energy. 
+ 
+The effectiveness of coalescing tasks hinges on having an effective {\em
+coalescing strategy}, which determines how many consecutive tasks to coalesce.
+An effective strategy must be {\em aggressive} enough, attempting to coalesce a
+large number of consecutive tasks to amortize a large amount of commit overhead.   
 %
+If power fails during a long sequence of coalesced tasks, execution will
+restart from the last commit, i.e. the first task in the sequence, losing the
+progress made by any of the coalesced tasks.
+%
+An effective strategy must also be {\em
+conservative} enough, attempting to coalesce only as many tasks as will execute
+to completion using the device's available energy, but no more.
+%
+An effective coalescing strategy moderates the risk of a power failure during a
+long coalesced task and capitalizes on the benefits of deferred commits by
+adapting the target size of the dynamic task to the energy available at
+runtime. 
 
-\noindent \textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
-arbitrary number of consecutive tasks. However, as more tasks coalesce, their
-collective commit overhead amortizes better, but the risk of wasting work also
-increases. If power fails during a long sequence of coalesced tasks, execution
-will restart from the last commit, i.e. the first task in the sequence, losing
-the progress made by any of the coalesced tasks. Therefore, a good coalescing strategy must moderate the risk of wasted work and capitalize on benefits of deferred commits by adapting the target size of the dynamic task
-to the energy available at runtime. 
+
+%\textcolor{red}{maybe is possible to demonstrate with data? count number of executed non-volatile vs volatile accesses}
 %
 
 \noindent \textbf{Task Coalescing Strategies.} 
@@ -86,41 +116,129 @@ to the energy available at runtime.
 	        \EndWhile
 	        %
 	        \State \Call{commit\_to\_fram}{\null}
-	        \State $B \leftarrow $ \Call{$f_\text{coalesc\_task\_maker}$}{$B$}
+	        \State $B \leftarrow $ \Call{$f_\text{commit}$}{$B$}
         \EndWhile
 	\end{algorithmic}
 \end{algorithm}
 %
 %
-The general structure of the proposed coalescing strategies is summaries in algorithm~\ref{algo:genCoalescing}, where, $B$ (target budget) is total number of static tasks to be coalesced; $T_\text{i}$ is the i-th task being executed; $W_\text{i}$ is weight of $T_\text{i}$; and $H$ (history) is the number of executed static tasks between the last two power interrupts, on a reboot, and it is the number of executed static tasks since the last power interrupt, while executing. Furthermore, we use the following function templates to characterize the proposed coalescing algorithms: $f_\text{reboot}$ which updates the target budget after a reboot. $f_\text{weight}$ which returns the weight of the task and its unit. $f_\text{coalesc\_task\_maker}$ which specifies the size of the coalesced task size. The following sections detail the different strategies \sys proposes and the needs that originated from one strategy leading to the conception of another one.
+Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing
+strategy. In the algorithm, $B$ (target budget) is total number of static tasks
+that \sys will next attempt to coalesce. $T_\text{i}$ is the $i^{th}$ task
+executed since the last power failure. $H$ (history) is the number tasks
+(coalesced or not) executed between the two most recent power failures.
+$W_\text{i}$ is the {\em weight} of a task $T_\text{i}$.  A task's weight is an
+arbitrary quantity associated with the task that represents its cost in time or
+energy to execute; different coalescing strategies may apply different weights
+to a task.  For example, a uniform weighting scheme sets the weight of each
+task to one, making them all effectively equal in cost to the coalescing
+algorithm.  A different policy might use a weighting scheme that sets a task's
+weight equal to its run time relative to the task that executes for the
+shortest duration, which has unity weight. 
 
-\subsubsection{Energy-blind Coalescing (EB)}
+Different coalescing strategies adhere mainly to the template in
+Algorithm~\ref{algo:genCoalescing}, varying in only a few {\em characteristic
+operations} that the algorithm leaves deliberately abstract.  A strategy's
+reboot update function, $f_\text{reboot}$, updates $B$, the target budget,
+after a reboot. A strategy's weight lookup function, $f_\text{weight}$, returns
+the a task's weight.  A strategy's commit update function, $f_\text{commit}$,
+updates $B$ after a successful commit. The following sections detail several
+possible coalescing strategies that we developed for \sys. 
+
+\subsubsection{Energy-oblivious Coalescing (EB)}
 \label{subsec:energyBlind}
 
 \begin{wrapfigure}{t!}{0.5\textwidth}
 	\centering
 	\includegraphics[width=0.5\columnwidth]{figures/slowCoal}
-	\caption{The {\em energy blind coalescing} algorithm \emph{linearly} updates its coalescing target.}
+	\caption{The {\em energy-oblivious coalescing} algorithm \emph{linearly} updates its coalescing target.}
 	\label{fig:energyBlind}
 \end{wrapfigure}
 
-The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfilled by a naive strategy, having the target budget $B$ to increase by $x$ static tasks after a successful completion of a coalesced task, and to decrease by the same number of tasks upon a reboot. In this case: 
+A very simple {\em energy-oblivious} coalescing strategy treats all tasks as
+having unity weight and varies the size of a coalesced task linearly. In such a
+scheme, the number of tasks to coalesce, $B$, increases by a constant $x$ when
+a coalesced sequence of tasks commits, and decreases by the same constant $x$
+when a coalesced sequence of tasks fails to complete (i.e., after a power
+failure).  The characteristic operations of the energy-oblivious strategy are: 
+
 \begin{itemize}
 \item $f_\text{reboot}(B) = B - x $;
 \item $f_\text{weight}(T_\text{i}) =  1$; 
-\item $f_\text{coalesc\_task\_maker}(B) = B + x$; 
+\item $f_\text{commit}(B) = B + x$; 
 \end{itemize}
-Since this algorithm relies on an \emph{energy blind counting process} that enlarges the coalesced task size by $x$ static tasks on a successful completion, and reduces its size by $x$ on a reboot. this algorithm is slow in reacting to the changes in energy conditions; the energy required by a coalesced task or the available energy. In particular, this algorithm can experience a large number of \emph{repeated power} failures without forward progress, (see figure~\ref{fig:energyBlind}). In other words, if a coalesced task size is enlarged ten times, due to ample amount of energy or coalescing small static tasks, and then the algorithm can only progress by a single static task, due to a change in energy condition, the device has to reboot for ten times to have an adequate coalesced task size. Moreover, This algorithm tends to experience a large re-execution penalty due to its unawareness of the energy conditions and it optimistic behavior.
 
-\subsubsection{Energy-aware Coalescing (EA)}
+The energy-oblivious strategy reacts slowly to the variation in the energy
+required to execute different tasks and to the in the effective quantum of
+energy available to the device (i.e., variation in energy buffer size). 
+%
+Figure~\ref{fig:energyBlind} shows how this strategy may experience a 
+large number of repeated power failures without forward progress.
+%
+With the successful commit of each coalesced task sequence, the coalescing
+target increases.  Eventually, the target may be too high and a coalesced task
+composed of only fewer tasks will commit without interruption by a power
+failure.
+%
+The strategy then slowly decreases the coalescing target, eventually reaching a
+coalescing target that allows completion.
+%
+
+A key limitation of this algorithm lies in the equality of the target decrease
+in $f_\text{reboot}(B)$ and the increase in $f_\text{reboot}(B)$.  If, after
+some number $k$ successful commits the target must decrease back to its
+original value before the $k$ commits, the algorithm must then decrease $B$ by
+$k \times x$.  To accumulate this decrease, this strategy requires $k$ power
+failures, after each of which the strategy decreases $B$ by $x$, eventually
+decreasing by $k \times x$, but only after a long time. 
+
+\subsubsection{History-Guided Coalescing (HG)}
 \label{subsec:energyAware}
-The Energy-aware coalescing algorithm overcomes the limitations of the previous algorithm, with out losing generality or requiring hardware support, by using the recent execution history as a metric---pure software technique---to estimate the available energy and to set the size of the coalescing task accordingly. Moreover, it takes advantage of the guarantees that the energy buffer offers on a fresh start by coalescing many static tasks. Then it approaches the expected power failure carefully by reduces the task target size by x\%, amongst 25\%, 50\% and 75\% the 50\% shows the best performance and therefore it is the default of \sys. if twice the number of the estimated tasks has been executed in the same power discharging cycle the algorithm concludes a wrong power failure time estimation has happened and enforce target re-tuning based on its new history. The EA algorithm is characterized by the following functions: 
+The History-Guided (HG) coalescing strategy adapts the coalescing target more
+quickly, addressing a key limitation of the EB coalescing strategy.  
+%
+EA gives each task unity weight, as with EB.  
+%
+HG differs from EB in how it updates $B$ on commit, and after a power failure.
+%
+HG assumes that as the duration of execution since a power failure increases,
+the amount of energy remaining decreases, and the risk of failing during a long
+sequence of coalesced tasks increases.  
+%
+Consequently, HG decreases the coalescing target by half with each successful commit.
+%
+HG is {\em history-guided} because it initializes the coalescing target to be
+equal to $H$, the total number of tasks executed between the most recent pair
+of power failures.
+%
+While a history of $H$ suggests that there is sufficient energy to coalesce and
+successfully commit $H$ tasks (i.e., to set $B = H$), HG conservatively sets $B$ equal to half
+of $H$ moderating the risk of a very long coalesced task. 
+%
+The fraction of the history by which HG adjusts $B$ is arbitrary.
+We experimented with a range of fraction values, settling on one half as the
+default for HG, because one half had the highest performance. 
+
+The EA algorithm is characterized by the following functions: 
 
 \begin{itemize}
 \item $f_\text{reboot}(B) = \lfloor(H / 2)\rfloor;$
 \item $f_\text{weight}(T_\text{i}) =  1$; 
-\item $f_\text{coalesc\_task\_maker}(B) = \lfloor(H / 2)\rfloor;$ 
+\item $f_\text{commit}(B) = \lfloor(B / 2)\rfloor;$ 
 \end{itemize}
+
+
+Figure~\ref{fig:energyAware} illustrates the operation of the history-guided
+coalescing strategy.  Each white box is a task and each red box is a commit.
+Time goes left to right and consecutive white boxes with no intervening commit
+are coalesced tasks.  A gray box is a task interrupted by a power failure.  At
+the top, the figure shows the $i^{th}$ execution period, which has a history
+value of $H^{(i)} = 6$.  $B$ is initially three and decreases to one.  Once the
+value of $B$ reaches one, HG is, in effect, expecting a power failure,
+justifying the decrease in the coalescing target.  After the power failure, HG
+first updates the history $H = H^{i+1} = 8$.  HG then uses the value of $H$ to
+update $B$, setting $B$ equal to four and continuing execution.  
+
 
 \begin{wrapfigure}{}{0.5\textwidth}
 	\centering
@@ -129,8 +247,51 @@ The Energy-aware coalescing algorithm overcomes the limitations of the previous 
 	\label{fig:energyAware}
 \end{wrapfigure}
 
+%, without losing generality or requiring hardware support,
+%Moreover, it takes advantage of the guarantees that the energy buffer offers on a fresh start by coalescing many static tasks.
 
-\subsubsection{Energy- and Task-aware Coalescing (ETA)}
+\subsubsection{Weighted History-Guided Coalescing (WHG)}
 \label{subsec:energyTaskAware}
 
-There are two factors that affect the accuracy of predicting a power interrupt. The stability of the incoming energy and the static tasks sizes distribution. If the task sizes are not uniformly distributed then the algorithm estimation might be off by a relatively large margin. For example, if there are two tasks of size $1s$ and $10s$ then EA will count them as two and might estimate that the target should be of size two static tasks. However, if the following two tasks, on one hand, are of size $1s$ then the algorithm will waste energy on unnecessary commits. On the other hand, if the following two tasks were of size $10s$ then the algorithm might fail, on the second task, and lose progress of $+10$ tasks. To overcome this limitation the counting process of ETA algorithm takes tasks' weight into consideration to approximate a uniform task size distribution, from the counting process perspective. As such ETA algorithm adapts the characterization of the EA algorithm by changing the weight function to be $f_\text{weight}(T_\text{i}) = W_\text{i}$.
+The Weighted History-Guided (WHG) coalescing strategy accounts for the
+different energy and time cost of a program's tasks when setting the coalescing
+target.
+%
+Each different task in the program consumes a different amount of energy to
+execute to completion.  
+%
+The EB and HG coalescing strategies assume each task has uniform energy cost:
+for these strategies, $B$ simply corresponds to a target {\em count} of tasks
+coalesced, regardless of the individual cost of each task.
+%
+However, if one task executes for ten seconds and another executes for one
+second, counting tasks misjudges the amount of {\em work} in the coalesced
+tasks.
+
+Instead, WHG associates a non-unity weight with each task in the program. 
+%
+WHG tracks the sum of the weights of tasks in a coalesced sequence of tasks.
+%
+When the sum of weights reaches $B$, the target, WHG commits the coalesced
+task.
+%
+WHG differs extends EB and HG to explicitly account for the variation in energy
+cost of a program's tasks, eliminating the assumption that all tasks do the
+same work, which is a key limitation.
+%
+WHG has the same characteristic operations as HG, except that
+$f_\text{weight}(T_\text{i}) = W_\text{i}$.
+
+The effectiveness of the WHG algorithm hinges on correctly identifying the
+weight of each task, which WHG assumes is {\em statically} available.
+%
+Profiling the time and energy cost of tasks in a program is a difficult,
+orthogonal problem~\cite{cleancut,baghsorkhi_cgo_2018}.
+%
+WHG could use the result of an arbitrarily sophisticated profiling procedure.
+%
+To produce a concrete result in this paper, we give WHG access to a simple
+profile of task run time collected offline using a single fixed input.
+%
+WHG stores the profile in a lookup table that maps a task's identifier to its
+weight, making the information available to \sys's scheduler at run time.
