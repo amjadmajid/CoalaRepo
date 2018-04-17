@@ -1,5 +1,5 @@
 \sys's design includes a novel task scheduler that uses efficient,
-energy-aware task coalescing to amortize task overheads, and uses a timer-based
+energy-aware task coalescing to amortize static task overheads, and uses a timer-based
 task-splitting mechanism to avoid non-termination of tasks too long
 for a device's energy buffer. 
 
@@ -22,10 +22,10 @@ as a batch.  In general, committing involves moving state manipulated by a task
 into its permanent location in non-volatile main memory.  In particular, \sys's
 commit procedure copies dirty pages of memory that a task updated between fast,
 volatile working memory and slower, non-volatile main memory; we defer the
-details of paging and commit to Section~\ref{sec:memory_virtualization}.
+details of paging and commit to Section~\ref{sec:memory_virtulaization}.
 
 When \sys coalesces a sequence of $N$ tasks, \sys avoids the cost of commit at
-the first $N-1$ boundaries.   The first $N-1$ inter-task transitions leave
+the first $N-1$ boundaries.  The first $N-1$ inter-task transitions leave
 dirty pages in working memory, deferring the work of committing dirty modified
 until the commit of the last task in the sequence.  Coalescing tasks brings a
 double benefit. First, coalescing reduces the total number of relatively
@@ -150,7 +150,7 @@ runtime.
 %
 %
 Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing
-strategy. In the algorithm, $B$ (target budget) is total number of static tasks
+strategy. In the algorithm, $B$ (target budget) is the total number of static tasks
 that \sys will next attempt to coalesce. $T_\text{i}$ is the $i^{th}$ task
 executed since the last power failure. $H$ (history) is the number tasks
 (coalesced or not) executed between the two most recent power failures.
@@ -197,7 +197,7 @@ failure).  The characteristic operations of the energy-oblivious strategy are:
 
 
 The energy-oblivious strategy reacts slowly to the variation in the energy
-required to execute different tasks and to the in the effective quantum of
+required to execute different tasks and to the variation in the effective quantum of
 energy available to the device (i.e., variation in energy buffer size). 
 %
 Figure~\ref{fig:energyBlind} shows how this strategy may experience a 
