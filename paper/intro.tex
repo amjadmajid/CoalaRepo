@@ -187,11 +187,16 @@ task atomicity is crucial to correctness, they can disable partial execution aro
 \textbf{Contributions.} To summarize, \sys's main contributions are: 
 %
 \begin{itemize}
-\item The first {\em adaptive} task-based intermittent execution model that dynamically coalesces tasks to avoid unnecessary commit overhead. 
-\item The first power interrupts immune memory virtualization mechanism for an intermittent system that \sys uses to preserve the atomicity of coalesced tasks.
-\item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
+\item The first {\em adaptive} task-based intermittent execution model that
+dynamically \emph{coalesces} tasks to reduce commit overhead and
+\emph{downscales} tasks to ensure forward progress.
+\item The first memory virtualization mechanism that preserves the atomicity of coalesced tasks under power failures.
+%\item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
 \item A fully-realized prototype of \sys that runs on real energy-harvesting devices, to be released as open source after publication via~\cite{coala_website}. 
-\item An evaluation directly comparing \sys to a state of the art task-based intermittent programming and execution model from prior work, showing that on a suite of benchmarks from the literature and several new workloads, \sys often has higher performance and is more flexible to diverse energy conditions. 
+\item An evaluation directly comparing \sys to a state of the art task-based
+intermittent programming and execution model from prior work, showing that on a
+suite of benchmarks from the literature and several new workloads, \sys often
+has higher performance and is more flexible to diverse energy conditions. 
 \end{itemize}
 %
 Section~\ref{sec:background} provides background on intermittent computing.
