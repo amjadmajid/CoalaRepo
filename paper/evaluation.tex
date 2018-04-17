@@ -4,9 +4,9 @@
 	\includegraphics[width=0.5\columnwidth]{figures/coalEfficiency}
     \caption{Breakdown of overhead for the proposed coalescing strategies
 relative to the baseline without coalescing.
-NC: no coalescing, EB: energy-blind coalescing, HG: history-guided coalescing, WHG:
+NC: no coalescing, EO: energy-blind coalescing, HG: history-guided coalescing, WHG:
 energy- and task-aware coalescing. All coalescing strategies reduce total
-overhead and maximize useful work. HG and WHG perform better than EB.}
+overhead and maximize useful work. HG and WHG perform better than EO.}
 	\label{fig:overallOverheadBreakdown}
 	%\end{figure}
 \end{wrapfigure}
@@ -31,7 +31,7 @@ performance.
 \subsubsection{Overhead Reduced by Coalescing}
 \label{sec:overhead-coalescing}
 
-For each coalescing strategy from Section~\ref{sec:task_adaptation} (EB, HG,
+For each coalescing strategy from Section~\ref{sec:task_adaptation} (EO, HG,
 and WHG) and for a baseline without coalescing (NC), we have measured the time
 spent on (i) executing useful task code, including \sys's overhead on access to
 protected variables, (ii) re-executing task code after a power failure, and
@@ -57,7 +57,7 @@ Across all benchmarks, all coalescing strategies reduce more commit overhead
 than the re-execution overhead they add.
 %
 This net overhead reduction is greatest in HG and WHG strategies compared
-to the EB strategy. We attribute this discrepancy to EB's slow adjustment
+to the EO strategy. We attribute this discrepancy to EO's slow adjustment
 of the target task size without regard to execution history.
 %
 In the subsequent experiments, we focus on the better-performing HG and WHG
