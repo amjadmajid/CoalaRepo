@@ -4,14 +4,14 @@
 \sys uses {\em task downscaling} to make progress through a task that is too
 large to complete using the energy that the device can buffer.  Task
 downscaling executes part of the long task and interrupts its execution with a
-{\em partial commit}, after which the long task continues.  If power fails, the
+{\em partial commit}, after which the long task continues. If power fails, the
 partial commit preserves the progress through the task, and execution resumes
 from the point of the partial commit, rather than from the start of the task.
 Eventually, after some number of partial commits and power failures, the task
-will complete and execution will move on to a task with an energy demand
+will complete and execution will proceed to a task with an energy demand
 accommodated by the device's energy buffer. Task downscaling violates task
 atomicity in a non-terminating execution, favoring continued progress over
-atomicity.  If a program requires a task's atomicity over its progress, 
+atomicity. If a program requires a task's atomicity over its progress, 
 the programmer can disable task downscaling for that task.
 
 The key design issue for task downscaling is deciding when to partially commit.

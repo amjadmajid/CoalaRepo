@@ -1,7 +1,7 @@
-\begin{wrapfigure}{t!}{0.5\textwidth}
+\begin{wrapfigure}{t!}{0.45\textwidth}
 	\centering
-	\includegraphics[width=0.5\columnwidth]{figures/graffle/overview.pdf}
-	\caption{\sys top-level view. \sys is composed of two core components: \emph{Task Scheduler} and \emph{Memory Manager}.\todo{Redraw figure to map new terms}{Carlo}}
+	\includegraphics[width=0.45\columnwidth]{figures/graffle/overview.pdf}
+	\caption{\sys top-level view. \sys is composed of two core components: \emph{Task Scheduler} and \emph{Memory Manager}.}
 	\label{fig:system_overview}
 \end{wrapfigure}
 
@@ -52,7 +52,7 @@ task, the scheduler uses a timer that fires at a decreasing interval to
 determine where to execute a {\em partial commit} of the task. Partial
 commit saves progress through a task that runs for too long to complete
 using the device's buffered energy. Eventually, after a series of partial
-commits, the too-long task completes --- partial commit favors progress over task atomicity.  
+commits, the too-long task completes---partial commit favors progress over task atomicity.  
 When a task repeatedly fails, the scheduler uses a timer that counts an operating interval
 that decreases in length with each failure and \sys partially commits at the end of the interval. 
 Section~\ref{sec:task_coalescing} provides details of \sys's task scheduler.
@@ -79,5 +79,5 @@ using, e.g., costly word-granular tracking). When a task ends, each page it
 accessed commits from volatile memory (or from a non-volatile swap region for
 dirty pages) back to the non-volatile main memory. Pages efficiently,
 atomically commit using a two-phase commit procedure accelerated using hardware
-support for direct memory access (DMA). Section~\ref{sec:memory_virtualization}
+support for direct memory access (DMA). Section~\ref{sec:memory_virtulaization}
 provides details of \sys's memory manager.
