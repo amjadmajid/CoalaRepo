@@ -50,10 +50,10 @@ declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.
 
 \textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} immediately
-transfers control to a specified next task and this API can be invoked along
-any arbitrary control path (i.e., to dynamically determine the next task).
-Like prior work~\cite{chain,dino,ratchet}, \sys's task control-flow model
-assumes that an executing task is never interrupted. 
+transfers control to a specified next task and can be invoked along
+any control path to dynamically determine the next task.
+Like prior work~\cite{chain,dino,ratchet}, \sys's control-flow model
+assumes that an executing task is not interruptible by asynchronous events.  
 
 \textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
 variable statically allocates and aligns a protected non-volatile variable. The
