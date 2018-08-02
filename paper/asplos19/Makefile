@@ -1,12 +1,13 @@
 
-FIGS = SRC = $(wildcard figures/*.tex) 
+FIGURES = $(wildcard texFigCode/*.tex) 
+
 all: figs
 	pdflatex paper.tex
 	bibtex paper
 	pdflatex paper.tex
 	pdflatex paper.tex
 
-figs:
+figs: $(FIGURES)
 	cd texFigCode; \
 	for i in ./*.tex; do echo "Building $$i"; pdflatex $$i; done; \
 	cp *.pdf ../figures/
