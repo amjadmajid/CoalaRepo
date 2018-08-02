@@ -1,24 +1,30 @@
+BUILD_DIR   := build
+FIG_DIR     := figures
+TEXFIG_DIR  := tex-figures
+DOC_CLASS   := jpaper
+MAIN        := paper
 
-FIGURES = $(wildcard texFigCode/*.tex) 
+TEXFIGS     := $(wildcard $(TEXFIG_DIR)/*.tex)
+TEXFIGS_PDF := $(patsubst $(TEXFIG_DIR)/%,$(FIG_DIR)/%,$(TEXFIGS:.tex=.pdf))
+FIGS_PDF    := $(filter-out $(TEXFIGS_PDF),$(wildcard $(FIG_DIR)/*.pdf))
 
-all: figs
-	pdflatex paper.tex
-	bibtex paper
-	pdflatex paper.tex
-	pdflatex paper.tex
+all: dir $(TEXFIGS_PDF) $(FIGS_PDF) $(DOC_CLASS).cls $(MAIN).tex
+	TEXMFOUTPUT="$(BUILD_DIR)"
+	pdflatex -output-directory=$(BUILD_DIR) $(MAIN)
+	bibtex $(BUILD_DIR)/$(MAIN)
+	pdflatex -output-directory=$(BUILD_DIR) $(MAIN)
+	pdflatex -output-directory=$(BUILD_DIR) $(MAIN)
+	mv $(BUILD_DIR)/$(MAIN).pdf $(MAIN).pdf
+	@ echo "PDF produced: $(MAIN).pdf"
 
-figs: $(FIGURES)
-	cd texFigCode; \
-	for i in ./*.tex; do echo "Building $$i"; pdflatex $$i; done; \
-	cp *.pdf ../figures/
+dir:
+	mkdir -p $(BUILD_DIR)
+
+$(FIG_DIR)/%.pdf: $(TEXFIG_DIR)/%.tex
+	pdflatex -output-directory=$(BUILD_DIR) $<
+	mv $(BUILD_DIR)/$*.pdf $@
 
 clean:
-	-rm paper.aux paper.bbl paper.blg paper.log paper.out paper.pdf
-
-
-#	pdflatex crc_example.tex; \
-#	pdflatex dynamic-chain-2.tex; \
-#	pdflatex taskification_example.tex; \
-#	pdflatex crc_example_war.tex; \
-#	pdflatex dynamic-chain.tex; \
-#	pdflatex sram-buffer.tex; \
+	- rm -rf $(BUILD_DIR)
+	- rm $(TEXFIGS_PDF)
+	- rm $(MAIN).pdf
