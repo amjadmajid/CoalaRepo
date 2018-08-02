@@ -6,6 +6,7 @@ Release/
 .lauches/
 paper.pdf
 !paper/figures/*.pdf
+build/
 *.aux
 *.log
 .DS_store

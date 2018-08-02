@@ -28,10 +28,10 @@ down and recharges to operate again later---corresponds to {\em intermittent exe
 operation-power failure-restart cycles. As an example, recharge times may be
 tens of seconds in radio frequency powered medical device~\cite[Fig.
 3c]{nadeau_naturebio_2017}. The recharge and discharge time---which corresponds to the device's inactive and active time---varies with the energy buffering capacitor~\cite{capybara} and some devices fail and restart operating $\approx$10 to
-$\approx$100 times per second~\cite{tan_infocom_2016,mementos,nvp}.  
+$\approx$100 times per second~\cite{tan_infocom_2016,mementos,nvp}.
 
-\textbf{Data Consistency in Intermittent Computing.}  
-%Software in an energy-harvesting system operates according to the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017}, which corresponds to the operation-failure-restart cycles of an energy-harvesting device. In an intermittent software execution, an {\em operating period} proceeds for anarbitrary duration (dictated by energy availability) before being interruptedby a {\em failure period}. In a failure period, 
+\textbf{Data Consistency in Intermittent Computing.}
+%Software in an energy-harvesting system operates according to the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017}, which corresponds to the operation-failure-restart cycles of an energy-harvesting device. In an intermittent software execution, an {\em operating period} proceeds for anarbitrary duration (dictated by energy availability) before being interruptedby a {\em failure period}. In a failure period,
 Upon power failures, a device loses the volatile
 state in its registers, stack, SRAM, and retains the state of any non-volatile
 memory, such as FRAM or Flash. While capturing periodic
@@ -50,11 +50,11 @@ expensive to design, verify, and manufacture. New architectures are also
 inapplicable to existing systems~\cite{hicks_isca_2017,nvp}. Software
 approaches are simpler and applicable to existing devices today, but prior
 software approaches have a number of limitations that are the focus of the work
-in this paper. A key limitation of prior software approaches that we address in this paper is the {\em inflexibility} of a program statically decomposed into tasks. 
+in this paper. A key limitation of prior software approaches that we address in this paper is the {\em inflexibility} of a program statically decomposed into tasks.
 
 \begin{figure} %{t!}{0.45\textwidth}
     \centering
-    \includegraphics[width=\columnwidth]{figures/intro-figure.pdf}
+    \includegraphics[width=\columnwidth]{figures/intro-figure-tiny.pdf}
     \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits (denoted as \texttt{cmt} in the figure). On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
     \label{fig:coalesce}
 \end{figure}
@@ -65,10 +65,10 @@ programmer~\cite{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to
 statically decompose a program into a collection of {\em tasks}.  A task can
 include arbitrary computation that should be executed despite arbitrarily-timed power failures.
 %and these existing systems guarantee that each
-%tasks executes {\em atomically}, despite arbitrarily-timed power failures.  
+%tasks executes {\em atomically}, despite arbitrarily-timed power failures.
 %
 The programmer explicitly expresses task-to-task control flow, or the compiler
-converts existing program control-flow into task-to-task control flow to sequence 
+converts existing program control-flow into task-to-task control flow to sequence
 the tasks that it defines.
 %
 Figure~\ref{fig:coalesce} illustrates how a program's tasks execute and
@@ -108,8 +108,8 @@ coalescing/splitting} that efficiently executes small tasks, trimming unnecessar
 
 This paper introduces a new system called \sys, which executes a task-based
 intermittent program by dynamically coalescing/splitting its tasks.
-\sys accepts any static decomposition (i.e., from the programmer or from a compiler) 
-and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute  
+\sys accepts any static decomposition (i.e., from the programmer or from a compiler)
+and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute
 with no commit overhead between them, instead performing
 task-end commit actions at the end of the second task only.
 %
@@ -117,8 +117,8 @@ When there is sufficient energy to execute both tasks, two distinct, small
 tasks are effectively executed as a single large task, preserving the atomicity
 of both. If power fails during a coalesced task, execution restarts from the
 {\em first} of the coalesced tasks. Figure~\ref{fig:coalesce} (top)
-illustrates how dynamic coalescing removes unnecessary overhead and shortens intermittent program execution. 
-On the other hand, a large task that requires more energy to complete than a device buffered energy 
+illustrates how dynamic coalescing removes unnecessary overhead and shortens intermittent program execution.
+On the other hand, a large task that requires more energy to complete than a device buffered energy
 is split by \sys to enable task termination and preserve execution progress, as depicted in Figure~\ref{fig:coalesce} (bottom).
 
 %Brandon: This is too detailed for the intro:
@@ -147,7 +147,7 @@ is split by \sys to enable task termination and preserve execution progress, as 
 \textbf{Challenges.} While a compiler can use static data privatization and commit instrumentation
 (i.e., redo-logging) to eliminate statically identifiable, inter-task data
 dependences~\cite{alpaca}, a \emph{dynamic} dependence between two coalesced
-tasks requires dynamic privatization and commit actions. 
+tasks requires dynamic privatization and commit actions.
 %
 To ensure consistency and respect inter-task dependences, \sys uses a novel
 approach \emph{power failure-immune memory virtualization} that buffers non-volatile variable
@@ -170,7 +170,7 @@ task that has repeatedly failed and restarted. Partial execution violates
 task atomicity, but preserves forward progress; if a programmer knows that
 task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
 %
-% !!!! % It should be emphasized that unlike a voltage-threshold-based protection approaches that may suffer from a non-termination problem if the checkpoint has to be placed within the interrupt-disabled region, a timer-based approach adapts its partial commit location on repeated failures. 
+% !!!! % It should be emphasized that unlike a voltage-threshold-based protection approaches that may suffer from a non-termination problem if the checkpoint has to be placed within the interrupt-disabled region, a timer-based approach adapts its partial commit location on repeated failures.
 %
 %Task coalescing removes the burden from the programmer, because it accepts any
 %task decomposition and improves it dynamically. To further reduce the
@@ -185,7 +185,7 @@ task atomicity is crucial to correctness, they can disable partial execution aro
 %intermittent platform with a moderate effort.}
 %
 
-\textbf{Contributions.} To summarize, \sys's main contributions are: 
+\textbf{Contributions.} To summarize, \sys's main contributions are:
 %
 \begin{itemize}
 \item The first {\em adaptive} task-based intermittent execution model that
@@ -193,11 +193,11 @@ dynamically \emph{coalesces} tasks to reduce commit overhead and
 \emph{downscales} tasks to ensure forward progress.
 \item The first memory virtualization mechanism that preserves the atomicity of coalesced tasks under power failures.
 %\item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
-\item A fully-realized prototype of \sys that runs on real energy-harvesting devices, to be released as open source after publication via~\cite{coala_website}. 
+\item A fully-realized prototype of \sys that runs on real energy-harvesting devices, to be released as open source after publication via~\cite{coala_website}.
 \item An evaluation directly comparing \sys to a state of the art task-based
 intermittent programming and execution model from prior work, showing that on a
 suite of benchmarks from the literature and several new workloads, \sys often
-has higher performance and is more flexible to diverse energy conditions. 
+has higher performance and is more flexible to diverse energy conditions.
 \end{itemize}
 %
 Section~\ref{sec:background} provides background on intermittent computing.
@@ -205,3 +205,4 @@ Section~\ref{sec:systemdescription} provides an overview of \sys, while
 Section~\ref{sec:task_adaptation} describes \sys's task adaptation mechanism (coalescing and downscaling). Memory virtualization mechanism is provided in Section~\ref{sec:memory_virtulaization}. Implementation details of \sys are given in Section~\ref{sec:implementation}. Sections~\ref{sec:methodology} and~\ref{sec:evaluation} describe \sys's methodology and evaluation, respectively. Section~\ref{sec:related_work} puts \sys in the
 context of related work and Section~\ref{sec:conclusions} concludes and discusses
 future work.
+
