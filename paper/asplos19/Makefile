@@ -1,17 +1,23 @@
-PAPER = template
-TEX = $(wildcard *.tex)
-BIB = references.bib
-FIGS = $(wildcard figures/*.pdf figures/*.png graphs/*.pdf graphs/*.png)
 
-.PHONY: all clean
+FIGS = SRC = $(wildcard figures/*.tex) 
+all: figs
+	pdflatex paper.tex
+	bibtex paper
+	pdflatex paper.tex
+	pdflatex paper.tex
 
-$(PAPER).pdf: $(TEX) $(BIB) $(FIGS) jpaper.cls
-	echo $(FIGS)
-	pdflatex $(PAPER)
-	bibtex $(PAPER)
-	pdflatex $(PAPER)
-	pdflatex $(PAPER)
+figs:
+	cd texFigCode; \
+	for i in ./*.tex; do echo "Building $$i"; pdflatex $$i; done; \
+	cp *.pdf ../figures/
 
 clean:
-	rm -f *.aux *.bbl *.blg *.log *.out $(PAPER).pdf
+	-rm paper.aux paper.bbl paper.blg paper.log paper.out paper.pdf
 
+
+#	pdflatex crc_example.tex; \
+#	pdflatex dynamic-chain-2.tex; \
+#	pdflatex taskification_example.tex; \
+#	pdflatex crc_example_war.tex; \
+#	pdflatex dynamic-chain.tex; \
+#	pdflatex sram-buffer.tex; \

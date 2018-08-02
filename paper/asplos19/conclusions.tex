@@ -1,0 +1,13 @@
+Software for intermittently-powered energy-harvesting devices requires a
+runtime system for performing computations across power failures.  \sys is a
+new task-based runtime system that fulfills this need.  \sys's distinguishing
+feature is its adaptability to changing energy conditions at runtime.  When
+more energy is available, \sys makes faster progress through the computation by
+coalescing statically-defined tasks together according to one of three proposed
+policies. When less energy is available, progress is latched at sub-task
+granularity. \sys's virtual memory system ensures that program state in
+non-volatile memory remains consistent and amortizes the cost of state transfer
+between volatile and non-volatile memory.  Our evaluation across embedded
+applications on a real energy-harvesting device demonstrates the utility of
+adaptive coalescing and downsizing, as well as the practicality of the proposed
+implementation.

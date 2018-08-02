@@ -1,0 +1,54 @@
+\documentclass[border={20pt 5pt 15pt 10pt}]{standalone} % Left Bottom Right Top
+%\documentclass{standalone} 
+
+%\usepackage{verbatim}
+%\usepackage{parcolumns}
+%\usepackage{fancyvrb}
+
+\usepackage{xparse}
+\usepackage{listings}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{amsmath} %for \text{} macro
+\usepackage{wasysym} %for \lightning symbol
+\usepackage{amssymb} %for \circlearrowright symbol
+
+\lstdefinestyle{mystyle}{
+	tabsize          = 3,     						% tab space width (for "for" loop for instance)
+	numbers          = left,  						% display line numbers on the left
+	numberblanklines = false,
+	%framesep         = 0pt,   						% expand outward
+	%framerule        = 0pt, 						% expand outward
+	frameround		 = ffff,
+	frame 			 = single,
+	commentstyle     = \color{ForestGreen},      			% comment color
+	keywordstyle     = \bfseries\color{blue},       % keyword color
+	stringstyle      = \color{DarkRed},  	  		% string color
+	backgroundcolor  = \color{white}, 				% backgroundcolor color
+	showstringspaces = true,             	 		% mark spaces in strings
+	otherkeywords	 = {NV, signal,inos_task,ios_vars, uint8_t},
+	firstnumber=1,
+	language = C,
+	escapechar = !,
+	basicstyle = \ttfamily,
+	columns = flexible,
+	mathescape = true, %activates $ sign
+	morecomment = [l]{//}
+}
+
+\begin{document}	
+
+\begin{lstlisting}[style = mystyle]
+$\text{\textcolor{red}{checkpoint()}}$; //Correct execution iteration 1 
+data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8));
+Rmnd = crcTbl[data] ^ (Rmnd << 8);
+$\text{\textcolor{red}{checkpoint()}}$; //Capture checkpoint before iteration 2
+data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8));
+Rmnd = crcTbl[data] ^ (Rmnd << 8);      
+$\text{\textcolor{red}{\lightning\hspace{0.5cm}\lightning\hspace{0.5cm}\lightning}\hspace{0.5cm}}$ //Power fails after Rmnd written, before checkpoint()
+$\textcolor{red}{\circlearrowright}\text{\textcolor{red}{checkpoint()}}$; //Restart from checkpoint; $\text{\textcolor{red}{Rmnd remains updated}}$
+data = functReflectData(msg[byte]) ^ (Rmnd >> (Wdth - 8)); 
+$\textcolor{red}{\times}\text{\textcolor{red}{ERROR: data updated using incorrect Rmnd value}}$
+$\ldots$
+\end{lstlisting} 
+
+\end{document}
