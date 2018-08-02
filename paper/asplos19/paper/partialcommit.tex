@@ -1,0 +1,52 @@
+\subsection{Task Downscaling}
+\label{sec:task_downsizing}
+
+\sys uses {\em task downscaling} to make progress through a task that is too
+large to complete using the energy that the device can buffer.  Task
+downscaling executes part of the long task and interrupts its execution with a
+{\em partial commit}, after which the long task continues. If power fails, the
+partial commit preserves the progress through the task, and execution resumes
+from the point of the partial commit, rather than from the start of the task.
+Eventually, after some number of partial commits and power failures, the task
+will complete and execution will proceed to a task with an energy demand
+accommodated by the device's energy buffer. Task downscaling violates task
+atomicity in a non-terminating execution, favoring continued progress over
+atomicity. If a program requires a task's atomicity over its progress, 
+the programmer can disable task downscaling for that task.
+
+The key design issue for task downscaling is deciding when to partially commit.
+\sys only applies task downscaling to a task that is likely to be
+non-terminating.  A task is likely to be non-terminating if it fails to execute
+completely twice consecutively. The second incomplete execution executes after
+a power failure, when the device will have fully recharged its energy buffer.
+If a task cannot complete when executing with a full energy buffer, the task is
+non-terminating.
+
+After identifying a task as likely non-terminating, \sys must decide when
+during the task's execution to partially commit the task's state.
+%
+\sys sets a timer at the start of the likely non-terminating task, initializing
+it to a very large value (e.g., an estimate of the maximum execution time using
+the device's energy buffer).
+%
+If the timer expires before power fails, \sys partially commits, retaining 
+the timer value to use for future partial commits. 
+%
+If the timer does not expire before power fails, \sys halves the timer and
+tries again.
+%
+\sys's exponential decrease of the timer value converges rapidly to a useable
+timer value.
+
+%Putting these in comments to make space look right
+%\textcolor{red}{More variables describing the partial commit algorithm: we do not explore as many options for partial commit as we do for coalescing}
+
+%\todo{Proof of the maximum granularity of task downscaling - show it is limited by the clock}{Carlo}
+
+%\subsubsection{Why Task Downsizing is not \sys's Default Behavior}
+%I do not understand what this section is about so I am removing it.  If someone wants to take another crack at re-writing it feel free.
+%Task downsizing is the core novelty of \sys when it comes to code portability and re-usability. However, it has limitations, which force  it to be a non-default \sys behavior. 
+%
+%\textbf{Static deployment of partial commit stubs.} This approach reduces programmer effort, although the programmer still needs to apply \sys's API and distribute trigger points for partial commits. On the other hand, \sys' downsizing introduces an additional overhead by saving the stack and the register file each time it commits the pages. 
+%
+%\textbf{Dynamic deployment of partial commit stubs.} \sys downsizing does not rely on any information from the programmer to trigger the commit process. However, \sys utilizes a trial and error approach to optimize the commit rate over the entire program execution time. Therefore, it suffers from a large cumulative re-execution penalty.
