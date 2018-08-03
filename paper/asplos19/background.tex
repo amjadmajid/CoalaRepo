@@ -28,18 +28,19 @@ in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
 \subsection{Intermittent Execution}
 \label{sec:background_consistency}
 
-% \begin{wrapfigure}{t!}{0.5\textwidth}
 \begin{figure}
-	\begin{subfigure}[t]{\linewidth}
-		\centering \includegraphics[width=\columnwidth]{figures/crc_example}
-		\caption{Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration.}\label{fig:crc_example}
-	\end{subfigure}
-	\begin{subfigure}[t]{\linewidth}
-		\centering \includegraphics[width=\columnwidth]{figures/crc_example_war}
-		\caption{Execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)}\label{fig:crc_example_war}
-	\end{subfigure}
-	\caption{Code example demonstrating checkpointing gives rise to data inconsistency.}\label{fig:code_demo_incosistency}
-% \end{wrapfigure}
+    \begin{subfigure}{0.49\columnwidth}
+        \includegraphics[width=\columnwidth]{figures/war-example.pdf}
+        \caption{Subcaption}
+        \label{fig:war-example}
+    \end{subfigure}
+    \begin{subfigure}{0.49\columnwidth}
+        \includegraphics[width=\columnwidth]{figures/war-execution.pdf}
+        \caption{Subcaption}
+        \label{fig:war-execution}
+    \end{subfigure}
+    \caption{Main caption.}
+    \label{fig:war}
 \end{figure}
 
 Software running on an energy-harvesting device executes {\em intermittently}
