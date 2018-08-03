@@ -255,6 +255,12 @@ decreasing by $k \times x$, but only after a long time.
 \subsubsection{History-Guided Coalescing (HG)}
 \label{subsec:energyAware}
 
+\begin{figure*}
+    \includegraphics[width=\linewidth]{figures/hg-coal-horiz.pdf}
+    \caption{HG coalescing sample execution across two power cycles.}
+    \label{fig:hg-coal}
+\end{figure*}
+
 The History-Guided (HG) coalescing strategy adapts the coalescing target more
 quickly, addressing a key limitation of the EO coalescing strategy.  
 %
@@ -290,16 +296,15 @@ The HG algorithm is characterized by the following functions:
 \item $f_\text{commit}(B) = \lfloor(B / 2)\rfloor;$ 
 \end{itemize}
 
-Figure~\ref{fig:energyAware} illustrates the operation of the history-guided
-coalescing strategy.  Each white box is a task and each red box is a commit.
-Time goes left to right and consecutive white boxes with no intervening commit
-are coalesced tasks.  A gray box is a task interrupted by a power failure.  At
-the top, the figure shows the $i$th execution period, which has a history
-value of $H^{(i)} = 4$.  $B$ is initially two and decreases to one.  Once the
+Figure~\ref{fig:hg-coal} illustrates the operation of the history-guided
+coalescing strategy.
+The figure shows two power cycles following the $i$th, the latter having an
+execution history $H^{(i)} = 4$.
+Based on that, $B$ is initially set to two and then decreases to one. Once the
 value of $B$ reaches one, HG is, in effect, expecting a power failure,
-justifying the decrease in the coalescing target.  After the power failure, HG
-first updates the history $H = H^{i+1} = 8$. HG then uses the value of $H$ to
-update $B$, setting $B$ equal to four and continuing execution.  
+justifying the conservative approach. After the power failure, HG
+uses the most recent history $H^{(i+1)} = 8$ to set $B = 4$
+and continue execution.
 
 %, without losing generality or requiring hardware support,
 %Moreover, it takes advantage of the guarantees that the energy buffer offers on a fresh start by coalescing many static tasks.
