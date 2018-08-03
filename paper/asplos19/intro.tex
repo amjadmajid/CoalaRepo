@@ -134,15 +134,29 @@ is split by \sys to enable task termination and preserve execution progress, as 
 %run-time---unfortunately Task 4 is \emph{no more atomic}
 %since its re-execution will not always produce the same
 %results.
-\textbf{Challenges.} While a compiler can use static data privatization and commit instrumentation
-(i.e., redo-logging) to eliminate statically identifiable, inter-task data
-dependences~\cite{alpaca}, a \emph{dynamic} dependence between two coalesced
-tasks requires dynamic privatization and commit actions.
+\textbf{Challenges and Contributions} 
+\begin{itemize}
+\item\textit{challenge} 1) Given unpredictable energy shots arrival, how to specify the size of a dynamic task on the fly? \textit{contribution---1} \sys addresses this challenge by using its \textit{recent execution history} as a metric to estimate the environment energy conditions. Furthermore, It mitigates the risk of dynamic task re-execution by taking advantage of the certainty that the energy buffer offers and approaches the expected power interrupt carefully. 
 %
-To ensure consistency and respect inter-task dependences, \sys uses a novel
-approach \emph{power failure-immune memory virtualization} that buffers non-volatile variable
-updates in volatile memory during a coalesced task execution, before committing
-them to non-volatile memory at the dynamic task boundary.
+\item\textit{challenge} 2) Given dynamic variables dependencies, how to ensure efficient data protection against power interrupts? \textit{contribution---2} \sys ensures the consistency of the data by using a novel
+approach called \emph{dynamic group privatization}. Varying variables dependencies forces a static approach (i.e.~\cite{alpaca}) to operate by considering a worst case scenario (i.e. protecting all global variables) in each dynamic task transition. \sys, therefore, utilizes a real-time data tracking to enable partial data protection on a task transition. Individual variables tacking, however, slows down a system dramatically. Therefore, \sys  relies on a coarse locality principle and protects the global variables in a batch. Moreover, it optimizes the data transfer by using Direct Memory Access (DMA).
+
+\item\textit{challenge} 3) A static task decomposition model assumes that each
+single task can execute to completion. If the hardware energy buffer provides
+inadequate energy to execute each single task to completion, a program will not
+terminate~\cite{cleancut_2018}. under such conditions how to enable the dynamic execution model to progress on a sub-task level? \textit{contribution---3} To avoid non-termination under adversarial
+energy conditions, \sys uses a timer-based {\em partial task commit} mechanism.
+Partial execution avoids non-termination by committing the intermediate state of a long-running
+task that has repeatedly failed and restarted. Partial execution violates
+task atomicity, but preserves forward progress; if a programmer knows that
+task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
+
+% \textbf{dynamic privatization}: while a compiler can use static data privatization and commit instrumentation
+% (i.e., redo-logging) to eliminate statically identifiable, inter-task data
+% dependences~\cite{alpaca}, a \emph{dynamic} dependence between two coalesced
+% tasks requires dynamic privatization and commit actions.
+% %
+
 %
 %Therefore, we require a \emph{new execution
 %model} that keeps each virtual task atomic by committing the
@@ -150,15 +164,8 @@ them to non-volatile memory at the dynamic task boundary.
 %dynamically at run-time---keeping the non-volatile memory
 %unmodified upon a power-interrupt and preserving its
 %consistency.
-A static task decomposition model assumes that each
-single task can execute to completion. If the hardware energy buffer provides
-inadequate energy to execute each single task to completion, a program will not
-terminate~\cite{cleancut_2018}. To avoid non-termination under adversarial
-energy conditions, \sys uses a timer-based {\em partial task commit} mechanism.
-Partial execution avoids non-termination by committing the intermediate state of a long-running
-task that has repeatedly failed and restarted. Partial execution violates
-task atomicity, but preserves forward progress; if a programmer knows that
-task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
+% \textbf{task non-termination}: 
+
 %
 % !!!! % It should be emphasized that unlike a voltage-threshold-based protection approaches that may suffer from a non-termination problem if the checkpoint has to be placed within the interrupt-disabled region, a timer-based approach adapts its partial commit location on repeated failures.
 %
@@ -174,21 +181,22 @@ task atomicity is crucial to correctness, they can disable partial execution aro
 %automatic task decomposition allowed us to port several	applications to an
 %intermittent platform with a moderate effort.}
 %
-
-\textbf{Contributions.} To summarize, \sys's main contributions are:
-%
-\begin{itemize}
-\item The first {\em adaptive} task-based intermittent execution model that
-dynamically \emph{coalesces} tasks to reduce commit overhead and
-\emph{downscales} tasks to ensure forward progress.
-\item The first memory virtualization mechanism that preserves the atomicity of coalesced tasks under power failures.
-%\item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
-\item A fully-realized prototype of \sys that runs on real energy-harvesting devices, to be released as open source after publication via~\cite{coala_website}.
-\item An evaluation directly comparing \sys to a state of the art task-based
-intermittent programming and execution model from prior work, showing that on a
-suite of benchmarks from the literature and several new workloads, \sys often
-has higher performance and is more flexible to diverse energy conditions.
 \end{itemize}
+
+% \textbf{Contributions.} To summarize, \sys's main contributions are:
+% %
+% \begin{itemize}
+% \item The first {\em adaptive} task-based intermittent execution model that
+% dynamically \emph{coalesces} tasks to reduce commit overhead and
+% \emph{downscales} tasks to ensure forward progress.
+% \item The first memory virtualization mechanism that preserves the atomicity of coalesced tasks under power failures.
+% %\item A fall-back dynamic task splitting mechanism that preserves forward progress despite executing tasks that are too large for a device's energy supply.
+% \item A fully-realized prototype of \sys that runs on real energy-harvesting devices, to be released as open source after publication via~\cite{coala_website}.
+% \item An evaluation directly comparing \sys to a state of the art task-based
+% intermittent programming and execution model from prior work, showing that on a
+% suite of benchmarks from the literature and several new workloads, \sys often
+% has higher performance and is more flexible to diverse energy conditions.
+% \end{itemize}
 %
 Section~\ref{sec:background} provides background on intermittent computing.
 Section~\ref{sec:systemdescription} provides an overview of \sys, while
