@@ -30,9 +30,7 @@ in particular, our target platform, WISP~\cite{wisp}, is equipped with a
 mixture of SRAM and FRAM. Our implementation leverages hardware support for
 fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. \sys do not
 require architectural additions to commodity processors as
-in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}. \sys supports I/O
-behavior similar to~\cite{alpaca,chain}, allowing safe, synchronous I/O and
-unsafe, asynchronous I/O.
+in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
 
 \subsection{Intermittent Execution}
 \label{sec:background_consistency}
@@ -82,12 +80,12 @@ Especially, data can get inconsistent when code includes a
 \emph{write-after-read} (WAR) dependence between operations that manipulate
 non-volatile memory, because it allows {\em writes} from a failed attempt to
 persist across failure and be read by the {\em
-reads}~\cite{ratchet,dino,alpaca} ---see
+reads}~\cite{ratchet,dino,alpaca}\TODO{figure 2 dependent text ---see
 Figure~\ref{fig:code_demo_incosistency} that illustrates how state can become
 inconsistent in an intermittent execution using the cyclic redundancy check
 (CRC) code from MIBench2~\cite{hicks_mibench2_2016}.  Additional method to
 maintain data consistent in the presence of WAR dependency is necessary for
-correct execution.
+correct execution.}
 %Checkpoints of volatile state preserve intermittent progress, but do not ensure data consistency~\cite{dino,chain,ratchet}. Data may become inconsistent if an attempt to execute some computation {\em writes} to a non-volatile variable, then power fails, then a second attempt to re-execute the same computation incorrectly {\em reads} the value written in the first attempt, rather than the variable's original value. The situation occurs when code includes a \emph{write-after-read} (WAR) dependence between operations that manipulate non-volatile variables~\cite{ratchet,dino,alpaca}---see Figure~\ref{fig:code_demo_incosistency} that illustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}.
 %Figure~\ref{fig:code_demo_incosistency} illgit statuustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}. The code computes the CRC for an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
 %Despite checkpointing at line 3 in Fig.~\ref{fig:crc_example}, the code may compute  $\texttt{data}$ incorrectly because of the read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5. Figure~\ref{fig:crc_example_war} shows an intermittent execution. The second iteration writes $\texttt{Rmnd}$, but power fails before the checkpoint. After restarting, line 9 reads the updated value of $\texttt{Rmnd}$, producing an incorrect $\texttt{data}$ value. Checkpoint-based systems risk violating memory consistency~\cite{dino}. 
@@ -98,7 +96,7 @@ correct execution.
 \label{section:background_task_computing}
 
 Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to
-decompose their program into tasks, which is a region of code that can contain
+decompose their program into \textbf{tasks}, which is a region of code that can contain
 arbitrary computation, sensing, and communication.  Task-based models keep
 progress at the granularity of tasks by repeatedly trying to re-execute each
 task on power failure until it successfully finishes, only then moving on to
@@ -171,20 +169,23 @@ frequently.
 %\end{subfigure}
 %	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.} \textcolor{red}{figures need to be merged into one}}\label{fig:framEnergy}
 %\end{figure}
-As an illustration, we measured the energy cost of volatile SRAM and non-volatile FRAM accesses on
-the MSP430FR5969~\cite{msp430datasheet} MCU. We used EDB~\cite{edb} to monitor
-voltage drop on a capacitor powering the device across 1600 read and write
-accesses to each memory, randomizing accesses to avoid caching effects. Our
-data showed that a non-volatile memory access consumes around 1.5 times the
-energy of a volatile access. The data confirm that, because non-volatile memory
-accesses are more expensive than volatile memory accesses, prior systems that
-frequently access non-volatile memory may be artificially inefficient.
+
+% As an illustration, we measured the energy cost of volatile SRAM and non-volatile FRAM accesses on
+% the MSP430FR5969~\cite{msp430datasheet} MCU. We used EDB~\cite{edb} to monitor
+% voltage drop on a capacitor powering the device across 1600 read and write
+% accesses to each memory, randomizing accesses to avoid caching effects. Our
+% data showed that a non-volatile memory access consumes around 1.5 times the
+% energy of a volatile access. The data confirm that, because non-volatile memory
+% accesses are more expensive than volatile memory accesses, prior systems that
+% frequently access non-volatile memory may be artificially inefficient.
+
 %~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek}. 
 % Figure~\ref{fig:framEnergy} summarizes the data, showing that a non-volatile memory access consumes around 1.5 times the energy of a volatile access in this device. This observation is also consistent with the TI specification~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek} 
-\sys is motivated by this observation: \sys 
-moves data pages from FRAM to SRAM to maximize SRAM accesses and minimize FRAM
-accesses, to decrease energy consumption and increase the time between power
-failures. 
+
+% \sys is motivated by this observation: \sys 
+% moves data pages from FRAM to SRAM to maximize SRAM accesses and minimize FRAM
+% accesses, to decrease energy consumption and increase the time between power
+% failures. 
 
 %The cost of non-volatile memory motivates \sys, which virtualizes memory to primarily use SRAM.
 
@@ -214,29 +215,24 @@ failures.
 %Przemek placeholder
 %\textbf{Task-based Models have Syntactic Limitations.} State of the art task-based programming models, Alpaca~\cite{alpaca}, has substantial limitations that prohibit writing generic programs. First, for Alpaca (and Chain~\cite{chain}), accesses to protected variables must be applied \emph{only} by using the variable's name, i.e. reference by variable address is not possible. This limitation implies that existing third-party libraries, such as MCU-tailored FFT library~\cite{}, cannot be implemented to support Alpaca or Chain (not to mention the impossibility of the development of an intermittent-safe \texttt{memcpy}). Furthermore, if a protected variable needs to be accessed in a code path that is not predictable by the compiler, for instance an Interrupt Service Routine, Alpaca cannot protect that access.
 
-\textbf{Incorrectly Sized Tasks.} Compiler-inserted checkpoints or
-programmer-defined tasks can both both incorrect and non-terminating or
-inefficient.  If code between consecutive checkpoints or in a task (we refer to
-both scenarios as ''code in a task'' in this section) consumes {\em more} than the fixed,
+\textbf{Incorrectly Sized Tasks Problem.} Compiler-inserted checkpoints or
+programmer-defined tasks can be both non-terminating and/or
+inefficient.  If a task (or code between two checkpoints) consumes more than the fixed,
 maximum energy that the device can buffer, then the task
 will never be able to complete using buffered energy.  Such a task is
 non-terminating, {\em prevents forward progress}, and makes the program
 incorrect. 
 %
-If the task consumes far {\em less} energy than a device can buffer, the system
-may operate {\em inefficiently}, checkpointing or transitioning between tasks
-more often than needed. 
+If the task consumes far less energy than a device can buffer, the system
+may operate {\em inefficiently}, saving the program state more often than needed.
 %
-Avoiding excessively costly, non-terminating tasks and short, high-overhead
-tasks is challenging both to the programmer and the compiler, because
-estimating the exact energy use of an arbitrary code is complicated.  When {\em
-porting} a program from one platform to another, the problem becomes worse
-because an excessively costly task on one device may be a relatively short task
-on a device with a larger buffer.  Buffer sizes on different platforms vary
-widely from, e.g., 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo},
-complicating the problem.
+Avoiding excessively costly, non-terminating, tasks and short, high-overhead,
+tasks is challenging, because estimating the exact energy use of an arbitrary code is complicated.  
+Moreover, when \emph{heterogeneous devices} with different energy buffers (e.g., 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}) are considered the problem of porting a program become much worse
+because a large task on one device may be a relatively short task
+on a device with a larger buffer.
 %
-As a solution, \sys's execution model presents {\em task coalescing}, which
+\textbf{\sys's execution model} solves this dilemma by introducing {\em task coalescing}, which
 merges multiple tasks to amortize the overhead when tasks are too small, and
 {\em task downscaling}, which breaks up a task when the task is too large to complete. 
 %When a task and its successor both complete, the two tasks were interleaved by a task boundary that preserves progress and state (i.e., checkpoint or commit). However, absent a power failure, the work to preserve state was {\em unnecessary}, incurring overhead on the tasks' executions. Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware (no support from dedicated circuitry to measure the state of energy buffer) with a fixed energy buffering capacity. Buffer sizes from prior work on intermittently-powered computing hardware vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short task on a device with a larger buffer. The key problem is that using existing systems, by defining tasks statically for a fixed energy buffer, the programmer either risks non-termination or poor performance due to high overhead. \sys's execution model based on {\em task coalescing} and {\em task downscaling}.  Coalescing dynamically merges multiple tasks based on execution behavior to amortize the cost of committing each task separately. Downscaling breaks up a single task into multiple subtasks that commit individually to avoid executing a single task that is too large to complete using the device's buffered energy.  Section~\ref{sec:task_adaptation}describes \sys's adaptive coalescing and downscaling mechanisms in detail. The main enabler for \sys's adaptation is its novel \emph{memory virtualization} mechanism, which is described in Section~\ref{sec:memory_virtulaization}.
