@@ -97,23 +97,17 @@ correct execution.}
 
 Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to
 decompose their program into \textbf{tasks}, which is a region of code that can contain
-arbitrary computation, sensing, and communication.  Task-based models keep
-progress at the granularity of tasks by repeatedly trying to re-execute each
-task on power failure until it successfully finishes, only then moving on to
-the next task.  Since these models do not rely on taking an expensive
-checkpoint, it is usually faster than the checkpoint-based
+arbitrary computation, sensing, and communication.  Task-based models progress at the granularity of tasks. They re-execute each task interrupted by a power failure until it successfully finishes, only then moving on to
+the next task. Since these models do not rely on taking an expensive
+checkpoint, they are usually faster than the checkpoint-based
 solution~\cite{chain, alpaca}.  \sys also follows the paradigm of the
 task-based programming model, where the programmer explicitly expresses the
 application as a sequence of tasks and the transitions between them.
-%Task-based runtime systems ensure that repeated task executions are idempotent. 
-%The key to idempotence is ensuring that non-volatile updates made by an interrupted task are never visible to a future task execution.  
-%A programmer describes task control-flow as a {\em task graph}. Task flow happens at programmer demarcated transition points that may be conditional on program values. 
-%Task-based programming abstractions guarantee that tasks execute {\em atomically}, regardless of power failures. 
 
 Task-based models also suffer from data inconsistency when there is a WAR
 dependence.  Prior systems tried to tackle the problem by a compiler-automated
 redo-logging for the variables that is part of the dependence~\cite{alpaca}, or
-by statically creating a multiple copies of the problematic variable to ensure
+by statically creating multiple copies of the problematic variable to ensure
 that no task reads and writes the same copy~\cite{chain}.
 %There are several run time strategies to ensuring task idempotence. One approach~\cite{alpaca}, is to identify non-volatile data involved in WAR dependences in a task (like DINO~\cite{dino} and Ratchet~\cite{ratchet} did for checkpoints), execute the task using private copies of those data, and commit the private copies on task completion. Another way is to statically create multiple versions of non-volatile data shared by tasks and ensure that no task reads and writes the same version~\cite{chain}. Regardless of the strategy, task-based systems execute statically-defined tasks atomically, completing in one or more attempt. 
 
@@ -144,8 +138,7 @@ Prior systems, including the task-based models, suffer from two major overheads:
 
 
 \textbf{Frequent Non-volatile Memory Access.} 
-Previous systems frequently access the non-volatile memory directly, which 
-is a potential source of inefficiency.  Checkpointing systems copy all volatile
+Previous systems frequently access the non-volatile memory directly, which is a potential source of inefficiency.  Checkpointing systems copy all volatile
 state~\cite{dino, mementos, ratchet, hicks_isca_2017} to non-volatile memory at
 every checkpoint.  Task-based models, which do not take checkpoints, back up a
 subset of non-volatile data to maintain memory consistency using, e.g.,
@@ -153,67 +146,8 @@ redo-logging.  Table~\ref{table:chechpoint_comparison} summarizes the data that
 gets copied to and from the non-volatile memory in service of memory
 consistency and progress preservation.  Ratchet~\cite{ratchet} and
 Clank~\cite{hicks_isca_2017}, which require all memory to be non-volatile
-perform high frequency non-volatile memory accesses, into checkpointing
+perform high-frequency non-volatile memory accesses, into checkpointing
 frequently.
-
-%Intermittent execution models incur overheads to checkpoint data~\cite{dino,ratchet,quickrecall,mementos}, manage channels~\cite{chain}, or privatize and commit data~\cite{alpaca}. Table~\ref{table:chechpoint_comparison} compares overheads for recent intermittent execution models (cf. \cite[Sec. 2.4]{alpaca}.) The mechanism responsible for overhead in each model varies, but the bulk of overhead in all models is a manipulating non-volatile memory. Checkpointing moves data to and from non-volatile memory, channel accesses manipulate non-volatile data~\cite{chain}, privatization copies from and commits to non-volatile memory~\cite{alpaca}, and idempotence solutions~\cite{ratchet} use {\em only} non-volatile memory.  
-% We do not need to emphasize the following figure! (Sinan)
-%\begin{figure}
-%\begin{subfigure}[t]{.49\columnwidth}
-%	\centering \includegraphics[width=\columnwidth]{figures/fram_write}
-%	\caption{Cost of \emph{write} operation}
-%\end{subfigure}%
-%\begin{subfigure}[t]{.49\columnwidth}
-%	\centering \includegraphics[width=\columnwidth]{figures/fram_read}
-%	\caption{Cost of \emph{read} operation}
-%\end{subfigure}
-%	\caption{\textbf{Cost of accessing volatile (SRAM)/non-volatile (FRAM) memory during write/read operation.} \textcolor{red}{figures need to be merged into one}}\label{fig:framEnergy}
-%\end{figure}
-
-% As an illustration, we measured the energy cost of volatile SRAM and non-volatile FRAM accesses on
-% the MSP430FR5969~\cite{msp430datasheet} MCU. We used EDB~\cite{edb} to monitor
-% voltage drop on a capacitor powering the device across 1600 read and write
-% accesses to each memory, randomizing accesses to avoid caching effects. Our
-% data showed that a non-volatile memory access consumes around 1.5 times the
-% energy of a volatile access. The data confirm that, because non-volatile memory
-% accesses are more expensive than volatile memory accesses, prior systems that
-% frequently access non-volatile memory may be artificially inefficient.
-
-%~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek}. 
-% Figure~\ref{fig:framEnergy} summarizes the data, showing that a non-volatile memory access consumes around 1.5 times the energy of a volatile access in this device. This observation is also consistent with the TI specification~\cite{}. \todo{add citation to TI specification on FRAM energy cost}{Przemek} 
-
-% \sys is motivated by this observation: \sys 
-% moves data pages from FRAM to SRAM to maximize SRAM accesses and minimize FRAM
-% accesses, to decrease energy consumption and increase the time between power
-% failures. 
-
-%The cost of non-volatile memory motivates \sys, which virtualizes memory to primarily use SRAM.
-
-%The above result reassures the intuitive observation that a decrease of checkpoint frequency (CP) decreases the energy cost associated with each state preservation method and reduces operation cost which in most simplistic terms is defined as $\mathcal{O}(\text{CP})+\mathcal{O}(\text{PL})$, where PL is the cost of program execution without checkpointing. On the other hand, this increases task/checkpoint re-execution time. The ideal solution is a runtime that \emph{adaptively} changes task size during runtime, which however exposes a second problem.
-
-%\begin{table}
-%	\centering
-%	\footnotesize
-%	\begin{tabular}{|c|c|}
-%		\hline
-%		Platform name & Storage capacitor size \\
-%		\hline \hline
-%		%Moo~\cite{moo} & 0.1\,F \\
-%		WISPCam~\cite{naderiparizi_rfid_2015} & 6.08\,mF \\ %tested [11.24, 17.45, 21.98]\,mF
-%		%NFC-WISP~\cite{zhao_rfid_2015} & 300\,$\mu$F \\
-%		NeuralWISP~\cite{holleman_biocas_2008} & 100\,$\mu$F \\
-%		WISP~\cite{wisp5} & 47\,$\mu$F \\
-%		{\em BioImpedance} sensor~\cite{rodriguez_tbcs_2015} & 20\,$\mu$F \\
-%		{\em Ingestible} sensor~\cite{nadeau_naturebio_2017} & 220\,$\mu$F\\
-%		\hline
-%	\end{tabular} 
-%	\caption{{\em Default} energy storage sizes for example battery-less platforms. Observe a huge variation in storage capacity.}
-%	%We note that values for other representative platforms~\cite{medusa_farsens_2017,talla_imwut_2017,liu_sigcomm_2013,parks_sigcomm_2014} were not reported in their respective papers.
-%	\label{table:capacitor}
-%\end{table}
-
-%Przemek placeholder
-%\textbf{Task-based Models have Syntactic Limitations.} State of the art task-based programming models, Alpaca~\cite{alpaca}, has substantial limitations that prohibit writing generic programs. First, for Alpaca (and Chain~\cite{chain}), accesses to protected variables must be applied \emph{only} by using the variable's name, i.e. reference by variable address is not possible. This limitation implies that existing third-party libraries, such as MCU-tailored FFT library~\cite{}, cannot be implemented to support Alpaca or Chain (not to mention the impossibility of the development of an intermittent-safe \texttt{memcpy}). Furthermore, if a protected variable needs to be accessed in a code path that is not predictable by the compiler, for instance an Interrupt Service Routine, Alpaca cannot protect that access.
 
 \textbf{Incorrectly Sized Tasks Problem.} Compiler-inserted checkpoints or
 programmer-defined tasks can be both non-terminating and/or
@@ -235,6 +169,3 @@ on a device with a larger buffer.
 \textbf{\sys's execution model} solves this dilemma by introducing {\em task coalescing}, which
 merges multiple tasks to amortize the overhead when tasks are too small, and
 {\em task downscaling}, which breaks up a task when the task is too large to complete. 
-%When a task and its successor both complete, the two tasks were interleaved by a task boundary that preserves progress and state (i.e., checkpoint or commit). However, absent a power failure, the work to preserve state was {\em unnecessary}, incurring overhead on the tasks' executions. Avoiding excessively costly, non-terminating tasks and short, high-overhead tasks is a programming challenge, given fixed hardware (no support from dedicated circuitry to measure the state of energy buffer) with a fixed energy buffering capacity. Buffer sizes from prior work on intermittently-powered computing hardware vary widely from 20\,$\mu $F~\cite{rodriguez_tbcs_2015} to 0.1\,F~\cite{moo}. Sizing tasks complicates {\em porting} code from one device to another. An excessively costly task on a device with a small energy buffer may be a relatively short task on a device with a larger buffer. The key problem is that using existing systems, by defining tasks statically for a fixed energy buffer, the programmer either risks non-termination or poor performance due to high overhead. \sys's execution model based on {\em task coalescing} and {\em task downscaling}.  Coalescing dynamically merges multiple tasks based on execution behavior to amortize the cost of committing each task separately. Downscaling breaks up a single task into multiple subtasks that commit individually to avoid executing a single task that is too large to complete using the device's buffered energy.  Section~\ref{sec:task_adaptation}describes \sys's adaptive coalescing and downscaling mechanisms in detail. The main enabler for \sys's adaptation is its novel \emph{memory virtualization} mechanism, which is described in Section~\ref{sec:memory_virtulaization}.
-
-%\textbf{Motivating the Design of \sys's Execution Model.} The challenge of \em{efficiently} executing a program under frequent power failures, lies in the fact the the program needs to be energy aware. This challenge becomes even bigger when \em{generality} is a design requirement and such the system must not require a specific hardware circuitry to offer its efficiency. \em{Fllexibility} is key for wide adaptation, therefore, \sys's execution model should not limit the programmer to a subset of the functionality of the underlying software technology. \em{\sys champions an efficient, general, and flexible intermittent execution.}

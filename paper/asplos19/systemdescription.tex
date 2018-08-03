@@ -7,46 +7,20 @@
 % \end{wrapfigure}
 \end{figure}
 
-\sys is a new programming and execution model for intermittent computing on energy-harvesting devices. \sys addresses the challenges outlined in Section~\ref{sec:background} to make task-based intermittent programs {\em programmable} and {\em efficient}. \sys accomplishes this goal with a constellation of a new programming model and run time software system support, that supports dynamically adaptive task-based execution. Figure~\ref{fig:system_overview} shows an overview of \sys.
+\sys is a new programming and execution model for intermittent computing on energy-harvesting devices. \sys addresses the challenges outlined in Section~\ref{sec:background} to make task-based intermittent programs {\em programmable} and {\em efficient}. \sys accomplishes this goal with a constellation of a new programming model and runtime software system support, that supports dynamically adaptive task-based execution. Figure~\ref{fig:system_overview} shows an overview of \sys.
 
-\textbf{Programming and Execution Model.}  To use \sys, a programmer must convert a plain C code into tasks by  encapsulating the conde in set of top-level set of functions (tasks), sequences the control-flow between these tasks, and annotates memory accesses that manipulate global data.
+\textbf{Programming and Execution Model.}  To use \sys, a programmer must convert a plain C code into tasks by encapsulating the code in a top-level set of functions, sequences the control-flow between these tasks, and annotates memory accesses that manipulate global data.
 % In other words, it requires reasoning similar to prior task-based systems~\cite{chain,alpaca}. 
 
-% A programmer may also opt to use compiler support to automatically decompose a program into tasks, leveraging recent work~\cite{cleancut_2018,baghsorkhi_cgo_2018}. Without loss of generality, we assume throughout this work that the programmer manually decomposed the program into tasks; \sys's behavior with automatically decomposed code would be identical.
+% A programmer may also opt to use compiler support to automatically decompose a program into tasks, leveraging recent work~\cite{cleancut_2018,baghsorkhi_cgo_2018}. Without loss of generality, we assume throughout this work that the programmer manually decomposed the program into tasks; \sys's behavior with the automatically decomposed code would be identical.
 
 The programmer compiles their task-based code, and links to \sys runtime,
 producing a \sys-enabled binary. The runtime library relies on \sys's novel
-{\em virtual memory manager} and its {\em adaptive task scheduler} to execute the binary 
-efficiently. 
+{\em virtual memory manager} and its {\em adaptive task scheduler} to adapt its execution with the energy conditions.
 
 \textbf{Adaptive Task Scheduler.} 
-\sys's adaptive task scheduler decides when to coalesce consecutive tasks
-together to amortize commit and transition costs, and when to downscale a task,
-breaking it into multiple tasks, to avoid non-termination.
+\sys's adaptive task scheduler makes \emph{energy-aware} scheduling decisions to group tasks together to amortize commit and transition costs, or to downscale a task, breaking it into multiple tasks, to avoid non-termination. \sys's scheduler uses its recent execution history---no hardware dependency---as a metric to estimate energy availability. 
 
-\sys's scheduler dynamically {\em coalesces} statically\hyp{}defined tasks to
-avoid inessential overheads associated with completing tasks. By default, tasks
-run in a sequence and each task commits its task-shared state as it completes.
-The time and energy cost of a task's commit is unnecessary if the task and its
-successor both complete without a power failure. The key insight that \sys
-leverages is that the first task could have deferred its commit to the second
-task. {\em Coalescing} tasks by deferring the first commit avoids the fixed
-cost of the first commit (task transitioning overheads). Coalescing also
-amortizes per-variable commit cost, committing each location accessed by both
-tasks only after the second task, rather than once per task.  \sys makes
-\emph{energy-aware} scheduling decisions, using a short history of recently
-executed tasks to estimate available energy and guide future decisions. \sys
-relies on {\em software only}, avoiding the need for additional circuitry to,
-e.g., measure available energy.
-
-%to set the adequate coalesced task
-%size accordingly. This fundamental feature prevents \sys from blind coalesced
-%task adaptation which may result in a repeated power failure problem. For
-%example, If \sys enlarges the coalesced task size by $x$ static tasks on a
-%coalesced task completion and reduces it by the same number of static tasks on
-%a power reboot, then \sys may need to reboot, for instance, ten times to reduce
-%a coalesced task size from ten to one, when $x=1$. Details of coalescing will
-%be given in Section~\ref{sec:task_coalescing}.
 
 \sys's scheduler {\em downscales} a task to preserve forward progress when a
 single task repeatedly fails to execute to completion.  For a repeatedly-failing
