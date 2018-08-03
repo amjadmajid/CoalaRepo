@@ -6,11 +6,6 @@ radio frequency transmissions and solar energy. These devices elide tethered
 power or a battery, instead collecting energy into a capacitor, operating when
 sufficient energy accumulates, and upon depleting the energy, turning off and
 recharging.
-%
-%Batteryless operation has a number of important advantages, making intermittent computing an important research domain. Supplying power to billions~\cite{gartner_iot} of embedded computers using batteries is not sustainable. The European Commission estimates that more than 160 kilotons of consumer batteries enter the European Union annually~\cite{eu_batteries_2016}. Batteries are an environmental risk, are fragile, are limited in their number of charge/discharge cycles, and may require costly physical maintenance that is difficult or impossible deployed (e.g. in space~\cite{kicksat}). By contrast, super-capacitors are durable, promising millions of charge/discharge cycles~\cite[Sec. I]{ongaro_pwre_2012}. The main limitation in moving to capacitor-based energy storage is that capacitor energy density---and consequently operating discharge time---is orders of magnitude less than a battery. 
-%
-%Given current technology development, battery-less systems are best suited for very long-term sensing and monitoring where access to recharge is either prohibitive or impossible. These include battery-less image capture and processing~\cite{naderiparizi_rfid_2015}, animal monitoring~\cite{thomas_jbcs_2012} or implantable~\cite{rodriguez_tbcs_2015} and digestible~\cite{nadeau_naturebio_2017} sensors.
-%
 There are several energy harvesting battery-less hardware platforms. For
 instance, computational RFIDs---open-source TI MSP430-based~\cite{wolverine}
 WISP~\cite{wisp5} (with its variants such as
@@ -19,8 +14,6 @@ NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones
 such as~\cite{medusa_farsens_2017}. Other platforms include ambient backscatter
 tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less
 phone~\cite{talla_imwut_2017}. 
-
-%In all of the above, the main source of energy harvested is the electromagnetic radiation in the radio frequency range (ambient transmitters such as high power TV transmitters~\cite{liu_sigcomm_2013} or dedicated RFID antenna~\cite{wisp5,moo,talla_imwut_2017,medusa_farsens_2017,holleman_biocas_2008,naderiparizi_rfid_2015}). Naturally, other forms of energy harvesting sources exist, including temperature gradient, (micro-)motions, light/sun radiation, vibrations, and body fluid flow (blood, gastric acid). Several recent surveys discussing energy harvesting, low-power, embedded systems and intermittent computing at a high level~\cite{paradiso_pvc_2005,soyata_csm_2016,prasad_comst_2014,ku_cst_2016,lucia_snapl_2017}.
 
 \textbf{Hardware Assumptions.} \sys is designed for the demands of existing and
 future energy-harvesting platforms based around general purpose, commodity
@@ -56,8 +49,7 @@ operating periods interspersed with power
 failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on
 the size of the device's energy storage buffer: a larger buffer allows longer
 operating periods. 
-%Energy-harvesters provide input power orders of magnitude less than operating power, making recharging negligible during operation.
-%Intermittent execution is different from continuous execution. 
+
 A power failure clears volatile state (e.g., registers and SRAM) while
 non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows
 to a prior point in the execution: by default, to the beginning of {\tt
@@ -65,14 +57,6 @@ main()}. Early intermittent systems preserved progress by periodically
 checkpointing volatile execution context to non-volatile
 memory~\cite{mementos}, sometimes using hardware
 support~\cite{mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}. 
-
-%\begin{figure}
-%	\centering
-%	\subfloat[Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration]{\includegraphics[width=\columnwidth]{figures/crc_example}\label{fig:crc_example}}\\
-%	\subfloat[Consecutive execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)]{\includegraphics[width=\columnwidth]{figures/crc_example_war}\label{fig:crc_example_war}}
-%	\caption{Code example demonstrating effect of write after read on volatile memory checkpointing.}
-%	\label{fig:code_demo_incosistency}
-%\end{figure}
 
 Checkpointing volatile state alone do not ensure data consistency when the
 system can directly manipulate non-volatile memory~\cite{mspcdino}.
@@ -86,10 +70,6 @@ inconsistent in an intermittent execution using the cyclic redundancy check
 (CRC) code from MIBench2~\cite{hicks_mibench2_2016}.  Additional method to
 maintain data consistent in the presence of WAR dependency is necessary for
 correct execution.}
-%Checkpoints of volatile state preserve intermittent progress, but do not ensure data consistency~\cite{dino,chain,ratchet}. Data may become inconsistent if an attempt to execute some computation {\em writes} to a non-volatile variable, then power fails, then a second attempt to re-execute the same computation incorrectly {\em reads} the value written in the first attempt, rather than the variable's original value. The situation occurs when code includes a \emph{write-after-read} (WAR) dependence between operations that manipulate non-volatile variables~\cite{ratchet,dino,alpaca}---see Figure~\ref{fig:code_demo_incosistency} that illustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}.
-%Figure~\ref{fig:code_demo_incosistency} illgit statuustrates how state can become inconsistent in an intermittent execution using the cyclic redundancy check (CRC) code from MIBench2~\cite{hicks_mibench2_2016}. The code computes the CRC for an $\texttt{nBytes}$ byte message $\texttt{msg}$ with remainder $\texttt{Rmnd}$.
-%Despite checkpointing at line 3 in Fig.~\ref{fig:crc_example}, the code may compute  $\texttt{data}$ incorrectly because of the read of $\texttt{Rmnd}$ on line 4 and the write of $\texttt{Rmnd}$ on line 5. Figure~\ref{fig:crc_example_war} shows an intermittent execution. The second iteration writes $\texttt{Rmnd}$, but power fails before the checkpoint. After restarting, line 9 reads the updated value of $\texttt{Rmnd}$, producing an incorrect $\texttt{data}$ value. Checkpoint-based systems risk violating memory consistency~\cite{dino}. 
-%To maintain consistency, prior systems~\cite{dino} {\em version} a subset of non-volatile data with the checkpoint. Task-based systems~\cite{chain,alpaca}, which we focus on, ensure consistency using programmer, compiler, and runtime support.
 
 
 \subsection{Task-based Intermittent Programming}
@@ -109,7 +89,6 @@ dependence.  Prior systems tried to tackle the problem by a compiler-automated
 redo-logging for the variables that is part of the dependence~\cite{alpaca}, or
 by statically creating multiple copies of the problematic variable to ensure
 that no task reads and writes the same copy~\cite{chain}.
-%There are several run time strategies to ensuring task idempotence. One approach~\cite{alpaca}, is to identify non-volatile data involved in WAR dependences in a task (like DINO~\cite{dino} and Ratchet~\cite{ratchet} did for checkpoints), execute the task using private copies of those data, and commit the private copies on task completion. Another way is to statically create multiple versions of non-volatile data shared by tasks and ensure that no task reads and writes the same version~\cite{chain}. Regardless of the strategy, task-based systems execute statically-defined tasks atomically, completing in one or more attempt. 
 
 \subsection{Costs of Previous Models}
 \label{sec:cost_task-based}
