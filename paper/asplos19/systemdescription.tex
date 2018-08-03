@@ -9,15 +9,15 @@
 
 \sys is a new programming and execution model for intermittent computing on energy-harvesting devices. \sys addresses the challenges outlined in Section~\ref{sec:background} to make task-based intermittent programs {\em programmable} and {\em efficient}. \sys accomplishes this goal with a constellation of a new programming model and run time software system support, that supports dynamically adaptive task-based execution. Figure~\ref{fig:system_overview} shows an overview of \sys.
 
-\textbf{Programming and Execution Model.}  To use \sys, a programmer first writes plain, imperative C code. The programmer then must decompose the program into tasks. To manually decompose a program into tasks, the programmer designates a set of functions as tasks, sequences control-flow between these tasks, and annotates memory accesses that manipulate data shared by multiple tasks. In other words, it requires reasoning similar to prior task-based systems~\cite{chain,alpaca}. 
+\textbf{Programming and Execution Model.}  To use \sys, a programmer must convert a plain C code into tasks by  designates a top-level set of functions as tasks, sequences the control-flow between these tasks, and annotates memory accesses that manipulate global data.
+% In other words, it requires reasoning similar to prior task-based systems~\cite{chain,alpaca}. 
 
-A programmer may also opt to use compiler support to automatically decompose a program into tasks, leveraging recent work~\cite{cleancut_2018,baghsorkhi_cgo_2018}. Without loss of generality, we assume throughout this work that the programmer manually decomposed the program into tasks; \sys's behavior with automatically decomposed code would be identical.
+% A programmer may also opt to use compiler support to automatically decompose a program into tasks, leveraging recent work~\cite{cleancut_2018,baghsorkhi_cgo_2018}. Without loss of generality, we assume throughout this work that the programmer manually decomposed the program into tasks; \sys's behavior with automatically decomposed code would be identical.
 
 The programmer compiles their task-based code, and links to \sys runtime,
-producing a \sys-enabled binary. The runtime implements \sys's task-based
-programming and execution model. The runtime system also includes \sys's novel
-{\em virtual memory manager} and its {\em adaptive task scheduler}, both
-of which are essential to \sys's adaptive task-based execution.
+producing a \sys-enabled binary. The runtime library relies on \sys's novel
+{\em virtual memory manager} and its {\em adaptive task scheduler} to execute the binary 
+efficiently. 
 
 \textbf{Adaptive Task Scheduler.} 
 \sys's adaptive task scheduler decides when to coalesce consecutive tasks

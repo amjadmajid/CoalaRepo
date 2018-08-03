@@ -28,7 +28,7 @@ computing components~\cite{wisp,msp430datasheet}. We assume a device with a
 memory system that has fast, byte-addressable volatile and non-volatile memory;
 in particular, our target platform, WISP~\cite{wisp}, is equipped with a
 mixture of SRAM and FRAM. Our implementation leverages hardware support for
-fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. \sys do not
+fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. \sys does not
 require architectural additions to commodity processors as
 in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
 
@@ -104,7 +104,7 @@ the next task.  Since these models do not rely on taking an expensive
 checkpoint, it is usually faster than the checkpoint-based
 solution~\cite{chain, alpaca}.  \sys also follows the paradigm of the
 task-based programming model, where the programmer explicitly expresses the
-application as a sequence of tasks and the transition between them.
+application as a sequence of tasks and the transitions between them.
 %Task-based runtime systems ensure that repeated task executions are idempotent. 
 %The key to idempotence is ensuring that non-volatile updates made by an interrupted task are never visible to a future task execution.  
 %A programmer describes task control-flow as a {\em task graph}. Task flow happens at programmer demarcated transition points that may be conditional on program values. 
