@@ -145,17 +145,17 @@ justifying the conservative approach. After the power failure, EG
 uses the most recent history $H^{(i+1)} = 8$ to set $B = 4$
 and continue execution.
 %
-\subsubsection{Weighted History-Guided Coalescing (WHG)}
+\subsubsection{Weighted Energy-Guided Coalescing (WEG)}
 \label{subsec:energyTaskAware}
 %
-The Weighted History-Guided (WHG) coalescing strategy accounts for the
+The \emph{Weighted Energy-Guided} (WEG) coalescing strategy accounts for the
 different energy and time cost of a program's tasks when setting the coalescing
 target.
 %
 Each different task in the program consumes a different amount of energy to
 execute to completion.  
 %
-The EO and HG coalescing strategies assume each task has uniform energy cost:
+The EO and EG coalescing strategies assume each task has uniform energy cost:
 for these strategies, $B$ simply corresponds to a target {\em count} of tasks
 coalesced, regardless of the individual cost of each task.
 %
@@ -163,30 +163,30 @@ However, if one task executes for ten seconds and another executes for one
 second, counting tasks misjudges the amount of {\em work} in the coalesced
 tasks.
 
-Instead, WHG associates a non-unity weight with each task in the program. 
+Instead, WEG associates a non-unity weight with each task in the program. 
 %
-WHG tracks the sum of the weights of tasks in a coalesced sequence of tasks.
+WEG tracks the sum of the weights of tasks in a coalesced sequence of tasks.
 %
-When the sum of weights reaches $B$, the target, WHG commits the coalesced
+When the sum of weights reaches $B$, the target, WEG commits the coalesced
 task.
 %
-WHG differs extends EO and HG to explicitly account for the variation in energy
+WEG differs from EO and HG by explicitly accounting for the variation in energy
 cost of a program's tasks, eliminating the assumption that all tasks do the
 same work, which is a key limitation.
 %
-WHG has the same characteristic operations as HG, except that
+WEG has the same characteristic operations as HG, except that
 $f_\text{weight}(T_\text{i}) = W_\text{i}$.
 
-The effectiveness of the WHG algorithm hinges on correctly identifying the
-weight of each task, which WHG assumes is {\em statically} available.
+The effectiveness of the WEG algorithm hinges on correctly identifying the
+weight of each task, which WEG assumes is {\em statically} available.
 %
 Profiling the time and energy cost of tasks in a program is a difficult,
 orthogonal problem~\cite{cleancut_2018,baghsorkhi_cgo_2018}.
 %
-WHG could use the result of an arbitrarily sophisticated profiling procedure.
+WEG could use the result of an arbitrarily sophisticated profiling procedure.
 %
-To produce a concrete result in this paper, we give WHG access to a simple
+To produce a concrete result in this paper, we give WEG access to a simple
 profile of task run time collected offline using a single fixed input.
 %
-WHG stores the profile in a lookup table that maps a task's identifier to its
+WEG stores the profile in a lookup table that maps a task's identifier to its
 weight, making the information available to \sys's scheduler at run time.
