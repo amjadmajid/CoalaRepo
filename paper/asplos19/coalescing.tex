@@ -86,7 +86,7 @@ possible coalescing strategies that we developed for \sys, albeit not the only p
 \subsubsection{Energy-Oblivious Coalescing (EO)}
 \label{subsec:energyBlind}
 % 
-A very simple {\em energy-Oblivious} coalescing strategy treats all tasks as
+A very simple {\em energy-oblivious} coalescing strategy treats all tasks as
 having unity weight and varies the size of a coalesced task linearly. In such a
 scheme, the number of tasks to coalesce, $B$, increases by a constant $x$ when
 a coalesced sequence of tasks commits, and decreases by the same constant $x$
@@ -103,28 +103,17 @@ failure. The characteristic operations of the energy-oblivious strategy are:
 %
 The energy-oblivious strategy reacts slowly to the variation in the energy
 required to execute different tasks and to the variation in the effective quantum of
-energy available to the device (i.e., variation in energy buffer size). 
-%
-Fig.~\ref{fig:energyBlind} shows how this strategy may experience a 
-large number of repeated power failures without forward progress.
-%
-With the successful commit of each coalesced task sequence, the coalescing
-target increases.  Eventually, the target may be too high and a coalesced task
+energy available to the device. With the successful commit of each coalesced task sequence, the coalescing target increases.  Eventually, the target may be too high and a coalesced task
 composed of only fewer tasks will commit without interruption by a power
 failure.
 %
-The strategy then slowly decreases the coalescing target, eventually reaching a
+The strategy then linearly decreases the coalescing target, eventually reaching a
 coalescing target that allows completion.
 %
 A key limitation of this algorithm lies in the equality of the target decrease
-in $f_\text{reboot}(B)$ and the increase in $f_\text{commit}(B)$.  If, after
-some number $k$ successful commits the target must decrease back to its
-original value before the $k$ commits, the algorithm must then decrease $B$ by
-$k \times x$.  To accumulate this decrease, this strategy requires $k$ power
-failures, after each of which the strategy decreases $B$ by $x$, eventually
-decreasing by $k \times x$, but only after a long time. 
+in $f_\text{reboot}$ and the increase in $f_\text{commit}$.  Let us assume $x=1$. If, after $k$ successful commits the target must decrease to its original value $B-k$ due to an energy drop, this strategy requires $k$ successive power failures.
 %
-\subsubsection{History-Guided Coalescing (HG)}
+\subsubsection{Energy-Guided Coalescing (EG)}
 \label{subsec:energyAware}
 %
 \begin{figure*}
@@ -133,41 +122,26 @@ decreasing by $k \times x$, but only after a long time.
     \label{fig:hg-coal}
 \end{figure*}
 %
-The \emph{History-Guided} (HG) coalescing strategy adapts the coalescing target more
-quickly, addressing a key limitation of the EO coalescing strategy.  
-HG gives each task unity weight, as with EO.  
-HG differs from EO in how it updates $B$ on commit, and after a power failure.
-HG assumes that as the duration of execution since a power failure increases,
-the amount of energy remaining decreases, and the risk of failing during a long
-sequence of coalesced tasks increases.  
-Consequently, HG decreases the coalescing target by half with each successful commit.
-HG is {\em history-guided} because it initializes the coalescing target to be
-equal to $H$, the total number of tasks executed between the most recent pair
-of power failures.
+The \emph{Energy-Guided} (EG) coalescing strategy adapts its coalescing target more quickly, addressing a key limitation of the EO, to adhere to changes in energy conditions. It uses its recent execution history as 
+mean to measure energy availability and alters its target accordingly.
+By relying on the history of execution EG eliminates the problem of frequent power failures a single coalesced task. In fact EG can reduce its target to one from any coalesced target in at most two successive power failures. For instance, if the execution is interrupted after finishing a single task the history will be one ($H = 1$) and the target will be set to one also. 
 While a history of $H$ suggests that there is sufficient energy to coalesce and
-successfully commit $H$ tasks (i.e., to set $B = H$), HG conservatively sets $B$ equal to half
-of $H$ moderating the risk of a very long coalesced task. 
-The fraction of the history by which HG adjusts $B$ is arbitrary.
-We experimented with a range of fraction values, settling on one half as the
-default for HG, because one half had the highest performance. 
-
-The HG algorithm is characterized by the following functions: 
+successfully commit $H$ tasks (i.e., to set $B = H$). EG conservatively sets $B$ equal to half of $H$ moderating the risk of a very long coalesced task. We experimented with a range of fraction values, settling on one half as the default for EG, because one half had the highest performance. The EG algorithm is characterized by the following functions: 
 %
 \begin{equation}
 	\begin{split}
-		 f_\text{reboot}(H) 			& = \lfloor(H / 2)\rfloor \\
+		 f_\text{reboot}(H) 			& = \lceil(H / 2)\rceil \\
 		 f_\text{weight}(T_\text{i}) 	& =  1 \\
-		 f_\text{commit}(B) 			& = \lfloor(B / 2)\rfloor
+		 f_\text{commit}(B) 			& = \lceil(B / 2)\rceil
 	\end{split}
 \end{equation}
 %
-Fig.~\ref{fig:hg-coal} illustrates the operation of the history-guided
-coalescing strategy.
+Fig.~\ref{fig:hg-coal} illustrates the operation of the EG.
 The figure shows two power cycles following the $i$th, the latter having an
 execution history $H^{(i)} = 4$.
 Based on that, $B$ is initially set to two and then decreases to one. Once the
-value of $B$ reaches one, HG is, in effect, expecting a power failure,
-justifying the conservative approach. After the power failure, HG
+value of $B$ reaches one, EG is, in effect, expecting a power failure,
+justifying the conservative approach. After the power failure, EG
 uses the most recent history $H^{(i+1)} = 8$ to set $B = 4$
 and continue execution.
 %
