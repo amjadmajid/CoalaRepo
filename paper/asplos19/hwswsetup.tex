@@ -77,13 +77,13 @@ evaluate \sys.}
 \end{table}
 
 We evaluated \sys using six benchmarks that are oftenly used in embedded systems (summarized in
-Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
-
+Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.\\
+%
 \textbf{Comparison with Alpaca using the GCC compiler.} We compare
 \sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for
 intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the
-same for both systems.
-
+same for both systems.\\
+%
 Since Alpaca's compiler pass is implemented only for LLVM, we could not use
 that implementation to instrument the benchmarks and compile them with GCC.
 Instead, we \emph{manually} performed the instrumentation done by the compiler
@@ -101,11 +101,3 @@ LLVM~\cite{baghsorkhi_cgo_2018}.
 %
 By compiling both systems with the same compiler (GCC), we ensure that our
 comparison in Section~\ref{sec:evaluation} is fair.
-
-% Unnecessary
-%\textbf{Comparison of \sys against other Systems.} We do not compare \sys
-%against Chain~\cite{chain}, another task-based system, which is inferior to
-%Alpaca in its performance. Also, we do not compare \sys to
-%checkpointing-based systems, such as DINO~\cite{dino} or
-%Mementos~\cite{mementos} (cf. Section~\ref{sec:background_consistency}).
-%\todo{Provide reasons why we do not compare against checkpointing}{Brandon}.
