@@ -1,13 +1,11 @@
 \documentclass[border={20pt 5pt 10pt 10pt}]{standalone} % Left Bottom Right Top
-
-\usepackage{xparse}
+ \usepackage{xparse}
 \usepackage{listings}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{amsmath} %for \text{} macro
 \usepackage{wasysym} %for \lightning symbol
 \usepackage{amssymb} %for \circlearrowright symbol
-
-\lstdefinestyle{mystyle}{
+ \lstdefinestyle{mystyle}{
     numbers=left, % display line numbers on the left
     showlines=true,
     frame=single,
@@ -24,29 +22,15 @@
     morecomment=[l]{//},
     keepspaces=true
 }
-
-<<<<<<< HEAD
-\begin{document}	
-=======
-\begin{document}
->>>>>>> a43433fcb870e8b69ed938dab7c57c28daf756d2
-
-\begin{lstlisting}[style=mystyle, linewidth=115px]
+ \begin{document}
+ \begin{lstlisting}[style=mystyle, linewidth=115px]
 $\text{\textcolor{red}{checkp()}}$;    // i = 0
 sum += x[0];
 i++;
 $\text{\textcolor{red}{checkp()}}$;    // i = 1
 sum += x[1];
-<<<<<<< HEAD
-$\text{\textcolor{red}{\lightning\hspace{0.3cm}\lightning\hspace{0.3cm}\lightning}}$  // power fail
-$\textcolor{red}{\circlearrowright\hspace{0.3cm}} \text{\textcolor{red}{checkp()}}$; // i = 1
-sum += x[1]; // wrong
-\end{lstlisting} 
-=======
 $\text{\textcolor{red}{\lightning\hspace{0.3cm}\lightning\hspace{0.12cm}}}$ // power failure
 $\textcolor{red}{\circlearrowright\hspace{0.28cm}}\text{\textcolor{red}{checkp()}}$; // i = 1
 sum += x[1]; // wrong
 \end{lstlisting}
->>>>>>> a43433fcb870e8b69ed938dab7c57c28daf756d2
-
 \end{document}
