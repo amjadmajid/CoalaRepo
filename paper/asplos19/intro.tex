@@ -53,41 +53,36 @@ approaches are simpler and applicable to existing devices today. Therefore, this
     \label{fig:coalesce}
 \end{figure}
 %
-\textbf{Task Decomposition of Intermittent Programs.} {\em
-Task-based} programming and execution models require a
+\textbf{Task Decomposition of Intermittent Programs.} Task-based programming and execution models require a
 programmer~\cite{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to
-statically decompose a program into a collection of {\em tasks}.  A task can
+statically decompose a program into a collection of tasks.  A \emph{task}, a top level function, can
 include arbitrary computation that should be executed despite arbitrarily-timed power failures.
 The programmer (or a compiler) explicitly expresses task-to-task control flow.
-Figure~\ref{fig:coalesce} illustrates how a program's tasks execute and
-shows how tasks can impose a run-time overhead. At each task transition, the system incurs an overhead to track and atomically \emph{commit} modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at run-time.
+Fig.~\ref{fig:coalesce} illustrates how a program's tasks execute and
+shows how tasks transitions can impose a run-time overhead. At each transition, the system incurs an overhead to track and atomically commit modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at run-time.
 %
-A programmer may thus create very large tasks in an attempt to reduce
-overhead by minimizing the number of task transitions. However, a very large
-task may require more energy to complete than a device's fixed hardware energy
-buffer can hold which may lead to a program non-termination problem. To eliminate this risk,
-existing systems require the programmer to decompose a program
-into small tasks, all of which complete using only buffered energy. These
-constraints on task sizing leave an unsatisfying dilemma: large, efficient
-tasks that risk non-termination, or small tasks that are guaranteed to
-complete, but incur a high task transition and commit overhead. In this work,
-we propose a third way, using a novel technique called {\em adaptive execution by dynamic task
-coalescing/splitting} that efficiently executes small tasks, trimming unnecessary overheads, while avoiding the risk of non-termination.
+A programmer may thus create very large tasks in an attempt to reduce task transitions
+overhead. However, a very large task may require more energy to complete than a device's fixed hardware energy
+buffer can hold which may lead to a task non-termination problem. To eliminate this risk,
+existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing leave an unsatisfying dilemma: large, efficient tasks that risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. In this work,
+we propose a third way, using a novel technique called \emph{adaptive task size execution by task coalescing/splitting} that efficiently executes small tasks, trimming unnecessary overheads, while avoiding the risk of non-termination.
 %
-This paper introduces a new system called \sys, which executes a task-based
+This paper introduces a new system called \emph{\sys}, which executes a task-based
 intermittent program by dynamically coalescing/splitting its tasks.
-\sys accepts any static decomposition and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute
-with no commit overhead between them, instead performing
-task-end commit actions at the end of the second task only.
-%
-When there is sufficient energy to execute both tasks, two distinct, small
-tasks are effectively executed as a single large task, preserving the atomicity
-of both. If power fails during a coalesced task, execution restarts from the
-{\em first} of the coalesced tasks. Figure~\ref{fig:coalesce} (top)
-illustrates how dynamic coalescing removes unnecessary overhead and shortens intermittent program execution.
-On the other hand, a large task that requires more energy to complete than a device buffered energy
-is split by \sys to enable task termination and preserve execution progress, as depicted in Figure~\ref{fig:coalesce} (bottom).
-%
+\sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce} (top)) or splits them (Fig.~\ref{fig:coalesce} (bottom)) based on the estimated energy availability. 
+\sys does not requires hardware support for energy estimation to make its scheduling decisions. 
+
+% \sys accepts any static decomposition and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute
+% with no commit overhead between them, instead performing task-end commit actions at the end of the second task only.
+% %
+% When there is sufficient energy to execute both tasks, two distinct, small
+% tasks are effectively executed as a single large task, preserving the atomicity
+% of both. If power fails during a coalesced task, execution restarts from the
+% {\em first} of the coalesced tasks. Figure~\ref{fig:coalesce} (top)
+% illustrates how dynamic coalescing removes unnecessary overhead and shortens intermittent program execution.
+% On the other hand, a large task that requires more energy to complete than a device buffered energy
+% is split by \sys to enable task termination and preserve execution progress, as depicted in Figure~\ref{fig:coalesce} (bottom).
+
 \textbf{Challenges and Contributions} 
 \begin{itemize}
 \item\textit{challenge} 1) Given unpredictable energy shots arrival, how to specify the size of a dynamic task on the fly? \textit{contribution---1} \sys addresses this challenge by using its \textit{recent execution history} as a metric to estimate the environment energy conditions. Furthermore, It mitigates the risk of dynamic task re-execution by taking advantage of the certainty that the energy buffer offers and approaches the expected power interrupt carefully. 

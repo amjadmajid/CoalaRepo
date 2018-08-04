@@ -67,7 +67,7 @@ Precisely, data can get inconsistent when code includes a
 \emph{write-after-read} (WAR) dependence between operations that manipulate
 non-volatile memory, because it allows {\em writes} from a failed attempt to
 persist across failure and be read by the {\em reads}~\cite{ratchet,dino,alpaca}.
-Figure~\ref{fig:war} illustrates how state can become
+Fig.~\ref{fig:war} illustrates how state can become
 inconsistent in an intermittent execution using a simple example of an average
 operation over an array of integers.
 The non-volatile variable \texttt{sum} introduces the WAR, being read and written sequentially
