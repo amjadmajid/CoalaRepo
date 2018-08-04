@@ -31,17 +31,19 @@ in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
 \begin{figure}
     \begin{subfigure}{0.49\columnwidth}
         \includegraphics[width=\columnwidth]{figures/war-example.pdf}
-        \caption{Subcaption}
+        \caption{WAR-affected code}
         \label{fig:war-example}
     \end{subfigure}
     \begin{subfigure}{0.49\columnwidth}
         \includegraphics[width=\columnwidth]{figures/war-execution.pdf}
-        \caption{Subcaption}
+        \caption{Incorrect execution}
         \label{fig:war-execution}
     \end{subfigure}
-    \caption{Main caption.}
+    \caption{WAR dependence example. \texttt{NV} marks non-volatile variables,
+    while \texttt{checkp()} is a checkpoint of volatile state.}
     \label{fig:war}
 \end{figure}
+
 
 Software running on an energy-harvesting device executes {\em intermittently}
 because energy sources are not always available to harvest and buffer
@@ -59,12 +61,25 @@ checkpointing volatile execution context to non-volatile
 memory~\cite{mementos}, sometimes using hardware
 support~\cite{mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}. 
 
+<<<<<<< HEAD
 Checkpointing volatile state alone do not ensure data consistency when the
+=======
+%\begin{figure}
+%	\centering
+%	\subfloat[Simplified C code snippet of a CRC calculation from~\cite{hicks_mibench2_2016}: per-byte message division by a polynomial; \texttt{NV} denotes non-volatile variable declaration]{\includegraphics[width=\columnwidth]{figures/crc_example}\label{fig:crc_example}}\\
+%	\subfloat[Consecutive execution steps of the loop body in the snippet above: non-volatile checkpointing did not guarantee data consistency as data has been manipulated (line 9) with stale reminder (line 3)]{\includegraphics[width=\columnwidth]{figures/crc_example_war}\label{fig:crc_example_war}}
+%	\caption{Code example demonstrating effect of write after read on volatile memory checkpointing.}
+%	\label{fig:code_demo_incosistency}
+%\end{figure}
+
+Checkpointing volatile state alone does not ensure data consistency when the
+>>>>>>> a43433fcb870e8b69ed938dab7c57c28daf756d2
 system can directly manipulate non-volatile memory~\cite{mspcdino}.
-Especially, data can get inconsistent when code includes a
+Precisely, data can get inconsistent when code includes a
 \emph{write-after-read} (WAR) dependence between operations that manipulate
 non-volatile memory, because it allows {\em writes} from a failed attempt to
 persist across failure and be read by the {\em
+<<<<<<< HEAD
 reads}~\cite{ratchet,dino,alpaca}\TODO{figure 2 dependent text ---see
 Figure~\ref{fig:code_demo_incosistency} that illustrates how state can become
 inconsistent in an intermittent execution using the cyclic redundancy check
@@ -72,6 +87,15 @@ inconsistent in an intermittent execution using the cyclic redundancy check
 maintain data consistent in the presence of WAR dependency is necessary for
 correct execution.}
 
+=======
+reads}~\cite{ratchet,dino,alpaca}.
+Figure~\ref{fig:war} illustrates how state can become
+inconsistent in an intermittent execution using a simple example of an average
+operation over an array of integers.
+The variable \texttt{sum} introduces the WAR, being read and written sequentially
+by the increment operation, thus being erroneously incremented when a power
+failure occurs before updating the index \texttt{i}.
+>>>>>>> a43433fcb870e8b69ed938dab7c57c28daf756d2
 
 \subsection{Task-based Intermittent Programming}
 \label{section:background_task_computing}
@@ -98,22 +122,22 @@ Prior systems, including the task-based models, suffer from two major overheads:
 {\em frequent non-volatile memory access} and {\em incorrectly sized, inefficient or non-terminating tasks}.
 
 \begin{table}
-	\centering
-	\footnotesize
-	\begin{tabular}{|c|c|}
-		\hline
-		Model & Data Copied to/from NVRAM \\
-		\hline\hline
-		Mementos~\cite{mementos}	& Registers + Stack     \\
-		DINO~\cite{dino}	& Registers + Stack + WAR NV variables \\%used in task\\
-		Chain~\cite{chain}	& PC + NV variables used in task\\
-		Alpaca~\cite{alpaca}	& PC + WAR NV variables used in task\\
-		Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Registers (requires NV main memory) \\
-		Region Formation~\cite{baghsorkhi_cgo_2018} & Registers + Updated variables in task \\
-		\hline
-	\end{tabular}
-	\caption{Non-volatile memory access for data consistency; \emph{PC}: program counter, \emph{WAR variables}: variables involved in Write after Read (WAR) dependences, \emph{NV}: non-volatile.}
-	\label{table:chechpoint_comparison}
+    \centering
+    \footnotesize
+    \begin{tabular}{|c|c|}
+        \hline
+        Model & Data Copied to/from NVRAM \\
+        \hline\hline
+        Mementos~\cite{mementos}	& Registers + Stack     \\
+        DINO~\cite{dino}	& Registers + Stack + WAR NV variables \\%used in task\\
+        Chain~\cite{chain}	& PC + NV variables used in task\\
+        Alpaca~\cite{alpaca}	& PC + WAR NV variables used in task\\
+        Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Registers (requires NV main memory) \\
+        Region Formation~\cite{baghsorkhi_cgo_2018} & Registers + Updated variables in task \\
+        \hline
+    \end{tabular}
+    \caption{Non-volatile memory access for data consistency; \emph{PC}: program counter, \emph{WAR variables}: variables involved in Write after Read (WAR) dependences, \emph{NV}: non-volatile.}
+    \label{table:chechpoint_comparison}
 \end{table}
 
 
