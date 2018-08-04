@@ -4,7 +4,7 @@ Release/
 .xdchelp
 .config/
 .lauches/
-paper.pdf
+paper*.pdf
 !paper/figures/*.pdf
 build/
 *.aux
