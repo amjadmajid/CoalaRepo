@@ -15,17 +15,6 @@ producing a \sys-enabled binary. The runtime library relies on \sys's novel
 \textbf{Adaptive Task Scheduler.} 
 \sys's adaptive task scheduler makes \emph{energy-aware} scheduling decisions to group tasks together or split a task. By coalescing tasks \sys amortizes commit and transition costs, and by a task splitting, after repeated failures on a single task, it avoids the task non-termination problem. The scheduler uses its recent execution history---no hardware dependency---as a metric to estimate energy availability and eventually to decide on the dynamic task size. 
 
-% HERE -----------------------------
 \textbf{Virtual Memory Manager.} \sys is able to efficiently coalesce
-tasks because of its efficient virtual memory manager. \sys's memory manager
-paginates memory and ensures that data in a page remain consistent despite
-power interruptions. \sys allows a task to manipulate data in a volatile copy
-of a page only. Pages swap between volatile and non-volatile memory, depending
-on the capacity of the volatile memory and the program's access pattern. \sys
-tracks a task's memory accesses efficiently at page granularity (rather than
-using, e.g., costly word-granular tracking). When a task ends, each page it
-accessed commits from volatile memory (or from a non-volatile swap region for
-dirty pages) back to the non-volatile main memory. Pages efficiently,
-atomically commit using a two-phase commit procedure accelerated using hardware
-support for direct memory access (DMA). Section~\ref{sec:memory_virtulaization}
-provides details of \sys's memory manager.
+tasks because of its efficient virtual memory manager (VMM).
+the VMM privatizes a group of memory pages demanded by a coalesced task, and limits an application access only to the fast volatile memory. It persists all pages modifications in non-volatile memory on a coalesced task transition. Section~\ref{sec:memory_virtulaization} provides details of VMM.
