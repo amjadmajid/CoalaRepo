@@ -105,7 +105,7 @@ inadequate energy to execute each single task to completion, a program will not
 terminate~\cite{cleancut_2018}. Under such conditions how to enable the dynamic execution model to progress on a sub-task level? To avoid non-termination under adversarial
 energy conditions, \sys uses a novel timer-based {\em partial task commit} mechanism.
 Partial execution avoids non-termination by committing the intermediate state of a long-running
-task that has repeatedly failed and restarted. 
+task that has repeatedly failed and restarted.
 %Partial execution violates task atomicity, but preserves forward progress; if a programmer knows that task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
 
 %\begin{itemize}
@@ -125,6 +125,10 @@ task that has repeatedly failed and restarted.
 %task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
 %\end{itemize}
 %
+
+\todo{Add a summary of our extensive evaluations.}{Amjad, Carlo} To asses the benefits of \sys over existing task-based systems, we .... 
+Our evaluation shows that \sys is $2X$ more energy-efficient than the state-of-the-art system in most cases and is able to progress where static systems fail---\emph{the only task-based system that guarantees task termination in any arbitrary task division}.
+ 
 
 The rest of this paper is organized as follows. Section~\ref{sec:background} provides background on intermittent computing.
 Section~\ref{sec:systemdescription} provides an overview of \sys, while
