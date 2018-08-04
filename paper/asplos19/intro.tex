@@ -50,7 +50,7 @@ approaches are simpler and applicable to existing devices today. Therefore, this
 \begin{figure}
     \centering
     \includegraphics[width=0.7\columnwidth]{figures/intro-figure-vert.pdf}
-    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits (denoted as \texttt{C} in the figure). On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
+    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits (denoted as \texttt{C}) of individual tasks (denoted as \texttt{T(x)}). On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
     \label{fig:coalesce}
 \end{figure}
 %
@@ -59,23 +59,22 @@ approaches are simpler and applicable to existing devices today. Therefore, this
 \noindent\textbf{Crucial Drawback of Static Task Decomposition.} 
 Task-based programming and execution models require a
 programmer~\cite{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to
-statically decompose a program into a collection of tasks.  A \emph{task}, a top level function, can
+statically decompose a program into a collection of tasks. A \emph{task}, a top level function, can
 include arbitrary computation that should be executed despite arbitrarily-timed power failures.
 The programmer (or a compiler) explicitly expresses task-to-task control flow.
 Fig.~\ref{fig:coalesce} illustrates how a program's tasks execute and
-shows how tasks transitions can impose a run-time overhead. At each transition, the system incurs an overhead to track and atomically commit modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at run-time.
+shows how tasks transitions can impose a runtime overhead. At each transition, the system incurs an overhead to track and atomically commit modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at runtime.
 %
 A programmer may thus create very large tasks in an attempt to reduce task transitions
 overhead. However, a very large task may require more energy to complete than a device's fixed hardware energy
 buffer can hold which may lead to a task \emph{non-termination} problem. To eliminate this risk,
-existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing leave an unsatisfying dilemma: large, efficient tasks that risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. In this work,
+existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing lead to the following dilemma: should large tasks be used, that are efficient but risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. In this work,
 we propose a third way, using a novel technique called \emph{adaptive task size execution by task coalescing/splitting} that efficiently executes small tasks, trimming unnecessary overheads, while avoiding the risk of non-termination.
-%
 
-\noindent\textbf{Challenges and Contributions.}
+\noindent\textbf{Our Contributions.}
 This paper introduces a new system called \emph{\sys}, which executes a task-based
 intermittent program by \emph{dynamically} coalescing/splitting its tasks.
-\sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce} (top)) or splits them (Fig.~\ref{fig:coalesce} (bottom)) based on the estimated energy availability without demanding any hardware support. The unique challenges and contributions revealed by this work are listed as follows (C1--C3): 
+\sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce} (top)) or splits them (Fig.~\ref{fig:coalesce} (bottom)) based on the estimated energy availability without demanding any hardware support. The unique challenges and contributions revealed by this work are listed as follows: 
 
 % \sys does not requires hardware support for energy estimation to make its scheduling decisions. 
 
