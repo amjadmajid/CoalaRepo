@@ -70,9 +70,9 @@ persist across failure and be read by the {\em reads}~\cite{ratchet,dino,alpaca}
 Figure~\ref{fig:war} illustrates how state can become
 inconsistent in an intermittent execution using a simple example of an average
 operation over an array of integers.
-The variable \texttt{sum} introduces the WAR, being read and written sequentially
-by the increment operation, thus being erroneously incremented when a power
-failure occurs before updating the index \texttt{i}.
+The non-volatile variable \texttt{sum} introduces the WAR, being read and written sequentially
+by the increment operation.
+If a power failure occurs right before updating the non-volatile index \texttt{i} (\ref{fig:war-execution}, Line 7), \texttt{sum} gets erroneously incremented twice consecutively by the same array element (\ref{fig:war-execution}, Lines 6 and 9).
 
 \subsection{Task-based Intermittent Programming}
 \label{section:background_task_computing}

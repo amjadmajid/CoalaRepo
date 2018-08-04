@@ -1,4 +1,4 @@
-\documentclass[border={20pt 5pt 10pt 10pt}]{standalone} % Left Bottom Right Top
+\documentclass[border={20pt 5pt 21pt 10pt}]{standalone} % Left Bottom Right Top
 
 \usepackage{xparse}
 \usepackage{listings}
@@ -30,10 +30,11 @@
 \begin{lstlisting}[style=mystyle, linewidth=115px]
 NV int i, sum, x[];
 
-sum = 0;
-for (i=0; i<N; i++) {
+i = sum = 0;
+while (i < N) {
     $\text{\textcolor{red}{checkp()}}$;
     sum += x[i];
+    i++;
 }
 sum = sum / N;
 \end{lstlisting} 

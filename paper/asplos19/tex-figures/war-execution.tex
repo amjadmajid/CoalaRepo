@@ -1,11 +1,13 @@
 \documentclass[border={20pt 5pt 10pt 10pt}]{standalone} % Left Bottom Right Top
- \usepackage{xparse}
+
+\usepackage{xparse}
 \usepackage{listings}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{amsmath} %for \text{} macro
 \usepackage{wasysym} %for \lightning symbol
 \usepackage{amssymb} %for \circlearrowright symbol
- \lstdefinestyle{mystyle}{
+
+\lstdefinestyle{mystyle}{
     numbers=left, % display line numbers on the left
     showlines=true,
     frame=single,
@@ -22,15 +24,19 @@
     morecomment=[l]{//},
     keepspaces=true
 }
- \begin{document}
- \begin{lstlisting}[style=mystyle, linewidth=115px]
-$\text{\textcolor{red}{checkp()}}$;    // i = 0
-sum += x[0];
+
+\begin{document}
+
+\begin{lstlisting}[style=mystyle, linewidth=115px]
+NV int i, sum, x[];
+
+sum += x[i]; // i = 0
 i++;
-$\text{\textcolor{red}{checkp()}}$;    // i = 1
-sum += x[1];
+$\text{\textcolor{red}{checkp()}}$;
+sum += x[i]; // i = 1
 $\text{\textcolor{red}{\lightning\hspace{0.3cm}\lightning\hspace{0.12cm}}}$ // power failure
-$\textcolor{red}{\circlearrowright\hspace{0.28cm}}\text{\textcolor{red}{checkp()}}$; // i = 1
-sum += x[1]; // wrong
+$\textcolor{red}{\circlearrowright\hspace{0.28cm}}\text{\textcolor{red}{checkp()}}$;
+sum += x[i]; // i = 1
 \end{lstlisting}
+
 \end{document}
