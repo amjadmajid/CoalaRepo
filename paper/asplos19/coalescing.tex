@@ -24,9 +24,9 @@ commit, which our measurements in Section~\ref{sec:evaluation} show constitute
 a substantial run-time overhead.
 
 An effective colescing strategy must be {\em aggressive} enough, attempting to coalesce a
-large number of tasks to amortize a large amount of commit overhead. However, it must be 
+large number of tasks to amortize a large amount of commit overhead. However, it must also be 
 {\em conservative} enough, attempting to coalesce only as many tasks as will execute
-to completion given a certain energy conditions, reducing the risk or coalesced task re-execution penalty. 
+to completion given a certain energy conditions, reducing the risk or long coalesced task re-execution penalty. 
 
 % An effective coalescing strategy moderates the risk of a power failure during a
 % long coalesced task and capitalizes on the benefits of deferred commits by
@@ -63,9 +63,9 @@ to completion given a certain energy conditions, reducing the risk or coalesced 
 \subsection{Task Coalescing Strategies} 
 Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing strategy. In the algorithm, $B$ (target budget) is total number of static tasks
 that \sys will next attempt to coalesce. $T_\text{i}$ is the $i$th task
-executed since the last power failure. $H$ (history) is the number tasks
-(coalesced or not) executed between the two most recent power failures.
-$W_\text{i}$ is the {\em weight} of a task $T_\text{i}$.  A task's weight is an
+executed since the last power failure. $H$ (history) is the total number of
+tasks between the last executed task and the power failure that preceding it.
+$W_\text{i}$ is the {\em weight} of a task $T_\text{i}$.  A task's weight $W$ is an
 arbitrary quantity associated with the task that represents its cost in time or
 energy to execute; different coalescing strategies may apply different weights
 to a task.  For example, a uniform weighting scheme sets the weight of each
@@ -81,23 +81,25 @@ reboot update function, $f_\text{reboot}$, updates $B$, the target budget,
 after a reboot. A strategy's weight lookup function, $f_\text{weight}$, returns
 the a task's weight.  A strategy's commit update function, $f_\text{commit}$,
 updates $B$ after a successful commit. The following sections detail several
-possible coalescing strategies that we developed for \sys. 
+possible coalescing strategies that we developed for \sys, albeit not the only possible. In fact, our system allows developers to design their own strategy to implement and link to Coala’s task scheduler. 
 % 
-\subsubsection{Energy-oblivious Coalescing (EO)}
+\subsubsection{Energy-Oblivious Coalescing (EO)}
 \label{subsec:energyBlind}
 % 
-A very simple {\em energy-oblivious} coalescing strategy treats all tasks as
+A very simple {\em energy-Oblivious} coalescing strategy treats all tasks as
 having unity weight and varies the size of a coalesced task linearly. In such a
 scheme, the number of tasks to coalesce, $B$, increases by a constant $x$ when
 a coalesced sequence of tasks commits, and decreases by the same constant $x$
 when a coalesced sequence of tasks fails to complete, i.e., after a power
 failure. The characteristic operations of the energy-oblivious strategy are: 
 %
-\begin{itemize}
-\item $f_\text{reboot}(B) = B - x $;
-\item $f_\text{weight}(T_\text{i}) =  1$; 
-\item $f_\text{commit}(B) = B + x$; 
-\end{itemize}
+\begin{equation}
+	\begin{split}
+		f_\text{reboot}(B)  		&	 = B - x \\
+		f_\text{weight}(T_\text{i}) & 	 =  1 \\
+		f_\text{commit}(B) 			& 	 = B + x
+	\end{split}
+\end{equation}
 %
 The energy-oblivious strategy reacts slowly to the variation in the energy
 required to execute different tasks and to the variation in the effective quantum of
@@ -131,7 +133,7 @@ decreasing by $k \times x$, but only after a long time.
     \label{fig:hg-coal}
 \end{figure*}
 %
-The History-Guided (HG) coalescing strategy adapts the coalescing target more
+The \emph{History-Guided} (HG) coalescing strategy adapts the coalescing target more
 quickly, addressing a key limitation of the EO coalescing strategy.  
 HG gives each task unity weight, as with EO.  
 HG differs from EO in how it updates $B$ on commit, and after a power failure.
@@ -151,11 +153,13 @@ default for HG, because one half had the highest performance.
 
 The HG algorithm is characterized by the following functions: 
 %
-\begin{itemize}
-\item $f_\text{reboot}(H) = \lfloor(H / 2)\rfloor;$
-\item $f_\text{weight}(T_\text{i}) =  1$; 
-\item $f_\text{commit}(B) = \lfloor(B / 2)\rfloor;$ 
-\end{itemize}
+\begin{equation}
+	\begin{split}
+		 f_\text{reboot}(H) 			& = \lfloor(H / 2)\rfloor \\
+		 f_\text{weight}(T_\text{i}) 	& =  1 \\
+		 f_\text{commit}(B) 			& = \lfloor(B / 2)\rfloor
+	\end{split}
+\end{equation}
 %
 Fig.~\ref{fig:hg-coal} illustrates the operation of the history-guided
 coalescing strategy.
