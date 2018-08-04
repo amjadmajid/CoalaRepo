@@ -3,7 +3,7 @@ We implemented \sys's programming and execution model as a runtime library and A
 \subsection{Application Programming Interface}
 \label{sec:coala_api}
 
-Coala's API adds only five syntactic constructs to a C-based language, summarized
+Coala's API adds only eight syntactic constructs to a C-based language, summarized
 in Table~\ref{table:coala_api}.
 
 %\texttt{COALA\_TASK} is a function annotation that declares a function to be a
@@ -48,39 +48,21 @@ in Table~\ref{table:coala_api}.
 
 \noindent\textbf{New Tasks.} The \texttt{COALA\_TASK} annotation on a function
 declaration statically allocates a non-volatile constant variable holding a
-task's weight and declares that the function is a task.
-
-\noindent\textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} immediately
-transfers control to a specified next task and can be invoked along
-any control path to dynamically determine the next task.
-Like prior work~\cite{chain,dino,ratchet}, \sys's control-flow model
-assumes that an executing task is not interruptible by asynchronous events.  
-
+task's weight and declares that the function is a task.\\
+%
+\noindent\textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} marks the task to be executed at the 
+end of the current one task and it can be invoked along
+any control path to dynamically determine the next task.\\
+%
 \noindent\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
-variable statically allocates and aligns a protected non-volatile variable. The
+variable statically allocates a protected non-volatile variable. The
 variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at
-runtime to ensure correct operation.
-
-\noindent\textbf{Protected Reads and Writes.} The programmer uses the \texttt{RP} and \texttt{WP} API
-methods to access protected variables.  These methods cause \sys to find a variable's page.
-If the page is not resident in working memory, the method leads to a page fault,
-which fetches the page from non-volatile memory. Unlike \texttt{RP},
-\texttt{WP} marks the variable's page as dirty, allowing for efficient 
-commit back to non-volatile memory. 
-
+runtime to ensure correct operation.\\
+%
 \noindent\textbf{Initialization.} The behavior of the API method
 \texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the
-addition of performing preliminary kernel initializations, including hardware setup.
-
-%\begin{wrapfigure}{t!}{0.5\textwidth}
-%	\centering
-%	%\includegraphics[width=0.5\columnwidth]{figures/graffle/state-machine.pdf}
-%	\caption{\sys state machine implementation \todo{Draw a figure}{Sinan, Carlo}}
-%	\label{fig:coala_state_machine}
-%\end{wrapfigure}
-
-%A high-level state machine of the execution manager is depicted in Figure~\ref{fig:coala_state_machine} \todo{Draw a figure reflecting the following description}{Sinan, Carlo}. 
-
+addition of performing preliminary kernel initializations, including hardware setup.\\
+%
 \noindent\textbf{Execution.} The programmer passes control to \sys's task scheduler 
 by calling \texttt{COALA\_RUN} after device initialization. 
 %
@@ -96,9 +78,9 @@ counter.
 %
 If there is no in-progress, partially committed task, \sys starts executing and
 coalescing tasks. 
-%\todo{Go over keywords (coalescing target, current budget, commit phases etc.) and make them consistent with the rest of the paper}{Amjad, Carlo}
 
-\subsection{Paging}
+
+\subsection{\textcolor{red}{to be revised after Virtual Mem.}Paging}
 \label{sec:impl:paging}
 
 As described in Section~\ref{sec:memory_virtulaization}, \sys's memory
@@ -136,18 +118,9 @@ Pages must be aligned to an $S$-byte boundary.
 We experimented with 32-, 64-, 128- and 256\,B pages, an 8\,KB non-volatile \texttt{\underline{shadow}} buffer and
 an 8\,KB non-volatile \texttt{\underline{store}}, and a volatile working buffer
 of 1\,KB, which is half of the total SRAM size in the MSP430FR6989 microcontroller.
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=\textwidth]{figures/graffle/paging.pdf}
-%	\caption{Illustration of \sys page tags mechanism.}
-%	\label{figure:coala_page_tags}
-%\end{figure}
-
-% It is important to mention that store and shadow buffers are virtual. By default, \sys allocates two memory banks for pages, $B0$ and $B1$, and all the pages have their store copy in $B0$. A dirty page that during the intermediate commit, or due to eviction, is copied to its shadow location in $B1$, will end up having its store location in $B1$ after the ultimate commit. Thus, during the ultimate commit
-
+%
 \subsection{Coalescing and Commit}
-
-
+%
 \sys uses a two-phase commit process to atomically commit pages despite
 possible power interruptions during commit.  When a coalesced task completes,
 \sys backs up dirty pages in volatile working memory to the non-volatile
@@ -164,9 +137,8 @@ and one copy always in the main memory store.  \sys uses double buffering to
 commit dirty pages efficiently by swapping which buffer is which, without
 copying any data.
 %
-
 \subsection{Task Downscaling}
-
+%
 \sys's task downscaling preserves forward progress by partially committing an
 ongoing, non-terminating task. 
 %
@@ -181,10 +153,3 @@ digitally sampled signal is meaningless.  In such a case, the programmer can
 disable partial commit for a task or a span of code, marking  the code with a
 pair of \texttt{COALA\_DISABLE\_PE} and \texttt{COALA\_ENABLE\_PE} annotations.
 These annotations respectively halt and resume the partial execution timer.
-
-%\begin{wrapfigure}{t!}{0.5\textwidth}
-%	\centering
-%	%\includegraphics[width=0.5\columnwidth]{figures/graffle/commits-illustration.pdf}
-%	\caption{Intermediate commit and ultimate commit Illustration \todo{to be drawn}{sinan}}
-%	\label{fig:intermediate_ultimate-commit}
-%\end{wrapfigure}
