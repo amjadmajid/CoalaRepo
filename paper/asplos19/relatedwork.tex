@@ -24,7 +24,7 @@ structures in non-volatile memory unsafe~\cite{mspcdino}.
 DINO~\cite{dino} addressed the consistency problem by selectively versioning
 non-volatile state within the checkpoints. Ratchet~\cite{ratchet} ensured
 consistency by placing a checkpoint at the beginning of each idempotent region
-in the code.  Clank~\cite{hicks_isca_2017} ensured consistency with custom
+in the code. Ratchet has a similar technique to task splitting with some essential differences: (i) It does not need to handle non-volatile memory accesses, since it assumes a unified non-volatile memory, whereas \sys has to save the volatile pages in non-volatile memory; (ii) The checkpoint is of a fixed size, while \sys privatize variant number of memory pages.  Clank~\cite{hicks_isca_2017} ensured consistency with custom
 hardware that dynamically tracks read-after-write dependencies in memory
 accesses and checkpoints on demand. The consistency problem was also
 approached with a combination of undo and redo logging in
