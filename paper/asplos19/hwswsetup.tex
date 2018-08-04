@@ -4,21 +4,18 @@ and deploy the binaries onto a real energy-harvesting device. In this section
 we describe the setup for the experiments presented in
 Section~\ref{sec:evaluation} and characterize the benchmark applications.
 
-\subsection{Intermittently-powered Platform and Experimental Setup}
+\subsection{Experimental Setup}
 \label{sec:results_hardware_software}
 
 We used two platforms to evaluate \sys: (i) an \emph{intermittently-powered}
 energy-harvesting device (WISP\,5.1~\cite{wisp5,wisp}), and (ii) a \emph{continuously-powered} evaluation
 board (MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad}).
 %
-Every benchmark listed in the next section was run repeatedly on
+Every benchmark listed in Section~\ref{sec:evaluation} was run repeatedly on
 each platform for a few minutes to ensure capturing a diverse power 
 trace and produce a high number of complete runs of all applications.
 The results were averaged across the duration of the experiment.
 
-% Experiments on the intermittently-powered platform used the
-% WISP\,5.1~\cite{wisp5,wisp} RF-powered energy-harvesting device.
-%
 The WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
 non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
 configured to 1\,MHz clock speed.
@@ -30,7 +27,7 @@ antenna~\cite{atlas2015}.
 The antenna was oriented towards and in parallel with the WISP antenna, and
 no objects obstructed the path.
 %
-We affixed the WISP with a paper harness at the edge of a table at a height of 10\,cm.
+We affixed the WISP with a paper harness at the edge of a table at a height, from the table suface, of 10\,cm.
 %
 For distance-controlled experiments we positioned WISP at $d=\{15, 30,
 50\}$\,cm from the exciter antenna and 60\,cm was used for the task downscaling
@@ -48,7 +45,6 @@ under profile, and the Saleae~\cite{saleae} logic analyzer measured
 the interval between edges in the signal. When the board is continously powered the 
 execution time was measured using the clock features in TI Code Composer Studio IDE version 7.1.
 %
-
 \subsection{Software Benchmarks}
 \label{sec:software_benchmarks}
 
@@ -80,42 +76,22 @@ evaluate \sys.}
 \label{table:benchmark_table}
 \end{table}
 
-We evaluated \sys using six benchmarks summarized in
-Table~\ref{table:benchmark_table}. %
-Three benchmarks (\textbf{ar}, \textbf{bc}, \textbf{cuckoo}) are from prior
-work~\cite{chain,alpaca} and three benchmarks (\textbf{dijkstra},
-\textbf{fft}, \textbf{sort}) are new implementations of applications
-from the MiBench suite~\cite{mibench,hicks_mibench2_2016}. The
-\textbf{fft} implementation is based on the Accelerated FFT library from
-TI~\cite{ti_dsp}. All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0
-from toolchain version 5.01.01.00 with \texttt{-O1} as optimization flag.
-%
-The source code for all benchmarks will be released at \cite{coala_website}.
-
-
-%Specifically, we have implemented three benchmarks used by Chain~\cite{chain} and Alpaca~\cite{alpaca} (source code is accessible~\cite{coala_website}), namely: \textbf{ar}: nearest neighbor classification of randomly generated data modeling a three-axis accelerometer; \textbf{bc}: counts bits in byte pseudo-random string using several algorithms, and compares results for correctness; \textbf{cuckoo}: Bloom-filter-like Cuckoo filter that first hashes a sequence of pseudo-random numbers, then queries the filter to recover the sequence. Additionally, we have ported three new benchmarks from~\cite{mibench}, namely: \textbf{dijkstra}: Dijkstra algorithm executed continously on a predefined adjecency matrix; \textbf{fft}: continuously repeating Fast Fourier Transform on three pre-generated 128 sample vector; and \textbf{sort}: selection sort algorithm on a fixed sequence of numbers. \todo{justify the selection of these benchmarks}
+We evaluated \sys using six benchmarks that are oftenly used in embedded systems (summarized in
+Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
 
 \textbf{Comparison with Alpaca using the GCC compiler.} We compare
-\sys against Alpaca~\cite{alpaca}, a state-of-the-art task-based system for
-intermittent computing. For a fair comparison the task decomposition is the
-same in \sys and Alpaca implementations of the benchmarks. We compare
-both systems using GCC.
+\sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for
+intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the
+same for both systems.
 
 Since Alpaca's compiler pass is implemented only for LLVM, we could not use
 that implementation to instrument the benchmarks and compile them with GCC.
 Instead, we \emph{manually} performed the instrumentation done by the compiler
-pass.  We performed the instrumentation at the source level, adding C
-statements to the program, instead of at the level of binary
-intermediate-representation (LLVM IR) as the compiler pass would. The result is
-equivalent from the perspective of overheads. The instrumentation consists of
-identifying write-after-read dependencies and adding code and memory
-allocations to make a private copy of the affected variables. For array
-variables, instrumentation also includes adding code for 
-dynamically tracking the array access.
-
-Manual instrumentation of Alpaca code is not a general approach, but only
-served as a practical alternative to porting the compiler pass from LLVM to
-GCC.
+pass. The instrumentation consists of identifying write-after-read dependencies 
+and adding code and memory allocations to make a private copy of the affected variables. 
+For array variables, instrumentation also includes adding code for 
+dynamically tracking the array access. Manual instrumentation of Alpaca code is not a general approach, 
+but only served as a practical alternative to porting the compiler pass from LLVM to GCC.
 %
 Our experiments show that manually-instrumented Alpaca code compiled with GCC
 is about 30\%-40\% faster than Alpaca code instrumented automatically by the
@@ -124,7 +100,7 @@ is due to the early experimental state of the MSP430 backend for
 LLVM~\cite{baghsorkhi_cgo_2018}.
 %
 By compiling both systems with the same compiler (GCC), we ensure that our
-comparison in Section~\ref{sec:evaluation} is fair.\vspace{2cm}
+comparison in Section~\ref{sec:evaluation} is fair.
 
 % Unnecessary
 %\textbf{Comparison of \sys against other Systems.} We do not compare \sys
