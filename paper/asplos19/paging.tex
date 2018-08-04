@@ -52,17 +52,26 @@ exceeded the size of the volatile working memory.
 Access (DMA) support, which copies a block of memory from one place to another
 as a single operation.
 
-
 \begin{figure}
-	\centering
-	\includegraphics[width=\columnwidth]{figures/paging.pdf}
-	\caption{Illustration of task-virtual memory interaction in \sys. Tasks only interact with the working buffer in SRAM (indicated as page buffer). The shadow buffer is used to hold the dirty bages. The indirection table is used to speed-up two-phase commit operation: it eliminates the copy operation in the second phase.}
-	\label{figure:coala_page_tags}
+    \centering
+    \includegraphics[width=\columnwidth]{figures/mem-man.pdf}
+    \caption{Interaction between task, memory manager and memory buffers upon \texttt{RP} and \texttt{WP},
+    and order of occurrence. Steps 2, 3, 4 and 5 are conditional. Tasks only have direct access to the
+    \texttt{working} buffer.}
+    \label{figure:mem-man}
 \end{figure}
 
-\textbf{System Overview.} Figure~\ref{figure:coala_page_tags} provides an
-overall view of \sys's virtual memory management system.  A page has a home
-location in non-volatile memory which we refer to as the page's
+% \begin{figure}
+	% \centering
+	% \includegraphics[width=\columnwidth]{figures/paging.pdf}
+	% \caption{Illustration of task-virtual memory interaction in \sys. Tasks only interact with the working buffer in SRAM (indicated as page buffer). The shadow buffer is used to hold the dirty bages. The indirection table is used to speed-up two-phase commit operation: it eliminates the copy operation in the second phase.}
+	% \label{figure:coala_page_tags}
+% \end{figure}
+
+\textbf{System Overview.}
+Figure~\ref{figure:mem-man} gives an overview of \sys's virtual memory management system,
+whose details are provided throughout this section.
+A page has a home location in non-volatile memory which we refer to as the page's
 \texttt{\underline{store}} (underlined locations are non-volatile).  When a
 task accesses a page, the memory manager swaps the page from its home location
 into the fully\hyp{}associative \texttt{working} buffer that is stored in
@@ -93,10 +102,9 @@ page buffer. Later, to commit the page, \sys writes it from its
 
 \subsection{Address Translation and Variable Access}
 
-A \sys task must access protected non-volatile variables through \sys's
-restricted memory interface, which Section~\ref{sec:coala_api} describes in
-detail.  The interface includes \texttt{RP(var)}, to read the value of variable
-{\tt var}, and \texttt{WP(var)} to assign a value to variable {\tt var}. The
+A task must access protected non-volatile variables through \sys's
+restricted memory interface. The interface includes \texttt{RP}$(v)$, to read the value of variable
+$v$, and \texttt{WP}$(v)$ to assign a value to variable $v$. The
 implementation of {\tt RP} is shown in Algorithm~\ref{algo:rwar}, and {\tt
 WP}'s implementation is similar except that {\tt WP} marks the accessed page as
 dirty.
@@ -128,21 +136,23 @@ that identifies the page and a \emph{page offset} that identifies a byte.
 	\end{algorithmic}}}
 \end{figure}
 
-After address translation, \sys attempts to access the protected variable's
-location in the volatile paging buffer. \sys keeps track of the page tags for
+After address translation (Figure~\ref{figure:mem-man}, Step 6), a task
+accesses the protected variable's location in the volatile paging buffer
+(Step 7). \sys keeps track of the page tags for
 the pages currently resident in the paging buffer. When a task accesses a
 variable, it compares the variable's page tag to tags of the pages in {\tt
-working} (Line 2).
+working} (Algorithm~\ref{algo:rwar}, Line 2).
 %
 %If the accessed variable's page is resident in the page buffer,
 %then the tag of one of the pages in this buffer is equal to the accessed
 %variable's page tag.
 %
 If the accessed variable's page tag is not found in the page buffer, the
-operation incurs a {\em page fault} (Line 4). At a page fault, \sys must swap
-out one of the pages that is resident in the page buffer (to the non-volatile
-\texttt{\underline{shadow}}) if \texttt{working} is full, and swap in the
-variable's page.
+operation incurs a {\em page fault} (Line 4).
+% At a page fault, \sys must swap
+% out one of the pages that is resident in the page buffer (to the non-volatile
+% \texttt{\underline{shadow}}) if \texttt{working} is full, and swap in the
+% variable's page.
 %
 The byte is accessed in the page buffer at the index of the resident page and
 the variable's page offset (Lines 5--6).
@@ -151,13 +161,18 @@ the variable's page offset (Lines 5--6).
 
 \subsection{Page Faults and Page Swapping}
 
+When accessing a protected variable with \texttt{RP} or \texttt{WP}, the memory
+manager first searched the variable's page in the \texttt{working} buffer
+(Figure~\ref{figure:mem-man}, Step 1).
+If the page is not found there, a page fault is incurred and a new page needs to
+be swapped in.
 If the \texttt{working} buffer is full, a page fault on a memory access
 requires \sys to swap out one of the pages in the volatile buffer (a
-\emph{victim page}) preserving updates made to that page, and to copy the
-accessed page of protected data into the working buffer.
-Algorithm~\ref{algo:pagefault} shows how \sys handles a page fault. A victim
-page in the \texttt{working} buffer is selected for eviction according to
-a \emph{first-in-first-out} (FIFO) replacement policy (Lines 2 and 12).
+\emph{victim page}) preserving updates made to that page.
+% and to copy the accessed page of protected data into the working buffer.
+% Algorithm~\ref{algo:pagefault} shows how \sys handles a page fault. A victim
+% page in the \texttt{working} buffer is selected for eviction according to
+% a \emph{first-in-first-out} (FIFO) replacement policy (Lines 2 and 12).
 %
 While we opted for the simplicity of FIFO, any other replacement policy, such
 as Least Recently Used (LRU) could work in its place.
@@ -168,32 +183,32 @@ as Least Recently Used (LRU) could work in its place.
 % 	\captionof{algorithm}{\texttt{PageFault}(tag $t$)}
 % 	\label{algo:pagefault}
 % 	\scriptsize
-\begin{algorithm}
-	\caption{\texttt{PageFault}(tag $t$)}
-	\label{algo:pagefault}
-	\scriptsize
-	%\small
-	\begin{algorithmic}[1]
-        \State \LeftComment{$i_\text{victim}$: index to free slot or page to be evicted, initially 0}
-        \State \LeftComment{\texttt{\underline{shadowCount}}: non-volatile, 0 on boot unless in phase 2 commit}
-        \State $t_\text{victim} \gets \Call{Tag}{\texttt{working}[i_\text{victim}]}$
-		\If {\Call{isDirty}{working[$i_\text{victim}$]} }	\Comment{Evicting a dirty page?}
-		\State $\texttt{\underline{shadow}}[t_\text{victim}] \xleftarrow{\text{DMA}} \texttt{working}[i_\text{victim}]$
-            \Comment{Swap out the page}
-        \If {$t_\text{victim} \not\in \texttt{\underline{shadowList}}$} \Comment{Keep track for quick traversal}
-            \State $\texttt{\underline{shadowList}}[\texttt{shadowCount++}] \gets t_\text{victim}$
-        \EndIf
-		\EndIf
-		\If {\Call{exists}{\underline{shadow}[$t$]}} \Comment{Page swapped out earlier?}
-		\State $\texttt{working}[i_\text{victim}] \xleftarrow{\text{DMA}} \texttt{\underline{shadow}}[t]$
-            \Comment{Get from commit buffer}
-		\Else
-		\State $\texttt{working}[i_\text{victim}] \xleftarrow{\text{DMA}} \texttt{\underline{store}}[t]$
-            \Comment{Get from backing store}
-		\EndIf
-        \State $i_\text{victim} \gets (i_\text{victim} + 1) \mod |\texttt{pageBufLength}|$ \Comment{FIFO evict}
-	\end{algorithmic}
-\end{algorithm}
+% \begin{algorithm}
+	% \caption{\texttt{PageFault}(tag $t$)}
+	% \label{algo:pagefault}
+	% \scriptsize
+	% %\small
+	% \begin{algorithmic}[1]
+        % \State \LeftComment{$i_\text{victim}$: index to free slot or page to be evicted, initially 0}
+        % \State \LeftComment{\texttt{\underline{shadowCount}}: non-volatile, 0 on boot unless in phase 2 commit}
+        % \State $t_\text{victim} \gets \Call{Tag}{\texttt{working}[i_\text{victim}]}$
+		% \If {\Call{isDirty}{working[$i_\text{victim}$]} }	\Comment{Evicting a dirty page?}
+		% \State $\texttt{\underline{shadow}}[t_\text{victim}] \xleftarrow{\text{DMA}} \texttt{working}[i_\text{victim}]$
+            % \Comment{Swap out the page}
+        % \If {$t_\text{victim} \not\in \texttt{\underline{shadowList}}$} \Comment{Keep track for quick traversal}
+            % \State $\texttt{\underline{shadowList}}[\texttt{shadowCount++}] \gets t_\text{victim}$
+        % \EndIf
+		% \EndIf
+		% \If {\Call{exists}{\underline{shadow}[$t$]}} \Comment{Page swapped out earlier?}
+		% \State $\texttt{working}[i_\text{victim}] \xleftarrow{\text{DMA}} \texttt{\underline{shadow}}[t]$
+            % \Comment{Get from commit buffer}
+		% \Else
+		% \State $\texttt{working}[i_\text{victim}] \xleftarrow{\text{DMA}} \texttt{\underline{store}}[t]$
+            % \Comment{Get from backing store}
+		% \EndIf
+        % \State $i_\text{victim} \gets (i_\text{victim} + 1) \mod |\texttt{pageBufLength}|$ \Comment{FIFO evict}
+	% \end{algorithmic}
+% \end{algorithm}
 
 % 	\end{algorithmic}
 % \end{algorithm}
@@ -201,30 +216,18 @@ as Least Recently Used (LRU) could work in its place.
 % \end{wrapfigure}
 
 If a task modified any byte in the victim page (i.e., using \texttt{WP}), then
-the page is dirty.  If the page being swapped out is not dirty and the page
-being accessed had not been dirtied and swapped out to the \texttt{shadow}
-buffer since the last reboot, then handling a page fault requires copying the
-accessed page from its home in the  \texttt{\underline{store}} into the
-\texttt{working} buffer (Line 11).  Otherwise, the page fault handler must take
-the following extra steps.
-%
-Before swapping in the accessed page, \sys must first preserve the updated
-values in the dirty page so that they can be committed back to their locations
-in memory when the task commits (but not earlier).  To preserve the dirty
-values, \sys copies the victim page to the non-volatile
-\texttt{\underline{shadow}} buffer (Line 5) and records the page's tag in a
-non-volatile commit list (Lines 6-7). \sys uses the commit list to iterate over shadow pages
-at commit time, to copy the contents of shadow pages back to the main memory {\tt store}.
+the page is dirty and its changes has to be persisted to non-volatile memory
+(Figure~\ref{figure:mem-man}, Step 2).
+If the accessed page was previously modified and swapped out since the last
+power failure, the most recent version of the page is in {\tt
+\underline{shadow}} (Step 3), otherwise it has to be retrieved from
+{\tt \underline{store}} (Step 4).
+Finally, the page is copied to the volatile buffer (Step 5).
 %
 %Dirty pages remain in {\tt \underline{shadow}} buffer until the
 %dynamic task completes, at which point \sys commits the modified
 %pages from {\tt \underline{shadow}} back to \texttt{\underline{store}}.
 %
-If the accessed page was previously modified and swapped out since the last
-power failure (Line 8), the most recent version of the page is in {\tt
-\underline{shadow}}, not \texttt{\underline{store}} (Line 9).
-
-
 
 %As
 %Algorithm~\ref{algo:pagefault} shows in Line 4, \sys checks if the requested
