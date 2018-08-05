@@ -1,52 +1,7 @@
-%%%%%%%%%%%%%%%%%%%%%% IMPORTANT INFO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% SRAM read/write latency is in the order of 8ns 		 [ Intermittent computation without hardware support of programmer intervention]
-% FRAM read/write latency is in the orfer of 60ns/100ns  [Texas Instrument MSP430FR573x DataSheet]
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Advances in processor efficiency along with the development of
-energy-harvesting systems have created a new category of devices that require
-neither a battery nor a tethered power
-supply~\cite{prasad_comst_2014,lucia_snapl_2017,soyata_csm_2016}. These
-devices operate using ambient energy, such as radio frequency
-transmissions~\cite{rf_powered_computing_gollakota_2014},
-light~\cite{margolies_infocom_2016,margolies_tosn_2016}, and
-vibration~\cite{gorlatova_sigmetrics_2014}. Incorporating compute, storage,
-sensing, and communication hardware~\cite{wisp5,moo,capybara}, such devices are a
-promising technology for use in the Internet of Things~\cite{ku_cst_2016},
-in-body~\cite{nadeau_naturebio_2017} and
-on-body~\cite{bandodkar_electroanalysis_2015} medical systems, and
-energy-harvesting nano-satellites~\cite{kicksat,capybara}.
-%
-Energy-harvesting devices create unique challenges because they operate {\em
-intermittently} when energy is
-available~\cite{hicks_isca_2017,lucia_snapl_2017}. An energy-harvesting device
-buffers energy in a small storage capacitor~\cite{gorlatova_tmc_2013,gunduz_commag_2014} and operates when a
-threshold amount of energy has accumulated. Harvestable energy sources are low-power (e.g., \si{\nano\watt}\ to \si{\micro\watt}) compared to a platform's operating
-power level (hundreds of \si{\micro\watt}\ to \si{\milli\watt}). A device operates briefly until it depletes its buffered energy, after which, it shuts
-down and recharges to operate again later---corresponding to the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017} composed of
-operation-power failure-restart cycles. 
-The recharge and discharge intervals---which correspond to the device's inactive and active time---vary with the energy buffering capacitor~\cite{capybara} \note{not only, though} and some devices fail and restart operating $\approx$10 to
-$\approx$100 times per second~\cite{tan_infocom_2016,mementos,nvp}.
-%
-%\textbf{Data Consistency in Intermittent Computing.}
+Advances in processor efficiency along with the development of energy-harvesting systems have created a new category of devices that require neither a battery nor a tethered power supply~\cite{prasad_comst_2014,lucia_snapl_2017,soyata_csm_2016}. These devices operate using ambient energy, such as radio frequency transmissions~\cite{rf_powered_computing_gollakota_2014},
+light~\cite{margolies_infocom_2016,margolies_tosn_2016}, and vibration~\cite{gorlatova_sigmetrics_2014}. Incorporating compute, storage, sensing, and communication hardware~\cite{wisp5,moo,capybara}, such devices are a promising technology for use in the Internet of Things~\cite{ku_cst_2016}, in-body~\cite{nadeau_naturebio_2017} and on-body~\cite{bandodkar_electroanalysis_2015} medical systems, and energy-harvesting nano-satellites~\cite{kicksat,capybara}. Energy-harvesting devices create unique challenges because they operate {\em intermittently} when energy is available~\cite{hicks_isca_2017,lucia_snapl_2017}. An energy-harvesting device buffers energy in a small storage capacitor~\cite{gorlatova_tmc_2013,gunduz_commag_2014} and operates when a threshold amount of energy has accumulated. Harvestable energy sources are low-power (e.g., \si{\nano\watt}\ to \si{\micro\watt}) compared to a platform's operating power level (hundreds of \si{\micro\watt}\ to \si{\milli\watt}). A device operates briefly until it depletes its buffered energy, after which, it shuts down and recharges to operate again later---corresponding to the {\em intermittent execution model}~\cite{dino,lucia_snapl_2017} composed of operation-power failure-restart cycles. The recharge and discharge intervals---which correspond to the device's inactive and active time---vary depending on the underlying hardware, such as the size of the energy buffering capacitor~\cite{capybara}, and some devices discharge and restart $\approx$10 to $\approx$100 times per second~\cite{tan_infocom_2016,mementos,nvp}.
 
-Upon power failures, a device loses the volatile
-state in its registers, stack, SRAM, and retains the state of any non-volatile
-memory, such as FRAM. While capturing periodic
-checkpoints~\cite{mementos,quickrecall} and sleep
-scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help preserve execution
-progress, failures can leave non-volatile state incorrect, partially updated,
-and may leave checkpointed volatile state inconsistent with non-volatile state.
-These inconsistencies cause intermittent execution to deviate from
-continuously-powered behavior, often leading to an unrecoverable
-application failure~\cite{dino,edb}. Prior work developed two main approaches to deal with data inconsistency for
-intermittently-powered devices: (i) \emph{software-based programming and
-execution models}~\cite{dino,ratchet,chain,alpaca} and (ii)
-\emph{hardware-based computer architecture
-support}~\cite{hicks_isca_2017,idetic,nvp}. Complex architectural changes are
-expensive to design, verify, and manufacture. New architectures are also
-inapplicable to existing systems~\cite{hicks_isca_2017,nvp}. Software
-approaches are simpler and applicable to existing devices today. \note{Talk about CP-based systems and talk why we focused task-based instead...}Therefore, this work focuses on a key limitation of task-based software approaches, that is, the {\em inflexibility} of statically decomposing a program into tasks.
-
+Upon power failures, a device loses the volatile state in its registers, stack, SRAM, and retains the state of any non-volatile memory, such as FRAM. While capturing periodic checkpoints~\cite{mementos,quickrecall} and sleep scheduling~\cite{dewdrop,hibernus,hibernusplusplus} help preserve execution progress, failures can leave non-volatile state incorrect, partially updated, and may leave checkpointed volatile state inconsistent with non-volatile state. These inconsistencies cause intermittent execution to deviate from continuously-powered behavior, often leading to an unrecoverable application failure~\cite{dino,edb}. Prior work developed two main approaches to deal with data inconsistency for intermittently-powered devices: (i) \emph{software-based programming and execution models}~\cite{dino,ratchet,chain,alpaca} and (ii) \emph{hardware-based computer architecture support}~\cite{hicks_isca_2017,idetic,nvp}. Complex architectural changes are expensive to design, verify, and manufacture. New architectures are also inapplicable to existing systems~\cite{hicks_isca_2017,nvp}. Software approaches are simpler and applicable to existing devices today. \note{Talk about CP-based systems and talk why we focused task-based instead...}Therefore, this work focuses on a key limitation of task-based software approaches, that is, the {\em inflexibility} of statically decomposing a program into tasks.
 %
 \begin{figure}
     \centering
@@ -56,24 +11,11 @@ approaches are simpler and applicable to existing devices today. \note{Talk abou
 \end{figure}
 %
 %\textbf{Task Decomposition of Intermittent Programs.} 
-
-\noindent\textbf{Crucial Drawback of Static Task Decomposition.} 
-\note{Why no indent?}
-Task-based programming and execution models require a
-programmer~\cite{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to
-statically decompose a program into a collection of tasks. A \emph{task}, a top level function, can
-include arbitrary computation that should be executed despite arbitrarily-timed power failures.
-The programmer (or a compiler) explicitly expresses task-to-task control flow.
-Fig.~\ref{fig:coalesce} illustrates how a program's tasks execute and shows how tasks transitions can impose a runtime overhead. At each transition, the system incurs an overhead to track and atomically commit modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at runtime.
 %
-A programmer may thus create very large tasks in an attempt to reduce task transitions
-overhead. However, a very large task may require more energy to complete than a device's fixed hardware energy
-buffer can hold which may lead to a task \emph{non-termination} problem. To eliminate this risk,
-existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing lead to the following dilemma: should large tasks be used, that are efficient but risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. 
+\textbf{Crucial Drawback of Static Task Decomposition.} Task-based programming and execution models require a programmer~\cite{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to statically decompose a program into a collection of tasks. A \emph{task}, a top level function, can include arbitrary computation that should be executed despite arbitrarily-timed power failures.
+The programmer (or a compiler) explicitly expresses task-to-task control flow. Fig.~\ref{fig:coalesce} illustrates how a program's tasks execute and shows how tasks transitions can impose a runtime overhead. At each transition, the system incurs an overhead to track and atomically commit modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at runtime. A programmer may thus create very large tasks in an attempt to reduce task transitions overhead. However, a very large task may require more energy to complete than a device's fixed hardware energy buffer can hold which may lead to a task \emph{non-termination} problem. To eliminate this risk, existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing lead to the following dilemma: should large tasks be used, that are efficient but risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. 
 
-\noindent\textbf{Challenges and Contributions.}
-\note{Why no indent?}
-This paper introduces \sys, a new task-based system that employs \emph{adaptive task size execution by task coalescing/splitting}. By means of this novel technique, small tasks can be executed efficiently by trimming unnecessary overheads \emph{dynamically}, meanwhile avoiding the risk of non-termination. \sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce}, top) or splits them (Fig.~\ref{fig:coalesce},bottom) based on the estimated energy availability without demanding any hardware support. \note{\textbf{To the best of our knowledge, \sys is the only task-based system that guarantees task termination and ....(something related with Coalescing...)  }}
+\textbf{Challenges and Contributions.} This paper introduces \sys, a new task-based system that employs \emph{adaptive task size execution by task coalescing/splitting}. By means of this novel technique, small tasks can be executed efficiently by trimming unnecessary overheads \emph{dynamically}, meanwhile avoiding the risk of non-termination. \sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce}, top) or splits them (Fig.~\ref{fig:coalesce},bottom) based on the estimated energy availability without demanding any hardware support. \note{\textbf{To the best of our knowledge, \sys is the only task-based system that guarantees task termination and ....(something related with Coalescing...)  }}
 
 The unique challenges and contributions revealed by this work are listed below:
 \note{it takes more space, but a bullet list makes C1-C3 stand out more properly}
