@@ -1,22 +1,11 @@
 We implemented \sys's programming and execution model as a runtime library and API that a programmer can use to make a plain C program intermittence-safe.
-
+%
 \subsection{Application Programming Interface}
 \label{sec:coala_api}
-
+%
 Coala's API adds only eight syntactic constructs to a C-based language, summarized
 in Table~\ref{table:coala_api}.
-
-%\texttt{TASK} is a function annotation that declares a function to be a
-%task. \texttt{NEXT\_TASK}, indicates the task to run next, after an
-%executing task completes.  \texttt{PV} declare a new protected variable.
-%The programmer uses \texttt{RP} and \texttt{WP}, to read and write protected
-%respectively.  \texttt{SM} identifies protected \texttt{struct} fields
-%and tells \sys to ensure that the struct fields are page-aligned in memory.
-%The programmer is required to explicitly call two API functions at the start of
-%{\tt main()}: \texttt{INIT}, which does global initialization upon first
-%boot and \texttt{RUN} which hands the control to \sys's task manager to
-%resume task execution.
-
+%
 \begin{table}
 \centering
 \begin{tabular}{| r | p{0.67\columnwidth} |}
@@ -43,9 +32,7 @@ in Table~\ref{table:coala_api}.
 \caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
 \label{table:coala_api}
 \end{table}
-
-%\subsection{API Details}
-
+%
 \noindent\textbf{New Tasks.} The \texttt{TASK} annotation on a function
 declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.\\
@@ -118,21 +105,9 @@ of 1\,KB.
 %
 \subsection{Coalescing and Commit}
 %
-\sys uses a two-phase commit process to atomically commit pages despite
-possible power interruptions during commit.  When a coalesced task completes,
-\sys backs up dirty pages in volatile working memory to the non-volatile
-shadow buffer using DMA. 
+The coalescing algorithm starts with a random guess about the size of the coalescing task, in our implementation the target is initialized to four. It then refines its guess based on the number of the static-tasks being successfully executed.
 %
-If power fails while backing up these pages, commit fails and the execution
-resumes from the last committed point.  After backing up pages from working
-memory to the shadow buffer, \sys sets a flag that indicates an on-going atomic
-commit.  At this point, commit is irrevocable and will continue until it
-completes despite power failures.   
-%
-Each page is double buffered, with one copy always in the shadow page buffer
-and one copy always in the main memory store.  \sys uses double buffering to
-commit dirty pages efficiently by swapping which buffer is which, without
-copying any data.
+When a coalesced task completes, \sys save all the modifications in its \texttt{\underline{private}} using DMA. In order to ensure the atomicity of the commit operation all the modified pages are copied to the \texttt{\underline{shadow}} buffer first. The \sys set a flag to indicates an on-going \emph{atomic commit} to update the private pages. For efficiency reasons \sys uses an indirection table to point to the private consistent pages and eliminate the need for moving pages for the second time.
 %
 \subsection{Task Downscaling}
 %
