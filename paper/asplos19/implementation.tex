@@ -80,30 +80,27 @@ If there is no in-progress, partially committed task, \sys starts executing and
 coalescing tasks. 
 
 
-\subsection{\textcolor{red}{to be revised after Virtual Mem.}Paging}
+\subsection{Paging}
 \label{sec:impl:paging}
 
 As described in Section~\ref{sec:memory_virtulaization}, \sys's memory
 virtualization scheme uses three buffers: a volatile \texttt{working} buffer, a
-non-volatile main memory \texttt{\underline{store}}, and a non-volatile
-\texttt{\underline{shadow}} page buffer. 
+non-volatile \texttt{\underline{private}}, and a non-volatile
+\texttt{\underline{shadow}} buffer. 
 %
-The main memory \texttt{\underline{store}} holds the last committed copy of all 
+The main memory \texttt{\underline{private}} holds the last committed copy of all 
 pages. 
 %
 After reboot, the \texttt{working} buffer is empty. Execution fills 
-the working buffer with pages as the program accesses them. 
+the \texttt{working} buffer with privatized pages as the program accesses them. 
 %
-The program primarily reads and writes data paged into the volatile working memory. 
-%
-The non-volatile \texttt{\underline{shadow}} buffer serves as an intermediate,
-non-volatile backing store for dirty pages evicted from the space-constrained
-working buffer. 
+The \texttt{\underline{shadow}} buffer serves as an intermediate,
+non-volatile backing \texttt{\underline{private}} for dirty pages evicted from the space-constrained
+\texttt{working} buffer. 
 
 To access a protected variable with either \texttt{RP}
-or \texttt{WP}, \sys searches for the variable in its working buffer first. If
-found, the program accesses the data in the working buffer.  If the page is not 
-in the working memory, the memory manager fetches it from non-volatile memory. 
+or \texttt{WP}, \sys searches for the variable in its \texttt{working} buffer first.
+ If the page is not, the VMM fetches it from non-volatile memory. 
 %
 \sys uses address-based page tagging to make finding a variable efficient.  The
 upper bits of a variable's memory address identify its page, and the lower bits
@@ -113,11 +110,11 @@ $p$, determines the number of tag bits, which is $\log P$.
 Page tagging imposes a data alignment requirement.
 Page size $S$ must be a power of two. 
 %
-Pages must be aligned to an $S$-byte boundary. 
+Pages must be aligned to an $S$-byte boundary for efficient memory access. 
 %
 We experimented with 32-, 64-, 128- and 256\,B pages, an 8\,KB non-volatile \texttt{\underline{shadow}} buffer and
-an 8\,KB non-volatile \texttt{\underline{store}}, and a volatile working buffer
-of 1\,KB, which is half of the total SRAM size in the MSP430FR6989 microcontroller.
+an 8\,KB non-volatile \texttt{\underline{private}}, and a \texttt{working} buffer
+of 1\,KB.
 %
 \subsection{Coalescing and Commit}
 %
