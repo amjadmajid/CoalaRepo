@@ -55,12 +55,11 @@ non-volatile memory into a \emph{virtual address} in \texttt{working} buffer in
 volatile memory. In \sys, a virtual address is composed of a \emph{page tag}
 that identifies the page and a \emph{page offset} that identifies a byte.
 %
-\begin{figure}
-\fbox{\parbox{\linewidth}{
-	\captionof{algorithm}{\texttt{RP}(variable $v$)}
-	\label{algo:rwar}
-	\scriptsize
-	\begin{algorithmic}[1]
+\begin{algorithm}[t]
+    \captionof{algorithm}{\texttt{RP}(variable $v$)}
+    \label{algo:rwar}
+    \scriptsize
+    \begin{algorithmic}[1]
 		\State $t \leftarrow \Call{GetTag}{v}$
         \State $i \gets \{ j\ |\ \Call{GetTag}{\texttt{working}[j]} = t \}$ \Comment{Search page}
 		\If { $i = \emptyset$ } \Comment{Var in a resident page?}
@@ -68,8 +67,8 @@ that identifies the page and a \emph{page offset} that identifies a byte.
 		\EndIf
 		\State $o \leftarrow \Call{GetOffset}{v}$
 		\State \Return \texttt{working}[$i$][$o$]  \Comment{Return from page}
-	\end{algorithmic}}}
-\end{figure}
+	\end{algorithmic}
+\end{algorithm}
 %
 After address translation (Figure~\ref{figure:mem-man}, Step 6), a task
 accesses the protected variable's location in the volatile \texttt{working} buffer
