@@ -1,10 +1,10 @@
 #! /Users/amjad/anaconda/bin/python3.6
-import serial 
+import serial
 import os
-import sys 
-import time 
+import sys
+import time
 from csf import *
-# get app name 
+# get app name
 appName=unified_input("enter app's name: ")
 fileName=unified_input("file's name ( (f)ast, (s)low, smar(t) ): ")
 
@@ -55,15 +55,15 @@ baudRate = 115200
 # e=None
 # ser=None
 # while port in portsName:
-# 	try: 
-ser = serial.Serial(portsName[1], baudRate, timeout=5)
+# 	try:
+ser = serial.Serial(portsName[0], baudRate, timeout=5)
 	# except e:
 	# 		print("Port error: ", str(e) )
 	# 		continue
 
 while Togo:
 		try:
-			np = str(ser.read(lineLen), 'utf-8') 
+			np = str(ser.read(lineLen), 'utf-8')
 			print(np, end="")
 			fname.write(np )
 		except e :
