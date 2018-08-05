@@ -45,7 +45,7 @@ execution models}~\cite{dino,ratchet,chain,alpaca} and (ii)
 support}~\cite{hicks_isca_2017,idetic,nvp}. Complex architectural changes are
 expensive to design, verify, and manufacture. New architectures are also
 inapplicable to existing systems~\cite{hicks_isca_2017,nvp}. Software
-approaches are simpler and applicable to existing devices today. Therefore, this work focuses on a key limitation of task-based software approaches, that is, the {\em inflexibility} of statically decomposing a program into tasks.
+approaches are simpler and applicable to existing devices today. \note{Talk about CP-based systems and talk why we focused task-based instead...}Therefore, this work focuses on a key limitation of task-based software approaches, that is, the {\em inflexibility} of statically decomposing a program into tasks.
 
 %
 \begin{figure}
@@ -69,14 +69,13 @@ Fig.~\ref{fig:coalesce} illustrates how a program's tasks execute and shows how 
 A programmer may thus create very large tasks in an attempt to reduce task transitions
 overhead. However, a very large task may require more energy to complete than a device's fixed hardware energy
 buffer can hold which may lead to a task \emph{non-termination} problem. To eliminate this risk,
-existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing lead to the following dilemma: should large tasks be used, that are efficient but risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. In this work,
-we propose a third way, using a novel technique called \emph{adaptive task size execution by task coalescing/splitting} that efficiently executes small tasks, trimming unnecessary overheads, while avoiding the risk of non-termination.
+existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing lead to the following dilemma: should large tasks be used, that are efficient but risk non-termination, or small tasks that are guaranteed to complete, but incur a high task transition and commit overhead. 
 
 \noindent\textbf{Challenges and Contributions.}
 \note{Why no indent?}
-This paper introduces a new system called \emph{\sys}, which executes a task-based
-intermittent program by \emph{dynamically} coalescing/splitting its tasks.
-\sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce}, top) or splits them (Fig.~\ref{fig:coalesce},bottom) based on the estimated energy availability without demanding any hardware support. The unique challenges and contributions revealed by this work are listed below:
+This paper introduces \sys, a new task-based system that employs \emph{adaptive task size execution by task coalescing/splitting}. By means of this novel technique, small tasks can be executed efficiently by trimming unnecessary overheads \emph{dynamically}, meanwhile avoiding the risk of non-termination. \sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce}, top) or splits them (Fig.~\ref{fig:coalesce},bottom) based on the estimated energy availability without demanding any hardware support. \note{\textbf{To the best of our knowledge, \sys is the only task-based system that guarantees task termination and ....(something related with Coalescing...)  }}
+
+The unique challenges and contributions revealed by this work are listed below:
 \note{it takes more space, but a bullet list makes C1-C3 stand out more properly}
 
 % \sys does not requires hardware support for energy estimation to make its scheduling decisions. 
