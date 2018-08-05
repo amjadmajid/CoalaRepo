@@ -6,15 +6,15 @@ We implemented \sys's programming and execution model as a runtime library and A
 Coala's API adds only eight syntactic constructs to a C-based language, summarized
 in Table~\ref{table:coala_api}.
 
-%\texttt{COALA\_TASK} is a function annotation that declares a function to be a
-%task. \texttt{COALA\_NEXT\_TASK}, indicates the task to run next, after an
-%executing task completes.  \texttt{COALA\_PV} declare a new protected variable.
+%\texttt{TASK} is a function annotation that declares a function to be a
+%task. \texttt{NEXT\_TASK}, indicates the task to run next, after an
+%executing task completes.  \texttt{PV} declare a new protected variable.
 %The programmer uses \texttt{RP} and \texttt{WP}, to read and write protected
-%respectively.  \texttt{COALA\_SM} identifies protected \texttt{struct} fields
+%respectively.  \texttt{SM} identifies protected \texttt{struct} fields
 %and tells \sys to ensure that the struct fields are page-aligned in memory.
 %The programmer is required to explicitly call two API functions at the start of
-%{\tt main()}: \texttt{COALA\_INIT}, which does global initialization upon first
-%boot and \texttt{COALA\_RUN} which hands the control to \sys's task manager to
+%{\tt main()}: \texttt{INIT}, which does global initialization upon first
+%boot and \texttt{RUN} which hands the control to \sys's task manager to
 %resume task execution.
 
 \begin{table}
@@ -46,25 +46,25 @@ in Table~\ref{table:coala_api}.
 
 %\subsection{API Details}
 
-\noindent\textbf{New Tasks.} The \texttt{COALA\_TASK} annotation on a function
+\noindent\textbf{New Tasks.} The \texttt{TASK} annotation on a function
 declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.\\
 %
-\noindent\textbf{Task Transitions.} A call to \texttt{COALA\_NEXT\_TASK} marks the task to be executed at the 
+\noindent\textbf{Task Transitions.} A call to \texttt{NEXT\_TASK} marks the task to be executed at the 
 end of the current one task and it can be invoked along
 any control path to dynamically determine the next task.\\
 %
-\noindent\textbf{Protected Variables.} The \texttt{COALA\_PV} annotation on a
+\noindent\textbf{Protected Variables.} The \texttt{PV} annotation on a
 variable statically allocates a protected non-volatile variable. The
 variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at
 runtime to ensure correct operation.\\
 %
 \noindent\textbf{Initialization.} The behavior of the API method
-\texttt{COALA\_INIT} is very similar to \texttt{COALA\_NEXT\_TASK}, with the
+\texttt{INIT} is very similar to \texttt{NEXT\_TASK}, with the
 addition of performing preliminary kernel initializations, including hardware setup.\\
 %
 \noindent\textbf{Execution.} The programmer passes control to \sys's task scheduler 
-by calling \texttt{COALA\_RUN} after device initialization. 
+by calling \texttt{RUN} after device initialization. 
 %
 First the scheduler updates the coalescing target using the coalescing
 strategy.  Second, the scheduler resumes a commit, if one is in progress. Third,
@@ -151,5 +151,5 @@ downscaling a task because of a need for task atomicity.  For example, sampling
 an analog signal requires consecutive samples at a known interval, or the
 digitally sampled signal is meaningless.  In such a case, the programmer can
 disable partial commit for a task or a span of code, marking  the code with a
-pair of \texttt{COALA\_DISABLE\_PE} and \texttt{COALA\_ENABLE\_PE} annotations.
+pair of \texttt{DISABLE\_PE} and \texttt{ENABLE\_PE} annotations.
 These annotations respectively halt and resume the partial execution timer.
