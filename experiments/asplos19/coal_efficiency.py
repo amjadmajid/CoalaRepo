@@ -78,18 +78,19 @@ d=barWitdth/5
 for h in range(len(names)):
     for i in range( numberOfBars ):
 
-        plt.text( pos[i]+d , 18 , lbl[i] , fontsize=11, color='white', verticalalignment='bottom', rotation=90)
+        plt.text( pos[i]+d-0.05 , -2 , lbl[i] , fontsize=11, color=c[0], verticalalignment='top', rotation=60)
     d+=1
 
 
 ax = plt.axes()
-ax.tick_params(axis='x', pad=5)
+ax.tick_params(axis='x', pad=25, bottom=False)
 ax.xaxis.set_major_locator(ticker.FixedLocator( np.arange(shift)+ (barWitdth*numberOfBars)/2 ))
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( names ))
 
+ax.set_facecolor('white')
 
-plt.legend([uc, rp, co], ["task code", "re-execution", "commit"], loc='lower center',  bbox_to_anchor=(0.5, -0.07), ncol=3,   fontsize= 14)
-plt.ylabel("Norm. MUC utilization")
+plt.legend([uc, rp, co], ["task code", "re-execution", "commit"], loc='lower center',  bbox_to_anchor=(0.5, -0.025), ncol=3,   fontsize= 14, framealpha=1, facecolor='white')
+plt.ylabel("MCU utilization [%]")
 plt.xlim([0,5.9])
 plt.tight_layout()
 f.savefig("../../paper/asplos19/figures/coalEfficiency.pdf",format="pdf", dpi=1200)

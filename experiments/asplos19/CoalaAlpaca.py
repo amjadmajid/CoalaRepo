@@ -76,7 +76,11 @@ lbl = ['.15', '.30','.50' ]
 plt.text( barWitdth  *26+ 0.4 , 0.03 , r'$\infty$' , fontsize=20, color='k', verticalalignment='bottom')
 plt.text( barWitdth  *28+ 0.4, 0.03 , r'$\infty$' , fontsize=20, color='k', verticalalignment='bottom')
 
-plt.legend([us, co], [ "Alpaca", "Coala" ], loc='lower center', ncol=2, fontsize=14)
+ax = plt.axes()
+ax.tick_params(axis='x', bottom=False)
+ax.set_facecolor('white')
+
+plt.legend([us, co], [ "Alpaca", "Coala" ], loc='lower center', bbox_to_anchor=(0.5, -0.025), ncol=2, fontsize=14, framealpha=1, facecolor='white')
 
 ax = plt.axes()
 ax.tick_params(axis='x', pad=5)

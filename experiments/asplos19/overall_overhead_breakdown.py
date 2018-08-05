@@ -72,11 +72,11 @@ lbl = ['NC', 'EG','WEG' ]
 d=barWitdth/3
 for h in range(len(names)):
     for i in range( numberOfBars ):
-        plt.text( pos[i]+d , -2 , lbl[i] , fontsize=11, color=c[0], verticalalignment='top', rotation=60)
+        plt.text( pos[i]+d-0.05 , -2 , lbl[i] , fontsize=11, color=c[0], verticalalignment='top', rotation=60)
     d+=1
 
 ax = plt.axes()
-ax.tick_params(axis='x', pad=25)
+ax.tick_params(axis='x', pad=25, bottom=False)
 
 ax.xaxis.set_major_locator(ticker.FixedLocator( np.arange(shift)+ (barWitdth*numberOfBars)/2 ))
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( names ))

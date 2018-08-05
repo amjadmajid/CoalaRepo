@@ -38,15 +38,17 @@ for i, row in enumerate(times):
         shift+=1
 
 ax = plt.axes()
+ax.tick_params(axis='x', bottom=False)
 ax.xaxis.set_major_locator(ticker.FixedLocator( np.arange(shift)+ (barWitdth*numberOfBars)/2 ))
 ax.xaxis.set_major_formatter(ticker.FixedFormatter( names ))
+ax.set_facecolor('white')
 
 plt.xlim([0,5.9])
 plt.ylabel("Norm. runtime")
 # plt.yticks([0.00, 0.25, 0.50, 0.75,  1.00])
 plt.tight_layout()
 
-plt.legend([slw, fst, smt], ['NC', 'HG','WHG' ], loc='lower center',  ncol=3,   fontsize= 14)
+plt.legend([slw, fst, smt], ['NC', 'HG','WHG' ], loc='lower center', bbox_to_anchor=(0.5, -0.025), ncol=3,   fontsize= 14, framealpha=1, facecolor='white')
 
 f.savefig("../../paper/asplos19/figures/coalStrategies.pdf",format="pdf", dpi=1200)
 f.savefig("../../paper/asplos19/figures/coalStrategies.eps",format="eps", dpi=1200)
