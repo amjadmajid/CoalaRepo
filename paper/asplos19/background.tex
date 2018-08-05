@@ -20,7 +20,7 @@ memory system that has fast, byte-addressable volatile and non-volatile memory; 
         \caption{Incorrect execution}
         \label{fig:war-execution}
     \end{subfigure}
-    \caption{WAR dependency example. \texttt{NV} marks non-volatile variables, while \texttt{checkp()} is a checkpoint of volatile state. \task{replace checkp(); with checkpoint();}}
+    \caption{WAR dependency example. \texttt{NV} marks non-volatile variables, while \texttt{checkp()} is a checkpoint of volatile state. \note{replace checkp() with checkpoint();}}
     \label{fig:war}
 \end{figure}
 
