@@ -1,6 +1,6 @@
 % \textcolor{red}{[additional motivation for coala memory virtualization] we should emphasize that Coala programming model removes the burden of identifying the write-after-read dependencies from the programmer  as compared to Chain. And it does not require a specific compiler that cannot consider a runtime dependent behavior like Interrupts service handling to guarantee memory protection, as in Alpaca.}
 %
-\sys's {\em virtual memory manager} (VMM) abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \emph{private} and \emph{shadow} buffers. Each buffer is divided into pages. The VMM prohibits applications from directly access these buffers. Instead, it redirects any data request to the \emph{working} buffer which is located in the volatile memory (SRAM) has a lower latency and energy cost to access than the device's FRAM. It populates working buffer with the privatized pages from non-volatile memory. When a coalesced task completes, the VMM ensures that updated pages are committed to main memory and visible to subsequently executed tasks. If the power interrupts a task, the VMM ensures that the task sees consistent memory state when it restarts its execution. The VMM ensures consistency even if a task or a sequence of tasks include WAR dependences that could compromise consistency~\cite{ratchet,dino}.
+\sys's {\em virtual memory manager} (VMM) abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \texttt{\underline{private}} and \texttt{\underline{shadow}} (underlined locations are non-volatile) buffers. Each buffer is divided into pages. The VMM prohibits applications from directly access these buffers. Instead, it redirects any request to the \texttt{working} buffer located in the volatile memory (SRAM), which has a lower latency and energy cost to access than FRAM. It populates \texttt{working} buffer with the privatized pages from non-volatile memory. When a coalesced task completes, the VMM ensures that updated pages are committed to main memory and visible to subsequently executed tasks. If the power interrupts a task, the VMM ensures the consistency of the data by relying on its \texttt{\underline{private}} buffer. The VMM ensures consistency even if a task or a sequence of tasks include WAR dependences that could compromise consistency~\cite{ratchet,dino}.
 %
 On a commit, the VMM atomically copies all ``dirty'' pages back into their location in the non-volatile memory.
 %
@@ -36,11 +36,10 @@ The VMM utilizes a two-phase commit to write dirty pages from the \texttt{workin
 buffer back to their home location in \texttt{\underline{private}}. It optimizes this process by using an indirection table to abstract the location of the \texttt{\underline{private}} buffer and
 to eliminate the need for the second page copy.
 %
-The memory manager is forced to swap out a dirty page from the \texttt{working} buffer
-when a task accesses a page that is not in the working buffer, and there is no
-free page in the working buffer (i.e., a page fault). On a page fault, \sys
-moves the page to a direct\hyp{}mapped non-volatile \texttt{\underline{shadow}}
-page buffer. \\
+The VMM is forced to swap out a dirty page from the \texttt{working} buffer
+when a task requests a page that is not in the \texttt{working} buffer, and there is no
+free page in the working buffer (i.e., a page fault). On a page fault, the VMM
+moves the page to the direct\hyp{}mapped non-volatile \texttt{\underline{shadow}} buffer. \\
 %
 \subsection{Address Translation and Variable Access}
 %
