@@ -191,7 +191,7 @@ shows how \sys's task downsizing adaptation mechanism eliminates this
 non-termination, without changing the static tasks and without recompiling the
 application.
 
-In a separate experiment, we have enabled task downsizing in \sys and measured
+\textcolor{red}{In a separate experiment, we have enabled task downsizing in \sys and measured
 the execution time for \textit{fft} benchmark at 60\,cm from the signal
 generator antenna. \sys executed the
 benchmark successfully without (NC) and with coalescing (WEG). The application
@@ -199,7 +199,7 @@ took longer to complete than at a shorter distance of 15\,cm in the previous
 experiment, because of smaller (negligible) incoming energy at the larger
 distance. The variant without coalescing (NC) slowed down by 2.16$\times$ and the
 variant with WEG coalescing slowed down by 2.31$\times$ slower, but at both
-distances, WEG completed faster than NC.
+distances, WEG completed faster than NC.}
 %
 For comparison, the run time with Alpaca is effectively infinite at this
 distance, which is a consequence of its non-adaptive static tasks.
