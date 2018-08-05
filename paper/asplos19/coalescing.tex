@@ -27,19 +27,12 @@ An effective colescing strategy must be {\em aggressive} enough, attempting to c
 large number of tasks to amortize a large amount of commit overhead. However, it must also be 
 {\em conservative} enough, attempting to coalesce only as many tasks as will execute
 to completion given a certain energy conditions, reducing the risk or long coalesced task re-execution penalty. 
-
-% An effective coalescing strategy moderates the risk of a power failure during a
-% long coalesced task and capitalizes on the benefits of deferred commits by
-% adapting the target size of the dynamic task to the energy available at
-% runtime. 
 %
-\begin{figure}{t}
-\fbox{\parbox{\linewidth}{
-	\captionof{algorithm}{Coalescing}
+
+\begin{algorithm}[t]
+	\caption{Coalescing}
 	\label{algo:genCoalescing}
 	\scriptsize
-	%\small
-	%
 	\begin{algorithmic}[1]
         \State $B \leftarrow $ \Call{$f_\text{reboot}$}{$z$}
         \State $H \gets 0$ 
@@ -56,9 +49,8 @@ to completion given a certain energy conditions, reducing the risk or long coale
 	        \State \Call{commit\_to\_fram}{\null}
 	        \State $B \leftarrow $ \Call{$f_\text{commit}$}{$B$}
         \EndWhile
-	\end{algorithmic}}}
-% \end{wrapfigure}
-\end{figure}
+	\end{algorithmic}
+\end{algorithm}
 % 
 \subsection{Task Coalescing Strategies} 
 Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing strategy. In the algorithm, $B$ (target budget) is total number of static tasks
