@@ -51,7 +51,7 @@ WP}'s implementation is similar except that {\tt WP} marks the accessed page as
 dirty.
 %
 {\tt RP} and {\tt WP} operations translate a variable's physical address in
-non-volatile memory into a \emph{virtual address} in the page buffer in
+non-volatile memory into a \emph{virtual address} in \texttt{working} buffer in
 volatile memory. In \sys, a virtual address is composed of a \emph{page tag}
 that identifies the page and a \emph{page offset} that identifies a byte.
 %
@@ -72,9 +72,9 @@ that identifies the page and a \emph{page offset} that identifies a byte.
 \end{figure}
 %
 After address translation (Figure~\ref{figure:mem-man}, Step 6), a task
-accesses the protected variable's location in the volatile paging buffer
+accesses the protected variable's location in the volatile \texttt{working} buffer
 (Step 7). \sys keeps track of the page tags for
-the pages currently resident in the paging buffer. When a task accesses a
+the pages currently resident in the \texttt{working} buffer. When a task accesses a
 variable, it compares the variable's page tag to tags of the pages in {\tt
 working} (Algorithm~\ref{algo:rwar}, Line 2).
 %
@@ -92,7 +92,7 @@ manager first searched the variable's page in the \texttt{working} buffer
 If the page is not found there, a page fault is incurred and a new page needs to
 be swapped in.
 If the \texttt{working} buffer is full, a page fault on a memory access
-requires \sys to swap out one of the pages in the volatile buffer (a
+requires VMM to swap out one of the pages in the \texttt{working} buffer (a
 \emph{victim page}) preserving updates made to that page.
 %
 While we opted for the simplicity of FIFO, any other replacement policy, such
@@ -112,7 +112,7 @@ Finally, the page is copied to the volatile buffer (Step 5). \\
 When the last task in a sequence of coalesced tasks completes, \sys must commit
 \emph{all} dirty pages in the \texttt{working} buffer and in the
 \texttt{\underline{shadow}} buffer, copying them back to their original
-locations in the main memory \texttt{\underline{store}}. If a task were allowed
+locations in the main memory \texttt{\underline{private}}. If a task were allowed
 to (re-)execute after only some pages have been committed to
 \texttt{\underline{store}}, the task might see protected variables in an
 inconsistent state; \sys's two-phase commit prevents this inconsistency. \\
