@@ -1,12 +1,9 @@
-Freeing embedded devices from batteries and powering them from ambient energy is a key factor in developing the energy-neutral Internet of Things.
+Energy-neutral Internet of Things requires freeing embedded devices from batteries and powering them from ambient energy.
 Ambient energy is, however, unpredictable and can only power a device intermittently.
-Therefore, the two paradigms of intermittent execution (checkpointing and task-based) save the intermediate program state into non-volatile memory frequently, to preserve the execution progress of a program.
-Despite the superiority of the task-based approach, tasks' size is fixed at compile-time, and agnostic to energy conditions.
-% it fixes the task size at compile time and operates obliviously to changing energy conditions.
-% When tasks are sized without accounting for available energy,
+Therefore, the two paradigms of intermittent execution, program checkpointing and task-based programming, save the intermediate program state into non-volatile memory frequently to preserve the execution progress.
+Despite the superiority of the task-based approach over checkpointing, tasks' size is fixed at compile-time and agnostic to energy conditions.
 Thus, the state may be saved either more frequently than necessary or not frequently enough for the program to progress and terminate.
-To address these challenges, we propose \sys, an \emph{adaptive} and \emph{efficient} task-based execution model.
+To address these challenges, we propose \sys, an adaptive and efficient task-based execution model.
 \sys progresses on a multi-task scale when energy permits and preserves the computation progress on a sub-task scale if necessary.
-\sys ensures that power failures do not leave the program state in non-volatile memory inconsistent using a specialized memory virtualization mechanism.
+\sys' specialized memory virtualization mechanism ensures that power failures do not leave the program state in non-volatile memory inconsistent.
 Our evaluation on a real energy-harvesting platform shows that \sys reduces run time by up to 54\%, and by 26\% on average, as compared to a state-of-the-art system, and is able to progress where static systems fail.
-% Our evaluation shows that \sys is $2X$ faster than the state-of-the-art system in most cases and is able to progress where static systems fail.
