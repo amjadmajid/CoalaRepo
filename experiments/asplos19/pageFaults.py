@@ -65,8 +65,8 @@ plt.ylabel("Normalized runtime")
 plt.xlim([0,5.9])
 ax.tick_params(axis='x', pad=30, bottom=False)
 plt.tight_layout()
-f.savefig("../figures/page_exec-time.pdf",format="pdf", dpi=1200)
-f.savefig("../figures/page_exec-time.eps",format="eps", dpi=1200)
+f.savefig("../../paper/asplos19/figures/page_exec-time.pdf",format="pdf", dpi=1200)
+f.savefig("../../paper/asplos19/figures/page_exec-time.eps",format="eps", dpi=1200)
 
 
 f = plt.figure(figsize=(8,2.8))
