@@ -14,62 +14,21 @@ Upon power failures, a device loses the volatile state in its registers, stack, 
 
 \textbf{Crucial Drawback of Static Task Decomposition.} Task-based programming and execution models require a programmer~\cite{alpaca,chain} or a compiler~\cite{baghsorkhi_cgo_2018} to statically decompose a program into a collection of tasks. A \emph{task}, a top level function, can include arbitrary computation that should be executed despite arbitrarily-timed power failures. The programmer (or a compiler) explicitly expresses task-to-task control flow. Fig.~\ref{fig:coalesce} illustrates how a program's tasks execute and shows how tasks transitions can impose a runtime overhead. At each transition, the system incurs an overhead to track and atomically commit modifications to the non-volatile memory, to maintain consistency of program state~\cite{chain,alpaca}. The more task transitions a program requires, the more commit overhead is incurred by the system at runtime. A programmer may thus create very large tasks in an attempt to reduce task transitions overhead. However, a very large task may require more energy to complete than a device's fixed hardware energy buffer can hold which may lead to a task \emph{non-termination} problem. To eliminate this risk, existing systems require the programmer to decompose a program into relatively small tasks to preserve execution progress. These constraints on task sizing lead to the following \emph{dilemma}: should large tasks be used, that are efficient but risk non-termination, or small tasks that are guaranteed to complete but incur a high task transition and commit overhead?
 
-\textbf{Challenges and Contributions.} This paper introduces \sys, a new task-based system that employs \emph{adaptive task size execution by task coalescing/splitting}. By means of this novel technique, small tasks can be executed efficiently by trimming unnecessary overheads \emph{dynamically}, meanwhile avoiding the risk of non-termination. \sys accepts any static decomposition and it coalesces (groups) tasks (Fig.~\ref{fig:coalesce}, top) or splits them (Fig.~\ref{fig:coalesce},bottom) based on the estimated energy availability without demanding any hardware support. \note{\textbf{To the best of our knowledge, \sys is the only task-based system that guarantees task termination and ....(something related with Coalescing...)  }}
+\textbf{Challenges and Contributions.} This paper introduces \sys: a new task-based system that employs \emph{adaptive task size execution by task coalescing and splitting}. By means of this novel technique, small tasks can be executed efficiently by trimming unnecessary overheads \emph{dynamically}, meanwhile avoiding the risk of non-termination. \sys accepts any static decomposition and it coalesces (groups) tasks or splits them (see again Fig.~\ref{fig:coalesce}) based on the estimated energy availability without demanding any hardware support. To the best of our knowledge, \sys is the only task-based system that guarantees forward progress for any statically-defined tasks or energy storage sizes. 
 
-The unique challenges and contributions revealed by this work are listed below:
-\note{it takes more space, but a bullet list makes C1-C3 stand out more properly}
+The unique contributions of \sys in relation to challenges of task-based systems revealed by this work are as follows:
 
-% \sys does not requires hardware support for energy estimation to make its scheduling decisions. 
+\begin{itemize}
 
-% \sys accepts any static decomposition and coalesces/splits its tasks at runtime. Two consecutive, coalesced tasks execute
-% with no commit overhead between them, instead performing task-end commit actions at the end of the second task only.
-% %
-% When there is sufficient energy to execute both tasks, two distinct, small
-% tasks are effectively executed as a single large task, preserving the atomicity
-% of both. If power fails during a coalesced task, execution restarts from the
-% {\em first} of the coalesced tasks. Figure~\ref{fig:coalesce} (top)
-% illustrates how dynamic coalescing removes unnecessary overhead and shortens intermittent program execution.
-% On the other hand, a large task that requires more energy to complete than a device buffered energy
-% is split by \sys to enable task termination and preserve execution progress, as depicted in Figure~\ref{fig:coalesce} (bottom).
+\item[C1] \emph{Overcoming Task Transition Overhead:} given unpredictable incoming energy, how to save computation progress as rare as possible? \sys tries to minimize task transition overhead by estimating energy conditions at run-time using \emph{recent execution history} as a metric.
 
-%\textbf{Challenges and Contributions} 
+\item[C2] \emph{Dynamic Memory Consistency Handling:} merging static tasks on the fly gives rise to the need for dynamic memory consistency handling. How to dynamically detect inter-task data dependencies and ensure efficient protection against power interrupts? \sys does so by using a novel approach called \emph{dynamic group privatization}---performing real-time dependency tracking to enable protection on a task transition. Individual variables tracking, however, slows down a system dramatically. Therefore, \sys protects global variables in a batch. Moreover, it optimizes data transfers by using Direct Memory Access (DMA).
 
-\noindent \emph{C1) Task Transition Overhead:} given unpredictable incoming energy, how to save progress as few times as possible? \sys tries to minimize task transition overhead by estimating energy conditions at run-time using \emph{recent execution history} as a metric.
-% \noindent\emph{C1) Dynamic Task Sizing:} Given unpredictable energy shots arrival, how to specify the size of a dynamic task on the fly? \sys addresses this challenge by using a novel approach: \textit{recent execution history} as a metric to estimate the environment energy conditions and to specify task sizes. 
-%Furthermore, It mitigates the risk of dynamic task re-execution by taking advantage of the certainty that the energy buffer offers and approaches the expected power interrupt carefully. 
+\item[C3] \emph{Ensuring Task Termination:} a static task decomposition model assumes that each single task can execute to completion. If the hardware energy buffer provides inadequate energy to execute each single task to completion, a program will not terminate~\cite{cleancut_2018}. Under such conditions, how to enable the dynamic execution model to progress on a sub-task level? To avoid non-termination under adverse energy conditions, \sys uses a novel timer-based {\em partial task commit} mechanism \note{should we instead cite Ratchet?}. Partial execution avoids non-termination by committing the intermediate state of a long-running task that has repeatedly failed and restarted.
 
-\noindent\emph{C2) Dynamic Memory Consistency Handling:} merging static tasks on the fly gives rise to the need for dynamic memory consistency handling. How to dynamically detect inter-task data dependencies and ensure efficient protection against power interrupts? \sys does so by using a novel
-approach called \emph{dynamic group privatization}--- %Varying variables dependencies forces a static approach (i.e.~\cite{alpaca}) to operate by considering a worst case scenario (i.e. protecting all global variables) in each dynamic task transition. 
-performing real-time dependency tracking to enable protection on a task transition. Individual variables tracking, however, slows down a system dramatically. Therefore, \sys protects global variables in a batch. Moreover, it optimizes data transfers by using Direct Memory Access (DMA).
+\end{itemize}
 
-\noindent\emph{C3) Ensuring Task Termination:} a static task decomposition model assumes that each
-single task can execute to completion. If the hardware energy buffer provides
-inadequate energy to execute each single task to completion, a program will not
-terminate~\cite{cleancut_2018}. Under such conditions, how to enable the dynamic execution model to progress on a sub-task level? To avoid non-termination under adverse
-energy conditions, \sys uses a novel timer-based {\em partial task commit} mechanism \note{should we instead cite Ratchet?}.
-Partial execution avoids non-termination by committing the intermediate state of a long-running
-task that has repeatedly failed and restarted.
-%Partial execution violates task atomicity, but preserves forward progress; if a programmer knows that task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
-
-%\begin{itemize}
-%\item\textit{challenge} 1) Given unpredictable energy shots arrival, how to specify the size of a dynamic task on the fly? \textit{contribution---1} \sys addresses this challenge by using its \textit{recent execution history} as a metric to estimate the environment energy conditions. Furthermore, It mitigates the risk of dynamic task re-execution by taking advantage of the certainty that the energy buffer offers and approaches the expected power interrupt carefully. 
-%%
-%\item\textit{challenge} 2) Given dynamic variables dependencies, how to ensure efficient data protection against power interrupts? \textit{contribution---2} \sys ensures the consistency of the data by using a novel
-%approach called \emph{dynamic group privatization}. Varying variables dependencies forces a static approach (i.e.~\cite{alpaca}) to operate by considering a worst case scenario (i.e. protecting all global variables) in each dynamic task transition. \sys, therefore, utilizes a real-time data tracking to enable partial data protection on a task transition. Individual variables tacking, however, slows down a system dramatically. Therefore, \sys  relies on a coarse locality principle and protects the global variables in a batch. Moreover, it optimizes the data transfer by using Direct Memory Access (DMA).
-%%
-%\item\textit{challenge} 3) A static task decomposition model assumes that each
-%single task can execute to completion. If the hardware energy buffer provides
-%inadequate energy to execute each single task to completion, a program will not
-%terminate~\cite{cleancut_2018}. under such conditions how to enable the dynamic execution model to progress on a sub-task level? \textit{contribution---3} To avoid non-termination under adversarial
-%energy conditions, \sys uses a timer-based {\em partial task commit} mechanism.
-%Partial execution avoids non-termination by committing the intermediate state of a long-running
-%task that has repeatedly failed and restarted. Partial execution violates
-%task atomicity, but preserves forward progress; if a programmer knows that
-%task atomicity is crucial to correctness, they can disable partial execution around a piece of code.
-%\end{itemize}
-%
-
-To asses the benefits of \sys over existing task-based systems, we implemented and tested six benchmarks on a real energy-harvesting platform. Our evaluation shows that \sys reduces run time by up to 54\%, and by 26\% on average, as compared to a state-of-the-art system, and is able to progress where static systems fail.
+To asses the benefits of \sys over existing task-based systems, we implemented and tested six benchmarks on a real energy-harvesting platform. Our evaluation shows that \sys reduces run time by up to 54\%, and by 26\% on average, as compared to a state-of-the-art system, and is able to progress where static task-based systems fail.
  
 The rest of this paper is organized as follows. Section~\ref{sec:background} provides background on intermittent computing.
 Section~\ref{sec:systemdescription} provides an overview of \sys, while Section~\ref{sec:task_adaptation} describes \sys's task adaptation mechanism. The dynamic group privatization is explained in Section~\ref{sec:memory_virtulaization}. Implementation details of \sys are given in Section~\ref{sec:implementation}. Sections~\ref{sec:methodology} and~\ref{sec:evaluation} describe \sys's evaluation methodology and results. Section~\ref{sec:related_work} positions \sys in the context of related work and Section~\ref{sec:conclusions} concludes and discusses future work.
