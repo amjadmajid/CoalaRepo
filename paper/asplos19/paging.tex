@@ -169,7 +169,7 @@ correctly access their original memory locations in \texttt{\underline{private}}
             \State $\texttt{\underline{committing}} \gets \textbf{true}$
             \While{\texttt{\underline{commitIndex}} < \texttt{\underline{shadowCount}}}
                 \State $t \gets \texttt{\underline{shadowList}}[\texttt{\underline{commitIndex}}]$
-                \State \Call{commitToStore}{\texttt{\underline{shadow}}[t]}
+                \State \Call{commitToPrivate}{\texttt{\underline{shadow}}[t]}
                 \State $\texttt{\underline{commitIndex}} \gets \texttt{\underline{commitIndex}} + 1$
             \EndWhile
             \State $\texttt{\underline{shadowCount}} \gets 0$
