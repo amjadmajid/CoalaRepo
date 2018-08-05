@@ -73,7 +73,7 @@ that identifies the page and a \emph{page offset} that identifies a byte.
 %
 After address translation (Figure~\ref{figure:mem-man}, Step 6), a task
 accesses the protected variable's location in the volatile \texttt{working} buffer
-(Step 7). \sys keeps track of the page tags for
+(Step 7). The VMM keeps track of the page tags for
 the pages currently resident in the \texttt{working} buffer. When a task accesses a
 variable, it compares the variable's page tag to tags of the pages in {\tt
 working} (Algorithm~\ref{algo:rwar}, Line 2).
@@ -104,7 +104,7 @@ the page is dirty and its changes has to be persisted to non-volatile memory
 If the accessed page was previously modified and swapped out since the last
 power failure, the most recent version of the page is in {\tt
 \underline{shadow}} (Step 3), otherwise it has to be retrieved from
-{\tt \underline{store}} (Step 4).
+{\tt \underline{private}} (Step 4).
 Finally, the page is copied to the volatile buffer (Step 5). \\
 %
 \subsection{Atomic Two-Phase Commit of Dirty Pages}
@@ -112,50 +112,44 @@ Finally, the page is copied to the volatile buffer (Step 5). \\
 When the last task in a sequence of coalesced tasks completes, \sys must commit
 \emph{all} dirty pages in the \texttt{working} buffer and in the
 \texttt{\underline{shadow}} buffer, copying them back to their original
-locations in the main memory \texttt{\underline{private}}. If a task were allowed
-to (re-)execute after only some pages have been committed to
-\texttt{\underline{store}}, the task might see protected variables in an
-inconsistent state; \sys's two-phase commit prevents this inconsistency. \\
-%
+locations in the main memory \texttt{\underline{private}}.\\
 To make the commit atomic, \sys commits the pages in two phases, implemented by
 Algorithm~\ref{algo:commit}.
 %
 The first phase copies dirty pages from the \texttt{working} buffer to the
 non-volatile \texttt{\underline{shadow}} buffer (Line 4). The second phase
-commits pages from \texttt{\underline{shadow}} to \texttt{\underline{store}}
+commits pages from \texttt{\underline{shadow}} to \texttt{\underline{private}}
 (Line 12).  If power fails during the first phase, the whole commit is aborted,
-and the execution restarts from the most recently committed point (i.e., from
-the first task in a coalesced sequence of tasks). If power fails in the second
+and the execution restarts from the most recently committed point (i.e., from the beginning of a coalesced task). If power fails in the second
 phase, the commit process safely resumes on reboot.  The second phase of commit
 depends on some run-time metadata. The \texttt{\underline{committing}} bit
 indicates that a commit is in progress and is set before the first page is
 committed (Line 9) and cleared after the last page is committed (Line 16).  The
 \texttt{\underline{shadowCount}} records the number of dirty shadow pages to
-commit and \sys clears the counter when commit completes (Line 14).  The
+commit and the VMM clears the counter when commit completes (Line 14).  The
 \texttt{\underline{commitIndex}} indexes the next page to be committed (Line
-11) and \sys clears the index at the end of the phase (Line 15).
+11) and the VMM clears the index at the end of the phase (Line 15).
 %
 \sys's commit is efficient because it maintains an index dirty pages instead of
 iterating through all potentially dirty pages to check a dirty bit during
 commit.
 %
-\sys's implementation is also efficient because the memory manager does not
-copy from \texttt{\underline{shadow}} to \texttt{\underline{store}}, instead
+\sys's implementation is also efficient because the VMM does not
+copy from \texttt{\underline{shadow}} to \texttt{\underline{private}}, instead
 swapping pointers in an indirection table that maintains the pages as a double
 buffer.  Section~\ref{sec:implementation} describes double buffering in more
 detail. \\
 %
 \textbf{Memory Consistency.} \sys's paging mechanism ensures that a task only
 ever executes using consistent protected data. During task execution,
-modifications to protected data do not affect their original memory locations,
+modifications to protected data do not affect the \texttt{\underline{private}} buffer,
 because a task reads and writes the volatile \texttt{working} buffer only, and
 modified pages are kept in \texttt{\underline{shadow}} until commit.  A power
-failure erases the contents of the page buffer, preventing a re-executing task
-from observing updates in the page buffer from a previous execution attempt.
+failure erases the contents of the \texttt{working} buffer, preventing a re-executing task
+from observing updates from a previous execution attempt.
 Clearing \texttt{\underline{shadowCount}} as part of the second phase commit
 (Line 14), ensures that all accesses to protected variables in subsequent tasks
-correctly access their original memory locations in \texttt{\underline{store}}.
-\sys assumes that the write to a non-volatile word in memory is atomic. \\
+correctly access their original memory locations in \texttt{\underline{private}}.\\
 %
 \begin{algorithm}[t]
 	\caption{Two-phase commit}
@@ -195,12 +189,11 @@ correctly access their original memory locations in \texttt{\underline{store}}.
 \sys asks the programmer to use its {\tt RP} and {\tt WP} paging API methods on
 every access to a protected variable (cf. Section~\ref{sec:coala_api}).  These
 API invocations present a risk of high overhead because there is a dynamic
-check on every read and write. An alternative approach~\cite{alpaca} relied on a compiler to analyze memory operations and try to insert memory protection code mostly at the beginning of a task, leaving most
-memory accesses uninstrumented.\\
+check on every read and write. 
 %
 Despite the risk of per-access overhead, \sys's dynamic memory protection
-scheme brings several benefits over a static approach.  First, the limitations
-of static analysis preclude some uses of pointers due to potential pointer
+scheme brings several benefits over a static approach (i.e.~\cite{alpaca}).  
+First, the limitations of static analysis preclude some uses of pointers due to potential pointer
 aliasing. For example, in the presence of arbitrary pointer operation, a
 function call using a function pointer, or an interrupt within a task, the
 system cannot statically analyze the memory behavior.   Second, a static approach
