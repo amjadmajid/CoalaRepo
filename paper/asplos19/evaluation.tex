@@ -35,7 +35,7 @@ The page size was set to the best performing value (32~B for \textbf{bc} and
 Section~\ref{sec:results_memory_management}.
 
 The overhead incurred by each coalescing strategy is broken down in
-Figure~\ref{fig:overallOverheadBreakdown}. Without coalescing enabled (NC), the
+Fig.~\ref{fig:overallOverheadBreakdown}. Without coalescing enabled (NC), the
 re-execution penalty is smallest, because the amount of work that can happen
 between commits and may have to be re-executed if interrupted is smallest when
 work from multiple static tasks is not combined.
@@ -67,7 +67,7 @@ history-guided coalescing, WHG: weighted history-guided coalescing.}
 %
 \subsubsection{\sys Kernel Overhead Breakdown}
 %
-Figure~\ref{fig:coalEfficiency} (top) breaks down the time spent on executing
+Fig.~\ref{fig:coalEfficiency} (top) breaks down the time spent on executing
 useful task code and committing further into time spent by the application and
 time spent by \sys's runtime.
 %
@@ -75,7 +75,7 @@ This dataset is generated in a separate experiment with the same setup as the
 previous experiment in Section~\ref{sec:overhead-coalescing}.
 %
 Consistent with the previous results in
-Figure~\ref{fig:overallOverheadBreakdown}, commit overhead is highest when
+Fig.~\ref{fig:overallOverheadBreakdown}, commit overhead is highest when
 coalescing is not used to reduce the number of commits.
 %
 However, coalescing increases the cost of each access to a protected variable,
@@ -88,7 +88,7 @@ necessary on each protected access is the most critical bottleneck for \sys.
 %
 \subsubsection{Protected Memory Accesses Breakdown}
 %
-Figure~\ref{fig:coalEfficiency} (bottom) breaks down protected memory accesses
+Fig.~\ref{fig:coalEfficiency} (bottom) breaks down protected memory accesses
 into three categories.
 %
 Each type of protected access incurs a different amount of overhead: access to
@@ -117,12 +117,12 @@ then compare the best variant to Alpaca~\cite{alpaca}.
 %
 \subsubsection{\sys Speedup with Coalescing}
 
-Figure~\ref{fig:coalescing} shows the \sys run time with two coalescing
+Fig.~\ref{fig:coalescing} shows the \sys run time with two coalescing
 strategies (EG, WEG) normalized to the run time without coalescing (NC).
 %
 The experimental setup is the same as that in Section~\ref{sec:coala_overhead}.
 %
-The results in Figure~\ref{fig:coalescing} show that all benchmarks
+The results in Fig.~\ref{fig:coalescing} show that all benchmarks
 complete faster with coalescing than without coalescing: from 25\% faster
 (\textbf{ar}) up to 70\% faster (\textbf{sort}).
 %
@@ -168,40 +168,38 @@ without coalescing.}
 %
 We now compare \sys's performance to Alpaca~\cite{alpaca}---a
 \emph{non-adaptive} task-based system with tasks fixed at compile time.
-Figure~\ref{fig:runtime} (right) shows the average execution time of each
+Fig.~\ref{fig:runtime} shows the average execution time of each
 application for \sys and Alpaca, normalized to the latter. The results show
 that \sys provides a performance benefit compared to Alpaca for most
-applications, with the exception of \textbf{ar} and \textbf{cuckoo} at some
-distances.  The speedup is greatest for applications with repeated write after
+applications. The speedup is greatest for applications with repeated write after
 read dependencies throughout their code, particularly involving arrays
-(\textbf{dijkstra}, \textbf{fft} and \textbf{sort}). \sys's virtualized memory
+(\textit{dijkstra}, \textit{fft} and \textit{sort}). \sys's VMM
 successfully amortizes the overhead of protecting memory that is accessed in
 such patterns.  In applications without locality among accesses to protected
 variables, including array elements, \sys incurs overhead from memory
 virtualization that causes its performance to be comparable to (or worse than)
-Alpaca (\textbf{ar}, \textbf{cuckoo}).
+Alpaca (\textit{ar}, \textit{cuckoo}), on average \sys 26\% faster than Alpaca.
 
-The \textbf{fft} benchmark did not complete at distances larger than
+The \textit{fft} benchmark did not complete at distances larger than
 15\,cm\footnote{At distances greater than 15\,cm, energy incoming during
 execution is negligible and stored energy is insufficient to complete some of
 the static tasks.} with neither Alpaca, nor \sys \emph{without the downsizing
-mechanism}. This is marked with $\infty$ signs in Figure~\ref{fig:coalescing}
-(left).  This non-terminating condition cannot be avoided in Alpaca, due to the
+mechanism}. This is marked with $\infty$ signs in Fig.~\ref{fig:coalescing}
+. This non-terminating condition cannot be avoided in Alpaca, due to the
 fixed, non-adaptive nature of its tasks.  In contrast, our next experiment
 shows how \sys's task downsizing adaptation mechanism eliminates this
 non-termination, without changing the static tasks and without recompiling the
 application.
 
 In a separate experiment, we have enabled task downsizing in \sys and measured
-the execution time for \textbf{fft} benchmark at 60\,cm from the signal
-generator antenna---even \emph{farther} than the distance at which this
-benchmark failed to terminate in the previous experiment. \sys executed the
-benchmark successfully without (NC) and with coalescing (WHG). The application
+the execution time for \textit{fft} benchmark at 60\,cm from the signal
+generator antenna. \sys executed the
+benchmark successfully without (NC) and with coalescing (WEG). The application
 took longer to complete than at a shorter distance of 15\,cm in the previous
 experiment, because of smaller (negligible) incoming energy at the larger
 distance. The variant without coalescing (NC) slowed down by 2.16$\times$ and the
-variant with WHG coalescing slowed down by 2.31$\times$ slower, but at both
-distances, WHG completed faster than NC.
+variant with WEG coalescing slowed down by 2.31$\times$ slower, but at both
+distances, WEG completed faster than NC.
 %
 For comparison, the run time with Alpaca is effectively infinite at this
 distance, which is a consequence of its non-adaptive static tasks.
@@ -211,54 +209,32 @@ distance, which is a consequence of its non-adaptive static tasks.
 
 We characterize the performance of \sys's virtual memory sub-system in an
 experiment on a continuously-powered evaluation board described in
-Section~\ref{sec:methodology}.  Figure~\ref{fig:page_size} quantifies the
+Section~\ref{sec:methodology}.  Fig.~\ref{fig:page_size} quantifies the
 effects of page size.
-
-%\textbf{Effect of Page Size on Runtime.}
-
+%
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/page_exec-time}
 	\includegraphics[width=\columnwidth]{figures/pagePulls}
-    \caption{Effect of page size on execution time (left) and on the number of
-page faults (right). The execution time is normalized to the lowest in each set
+    \caption{Effect of page size on execution time (top) and on the number of
+page faults (bottom). The execution time is normalized to the lowest in each set
 of page sizes.}
 	\label{fig:page_size}
 \end{figure}
-
-
+%
 \subsubsection{Effect of Page Size on Runtime}
-
-Figure~\ref{fig:page_size} (left) shows the execution time as a function
+%
+Fig.~\ref{fig:page_size} (top) shows the execution time as a function
 of page size, normalized to the lowest per-application performance among the
 set of page sizes.
-%
-With some exceptions, a ``bathtub curve'' can be observed in the data.  For
-some applications one of the two edges of the bathtub shape is missing, because
-we did not evaluate a sufficiently wide range of page sizes.
-%
-The right edge of the bathtub is a consequence of the time spent copying
-unnecessary data along with data of interest, because copies are at page
-granularity.
-%
-The left edge of the bathtub is due to the overhead of swapping pages in
-upon access.
-%
-The swap-in overhead is proportional to the number of page faults.
-%
-Page faults are more likely with smaller pages, as visible in the plot on the
-right in Figure~\ref{fig:page_size}.
-%
 The data suggest that there is a page size, distinct from the largest or
 smallest, that minimizes execution time. The best page size is not the same for
 each application. Nevertheless, if a choice must be made for all applications,
 128\,B pages perform well for most of them.
-
-%\textbf{Effect of Page Size on Page Faults.}
-
+%
 \subsubsection{Effect of Page Size on Page Faults}
-
-Figure~\ref{fig:page_size} (right) shows the number of page faults as a
+%
+Fig.~\ref{fig:page_size} (bottom) shows the number of page faults as a
 function of page size.
 %
 The smaller the page the more likely that a memory access will land
@@ -268,53 +244,4 @@ This trend is visible for all applications, exception \textbf{bc}. The total
 amount of data accessed by \textbf{bc}, as well as its working set, is small.
 Even with the smallest page, all accesses are contained within that page, and
 no page faults occur. Without any page faults to begin with, increasing the
-page size has no effect.
-
-%\subsection{\sys Memory Footprint?}
-%\label{sec:results_program_characterization}
-%
-%\begin{table}
-%	\begin{tabular}{| c | c | c | c | c |}
-%		\hline
-%		\multirow{2}{*}{Application} & \multicolumn{2}{ c |}{Memory footprint} & \multirow{2}{*}{No. tasks} & \multirow{2}{*}{SLOC} \\
-%		\cline{2-3}
-%		{} & \sys & Alpaca & {} & {} \\
-%		\hline\hline
-%				\textbf{ar} & --- & --- & --- & ---\\
-%		\hline
-%				\textbf{bc} & --- & --- & --- & ---\\
-%		\hline
-%				\textbf{cuckoo} & --- & --- & --- & ---\\
-%		\hline
-%				\textbf{dijkstra} & --- & --- & --- & ---\\
-%		\hline
-%				\textbf{fft} & --- & --- & --- & ---\\
-%		\hline
-%				\textbf{sort} & --- & --- & --- & ---\\
-%		\hline
-%	\end{tabular}
-%		\caption{Comparison between \sys and Alpaca benchmarks.}
-%		\label{table:compiler_result}\vspace{-0.5cm}
-%\end{table}
-
-%\begin{table}[t]
-%	\centering
-%	\renewcommand{\tabcolsep}{1pt}
-%	\begin{tabular}{|l|cc|cc|cc|cc|c|}
-%		\hline
-%		{} & \multicolumn{2}{c|}{{\bf Prot. bytes}} & \multicolumn{2}{c|}{{\bf \# Tasks}} & \multicolumn{2}{c|}{{\bf \# Prot. acc.}} & \multicolumn{2}{c|}{\bf SLOC} & {\bf Comp.} \\
-%		App & Man. & Comp. & Man. & Comp. & Man. & Comp. & \multicolumn{1}{l}{\sys} & \multicolumn{1}{r|}{Chain~\cite{chain}} & {\bf time} \\
-%		\hline\hline
-%		bc & 22 & 22 & 10 & 15 & 81 & 93 & 351 &588 & 3\\
-%		cem & 3492 & 3242 & 12 & 9 & 92 & 123 & 388 &721 & 2\\
-%		cuckoo & 282 & 288 & 15 & 6 & 90 & 76 & 483 &762 & 6\\
-%		rsa & 332 & 250 & 20 & 27 & 130 & 296 & 887 &1233 & 86\\
-%		ar & 166 & 218 & 11 & 6 & 112 & 333 & 483 &762 & 34\\
-%		sort & 104 & 104 & 4 & 2 & 70 & 23 & 180 & 287 & $<$1\\
-%		dft$^\dagger$ & --- & --- & --- & --- & --- & --- & 222 & 293 & ---\\
-%		%dd &  &  &  &  &  &  &  & 287 &  \\
-%		\hline
-%	\end{tabular}
-%		\caption{Comparison between \sys and Alpaca benchmarks.}
-%		\label{table:compiler_result}\vspace{-0.5cm}
-%\end{table}
+page size result only in overhead.
