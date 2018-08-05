@@ -1,6 +1,4 @@
-% \begin{wrapfigure}{t!}{0.5\textwidth}
 \begin{figure}
-	%\begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
     \caption{Breakdown of overhead for the proposed coalescing strategies
@@ -11,29 +9,21 @@ overhead and maximize useful work. HG and WHG perform better than EO.}
 	\label{fig:overallOverheadBreakdown}
 \end{figure}
 % \end{wrapfigure}
-
-Our evaluation quantitavely demonstrates that \sys (i) \emph{reduces the memory
-protection overhead} by coalescing, (ii) \emph{improves execution speed} for
-conservative static task decompostions compared to state-of-the-art runtimes; %
-and (iii) \emph{provides computation progress} at the sub-task granularity,
-preventing non-termination at adverse energy conditions where state-of-the-art
-runtimes fail. We measured the execution time of the benchmarks implemented
-using \sys with each variant of the two proposed adaptation mechanisms:
-\emph{task coalescing} and \emph{task downsizing}. We compared \sys's best
-configurations against a state-of-the art system, Alpaca~\cite{alpaca}. We have
-also broken down \sys's overhead to explain the source of \sys's improved
-performance.
-
+%
+Building on top of the existing work, we have selected the most efficient run-time library~\cite{alpaca} and compared the performance of \sys against it.
+Our evaluation quantitatively demonstrates that \sys (i) \emph{reduces the memory
+protection overhead} by coalescing, (ii) \emph{improves execution speed}, in most cases; %
+and (iii) by mean of task-downscaling \sys is able to progress where static system stuck in task non-termination loop. 
+We have also broken down \sys's overhead to explain the source of \sys's improved performance.
+%
 \subsection{Characterization of Overhead}
 \label{sec:coala_overhead}
-
-%\indent \textbf{Overhead Reduced by Coalescing.}
 
 \subsubsection{Overhead Reduced by Coalescing}
 \label{sec:overhead-coalescing}
 
-For each coalescing strategy from Section~\ref{sec:task_adaptation} (EO, HG,
-and WHG) and for a baseline without coalescing (NC), we have measured the time
+For each coalescing strategy from Section~\ref{sec:task_adaptation} (EO, EG,
+and WEG) and for a baseline without coalescing (NC), we have measured the time
 spent on (i) executing useful task code, including \sys's overhead on access to
 protected variables, (ii) re-executing task code after a power failure, and
 (iii) committing state to non-volatile memory at the end of each (coalesced)
@@ -50,37 +40,34 @@ re-execution penalty is smallest, because the amount of work that can happen
 between commits and may have to be re-executed if interrupted is smallest when
 work from multiple static tasks is not combined.
 %
-However, any gain from a reduced re-execution penalty is cancelled out by
+However, any gain from a reduced re-execution penalty is canceled out by
 the increased commit overhead that is incurred at the end of each static
 task.
 %
 Across all benchmarks, all coalescing strategies reduce more commit overhead
 than the re-execution overhead they add.
 %
-This net overhead reduction is greatest in HG and WHG strategies compared
+This net overhead reduction is greatest in EG and WEG strategies compared
 to the EO strategy. We attribute this discrepancy to EO's slow adjustment
-of the target task size without regard to execution history.
+of the target task size without regard to the energy conditions.
 %
-In the subsequent experiments, we focus on the better-performing HG and WHG
+In the subsequent experiments, we focus on the better-performing EG and WEG
 strategies.
-
-
+%
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/overallOverhead}
 	\includegraphics[width=\columnwidth]{figures/memAccess}
 	\caption{\sys kernel overhead: a breakdown of time spent in
-the application and in the runtime (left) and a breakdown of protected memory
+the application and in the runtime (top) and a breakdown of protected memory
 accesses into three types with different costs. NC: no coalescing, HG:
 history-guided coalescing, WHG: weighted history-guided coalescing.}
 	\label{fig:coalEfficiency}
 \end{figure}
-
-%\textbf{\sys Kernel Overhead Breakdown.}
-
+%
 \subsubsection{\sys Kernel Overhead Breakdown}
-
-Figure~\ref{fig:coalEfficiency} (left) breaks down the time spent on executing
+%
+Figure~\ref{fig:coalEfficiency} (top) breaks down the time spent on executing
 useful task code and committing further into time spent by the application and
 time spent by \sys's runtime.
 %
@@ -95,15 +82,13 @@ However, coalescing increases the cost of each access to a protected variable,
 since work in the address translation in the paging system increases as the
 task size grows.
 %
-For both coalescing strategies (HG and WHG) accesses to protected variables
+For both coalescing strategies (EG and WEG) accesses to protected variables
 constitute about 30\% of the runtime overhead. Dynamic address translation
 necessary on each protected access is the most critical bottleneck for \sys.
-
-%\textbf{Protected Memory Accesses Breakdown.}
-
+%
 \subsubsection{Protected Memory Accesses Breakdown}
-
-Figure~\ref{fig:coalEfficiency} (right) breaks down protected memory accesses
+%
+Figure~\ref{fig:coalEfficiency} (bottom) breaks down protected memory accesses
 into three categories.
 %
 Each type of protected access incurs a different amount of overhead: access to
@@ -115,34 +100,29 @@ The results in the figure show that the overwhelming majority of accesses are
 of the cheapest kind, which motivated us to optimize this access type in our
 implementation (cf. Section~\ref{sec:impl:paging}).
 %
-The search for the accessed page in the \texttt{working} buffer,
-will return immediately when the page is the most recently accessed page.
-%
 Only \textbf{cuckoo}, \textbf{dijkstra}, and \textbf{fft} have non-negligible
 number of accesses to a different SRAM page, which is due to the larger working
 set and a less regular access pattern in these applications.
 %
 In general, memory access patterns are shaped by the application, and the more
 program state is protected, the higher the rate of page swaps.
-
+%
 \subsection{Execution time}
 \label{sec:result_coalescing}
-
+%
 Having shown in Section~\ref{sec:coala_overhead} that coalescing reduces
 overhead, we now investigate the outcome of this reduction on the total
 execution time. We first investigate difference variants of \sys and
-then compare the best variant to Alpaca.
-
-%\textbf{\sys Speedup with Coalescing.}
-
+then compare the best variant to Alpaca~\cite{alpaca}.
+%
 \subsubsection{\sys Speedup with Coalescing}
 
 Figure~\ref{fig:coalescing} shows the \sys run time with two coalescing
-strategies (HG, WHG) normalized to the run time without coalescing (NC).
+strategies (EG, WEG) normalized to the run time without coalescing (NC).
 %
 The experimental setup is the same as that in Section~\ref{sec:coala_overhead}.
 %
-The results in Figure~\ref{fig:coalescing} (left) show that all benchmarks
+The results in Figure~\ref{fig:coalescing} show that all benchmarks
 complete faster with coalescing than without coalescing: from 25\% faster
 (\textbf{ar}) up to 70\% faster (\textbf{sort}).
 %
@@ -153,7 +133,7 @@ However, the magnitude of the speedup is (1) highly application-dependent and
 (2) largely similar across the two coalescing strategies, with the exception of
 \textbf{fft}.
 %
-In some cases (\textbf{bc}, \textbf{cuckoo}, \textbf{sort}) the history-guided
+In some cases (\textbf{bc}, \textbf{cuckoo}, \textbf{sort}) the Weight Energy-guided
 feature in the coalescing algorithm is counter-productive.
 %
 This occurs in task decompositions with a uniform task energy, where counting
@@ -161,17 +141,17 @@ tasks disregarding their energy provides an equal amount of information with a
 smaller effort.
 %
 In \textbf{fft}, tasks are not uniform, and accounting for task energies is
-beneficial. In fact, the lack of task energy awareness is detrimental: with HG
+beneficial. In fact, the lack of task energy awareness is detrimental: with EG
 \textbf{fft} runs slower than without any coalescing (NC).
 %
 The speedup is highest for \textbf{bc}, \textbf{cuckoo}, \textbf{dijkstra} and
 \textbf{sort}, because their tasks are small and are easily coalesced,
 eliminating many unnecessary commits.
-
+%
 \begin{figure}
 	\includegraphics[width=\columnwidth]{figures/coalStrategies}%
-    \caption{\sys's coalescing performance. Left: Application execution time
-with coalescing strategies (HG and WHG) normalized to the execution time
+    \caption{\sys's coalescing performance.  Application execution time
+with coalescing strategies (EG and WEG) normalized to the execution time
 without coalescing.}
 	\label{fig:coalescing}
 \end{figure}
@@ -185,7 +165,7 @@ without coalescing.}
 \end{figure}
 
 \subsubsection{Benefits of Adaptive Tasks}
-
+%
 We now compare \sys's performance to Alpaca~\cite{alpaca}---a
 \emph{non-adaptive} task-based system with tasks fixed at compile time.
 Figure~\ref{fig:runtime} (right) shows the average execution time of each
