@@ -1,28 +1,10 @@
 \subsection{Energy Harvesting Systems}
 \label{sec:background_harvesting}
 
-Energy harvesting devices operate using energy extracted from sources such as
-radio frequency transmissions and light. These devices elide tethered
-power and batteries, instead collecting energy into a capacitor, operating when
-sufficient charge accumulates, and turning off for recharge upon depletion of the buffer.
-There are several energy harvesting battery-less hardware platforms. For
-instance, computational RFIDs---open-source TI MSP430-based~\cite{wolverine}
-WISP~\cite{wisp5} (with its variants such as
-WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or
-NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones
-such as~\cite{medusa_farsens_2017}. Other platforms include ambient backscatter
-tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less
-phone~\cite{talla_imwut_2017}. 
+Energy harvesting devices operate using energy extracted from ambient sources, e.g. radio frequency transmissions, light. These devices elide tethered power and batteries, instead collecting energy into a capacitor, operating when sufficient charge accumulates, and turning off for recharge upon depletion of the buffer. There are several energy harvesting battery-less hardware platforms. For instance, computational RFIDs---open-source TI MSP430-based~\cite{wolverine} WISP~\cite{wisp5} (with its variants such as WISPCam~\cite{naderiparizi_rfid_2015}, NFC-WISP~\cite{zhao_rfid_2015} or NeuralWISP~\cite{holleman_biocas_2008}), Moo~\cite{moo}, and commercial ones such as~\cite{medusa_farsens_2017}. Other platforms include ambient backscatter tag~\cite{liu_sigcomm_2013,parks_sigcomm_2014} or battery-less phone~\cite{talla_imwut_2017}. 
 
-\textbf{Hardware Assumptions.} \sys is designed for the demands of existing and
-future energy-harvesting platforms based around general purpose, commodity
-computing components~\cite{wisp,msp430datasheet}. We assume a device with a
-memory system that has fast, byte-addressable volatile and non-volatile memory;
-in particular, our target platform, WISP~\cite{wisp}, is equipped with a
-mixture of SRAM and FRAM. Our implementation leverages hardware support for
-fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. \sys does not
-require architectural additions to commodity processors as
-in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
+\textbf{What Hardware does \sys Target.} \sys is designed for the demands of existing and future energy-harvesting platforms based around general purpose, commodity computing components~\cite{wisp,msp430datasheet}. \sys targets a device with a
+memory system that has fast, byte-addressable volatile and non-volatile memory; in particular, our target platform, WISP~\cite{wisp}, is equipped with a mixture of SRAM and FRAM. \sys leverages hardware support for fast, bulk-copying between memories via DMA~\cite{msp430datasheet}. \sys does not require architectural additions to commodity processors as in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
 
 \subsection{Intermittent Execution}
 \label{sec:background_consistency}
@@ -38,67 +20,26 @@ in~\cite{su_date_2017,hicks_isca_2017,quickrecall,nvp}.
         \caption{Incorrect execution}
         \label{fig:war-execution}
     \end{subfigure}
-    \caption{WAR dependency example. \texttt{NV} marks non-volatile variables,
-    while \texttt{checkp()} is a checkpoint of volatile state.}
+    \caption{WAR dependency example. \texttt{NV} marks non-volatile variables, while \texttt{checkp()} is a checkpoint of volatile state. \task{replace checkp(); with checkpoint();}}
     \label{fig:war}
 \end{figure}
 
+Software running on an energy-harvesting device executes {\em intermittently} because power sources are not always available to harvest and buffer sufficient operational energy. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer (a larger buffer allows longer operating periods), current consumption and incoming energy.
 
-Software running on an energy-harvesting device executes {\em intermittently}
-because power sources are not always available to harvest and buffer
-sufficient operational energy. An intermittent execution is composed of
-operating periods interspersed with power
-failures~\cite{dino,chain,alpaca,ratchet}.
-The frequency of failures depends on the size of the device's energy storage buffer
-(a larger buffer allows longer operating periods), current consumption and
-incoming energy.
-
-A power failure clears volatile state (e.g., registers and SRAM) while
-non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows
-to a prior point in the execution: by default, to the beginning of {\tt
-main()}. Early intermittent systems preserved progress by periodically
-checkpointing volatile execution context to non-volatile
-memory~\cite{mementos}, sometimes using hardware
-support~\cite{mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}. 
-%
-Checkpointing volatile state alone does not ensure data consistency when the
-system can directly manipulate non-volatile memory~\cite{mspcdino}.
-Precisely, data can get inconsistent when code includes a
-\emph{write-after-read} (WAR) dependency between operations that manipulate
-non-volatile memory.
-% because it allows {\em writes} from a failed attempt to
-% persist across failure and be read by the {\em reads}~\cite{ratchet,dino,alpaca}.
-Fig.~\ref{fig:war} illustrates how state can become
-inconsistent in an intermittent execution using a simple example of an average
-operation over an array of integers.
-The non-volatile variable \texttt{sum} introduces the WAR, being read and written sequentially
-by the increment operation.
-If a power failure occurs right before updating the non-volatile index \texttt{i} (\ref{fig:war-execution}, Line 7), \texttt{sum} gets erroneously incremented twice consecutively by the same array element (\ref{fig:war-execution}, Lines 6 and 9).
+A power failure clears volatile state (e.g., registers and SRAM) while non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos}, sometimes using hardware support~\cite{mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}. Checkpointing volatile state alone does not ensure data consistency when the system can directly manipulate non-volatile memory~\cite{mspcdino}. Precisely, data can get inconsistent when code includes a \emph{write-after-read} (WAR) dependency between operations that manipulate non-volatile memory. Fig.~\ref{fig:war} illustrates how state can become inconsistent in an intermittent execution using a simple example of an average operation over an array of integers.
+The non-volatile variable \texttt{sum} introduces the WAR, being read and written sequentially by the increment operation. If a power failure occurs right before updating the non-volatile index \texttt{i} (\ref{fig:war-execution}, Line 7), \texttt{sum} gets erroneously incremented twice consecutively by the same array element (\ref{fig:war-execution}, Lines 6 and 9).
 
 \subsection{Task-based Intermittent Programming}
 \label{section:background_task_computing}
 
-Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to
-decompose their program into \textbf{tasks}, which are regions of code that can contain
-arbitrary computation, sensing, and communication.  Task-based models progress at the granularity of tasks. They re-execute each task interrupted by a power failure until it successfully finishes, only then moving on to
-the next task. Since these models do not rely on capturing an expensive
-checkpoint, they are usually faster than the checkpoint-based
-solution~\cite{chain, alpaca}.  \sys also follows the paradigm of the
-task-based programming model, where the programmer explicitly expresses the
-application as a sequence of tasks and the transitions between them.
+Task-based execution models~\cite{dino,chain,alpaca} ask the programmer to decompose their program into \textbf{tasks}, which are regions of code that can contain arbitrary computation, sensing, and communication. Task-based models progress at the granularity of tasks. They re-execute each task interrupted by a power failure until it successfully finishes, only then moving on to the next task. Since these models do not rely on capturing an expensive checkpoint, they are usually faster than the checkpoint-based solution~\cite{chain, alpaca}.  \sys also follows the paradigm of the task-based programming model, where the programmer explicitly expresses the application as a sequence of tasks and the transitions between them.
 
-Task-based models also suffer from data inconsistencies when WAR dependencies are involved.
-Prior systems tried to tackle this problem by a compiler-automated
-redo-logging for the variables that are part of the dependency~\cite{alpaca}, or
-by statically creating multiple copies of the problematic variable to ensure
-that no task reads and writes the same copy~\cite{chain}.
+Task-based models also suffer from data inconsistencies when WAR dependencies are involved. Prior systems tried to tackle this problem by a compiler-automated redo-logging for the variables that are part of the dependency~\cite{alpaca}, or by statically creating multiple copies of the problematic variable to ensure that no task reads and writes the same copy~\cite{chain}.
 
 \subsection{Costs of Previous Models}
 \label{sec:cost_task-based}
 
-Prior systems, including task-based models, have two major drawbacks:
-{\em frequent non-volatile memory accesses} and {\em incorrectly sized tasks}
-(too small or too large).
+Prior systems, including task-based models, have two major drawbacks: {\em frequent non-volatile memory accesses} and {\em incorrectly sized tasks} (too small or too large).
 
 \begin{table}
     \centering
@@ -118,7 +59,6 @@ Prior systems, including task-based models, have two major drawbacks:
     \caption{Non-volatile memory access for data consistency; \emph{PC}: program counter, \emph{WAR variables}: variables involved in Write after Read (WAR) dependences, \emph{NV}: non-volatile.}
     \label{table:chechpoint_comparison}
 \end{table}
-
 
 \textbf{Frequent Non-volatile Memory Access.} 
 \note{I want to emphasize again that we do not evaluate NV memory accesses}
