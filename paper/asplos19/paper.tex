@@ -1,6 +1,7 @@
 \documentclass[pageno]{jpaper}
-%replace XXX with the submission number you are given from the ASPLOS submission site.
+
 \newcommand{\asplossubmissionnumber}{336}
+
 \usepackage[normalem]{ulem}
 \usepackage{booktabs}   % For formal tables: http://ctan.org/pkg/booktabs
 \usepackage{subcaption} % For complex figures with subfigures/subcaptions http://ctan.org/pkg/subcaption
@@ -19,9 +20,10 @@
 \usepackage{multirow}
 \usepackage{capt-of}
 \usepackage{siunitx}
-%
+\usepackage{flushend}
+
 \hypersetup{colorlinks=false,linkcolor=blue,urlcolor=blue}
-%
+
 %\usepackage[normalem]{ulem}
 %\usepackage{float}
 %
@@ -66,7 +68,7 @@
 %
 \algnewcommand{\LeftComment}[2][.5\linewidth]{%
   \leavevmode\makebox[#1][l]{$\triangleright$~#2}\hfill}
-%
+
 % Tighter than defaults:
 %\setlength{\sectionbelowskip}{1pt}
 \setlength{\sectionbelowskip}{4pt}
@@ -81,22 +83,20 @@
 \newcommand{\add}[1]{\textcolor{blue}{#1}}
 \newcommand{\remove}[1]{\textcolor{red}{\st{#1}}}
 \newcommand{\replace}[2]{\remove{#1} \add{#2}}
-%
 \newcommand{\transition}{{\tt coala\_next\_task}\xspace}
 \newcommand{\sys}{Coala\xspace}
+
+\newcommand{\sysfull}{Dynamic Task-Based Intermittent Execution for Energy-Harvesting Devices}
 % \newcommand{\sysmed}{\sys: Adaptive Task-Based Intermittent Execution}
 % \newcommand{\sysfull}{\sys: Adaptive Task-Based Intermittent Execution}
 %\newcommand{\sysmed}{\sys: Adaptive Intermittent Execution Model$\ldots$}
 % \newcommand{\sysmed}{\sys: Adaptive Task-Based Intermittent Execution Model for Energy-harvesting Devices}
-\newcommand{\sysfull}{Dynamic Task-Based Intermittent Execution for Energy-Harvesting Devices}
 %\newcommand{\sysmed}{\sys: Adaptive Task Coalescing for Intermittent Computing $\ldots$}
 %\newcommand{\sysfull}{\sys: Adaptive Task Coalescing for Intermittent Computing on Energy-harvesting Devices}
 %newcommand{\sysfull}{\sys: Efficient Task-based Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization} %Old title
-%
+
 \begin{document}
-%
-%% Title information
-%
+
 \title{\sysfull}         %% [Short Title] is optional;
 \date{}
 \maketitle
@@ -198,71 +198,69 @@
 % \email{p.pawelczak@tudelft.nl}
 %
 % \renewcommand{\shortauthors}{A. Y. Majid et al.}
-%
+
 \begin{abstract}	
 \input{abstract}
 \end{abstract}
-%
+
 \section{Introduction}
 \label{sec:intro}
-%
+
 \input{intro}
-%
+
 % \clearpage % hack to get rid of rophan
 \section{Intermittent Computing: Background}
 \label{sec:background}
-%
+
 \input{background}
-%
-% \section{\sys Programming Model and \sys System Overview}
+
 \section{\sys System Overview}
 \label{sec:systemdescription}
-%
+
 \input{systemdescription}
-%
+
 \section{\sys Task Adaptation}
 \label{sec:task_adaptation}
-%
+
 \input{coalescing}
-%
 \input{partialcommit}
-%
+
 \section{\sys Memory Management}
-% \section{\sys Memory Virtualization}
 \label{sec:memory_virtulaization}
-%
+
 \input{paging}
-%
+
 \section{\sys Implementation}
 \label{sec:implementation}
-%
+
 \input{implementation}
-%
+
 %\section{Discussion}
 %\label{sec:discussion}
+
 %\input{discussion}
-%
+
 \section{Methodology}
 \label{sec:methodology}
-%
+
 \input{hwswsetup}
-%
+
 \section{\sys Evaluation}
 \label{sec:evaluation}
-%
+
 \input{evaluation}
-%
+
 \section{Related Work}
 \label{sec:related_work}
-%
+
 \input{relatedwork}
-%
+
 \section{Conclusions}
 \label{sec:conclusions}
-%
+
 \input{conclusions}
-%
+
 \bibliographystyle{plain}
 \bibliography{bib}
-%
+
 \end{document}
