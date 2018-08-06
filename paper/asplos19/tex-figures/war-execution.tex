@@ -10,11 +10,11 @@
 \lstdefinestyle{mystyle}{
     numbers=left, % display line numbers on the left
     showlines=true,
-    frame=single,
+    %frame=single,
     commentstyle=\color{ForestGreen}, % comment color
     keywordstyle=\bfseries\color{blue}, % keyword color
     otherkeywords={NV},
-    %numbers = none,
+    % numbers = none,
     firstnumber=1,
     language=C,
     escapechar=!,
@@ -22,19 +22,19 @@
     columns=flexible,
     mathescape=true, % activates $ sign
     morecomment=[l]{//},
-    keepspaces=true
+    %keepspaces=true
 }
 
 \begin{document}
 
-\begin{lstlisting}[style=mystyle, linewidth=95px]
+\begin{lstlisting}[style=mystyle, linewidth=87px]
 NV int i, sum, x[];
 sum += x[i]; // i = 0
 i++;
 $\text{\textcolor{red}{checkpoint()}}$;
 sum += x[i]; // i = 1
-$\text{\textcolor{red}{\lightning\hspace{0.3cm}\lightning\hspace{0.12cm}}}$ // power failure
-$\textcolor{red}{\circlearrowright\hspace{0.28cm}}\text{\textcolor{red}{checkp()}}$;
+$\text{\textcolor{red}{\lightning\hspace{0.3cm}}}$ // power failure
+$\textcolor{red}{\circlearrowright\hspace{0.28cm}}\text{\textcolor{red}{checkpoint()}}$;
 sum += x[i]; // i = 1
 \end{lstlisting}
 
