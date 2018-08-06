@@ -1,4 +1,4 @@
-\documentclass[border={15pt 0pt 0pt 0pt}]{standalone} % Left Bottom Right Top
+\documentclass[border={25pt 0pt 15pt 5pt}]{standalone} % Left Bottom Right Top
 
 \usepackage{xparse}
 \usepackage{listings}
@@ -10,7 +10,7 @@
 \lstdefinestyle{mystyle}{
     numbers=left, % display line numbers on the left
     showlines=true,
-    %frame=single,
+    frame=single,
     commentstyle=\color{ForestGreen}, % comment color
     keywordstyle=\bfseries\color{blue}, % keyword color
     otherkeywords={NV},
@@ -33,7 +33,7 @@ i = sum = 0;
 while (i < N) {
     $\text{\textcolor{red}{checkpoint()}}$;
     sum += x[i];
-    i++; $\text{\hspace{1.65cm}}$
+    i++; $\text{\hspace{1.62cm}}$
 }
 sum = sum / N;
 \end{lstlisting} 
