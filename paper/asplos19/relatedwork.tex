@@ -1,11 +1,12 @@
 \textbf{Intermittently-powered Devices.} There is a large body of research on
 energy-harvesting and wirelessly-powered embedded devices covered in recent
 surveys~\cite{prasad_comst_2014,sample_procieee_2013,huang:commag:2015,visser_procieee_2013,kamalinejad_commag_2015,ku_cst_2016}.
-As computing power consumption continues to decrease, a new wave of
-systems that are powered by radio waves (RF) is
+As power requirements continue to decrease, a new wave of
+systems powered by radio waves (RF) is
 emerging~\cite{patel_pervasive_2017,rf_powered_computing_gollakota_2014,wisp5,moo,zhao_rfid_2015,holleman_biocas_2008,thomas_jbcs_2012,naderiparizi_rfid_2015,rodriguez_tbcs_2015,liu_sigcomm_2013,kicksat,nadeau_naturebio_2017}.
-RF-powered devices are an important category of intermittent computing devices
-that \sys targets.  The emergence of intermittent computing hardware platforms
+%RF-powered devices are an important category of intermittent computing devices
+%that \sys targets.  
+The emergence of such hardware platforms
 has led to the development of instrumentation, debugging, and prototyping tools
 for such systems
 ~\cite{hester_sensys_2014,hester_sensys_2015,edb,capybara,stork,wisent,flicker}. \\
@@ -45,10 +46,9 @@ application-level atomicity constraints, such as correlating sensor readings.
 %
 Checkpointing systems that copy most volatile state scale poorly as the
 size of volatile memory increases.  QuickRecall, Clank and Ratchet reduce
-the copying overhead by allocating the stack in non-volatile memory, which
-requires more time and energy to access than volatile memory (cf.
-Section~\ref{sec:cost_task-based}) and is not a viable option for off-chip non-volatile
-memory. In addition, unlike \sys, QuickRecall and Clank require custom hardware.  \\
+the copying overhead by allocating the stack in non-volatile memory---requires more time and energy to access than volatile memory (cf.
+Section~\ref{sec:cost_task-based}) and not a viable option for off-chip non-volatile
+memory. In addition, QuickRecall and Clank require custom hardware.  \\
 %
 \textbf{Task-based Systems.} An alternative to checkpointing are recent systems
 based on static tasks, such as Chain~\cite{chain}, Alpaca~\cite{alpaca} and
@@ -59,7 +59,7 @@ redo-logging~\cite{alpaca} they avoid checkpointing overheads. Moreover,
 task-based models facilitate respecting application-level atomicity
 constraints.
 %
-\sys relates closely to task-based models because \sys also relies on
+\sys also relies on
 statically defined tasks to avoid checkpointing volatile state. 
 %
 However, unlike prior systems, \sys coalesces its statically-defined tasks at
@@ -71,7 +71,7 @@ channel-based~\cite{chain} and privatization-based~\cite{alpaca} mechanisms in
 prior systems. \sys keeps memory consistent through memory virtualization
 optimized for bulk accesses to task-shared data with high locality. \\
 %
-\textbf{Task Decomposition.} In contrast to \sys's dynamic construction of
+\textbf{Task Decomposition.} In contrast to \sys's construction of
 coallesced tasks at runtime, prior work has proposed to optimize task size
 at compile time. CleanCut~\cite{cleancut_2018} program analysis statically
 estimated energy consumption and split the program into tasks until all tasks
