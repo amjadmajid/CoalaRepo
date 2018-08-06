@@ -1,19 +1,18 @@
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalEfficiency}
-    \caption{Breakdown of overhead for the proposed coalescing strategies
-relative to the baseline without coalescing.
-NC: no coalescing, EO: energy-oblivious coalescing, HG: history-guided coalescing, WHG:
+    \caption{Breakdown of overhead for the proposed coalescing strategies.
+NC: no coalescing, EO: energy-oblivious coalescing, EG: Energy-guided coalescing, WEG:
 energy- and task-aware coalescing. All coalescing strategies reduce total
-overhead and maximize useful work. HG and WHG perform better than EO.}
+overhead and maximize useful work. EG and WEG perform better than EO.}
 	\label{fig:overallOverheadBreakdown}
 \end{figure}
 % \end{wrapfigure}
 %
-Building on top of the existing work, we have selected the most efficient run-time library~\cite{alpaca} and compared the performance of \sys against it.
+Building on top of the existing work, we have selected the most efficient task-based run-time library~\cite{alpaca} and compared \sys against it.
 Our evaluation quantitatively demonstrates that \sys (i) \emph{reduces the memory
 protection overhead} by coalescing, (ii) \emph{improves execution speed}, in most cases; %
-and (iii) by mean of task-downscaling \sys is able to progress where static system stuck in task non-termination loop. 
+and (iii) \sys is able to progress where static systems suffer from a task non-termination loop. 
 We have also broken down \sys's overhead to explain the source of \sys's improved performance.
 %
 \subsection{Characterization of Overhead}
@@ -24,15 +23,10 @@ We have also broken down \sys's overhead to explain the source of \sys's improve
 
 For each coalescing strategy from Section~\ref{sec:task_adaptation} (EO, EG,
 and WEG) and for a baseline without coalescing (NC), we have measured the time
-spent on (i) executing useful task code, including \sys's overhead on access to
-protected variables, (ii) re-executing task code after a power failure, and
+spent on (i) executing task code (ii) re-executing task code after a power failure, and
 (iii) committing state to non-volatile memory at the end of each (coalesced)
 task.  In this experiment the WISP was 15\,cm away from the signal generator
 antenna.
-%
-The page size was set to the best performing value (32~B for \textbf{bc} and
-256~B pages for the rest) identified in detailed evaluation of paging in
-Section~\ref{sec:results_memory_management}.
 
 The overhead incurred by each coalescing strategy is broken down in
 Fig.~\ref{fig:overallOverheadBreakdown}. Without coalescing enabled (NC), the
@@ -60,27 +54,20 @@ strategies.
 	\includegraphics[width=\columnwidth]{figures/memAccess}
 	\caption{\sys kernel overhead: a breakdown of time spent in
 the application and in the runtime (top) and a breakdown of protected memory
-accesses into three types with different costs. NC: no coalescing, HG:
-history-guided coalescing, WHG: weighted history-guided coalescing.}
+accesses into three types with different costs. NC: no coalescing, EG:
+Energy-guided coalescing, WEG: weighted Energy-guided coalescing.}
 	\label{fig:coalEfficiency}
 \end{figure}
 %
 \subsubsection{\sys Kernel Overhead Breakdown}
 %
-Fig.~\ref{fig:coalEfficiency} (top) breaks down the time spent on executing
-useful task code and committing further into time spent by the application and
-time spent by \sys's runtime.
-%
-This dataset is generated in a separate experiment with the same setup as the
-previous experiment in Section~\ref{sec:overhead-coalescing}.
-%
-Consistent with the previous results in
-Fig.~\ref{fig:overallOverheadBreakdown}, commit overhead is highest when
-coalescing is not used to reduce the number of commits.
+Fig.~\ref{fig:coalEfficiency} (top) breaks down the time spent on executing 
+task code and committing further into time spent by the application and
+time spent by \sys's runtime. When coalescing is not enabled the commit overhead is 
+highest.
 %
 However, coalescing increases the cost of each access to a protected variable,
-since work in the address translation in the paging system increases as the
-task size grows.
+since VMM has to spend more on average time in searching for the requested page.
 %
 For both coalescing strategies (EG and WEG) accesses to protected variables
 constitute about 30\% of the runtime overhead. Dynamic address translation
@@ -98,9 +85,9 @@ from FRAM into SRAM is most expensive.
 %
 The results in the figure show that the overwhelming majority of accesses are
 of the cheapest kind, which motivated us to optimize this access type in our
-implementation (cf. Section~\ref{sec:impl:paging}).
+implementation (see Section~\ref{sec:impl:paging}).
 %
-Only \textbf{cuckoo}, \textbf{dijkstra}, and \textbf{fft} have non-negligible
+Only \textit{cuckoo}, \textit{dijkstra}, and \textit{fft} have non-negligible
 number of accesses to a different SRAM page, which is due to the larger working
 set and a less regular access pattern in these applications.
 %
@@ -120,32 +107,30 @@ then compare the best variant to Alpaca~\cite{alpaca}.
 Fig.~\ref{fig:coalescing} shows the \sys run time with two coalescing
 strategies (EG, WEG) normalized to the run time without coalescing (NC).
 %
-The experimental setup is the same as that in Section~\ref{sec:coala_overhead}.
-%
 The results in Fig.~\ref{fig:coalescing} show that all benchmarks
 complete faster with coalescing than without coalescing: from 25\% faster
-(\textbf{ar}) up to 70\% faster (\textbf{sort}).
+(\textit{ar}) up to 70\% faster (\textit{sort}).
 %
 This speedup is a consequence of the reduced overhead demonstrated in
 Section~\ref{sec:coala_overhead}.
 %
 However, the magnitude of the speedup is (1) highly application-dependent and
 (2) largely similar across the two coalescing strategies, with the exception of
-\textbf{fft}.
+\textit{fft}.
 %
-In some cases (\textbf{bc}, \textbf{cuckoo}, \textbf{sort}) the Weight Energy-guided
+In some cases (\textit{bc}, \textit{cuckoo}, \textit{sort}) the Weight Energy-guided
 feature in the coalescing algorithm is counter-productive.
 %
 This occurs in task decompositions with a uniform task energy, where counting
 tasks disregarding their energy provides an equal amount of information with a
 smaller effort.
 %
-In \textbf{fft}, tasks are not uniform, and accounting for task energies is
+In \textit{fft}, tasks are not uniform, and accounting for task energies is
 beneficial. In fact, the lack of task energy awareness is detrimental: with EG
-\textbf{fft} runs slower than without any coalescing (NC).
+\textit{fft} runs slower than without any coalescing (NC).
 %
-The speedup is highest for \textbf{bc}, \textbf{cuckoo}, \textbf{dijkstra} and
-\textbf{sort}, because their tasks are small and are easily coalesced,
+The speedup is highest for \textit{bc}, \textit{cuckoo}, \textit{dijkstra} and
+\textit{sort}, because their tasks are relatively small and are easily coalesced,
 eliminating many unnecessary commits.
 %
 \begin{figure}
@@ -158,7 +143,7 @@ without coalescing.}
 
 \begin{figure}
 	\includegraphics[width=\columnwidth]{figures/coala_alpaca_gcc}
-    \caption{\sys's execution time, normalized to the execution time 
+    \caption{\sys's execution time, normalized, where possible, to the execution time 
     with Alpaca, as a function of distance to the energy source 
     measured in meter.}
 	\label{fig:runtime}
@@ -169,7 +154,7 @@ without coalescing.}
 We now compare \sys's performance to Alpaca~\cite{alpaca}---a
 \emph{non-adaptive} task-based system with tasks fixed at compile time.
 Fig.~\ref{fig:runtime} shows the average execution time of each
-application for \sys and Alpaca, normalized to the latter. The results show
+application for \sys and Alpaca, normalized, where possible, to the latter. The results show
 that \sys provides a performance benefit compared to Alpaca for most
 applications. The speedup is greatest for applications with repeated write after
 read dependencies throughout their code, particularly involving arrays
@@ -178,31 +163,13 @@ successfully amortizes the overhead of protecting memory that is accessed in
 such patterns.  In applications without locality among accesses to protected
 variables, including array elements, \sys incurs overhead from memory
 virtualization that causes its performance to be comparable to (or worse than)
-Alpaca (\textit{ar}, \textit{cuckoo}), on average \sys 26\% faster than Alpaca.
+Alpaca (\textit{ar}, \textit{cuckoo}).
 
-The \textit{fft} benchmark did not complete at distances larger than
-15\,cm\footnote{At distances greater than 15\,cm, energy incoming during
+Due to its static progressing behavior Alpaca was unable to finish the \textit{fft} benchmark on a distance larger than 15\,cm\footnote{At distances greater than 15\,cm, energy incoming during
 execution is negligible and stored energy is insufficient to complete some of
-the static tasks.} with neither Alpaca, nor \sys \emph{without the downsizing
-mechanism}. This is marked with $\infty$ signs in Fig.~\ref{fig:coalescing}
-. This non-terminating condition cannot be avoided in Alpaca, due to the
-fixed, non-adaptive nature of its tasks.  In contrast, our next experiment
-shows how \sys's task downsizing adaptation mechanism eliminates this
-non-termination, without changing the static tasks and without recompiling the
-application.
-
-\textcolor{red}{In a separate experiment, we have enabled task downsizing in \sys and measured
-the execution time for \textit{fft} benchmark at 60\,cm from the signal
-generator antenna. \sys executed the
-benchmark successfully without (NC) and with coalescing (WEG). The application
-took longer to complete than at a shorter distance of 15\,cm in the previous
-experiment, because of smaller (negligible) incoming energy at the larger
-distance. The variant without coalescing (NC) slowed down by 2.16$\times$ and the
-variant with WEG coalescing slowed down by 2.31$\times$ slower, but at both
-distances, WEG completed faster than NC.}
-%
-For comparison, the run time with Alpaca is effectively infinite at this
-distance, which is a consequence of its non-adaptive static tasks.
+the static tasks.}. This is marked with $\infty$ signs in Fig.~\ref{fig:coalescing}. \sys, however, manged to complete \textit{fft} application by enabling its task downscaling on the distances 30\,cm and 50\,cm.
+ 
+Overall, \sys shows better performance than its counterpart, and it is able to overcome the \textit{big task} (i.e. \textit{fft} tasks) problem that the static task-based systems suffer from. 
 
 \subsection{Virtual Memory Performance}
 \label{sec:results_memory_management}
@@ -240,8 +207,8 @@ function of page size.
 The smaller the page the more likely that a memory access will land
 outside that page and that a new page will need to be swapped in.
 %
-This trend is visible for all applications, exception \textbf{bc}. The total
-amount of data accessed by \textbf{bc}, as well as its working set, is small.
+This trend is visible for all applications, exception \textit{bc}. The total
+amount of data accessed by \textit{bc}, as well as its working set, is small.
 Even with the smallest page, all accesses are contained within that page, and
 no page faults occur. Without any page faults to begin with, increasing the
 page size result only in overhead.
