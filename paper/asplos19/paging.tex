@@ -3,11 +3,13 @@
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalesced-war.pdf}
-	\caption{induction of WAR dependency by coalescing: without extra protection, which static runtime cannot reason about, task coalescing induces WAR dependency (at variable $x$) even though individual tasks are WAR protected.}
+	\caption{A WAR dependency (at variable $x$) induced by task coalescing at runtime. Such dynamic dependencies cannot be resolved at compile time and they break memory consistency.
+%		induction of WAR dependency by coalescing: without extra protection, which static runtime cannot reason about, task coalescing induces WAR dependency (at variable $x$) even though individual tasks are WAR protected.
+}
 	\label{figure:coalescedWar}
 \end{figure}
 
-\sys's {\em virtual memory manager} (VMM) is a core enabler of \sys task adaptation mechanism. Its necessity is illustrated by example given in Figure~\ref{figure:coalescedWar}: even though each task might be WAR-protected, coalescing breaks the global WAR insurance. Therefore we need a new memory management mechanism that will keep WAR-protection despite coalescing, which in case of \sys is exemplified by VMM. 
+\sys's {\em virtual memory manager} (VMM) is a core enabler of \sys task adaptation mechanism. Its necessity is illustrated by example given in Figure~\ref{figure:coalescedWar}: resolving WAR dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent with task coalescing. Since task coalescing induces dynamic WAR dependencies,  a new memory consistency handling technique is mandatory so that these dependencies are resolved and handled at runtime. 
 
 VMM overview is given in Figure~\ref{figure:mem-man}.
 VMM abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \texttt{\underline{private}} and \texttt{\underline{shadow}} (underlined locations are non-volatile) buffers, and each buffer is divided into pages.
