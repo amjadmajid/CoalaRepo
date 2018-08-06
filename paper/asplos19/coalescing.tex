@@ -1,33 +1,14 @@
-\sys's design includes a novel task scheduler that uses efficient,
-energy-aware task coalescing to amortize static task overheads, and uses a timer-based
-task-splitting mechanism to avoid non-termination of tasks too long
-for a device's energy buffer. 
-% 
+\sys's design includes a novel task scheduler. It uses efficient, energy-aware task coalescing to amortize static task overheads, and a timer-based task-splitting mechanism to avoid non-termination of tasks too long for a device's energy buffer. 
+
 \subsection{Task Coalescing}
 \label{sec:task_coalescing}
-% 
-When a device's buffered energy is sufficient to run multiple consecutive tasks
-without a power failure, committing state after each task is an unnecessary
-overhead. \sys eliminates this overhead by coalescing a sequence of tasks and deferring the commit
-operations for all tasks to the end of the sequence. 
-In general, committing involves moving state manipulated by a task
-into its permanent location in non-volatile memory.  In particular, \sys's
-commit procedure copies dirty pages of memory that a task updated between fast,
-volatile working memory and slower, non-volatile main memory; we defer the
-details of paging privatization and commit to Section~\ref{sec:memory_virtulaization}.
 
-Coalescing tasks brings a double benefit. First, coalescing reduces the total number of relatively
-high-latency, high-energy non-volatile memory accesses because tasks primarily
-access variables in relatively low-latency, low-energy volatile memory.
-Second, coalescing eliminates the unnecessary instructions that implement task
-commit, which our measurements in Section~\ref{sec:evaluation} show constitute
-a substantial run-time overhead.
+When a device's buffered energy is sufficient to run multiple consecutive tasks without a power failure, committing state after each task is an unnecessary overhead. \sys eliminates this overhead by coalescing a sequence of tasks and deferring the commit
+operations for all tasks to the end of the sequence. In general, committing involves moving state manipulated by a task into its permanent location in non-volatile memory. In particular, \sys's commit procedure copies dirty pages of memory that a task updated between fast, volatile working memory and slower, non-volatile main memory; we defer the details of paging privatization and commit to Section~\ref{sec:memory_virtulaization}.
 
-An effective colescing strategy must be {\em aggressive} enough, attempting to coalesce a
-large number of tasks to amortize a large amount of commit overhead. However, it must also be 
-{\em conservative} enough, attempting to coalesce only as many tasks as will execute
-to completion given a certain energy conditions, reducing the risk or long coalesced task re-execution penalty. 
-%
+Coalescing has a double benefit. First, coalescing reduces the total number of relatively high-latency, high-energy non-volatile memory accesses because tasks primarily access variables in relatively low-latency, low-energy volatile memory. Second, coalescing eliminates the unnecessary instructions that implement task commit, which constitute a substantial run-time overhead, as our measurements in Section~\ref{sec:evaluation} show.
+
+An effective coalescing strategy must be {\em aggressive} enough, attempting to coalesce a large number of tasks to amortize commit overhead. However, it must also be  {\em conservative} enough, attempting to coalesce only as many tasks as will execute to completion given a certain energy conditions, reducing the risk or long coalesced task re-execution penalty. 
 
 \begin{algorithm}[t]
 	\caption{Coalescing}
@@ -35,7 +16,7 @@ to completion given a certain energy conditions, reducing the risk or long coale
 	\scriptsize
 	\begin{algorithmic}[1]
         \State $B \leftarrow $ \Call{$f_\text{reboot}$}{$z$}
-        \State $H \gets 0$ 
+        \State $H \gets 0$ \Comment{\note{add comments for some lines to get rid of white spaces}}
         \While{$\texttt{true}$}       
 	        \State $ i \gets 0$
 	        %
@@ -52,9 +33,9 @@ to completion given a certain energy conditions, reducing the risk or long coale
 	\end{algorithmic}
 \end{algorithm}
 % 
-\subsection{Task Coalescing Strategies} 
-Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing strategy. In the algorithm, $B$ (target budget) is total number of static tasks
-that \sys will next attempt to coalesce. $T_\text{i}$ is the $i$th task
+\subsection{Task Coalescing Strategies}
+
+Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing strategy. In the algorithm, $B$ (target budget) is total number of static tasks that \sys will next attempt to coalesce. $T_\text{i}$ is the $i$th task
 executed since the last power failure. $H$ (history) is the total number of
 tasks between the last executed task and the power failure that preceding it.
 $W_\text{i}$ is the {\em weight} of a task $T_\text{i}$.  A task's weight $W$ is an
