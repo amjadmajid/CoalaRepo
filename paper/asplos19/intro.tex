@@ -6,7 +6,7 @@ Upon power failures, a device loses the volatile state in its registers, stack, 
 \begin{figure}
     \centering
     \includegraphics[width=\columnwidth]{figures/intro-figure.pdf}
-    \caption{Task coalescing at runtime reduces time and energy overhead in task-based intermittent programming models by performing fewer commits (denoted as \texttt{C}) of individual tasks (denoted as \texttt{Tx}). On the other hand, task splitting reduces wasted computation and enables termination for bigger tasks.}
+    \caption{Task coalescing reduces time and energy overhead by performing fewer commits (denoted as \texttt{C}) than the individual tasks (denoted as \texttt{Tx}) commits (left). On the other hand, task splitting reduces wasted computation and enables termination of big tasks, requiring more energy than the energy buffer can hold (right).}
     \label{fig:coalesce}
 \end{figure}
 
