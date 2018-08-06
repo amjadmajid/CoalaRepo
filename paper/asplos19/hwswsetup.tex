@@ -1,8 +1,6 @@
-We prototype \sys and use its API to implement a set of benchmark
-applications representative of the embedded domain. We build the applications
-and deploy the binaries onto a real energy-harvesting device. In this section
-we describe the setup for the experiments presented in
-Section~\ref{sec:evaluation} and characterize the benchmark applications.
+We prototype \sys and use its API to implement a set of benchmark applications representative of the embedded domain. We build the applications and deploy the binaries onto a real energy-harvesting device. 
+
+%In this section we describe the setup for the experiments presented in Section~\ref{sec:evaluation} and characterize the benchmark applications.
 
 \subsection{Experimental Setup}
 \label{sec:results_hardware_software}
@@ -20,7 +18,7 @@ The WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
 non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
 configured to 1\,MHz clock speed.
 %
-We powered the WISP using an RF signal generator emitting  a 20\,dBm sinusoidal wave at 915\,MHz.
+We powered the WISP using an RF signal generator emitting a 20\,dBm sinusoidal wave at 915\,MHz.
 The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
 antenna~\cite{atlas2015}.
 %
@@ -75,31 +73,16 @@ values in a Cuckoo filter\\
 \label{table:benchmark_table}
 \end{table}
 
-We evaluated \sys using six benchmarks that are oftenly used in embedded systems (summarized in
-Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
+We evaluated \sys using six benchmarks that are often used in embedded systems (summarized in Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
 
 \paragraph{Comparison with Alpaca using the GCC compiler.}
 
-We compare \sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for
-intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the
-same for both systems.
+We compare \sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the same for both systems.
+
+Since Alpaca's compiler pass is implemented only for LLVM, we could not use that implementation to instrument the benchmarks and compile them with GCC. Instead, we \emph{manually} performed the instrumentation done by the compiler pass. The instrumentation consists of identifying WAR dependencies  and adding code and memory allocations to make a private copy of the affected variables.  For array variables, instrumentation also includes adding code for dynamically tracking the array access. 
+
+%Manual instrumentation of Alpaca code is not a general approach, but only served as a practical alternative to porting the compiler pass from LLVM to GCC.
 %
-\note{try to reduce what follows}
+%Our experiments show that manually-instrumented Alpaca code compiled with GCC is about 30\%-40\% faster than Alpaca code instrumented automatically by the Alpaca LLVM compiler pass and compiled with LLVM. This performance difference is due to the early experimental state of the MSP430 backend for LLVM~\cite{baghsorkhi_cgo_2018}.
 %
-Since Alpaca's compiler pass is implemented only for LLVM, we could not use
-that implementation to instrument the benchmarks and compile them with GCC.
-Instead, we \emph{manually} performed the instrumentation done by the compiler
-pass. The instrumentation consists of identifying write-after-read dependencies 
-and adding code and memory allocations to make a private copy of the affected variables. 
-For array variables, instrumentation also includes adding code for 
-dynamically tracking the array access. Manual instrumentation of Alpaca code is not a general approach, 
-but only served as a practical alternative to porting the compiler pass from LLVM to GCC.
-%
-Our experiments show that manually-instrumented Alpaca code compiled with GCC
-is about 30\%-40\% faster than Alpaca code instrumented automatically by the
-Alpaca LLVM compiler pass and compiled with LLVM. This performance difference
-is due to the early experimental state of the MSP430 backend for
-LLVM~\cite{baghsorkhi_cgo_2018}.
-%
-By compiling both systems with the same compiler (GCC), we ensure that our
-comparison in Section~\ref{sec:evaluation} is fair.
+By compiling both systems with the same compiler (GCC), we ensure that our comparison in Section~\ref{sec:evaluation} is fair.
