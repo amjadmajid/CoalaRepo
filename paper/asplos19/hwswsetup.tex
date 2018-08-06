@@ -55,34 +55,36 @@ execution time was measured using the clock features in TI Code Composer Studio 
 		\hline
 		App.&tasks&SLOC&Description\\
 		\hline\hline
-        \textbf{ar} &10 &428 & Activity recognition using a nearest neighbor
-classifier\\ % with a deterministic input from a randomly-generated sequence of accelerometer data\\
+        \textbf{ar} &10 &428 & activity recognition using a KNN\\ % with a deterministic input from a randomly-generated sequence of accelerometer data\\
 		\hline
-        \textbf{bc} &10 &371 & Counts bits in bytes sequences
-using several algorithms and check for correctness\\
+        \textbf{bc} &10 &371 & several bitcount algorithms\\
+        % \textbf{bc} &10 &371 & Counts bits in bytes sequences
+% using several algorithms and check for correctness\\
 		\hline
-        \textbf{cuckoo} &14 &426 & Inserts and queries a sequence of pseudo-random
-values in a Cuckoo filter.\\
+        \textbf{cuckoo} &14 &426 & inserts and queries a sequence of pseudo-random
+values in a Cuckoo filter\\
 		\hline
         \textbf{dijkstra} &5 &198 & Dijkstra shortest path algorithm \\
 		\hline
         \textbf{fft} &8 &449 & Fast Fourier Transform\\ % on three pre-generated 128 sample vectors\\
 		\hline
-		\textbf{sort} &4 &167 & Selection sort algorithm\\
+		\textbf{sort} &4 &167 & selection sort algorithm\\
 		\hline
 	\end{tabular}
-\caption{Description and characteristics of benchmark applications used to
-evaluate \sys.}
+\caption{Characteristics of benchmarks used for evaluation.}
 \label{table:benchmark_table}
 \end{table}
 
 We evaluated \sys using six benchmarks that are oftenly used in embedded systems (summarized in
-Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.\\
-%
-\textbf{Comparison with Alpaca using the GCC compiler.} We compare
-\sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for
+Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
+
+\paragraph{Comparison with Alpaca using the GCC compiler.}
+
+We compare \sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for
 intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the
-same for both systems.\\
+same for both systems.
+%
+\note{try to reduce what follows}
 %
 Since Alpaca's compiler pass is implemented only for LLVM, we could not use
 that implementation to instrument the benchmarks and compile them with GCC.
