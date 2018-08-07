@@ -67,13 +67,13 @@ for i in range(1,7):
 
 # add text at the bottom of the bars 
 pos=np.array([0,2,4])*barWitdth
-lbl = ['.15', '.30','.50' ]
+lbl = ['15', '30','50' ]
 
 d=0
 for h in range(numberOfBars):
     for i in range( 3 ):
 
-        plt.text( pos[i]+d , -0.033 , lbl[i] , fontsize=11, color='#08519c', verticalalignment='top', rotation=60)
+        plt.text( pos[i]+d+0.05 , -0.05 , lbl[i] , fontsize=11, color='#08519c', verticalalignment='top', rotation=60)
     d+=1
 
 

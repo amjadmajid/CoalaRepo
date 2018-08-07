@@ -48,7 +48,7 @@ plt.ylabel("Norm. runtime")
 # plt.yticks([0.00, 0.25, 0.50, 0.75,  1.00])
 plt.tight_layout()
 
-plt.legend([slw, fst, smt], ['NC', 'HG','WHG' ], loc='lower center', bbox_to_anchor=(0.5, -0.025), ncol=3,   fontsize= 14, framealpha=1, facecolor='white')
+plt.legend([slw, fst, smt], ['NC', 'EG','WEG' ], loc='lower center', bbox_to_anchor=(0.5, -0.025), ncol=3,   fontsize= 14, framealpha=1, facecolor='white')
 
 f.savefig("../../paper/asplos19/figures/coalStrategies.pdf",format="pdf", dpi=1200)
 f.savefig("../../paper/asplos19/figures/coalStrategies.eps",format="eps", dpi=1200)

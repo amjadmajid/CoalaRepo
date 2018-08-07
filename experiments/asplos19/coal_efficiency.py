@@ -72,7 +72,7 @@ for i, row in enumerate(times):
 
 # add text at the bottom of the bars 
 pos=np.array([0,1,2,3])*barWitdth
-lbl = ['NC', 'EO','HG', 'WHG' ]
+lbl = ['NC', 'EO','EG', 'WEG' ]
 
 d=barWitdth/5
 for h in range(len(names)):
