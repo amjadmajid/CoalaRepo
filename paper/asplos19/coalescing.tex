@@ -3,7 +3,7 @@
 \subsection{Task Coalescing}
 \label{sec:task_coalescing}
 
-When a device's buffered energy is sufficient to run multiple consecutive tasks without a power failure, committing state after each task is an unnecessary overhead. \sys eliminates this overhead by coalescing a sequence of tasks and deferring the commit
+When a device's buffered energy is sufficient to run multiple tasks without a power failure, committing state after each task is an unnecessary overhead. \sys eliminates this overhead by coalescing a sequence of tasks and deferring the commit
 operations for all tasks to the end of the sequence. In general, committing involves moving state manipulated by a task into its permanent location in non-volatile memory. In particular, \sys's commit procedure copies dirty pages of memory that a task updated between fast, volatile working memory and slower, non-volatile main memory. We defer the details of paging privatization and commit to Section~\ref{sec:memory_virtulaization}.
 An effective coalescing strategy must be {\em aggressive} enough, attempting to coalesce a large number of tasks to amortize commit overhead.
 However, it must also be  {\em conservative} enough, attempting to coalesce only as many tasks as will execute to completion given certain energy conditions, reducing the risk or long coalesced task re-execution penalty. 
@@ -58,7 +58,7 @@ A very simple {\em energy-oblivious} (EO) coalescing strategy treats all tasks a
 	\label{eq:eo}
 \end{equation}
 %
-The energy-oblivious strategy reacts slowly to the variation in the energy required to execute different tasks and to the variation in the effective quantum of energy available to the device. With the successful commit of each coalesced task sequence, the coalescing target increases. Eventually, the target may be too high and only a coalesced task composed of a few units will commit without interruption by a power failure. The strategy then linearly decreases $C$, eventually reaching a value that allows completion. A key limitation of this algorithm lies in the equality of the target decrease in $f_\text{reboot}$ and the increase in $f_\text{commit}$. Let us assume $x=1$. If, after $k$ successful commits, the target must decrease to its original value $C-k$ due to an energy drop, EO requires $k$ successive power failures.
+The energy-oblivious strategy reacts slowly to the variation in the energy required to execute different tasks and to the variation in the effective quantum of energy available to the device. With the successful commit of each coalesced task sequence, the coalescing target increases. Eventually, the target may be too high and only a coalesced task composed of a few units will commit without interruption by a power failure. The strategy then linearly decreases $C$, eventually reaching a value that allows completion. A key limitation of this algorithm lies in the equality of the target decrease in $f_\text{reboot}$ and the increase in $f_\text{commit}$. Let us assume $x=1$. If, after $k$ successful commits, the target must decrease to its original value $C-k$ due to an energy drop, EO requires $k$ successive power failures, before being able to progress.
 
 \paragraph{Energy-Guided Coalescing.}
 \label{subsec:energyAware}
