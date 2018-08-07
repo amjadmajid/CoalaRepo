@@ -5,7 +5,7 @@
 	\label{figure:coalescedWar}
 \end{figure}
 
-Resolving WAR (Write-After-Read) dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent when tasks are coalesced. Not handling WAR dependencies with task coalescing introduces a new problem, which we denote as \emph{task coalescing-induced WAR dependency}. This problem is illustrated in Fig.~\ref{figure:coalescedWar}. Therefore, \sys implements novel {\em Virtual Memory Manager} (VMM) which enables task coalescing guaranteeing data integrity, which is at the same time efficient.
+Resolving WAR (Write-After-Read) dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent when tasks are coalesced. Not handling WAR dependencies on a coalesced task scope introduces a new problem, which we denote as \emph{task coalescing-induced WAR dependency}. This problem is illustrated in Fig.~\ref{figure:coalescedWar}. Therefore, \sys implements novel {\em Virtual Memory Manager} (VMM) which enables task coalescing guaranteeing data integrity, which is at the same time efficient.
 
 VMM overview is given in Fig.~\ref{figure:mem-man}.
 VMM abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \texttt{\underline{private}} and \texttt{\underline{shadow}} (underlined locations are non-volatile) buffers, and each buffer is divided into pages.
