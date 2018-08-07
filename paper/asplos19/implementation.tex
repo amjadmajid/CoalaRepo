@@ -108,32 +108,14 @@ These annotations respectively halt and resume the partial commit timer.
 \subsection{Paging}
 \label{sec:impl:paging}
 
-% As described in Section~\ref{sec:memory_virtulaization}, \sys's memory
-% virtualization scheme uses three buffers: a volatile \texttt{working} buffer, a
-% non-volatile \texttt{\underline{private}}, and a non-volatile
-% \texttt{\underline{shadow}} buffer. 
-%
-% The main memory \texttt{\underline{private}} holds the last committed copy of all 
-% pages. 
-%
-% After reboot, the \texttt{working} buffer is empty. Execution fills 
-% the \texttt{working} buffer with privatized pages as the program accesses them. 
-%
-% The \texttt{\underline{shadow}} buffer serves as an intermediate,
-% non-volatile backing \texttt{\underline{private}} for dirty pages evicted from the space-constrained
-% \texttt{working} buffer. 
 
-% To access a protected variable with either \texttt{RP}
-% or \texttt{WP}, \sys searches for the variable in its \texttt{working} buffer first.
- % If the page is not, the VMM fetches it from non-volatile memory. 
-%
 \paragraph{Efficiency.}
 \sys uses address-based page tagging to make finding a variable efficient.  The
 upper bits of a variable's memory address identify its page, and the lower bits
 denote the variable's offset in its page. The total number of pages in memory,
 $P$, determines the number of tag bits, which is $\log_2 P$.
 %
-Furthermore, the VMM moves pages of data efficiently using hardware accelerated DMA support.
+Furthermore, the PP moves pages of data efficiently using hardware accelerated DMA support.
 
 \paragraph{Alignment.}
 Page tagging imposes a data alignment requirement.
