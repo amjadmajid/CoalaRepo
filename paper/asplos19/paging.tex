@@ -1,30 +1,27 @@
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/coalesced-war.pdf}
-	\caption{A WAR dependency (at variable $x$) induced by task coalescing at runtime. Such dynamic dependencies cannot be resolved at compile time and they break memory consistency.
-%		induction of WAR dependency by coalescing: without extra protection, which static runtime cannot reason about, task coalescing induces WAR dependency (at variable $x$) even though individual tasks are WAR protected.
-}
+	\caption{Task coalescing-induced WAR dependency (in the case of this example, at variable $x$). Such dynamic dependencies cannot be resolved at compile time and they break memory consistency.}
 	\label{figure:coalescedWar}
 \end{figure}
 
-Resolving WAR (Write-After-Read) dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent when task are coalesced (see Fig.~\ref{figure:coalescedWar}). Therefore, \sys introduces its {\em page privatizer} (PP) which enables efficient task coalescing.
+Resolving WAR (Write-After-Read) dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent when task are coalesced. Not handing WAR dependencies with task coalescing introduces a new problem, which we denote as \emph{task coalescing-induced WAR dependency}. This problem is illustrated in Fig.~\ref{figure:coalescedWar}. Therefore, \sys introduces its novel {\em Virtual Memory Manager} (WMM) which enables task coalescing guaranteeing data integrity, which is at the same time efficient.
 
-
-PP overview is given in Fig.~\ref{figure:mem-man}.
-PP abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \texttt{\underline{private}} and \texttt{\underline{shadow}} (underlined locations are non-volatile) buffers, and each buffer is divided into pages.
+VMM overview is given in Fig.~\ref{figure:mem-man}.
+VMM abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \texttt{\underline{private}} and \texttt{\underline{shadow}} (underlined locations are non-volatile) buffers, and each buffer is divided into pages.
 \texttt{\underline{private}} holds the consistent version of pages after each commit (and on reboot), while \texttt{\underline{shadow}} serves as support during the execution of coalesced tasks.
-The PP prohibits applications from directly accessing these buffers.
+The VMM prohibits applications from directly accessing these buffers.
 Instead, it redirects any request to the \texttt{working} buffer located in the volatile memory (SRAM), which has a lower latency and energy cost to access than FRAM.
 It populates the \texttt{working} buffer with the privatized pages from non-volatile memory requested by tasks.
-When a coalesced task completes, the PP ensures that {\em dirty} (i.e., modified) pages are committed to FRAM and visible to subsequent tasks.
+When a coalesced task completes, the VMM ensures that {\em dirty}, i.e., modified, pages are committed to FRAM and visible to subsequent tasks.
 If a power failure interrupts a task, all temporary modifications to pages in \texttt{working} (and \texttt{\underline{shadow}}) occurred after the last commit are discarded in order to keep data consistency.
-On a commit, the PP atomically copies, through a two-phase commit, all dirty pages back into their location in the non-volatile memory.
+On a commit, the VMM atomically copies, through a two-phase commit, all dirty pages back into their location in the non-volatile memory.
 % SRAM has a limited size and there is an extended working memory containing {\em shadow pages} in the larger FRAM. A shadow page stores the data from an updated page that needs to be committed back to non-volatile memory, but that exceeded the size of the volatile working memory.
 
 \begin{figure}
     \centering
     \includegraphics[width=\columnwidth]{figures/mem-man.pdf}
-    \caption{Interaction between task, page privatizer and memory buffers upon \texttt{RP} and \texttt{WP}, and order of occurrence. Steps 2, 3, 4 and 5 are conditional.}
+    \caption{Interaction between task, memory manager and memory buffers upon \texttt{RP} and \texttt{WP}, and order of occurrence. Steps 2, 3, 4 and 5 are conditional.}
     \label{figure:mem-man}
 \end{figure}
 
@@ -55,9 +52,9 @@ After address translation (Fig.~\ref{figure:mem-man}, Step 6), a task accesses t
 
 \subsection{Page Faults and Page Swapping}
 
-When accessing a protected variable with \texttt{RP} or \texttt{WP}, the PP first searches the variable's page in the \texttt{working} buffer (Fig.~\ref{figure:mem-man}, Step 1).
+When accessing a protected variable with \texttt{RP} or \texttt{WP}, the memory manager first searches the variable's page in the \texttt{working} buffer (Fig.~\ref{figure:mem-man}, Step 1).
 If the page is not found there, a page fault is incurred and a new page needs to be swapped in.
-If the \texttt{working} buffer is full, a page fault on a memory access requires the PP to swap out one of the pages in the \texttt{working} buffer (a \emph{victim page}) preserving updates made to that page.
+If the \texttt{working} buffer is full, a page fault on a memory access requires the VMM to swap out one of the pages in the \texttt{working} buffer (a \emph{victim page}) preserving updates made to that page.
 If a task modified any byte in the victim page (i.e., using \texttt{WP}), then the page is dirty and its changes have to be persisted to non-volatile memory (Fig.~\ref{figure:mem-man}, Step 2). If the accessed page was previously modified and swapped out since the last power failure, the most recent version of the page is in {\tt \underline{shadow}} (Step 3), otherwise it has to be retrieved from {\tt \underline{private}} (Step 4). Finally, the page is copied to the volatile buffer (Step 5).
 
 \subsection{Atomic Two-Phase Commit of Dirty Pages}
@@ -65,12 +62,12 @@ If a task modified any byte in the victim page (i.e., using \texttt{WP}), then t
 When the last task in a sequence of coalesced tasks completes, \sys must commit \emph{all} dirty pages in \texttt{working} and \texttt{\underline{shadow}}, copying them back to their original locations in \texttt{\underline{private}}. 
 
 To make the commit atomic, \sys commits dirty pages in two phases, as shown in Algorithm~\ref{algo:commit}. The first phase copies dirty pages from \texttt{working} to the non-volatile \texttt{\underline{shadow}} (Line 4). The second phase commits pages from \texttt{\underline{shadow}} to \texttt{\underline{private}} (Line 12).  If power fails during the first phase, the whole commit is aborted, and the execution restarts from the most recently committed point (i.e., from the beginning of a coalesced task). If power fails in the second
-phase, the commit process safely resumes on reboot.  The second phase depends on some run-time metadata. The \texttt{\underline{committing}} bit indicates that a commit is in progress and is set before the first page is committed (Line 9) and cleared after the last page is committed (Line 16).  The \texttt{\underline{shadowCount}} records the number of dirty shadow pages to commit and the PP clears the counter when commit completes (Line 14). The \texttt{\underline{commitIndex}} indexes the next page to be committed (Line 11) and the PP clears the index at the end of the phase (Line 15).
+phase, the commit process safely resumes on reboot.  The second phase depends on some run-time metadata. The \texttt{\underline{committing}} bit indicates that a commit is in progress and is set before the first page is committed (Line 9) and cleared after the last page is committed (Line 16).  The \texttt{\underline{shadowCount}} records the number of dirty shadow pages to commit and the VMM clears the counter when commit completes (Line 14). The \texttt{\underline{commitIndex}} indexes the next page to be committed (Line 11) and the VMM clears the index at the end of the phase (Line 15).
 
 \sys's commit is efficient because it maintains an index of dirty pages instead of iterating through all potentially dirty pages to check their state.
 Another source of efficiency lies in the second phase of the commit:
 % \sys's implementation is also efficient because
-the PP does not copy pages from \texttt{\underline{shadow}} to \texttt{\underline{private}}, instead it swaps pointers in an indirection table that maintains the pages as a double buffer.
+the VMM does not copy pages from \texttt{\underline{shadow}} to \texttt{\underline{private}}, instead it swaps pointers in an indirection table that maintains the pages as a double buffer.
 
 \paragraph{Memory Consistency.}
 \sys's paging mechanism ensures that a task only ever executes using consistent protected data. During task execution, modifications to protected data do not affect the \texttt{\underline{private}} buffer, because a task reads and writes the volatile \texttt{working} buffer only, and modified pages are kept in \texttt{\underline{shadow}} until commit. A power failure erases the contents of the \texttt{working} buffer, preventing a re-executing task from observing updates from a previous execution attempt. Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Line 14) ensures that all accesses to protected variables in subsequent tasks correctly access their consistent memory locations in \texttt{\underline{private}}. This solves coalescing-induced WAR dependency problem (see Fig.~\ref{figure:coalescedWar} again).
