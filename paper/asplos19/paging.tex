@@ -43,7 +43,7 @@ In \sys, a virtual address is composed of a \emph{page tag} that identifies the 
     \begin{algorithmic}[1]
 		\State $t \leftarrow \Call{GetTag}{v}$
         \State $i \gets \{ j\ |\ \Call{GetTag}{\texttt{working}[j]} = t \}$ \Comment{Search page}
-		\If { $i = \emptyset$ } \Comment{Var in a resident page?}
+		\If { $i = \emptyset$ } \Comment{Variable in a resident page?}
 		\State	$i \gets \Call{PageFault}{t}$ \Comment{Swap page in}
 		\EndIf
 		\State $o \leftarrow \Call{GetOffset}{v}$
@@ -73,7 +73,7 @@ Another source of efficiency lies in the second phase of the commit:
 the PP does not copy pages from \texttt{\underline{shadow}} to \texttt{\underline{private}}, instead it swaps pointers in an indirection table that maintains the pages as a double buffer.
 
 \paragraph{Memory Consistency.}
-\sys's paging mechanism ensures that a task only ever executes using consistent protected data. During task execution, modifications to protected data do not affect the \texttt{\underline{private}} buffer, because a task reads and writes the volatile \texttt{working} buffer only, and modified pages are kept in \texttt{\underline{shadow}} until commit. A power failure erases the contents of the \texttt{working} buffer, preventing a re-executing task from observing updates from a previous execution attempt. Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Line 14) ensures that all accesses to protected variables in subsequent tasks correctly access their consistent memory locations in \texttt{\underline{private}}.
+\sys's paging mechanism ensures that a task only ever executes using consistent protected data. During task execution, modifications to protected data do not affect the \texttt{\underline{private}} buffer, because a task reads and writes the volatile \texttt{working} buffer only, and modified pages are kept in \texttt{\underline{shadow}} until commit. A power failure erases the contents of the \texttt{working} buffer, preventing a re-executing task from observing updates from a previous execution attempt. Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Line 14) ensures that all accesses to protected variables in subsequent tasks correctly access their consistent memory locations in \texttt{\underline{private}}. This solves coalescing-induced WAR dependency problem (see Fig.~\ref{figure:coalescedWar} again).
 
 \begin{algorithm}[t]
 	\caption{Two-phase commit}
