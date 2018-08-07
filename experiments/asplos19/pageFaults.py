@@ -53,7 +53,7 @@ for i in range(len(appsNames)):
         align='edge')
 
     for i, pagesize in enumerate(pageSizes):
-    	plt.text( barWitdth*i+shift+barWitdth/4-0.05, -0.08 , pagesize , fontsize=11, color='#08519c', verticalalignment='top', rotation=60)
+    	plt.text( barWitdth*i+shift+barWitdth/4-0.05, -0.033 , pagesize , fontsize=11, color='#08519c', verticalalignment='top', rotation=60)
     shift+=1
 
 ax = plt.axes()
@@ -61,9 +61,9 @@ ax.xaxis.set_major_locator(ticker.FixedLocator( np.arange(shift)+(barWitdth*numb
 ax.xaxis.set_major_formatter(ticker.FixedFormatter(appsNames))
 ax.set_facecolor('white')
 
-plt.ylabel("Normalized runtime")
+plt.ylabel("Norm. runtime")
 plt.xlim([0,5.9])
-ax.tick_params(axis='x', pad=30, bottom=False)
+ax.tick_params(axis='x', pad=25, bottom=False)
 plt.tight_layout()
 f.savefig("../../paper/asplos19/figures/page_exec-time.pdf",format="pdf", dpi=1200)
 f.savefig("../../paper/asplos19/figures/page_exec-time.eps",format="eps", dpi=1200)
@@ -82,7 +82,7 @@ for i in range(len(appsNames)):
         align='edge')
 
     for i, pagesize in enumerate(pageSizes):
-        plt.text( barWitdth*i+shift+barWitdth/4-0.05, -0.8 , pagesize , fontsize=11, color='#08519c', verticalalignment='top', rotation=60)
+        plt.text( barWitdth*i+shift+barWitdth/4-0.05, -0.33 , pagesize , fontsize=11, color='#08519c', verticalalignment='top', rotation=60)
 
 
     shift+=1
@@ -95,7 +95,7 @@ ax.yaxis.set_major_locator(ticker.FixedLocator( [0,4,8,12,16,20]))
 ax.yaxis.set_major_formatter(ticker.FixedFormatter([0,4,8,12,16,20]))
 plt.xlim([0,5.9])
 plt.ylabel("No. page faults")
-ax.tick_params(axis='x', pad=30, bottom=False)
+ax.tick_params(axis='x', pad=25, bottom=False)
 # plt.ylabel([0,4,8,12,16,20])
 plt.tight_layout()
 f.savefig("../../paper/asplos19/figures/pagePulls.pdf",format="pdf", dpi=1200)
