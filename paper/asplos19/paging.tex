@@ -48,7 +48,7 @@ In \sys, a virtual address is composed of a \emph{page tag} that identifies the 
 	\end{algorithmic}
 \end{algorithm}
 
-After address translation (Fig.~\ref{figure:mem-man}, Step 6), a task accesses the protected variable's location in the volatile \texttt{working} buffer (Step 7). The PP keeps track of the page tags for the pages currently resident in the \texttt{working} buffer. When a task accesses a variable, it compares the variable's page tag to tags of the pages in {\tt working} (Algorithm~\ref{algo:rwar}, Line 2). If the accessed variable's page tag is not found in the page buffer, the operation incurs a {\em page fault} (Line 4). The byte is accessed in the page buffer at the index of the resident page and the variable's page offset (Lines 5--6).
+After address translation (Fig.~\ref{figure:mem-man}, Step 6), a task accesses the protected variable's location in the volatile \texttt{working} buffer (Step 7). The VMM keeps track of the page tags for the pages currently resident in the \texttt{working} buffer. When a task accesses a variable, it compares the variable's page tag to tags of the pages in {\tt working} (Algorithm~\ref{algo:rwar}, Line 2). If the accessed variable's page tag is not found in the page buffer, the operation incurs a {\em page fault} (Line 4). The byte is accessed in the page buffer at the index of the resident page and the variable's page offset (Lines 5--6).
 
 \subsection{Page Faults and Page Swapping}
 
