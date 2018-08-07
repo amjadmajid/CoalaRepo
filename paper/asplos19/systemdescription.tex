@@ -1,11 +1,11 @@
 \begin{figure}
 	\centering
 	\includegraphics[width=\columnwidth]{figures/system-overview.pdf}
-	\caption{\sys top-level view. ATS: adaptive task scheduler, PP: Page Privatizer, PM: physical memory.}
+	\caption{\sys top-level view. APP: application, ATS: adaptive task scheduler, VMM: Virtual Memory Manager, PM: physical memory.}
 	\label{fig:system_overview}
 \end{figure}
 
-\sys is a new programming and execution model for intermittent operation on energy-harvesting devices. It addresses the challenges given in Section~\ref{sec:background} making task-based intermittent applications {\em programmable}, {\em efficient} and {\em portable}, introducing a new programming model and runtime software system that supports adaptive task-based execution. Fig.~\ref{fig:system_overview} shows an overview of \sys.
+\sys is a new programming and execution model for intermittent operation on \emph{small embedded energy-harvesting devices}. It addresses the challenges given in Section~\ref{sec:background} making task-based intermittent applications {\em programmable}, {\em efficient} and {\em portable}, introducing a new programming model and runtime software system that supports adaptive task-based execution. Fig.~\ref{fig:system_overview} shows an overview of \sys.
 
 \paragraph{Programming and Execution Model.}
 To use \sys, a programmer must (i) convert a plain C code into tasks by encapsulating the code in a top-level set of functions, (ii) sequence the control-flow between these tasks, and (iii) annotate memory accesses that manipulate task-shared data. Then, they compile and link the code against \sys's runtime, producing a \sys-enabled binary. The runtime relies on \sys's novel {\em adaptive task scheduler} to adapt its execution with the energy conditions. Facilitating efficient task adaptation requires dynamic memory protection which is what \sys's \emph{page privatizer} does. 
