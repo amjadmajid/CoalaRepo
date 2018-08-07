@@ -19,13 +19,33 @@ Energy harvesting devices operate using energy extracted from ambient sources, e
         \caption{WAR-affected code execution}
         \label{fig:war-execution}
     \end{subfigure}
-    \caption{WAR dependency example. \texttt{NV} marks non-volatile variables, while \texttt{checkp()} is a checkpoint of volatile state.}
+    \caption{WAR dependency example. \texttt{NV} marks non-volatile variables, while \texttt{checkpoint()} is a checkpoint of volatile state.}
     \label{fig:war}
 \end{figure}
 
+\begin{table}
+    \centering
+    \footnotesize
+    \begin{tabular}{|c|c|}
+        \hline
+        Model & Data Copied to/from NVRAM \\
+        \hline\hline
+        Mementos~\cite{mementos}    & Registers + Stack     \\
+        DINO~\cite{dino}    & Registers + Stack + WAR NV variables \\%used in task\\
+        Chain~\cite{chain}  & PC + NV variables used in task\\
+        Alpaca~\cite{alpaca}    & PC + WAR NV variables used in task\\
+        Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Registers (requires NV main memory) \\
+        Region Formation~\cite{baghsorkhi_cgo_2018} & Registers + Updated variables in task \\
+        \hline
+    \end{tabular}
+    \caption{Non-volatile memory access for data consistency; \emph{PC}: program counter, \emph{WAR variables}: variables involved in Write after Read (WAR) dependences, \emph{NV}: non-volatile.}
+    \label{table:chechpoint_comparison}
+\end{table}
+
+
 Software running on an energy-harvesting device executes {\em intermittently} because power sources are not always available to harvest and buffer sufficient operational energy. An intermittent execution is composed of operating periods interspersed with power failures~\cite{dino,chain,alpaca,ratchet}. The frequency of failures depends on the size of the device's energy storage buffer (a larger buffer allows longer operating periods), current consumption and incoming energy.
 
-A power failure clears volatile state (e.g., registers and SRAM) while non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos}, sometimes using hardware support~\cite{mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}. Checkpointing volatile state alone does not ensure data consistency when the system can directly manipulate non-volatile memory~\cite{mspcdino}. Precisely, data can get inconsistent when code includes a \emph{write-after-read} (WAR) dependency between operations that manipulate non-volatile memory. Fig.~\ref{fig:war} illustrates how state can become inconsistent in an intermittent execution using a simple example of an average operation over an array of integers.
+A power failure clears volatile state (e.g., registers and SRAM) while non-volatile memory (e.g., FRAM) persists. Upon a power failure, control flows to a prior point in the execution: by default, to the beginning of {\tt main()}. Early intermittent systems preserved progress by periodically checkpointing volatile execution context to non-volatile memory~\cite{mementos}, sometimes requiring hardware support~\cite{mottola2017harvos,hibernusplusplus,hibernus,idetic,quickrecall}, Table~\ref{table:chechpoint_comparison} summarizes the data that gets copied to and from the non-volatile memory in service of memory consistency and progress preservation. Checkpointing volatile state alone does not ensure data consistency when the system can directly manipulate non-volatile memory~\cite{mspcdino}. Precisely, data can get inconsistent when code includes a \emph{write-after-read} (WAR) dependency between operations that manipulate non-volatile memory. Fig.~\ref{fig:war} illustrates how state can become inconsistent in an intermittent execution using a simple example of an average operation over an array of integers.
 The non-volatile variable \texttt{sum} introduces the WAR, being read and written sequentially by the increment operation. If a power failure occurs right before updating the non-volatile index \texttt{i} (\ref{fig:war-execution}, Line 6), \texttt{sum} gets erroneously incremented twice consecutively by the same array element (\ref{fig:war-execution}, Lines 5 and 8).
 
 \subsection{Task-based Intermittent Programming}
@@ -39,25 +59,6 @@ Task-based models also suffer from data inconsistencies when WAR dependencies ar
 \label{sec:cost_task-based}
 
 Prior systems, including task-based models, have two major drawbacks: {\em frequent non-volatile memory accesses} and {\em incorrectly sized tasks} (too small or too large).
-
-\begin{table}
-    \centering
-    \footnotesize
-    \begin{tabular}{|c|c|}
-        \hline
-        Model & Data Copied to/from NVRAM \\
-        \hline\hline
-        Mementos~\cite{mementos}	& Registers + Stack     \\
-        DINO~\cite{dino}	& Registers + Stack + WAR NV variables \\%used in task\\
-        Chain~\cite{chain}	& PC + NV variables used in task\\
-        Alpaca~\cite{alpaca}	& PC + WAR NV variables used in task\\
-        Ratchet~\cite{ratchet}, Clank~\cite{hicks_isca_2017} & Registers (requires NV main memory) \\
-        Region Formation~\cite{baghsorkhi_cgo_2018} & Registers + Updated variables in task \\
-        \hline
-    \end{tabular}
-    \caption{Non-volatile memory access for data consistency; \emph{PC}: program counter, \emph{WAR variables}: variables involved in Write after Read (WAR) dependences, \emph{NV}: non-volatile.}
-    \label{table:chechpoint_comparison}
-\end{table}
 
 %\textbf{Direct Non-volatile Memory Access.} Previous systems frequently access the non-volatile memory directly, which is a potential source of inefficiency. Checkpointing systems copy all volatile state~\cite{dino, mementos, ratchet, hicks_isca_2017} to non-volatile memory at every checkpoint.  Task-based models, which do not take checkpoints, back up a subset of non-volatile data to maintain memory consistency using, e.g., redo-logging.  Table~\ref{table:chechpoint_comparison} summarizes the data that gets copied to and from the non-volatile memory in service of memory consistency and progress preservation.  Ratchet~\cite{ratchet} and Clank~\cite{hicks_isca_2017}, which require all memory to be non-volatile, perform high-frequency non-volatile memory accesses, checkpointing frequently. On the other hand, \sys accesses non-volatile memory by using only DMA and without CPU intervention: \sys moves a batch of variables from non-volatile memory into volatile memory and programs are only allowed to access individual variables in volatile memory directly.
 
