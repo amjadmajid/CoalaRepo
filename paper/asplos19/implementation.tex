@@ -78,10 +78,10 @@ coalescing tasks.
 %
 \paragraph{Parameters.}
 Equations (\ref{eq:eo}) and (\ref{eq:eg}) parametrize the behavior of the coalescing strategies in terms of $x$, $\rho$ and $\gamma$.
-We experimented with a range of values, and then used the ones that yielded the best performance: $x = 1$ (for EO) and $\rho = \gamma = 1$ (for EG/WEG).
+We experimented with a range of values, and then used the ones that yielded the best performance: $x = 1$ (for EO) and $\rho = \gamma = 1$ (for EG and WEG).
 
 \paragraph{Weights for WEG.}
-The effectiveness of the WEG hinges on correctly identifying the weight of each task, which WEG assumes is {\em statically} available. Profiling the time and energy cost of tasks in a program is a difficult, orthogonal problem~\cite{cleancut_2018,baghsorkhi_cgo_2018}. WEG could use the result of an arbitrarily sophisticated profiling procedure. To produce a concrete result in this paper, we give WEG access to a simple profile of task run time collected offline using a single fixed input. WEG stores the profile in a lookup table that maps a task's identifier to its weight, making the information available to \sys's scheduler at run time.
+The effectiveness of the WEG hinges on correctly identifying the weight of each task, which WEG assumes is {\em statically} available. Profiling the time and energy cost of tasks in a program is a difficult, orthogonal problem~\cite{cleancut_2018,baghsorkhi_cgo_2018}. WEG could use the result of an arbitrarily sophisticated profiling procedure. To produce a concrete result in this paper, we give WEG access to a simple profile of task run time (collected offline) using a single fixed input. WEG stores the profile in a lookup table that maps a task's identifier to its weight, making the information available to \sys's scheduler at run time.
 
 %
 \subsection{Task Downscaling}
@@ -92,9 +92,7 @@ The effectiveness of the WEG hinges on correctly identifying the weight of each 
 \paragraph{Timer Strategy.}
 After identifying a task as likely non-terminating, \sys must decide when during the task's execution to partially commit the task's state. \sys sets a timer at the start of the likely non-terminating task, initializing it to a very large value (e.g., an estimate of the maximum execution time using the device's energy buffer). If the timer expires before power fails, \sys partially commits, retaining  the timer value to use for future partial commits. If the timer does not expire before power fails, \sys halves the timer and tries again. The exponential decrease of the timer value converges rapidly to a usable one.
 %
-Partial commit relies on the existence of a hardware timer, which is a very
-common feature in a typical MCU and consumes very little energy (i.e.,
-$\approx$3\,$\mu$A/MHz~\cite{msp430datasheet}).  
+%Partial commit relies on the existence of a hardware timer, which is a very common feature in a typical MCU and consumes very little energy (i.e., $\approx$3\,$\mu$A/MHz~\cite{msp430datasheet}).  
 
  \paragraph{Partial Commit and Task Atomicity.}
  Some applications may prevent
@@ -131,5 +129,5 @@ of 1\,KB.
 
 \paragraph{Page Eviction.}
 When a page in \texttt{working} has to be swapped out to make room for a newly requested one, an eviction policy has to be chosen.
-While we opted for the simplicity of FIFO, any other replacement policy, such as Least Recently Used (LRU), could work in its place.
+While we opted for the simplicity of FIFO, any other replacement policy, such as Least Recently Used, could work in its place.
 
