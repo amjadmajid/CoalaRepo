@@ -9,27 +9,26 @@ We used two platforms to evaluate \sys: (i) an \emph{intermittently-powered}
 energy-harvesting device (WISP\,5.1~\cite{wisp5,wisp}), and (ii) a \emph{continuously-powered} evaluation
 board (MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad}).
 %
-Every benchmark listed in Section~\ref{sec:evaluation} was run repeatedly on
+Every benchmark used in Section~\ref{sec:evaluation} was run repeatedly on
 each platform for a few minutes to ensure capturing a diverse power 
 trace and produce a high number of complete runs of all applications.
 The results were averaged across the duration of the experiment.
 
-The WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
+WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
 non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
 configured to 1\,MHz clock speed.
 %
-We powered the WISP using an RF signal generator emitting a 20\,dBm sinusoidal wave at 915\,MHz.
+We powered WISP using an RF signal generator emitting a 20\,dBm sinusoidal wave at 915\,MHz.
 The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
 antenna~\cite{atlas2015}.
 %
-The antenna was oriented towards and in parallel with the WISP antenna, and
+The antenna was oriented towards and in parallel with WISP's antenna, and
 no objects obstructed the path.
 %
-We affixed the WISP with a paper harness at the edge of a table at a height, from the table suface, of 10\,cm.
+We affixed WISP with a paper harness at the edge of a table at a height, from the table suface, of 10\,cm.
 %
 For distance-controlled experiments we positioned WISP at $d=\{15, 30,
-50\}$\,cm from the exciter antenna and 60\,cm was used for the task downscaling
-experiments.
+50\}$\,cm from the exciter antenna.
 %
 % We chose relatively shorter distances than in a deployment scenario to reduce
 % charge time and run experiments faster, after having confirmed ourselves a
@@ -40,7 +39,7 @@ experiments.
 %
 To obtain execution time, the software toggled GPIO pins at sections of the code
 under profile, and the Saleae~\cite{saleae} logic analyzer measured
-the interval between edges in the signal. When the board is continously powered the 
+intervals between edges in the signal. For continous power experiments, the 
 execution time was measured using the clock features in TI Code Composer Studio IDE version 7.1.
 %
 \subsection{Software Benchmarks}
@@ -59,8 +58,7 @@ execution time was measured using the clock features in TI Code Composer Studio 
         % \textbf{bc} &10 &371 & Counts bits in bytes sequences
 % using several algorithms and check for correctness\\
 		\hline
-        \textbf{cuckoo} &14 &426 & inserts and queries a sequence of pseudo-random
-values in a Cuckoo filter\\
+                \textbf{cuckoo} &14 &426 & Cuckoo Filter with pseudo-random values\\
 		\hline
         \textbf{dijkstra} &5 &198 & Dijkstra shortest path algorithm \\
 		\hline
@@ -73,14 +71,15 @@ values in a Cuckoo filter\\
 \label{table:benchmark_table}
 \end{table}
 
-We evaluated \sys using six benchmarks that are often used in embedded systems (summarized in Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 toolchain with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
+We evaluated \sys using six benchmarks that are often used in embedded systems (summarized in Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
 
 \paragraph{Comparison with Alpaca using the GCC compiler.}
 
 We compare \sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the same for both systems.
-
-Since Alpaca's compiler pass is implemented only for LLVM, we could not use that implementation to instrument the benchmarks and compile them with GCC. Instead, we \emph{manually} performed the instrumentation done by the compiler pass. The instrumentation consists of identifying WAR dependencies  and adding code and memory allocations to make a private copy of the affected variables.  For array variables, instrumentation also includes adding code for dynamically tracking the array access. 
-
+%
+Since Alpaca's compiler pass is implemented only for LLVM, we could not use that implementation to instrument the benchmarks and compile them with GCC. Instead, we \emph{manually} performed the instrumentation done by the compiler pass. The instrumentation consists of identifying WAR dependencies  and adding code and memory allocations to make a private copy of the affected variables.
+% For array variables, instrumentation also includes adding code for dynamically tracking the array access. 
+%
 %Manual instrumentation of Alpaca code is not a general approach, but only served as a practical alternative to porting the compiler pass from LLVM to GCC.
 %
 %Our experiments show that manually-instrumented Alpaca code compiled with GCC is about 30\%-40\% faster than Alpaca code instrumented automatically by the Alpaca LLVM compiler pass and compiled with LLVM. This performance difference is due to the early experimental state of the MSP430 backend for LLVM~\cite{baghsorkhi_cgo_2018}.
