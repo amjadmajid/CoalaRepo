@@ -3,10 +3,10 @@
 \subsection{Task Coalescing}
 \label{sec:task_coalescing}
 
-When a device's buffered energy is sufficient to run multiple tasks without a power failure, committing state after each task is an unnecessary overhead. \sys eliminates this overhead by coalescing a sequence of tasks and deferring the commit
-operations for all tasks to the end of the sequence. In general, committing involves moving state manipulated by a task into its permanent location in non-volatile memory. In particular, \sys's commit procedure copies dirty pages of memory that a task updated between fast, volatile working memory and slower, non-volatile main memory. We defer the details of paging privatization and commit to Section~\ref{sec:memory_virtulaization}.
+When a device's buffered energy is sufficient to run multiple tasks without a power failure, committing state after each task is unnecessary overhead. \sys reduces this overhead by coalescing a sequence of tasks and deferring commit
+operations for all tasks to the end of the sequence. In general, committing involves moving state manipulated by a task into its permanent location in non-volatile memory. In particular, \sys's commit procedure copies dirty pages of memory that a task updated from fast, volatile working memory to slower, non-volatile main memory. We defer the details of paging privatization and commit to Section~\ref{sec:memory_virtulaization}.
 An effective coalescing strategy must be {\em aggressive} enough, attempting to coalesce a large number of tasks to amortize commit overhead.
-However, it must also be  {\em conservative} enough, attempting to coalesce only as many tasks as will execute to completion given certain energy conditions, reducing the risk or long coalesced task re-execution penalty. 
+However, it must also be  {\em conservative} enough, coalescing only as many tasks as will execute to completion given certain energy conditions, reducing the risk of re-execution penalty for long coalesced tasks.
 
 \subsubsection{Generic Design of Task Coalescing Strategies}
 \label{subsec:coalescingGeneral}
@@ -19,7 +19,7 @@ However, it must also be  {\em conservative} enough, attempting to coalesce only
 	\scriptsize
 	\begin{algorithmic}[1]
         \State $C \leftarrow $ \Call{$f_\text{reboot}$}{$z$} \Comment{Update coalescing target by reboot update function}
-        \State $H \gets 0$ \Comment{Initialize history: total number of tasks executed since last power failure}
+        \State $H \gets 0$ \Comment{Initialize history}
         \While{$\texttt{true}$}       
 	        \State $ i \gets 0$
 	        %
@@ -31,7 +31,7 @@ However, it must also be  {\em conservative} enough, attempting to coalesce only
 	        \EndWhile
 	        %
 	        \State \Call{commit\_to\_fram}{\null}
-	        \State $C \leftarrow $ \Call{$f_\text{commit}$}{$C$}
+                \State $C \leftarrow $ \Call{$f_\text{commit}$}{$C$} \Comment{Update coalescing target by commit update function}
         \EndWhile
 	\end{algorithmic}
 \end{algorithm}
@@ -42,12 +42,12 @@ Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing s
 \subsubsection{Example Task Coalescing Strategies}
 \label{subsec:coalescingStrategies}
 
-Different coalescing strategies adhere mainly to the template in Algorithm~\ref{algo:genCoalescing}, varying in only a few {\em characteristic operations} that the algorithm leaves deliberately abstract. A strategy's reboot update function, $f_\text{reboot}$, updates $C$, the coalescing target, after a reboot. A strategy's weight lookup function, $f_\text{weight}$, returns a task's weight.  A strategy's commit update function, $f_\text{commit}$, updates $C$ after a successful commit. The following paragraphs detail several possible coalescing strategies that we developed for \sys, albeit not the only possible. In fact, \sys \emph{allows programmers to design their own strategy} to implement and link to \sys's task scheduler. 
+Different coalescing strategies adhere mainly to the template in Algorithm~\ref{algo:genCoalescing}, varying in only a few {\em characteristic operations} that the algorithm leaves deliberately abstract. The reboot update function, $f_\text{reboot}$, updates $C$, the coalescing target, after a reboot. The weight lookup function $f_\text{weight}$ returns a task's weight. The commit update function $f_\text{commit}$ updates $C$ after a successful commit. The following paragraphs detail three coalescing strategies that we developed for \sys, albeit not the only possible. In fact, \sys \emph{allows programmers to design their own strategy} to implement and link against \sys's task scheduler. 
 
 \paragraph{Energy-Oblivious Coalescing.}
 \label{subsec:energyBlind}
  
-A very simple {\em energy-oblivious} (EO) coalescing strategy treats all tasks as having unity weight and varies the size of a coalesced task linearly. In such a scheme, the number of tasks to coalesce, $C$, increases by a constant $x$ when a coalesced sequence of tasks commits, and decreases by the same constant $x$ when a coalesced sequence of tasks fails to complete, i.e., after a power failure. The characteristic operations of EO are
+A very simple {\em energy-oblivious} (EO) coalescing strategy treats all tasks as having unity weight and varies the size of the coalescing target linearly. In such a scheme, the number of tasks to coalesce, $C$, increases by a constant $x$ when a coalesced sequence of tasks commits, and decreases by the same constant $x$ when a coalesced sequence of tasks fails to complete, i.e., after a power failure. The characteristic operations of EO are
 %
 \begin{equation}
 	\begin{split}
@@ -58,7 +58,7 @@ A very simple {\em energy-oblivious} (EO) coalescing strategy treats all tasks a
 	\label{eq:eo}
 \end{equation}
 %
-The energy-oblivious strategy reacts slowly to the variation in the energy required to execute different tasks and to the variation in the effective quantum of energy available to the device. With the successful commit of each coalesced task sequence, the coalescing target increases. Eventually, the target may be too high and only a coalesced task composed of a few units will commit without interruption by a power failure. The strategy then linearly decreases $C$, eventually reaching a value that allows completion. A key limitation of this algorithm lies in the equality of the target decrease in $f_\text{reboot}$ and the increase in $f_\text{commit}$. Let us assume $x=1$. If, after $k$ successful commits, the target must decrease to its original value $C-k$ due to an energy drop, EO requires $k$ successive power failures, before being able to progress.
+EO reacts slowly to the variation in the energy required to execute different tasks and to the variation in the effective quantum of energy available to the device. With the successful commit of each coalesced task sequence, $C$ increases. Eventually, the target may be too high and only a coalesced task composed of a few units will commit without interruption by a power failure. The strategy then linearly decreases $C$, eventually reaching a value that allows completion. A key limitation of this algorithm lies in the equality of the target decrease in $f_\text{reboot}$ and the increase in $f_\text{commit}$. Let us assume $x=1$. If, after $k$ successful commits, the target must decrease to its original value $C-k$ due to an energy drop, EO requires $k$ successive power failures, before being able to progress.
 
 \paragraph{Energy-Guided Coalescing.}
 \label{subsec:energyAware}
@@ -80,14 +80,14 @@ The \emph{Energy-Guided} (EG) coalescing strategy adapts its coalescing target m
 	\label{eq:eg}
 \end{equation}
 %
-where $\rho, \gamma \in [0, 1]$. By relying on the history of execution EG eliminates the problem of frequent power failures on a single coalesced task. In fact, at any reboot, EG will {\em conservatively} try to coalesce only a fraction ($\rho$) of tasks that had successfully completed during the last power cycle.
+where $\rho, \gamma \in [0, 1]$. By relying on the history of execution EG eliminates the problem of frequent power failures on a single coalesced task. In fact, at each reboot, EG will {\em conservatively} try to coalesce only a fraction ($\rho$) of tasks that had successfully completed during the last power cycle.
 % In fact EG can reduce its target to one from any coalesced target in at most two successive power failures. For instance, if the execution is interrupted after finishing a single task the history will be one ($H = 1$) and the target will be set to one also. While a history of $H$ suggests that there is sufficient energy to coalesce and successfully commit $H$ tasks (i.e., to set $C = H$). EG conservatively sets $C$ equal to half of $H$ moderating the risk of a very long coalesced task. We experimented with a range of fraction values, settling on one half as the default for EG, because one half had the highest performance.
-Fig.~\ref{fig:hg-coal} illustrates a snapshot of the operation of EG, with $\rho = \gamma = 0.5$. The figure shows two power cycles following the $i$th, the latter having an execution history $H^{(i)} = 4$. Based on that, $C$ is initially set to two and then decreases to one. Once the value of $C$ reaches one, EG is, in effect, expecting a power failure, justifying the conservative approach. After the power failure, EG uses the most recent history $H^{(i+1)} = 8$ to set $C = 4$ and continue execution.
+Fig.~\ref{fig:hg-coal} illustrates a snapshot of the operation of EG, with $\rho = \gamma = 0.5$. The figure shows two power cycles following the $i$th, the latter having an execution history $H^{(i)} = 4$. Based on that, $C$ is initially set to two and then decreases to one. Once the value of $C$ reaches one, EG is expecting a power failure, justifying the conservative approach. After the reboot, EG uses the most recent history $H^{(i+1)} = 8$ to set $C = 4$ and continue execution.
 
 \paragraph{Weighted Energy-Guided Coalescing.}
 \label{subsec:energyTaskAware}
 
-The \emph{Weighted Energy-Guided} (WEG) coalescing strategy accounts for non-uniform energy and time costs of a program's tasks when setting $C$. Each different task in the program consumes a different amount of energy to execute to completion. The EO and EG coalescing strategies assume that each task has the same cost: for these strategies, $C$ simply corresponds to a target {\em count} of tasks to coalesce, regardless of the individual cost of each task. However, if one task executes for ten seconds and another executes for one second, counting tasks misjudges the amount of {\em work} in the coalesced tasks (and the history).
+The \emph{Weighted Energy-Guided} (WEG) coalescing strategy accounts for non-uniform energy and time costs of a program's tasks when setting $C$. Each different task in the program consumes a different amount of energy to run to completion. The EO and EG coalescing strategies assume that each task has the same cost: for these strategies, $C$ simply corresponds to a target {\em count} of tasks to coalesce, regardless of the individual cost of each task. However, if one task executes for ten seconds and another executes for one second, counting tasks misjudges the amount of {\em work} in the coalesced tasks (and the history).
 %
 Instead, WEG associates a non-unity weight with each task in the program, and tracks the sum of the weights of tasks in a coalesced sequence. When the sum of weights reaches $C$, the target, WEG commits the coalesced task.
 % WEG differs from EO and HG by explicitly accounting for the variation in energy cost of a program's tasks, eliminating the assumption that all tasks do the same work, which is a key limitation.
