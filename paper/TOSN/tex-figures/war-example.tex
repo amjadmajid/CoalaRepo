@@ -1,0 +1,41 @@
+\documentclass[border={25pt 0pt 15pt 5pt}]{standalone} % Left Bottom Right Top
+
+\usepackage{xparse}
+\usepackage{listings}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{amsmath} %for \text{} macro
+\usepackage{wasysym} %for \lightning symbol
+\usepackage{amssymb} %for \circlearrowright symbol
+
+\lstdefinestyle{mystyle}{
+    numbers=left, % display line numbers on the left
+    showlines=true,
+    frame=single,
+    commentstyle=\color{ForestGreen}, % comment color
+    keywordstyle=\bfseries\color{blue}, % keyword color
+    otherkeywords={NV},
+    % numbers = none,
+    firstnumber=1,
+    language=C,
+    escapechar=!,
+	basicstyle={\scriptsize\ttfamily},
+    columns=flexible,
+    mathescape=true, % activates $ sign
+    morecomment=[l]{//},
+    %keepspaces=true
+}
+
+\begin{document}	
+
+\begin{lstlisting}[style=mystyle, linewidth=87px]
+NV int i, sum, x[];
+i = sum = 0;
+while (i < N) {
+    $\text{\textcolor{red}{checkpoint()}}$;
+    sum += x[i];
+    i++; $\text{\hspace{1.62cm}}$
+}
+sum = sum / N;
+\end{lstlisting} 
+
+\end{document}

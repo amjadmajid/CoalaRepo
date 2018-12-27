@@ -1,0 +1,112 @@
+We prototype \sys and use its API to implement a set of benchmark applications representative of the embedded domain. We build the applications and deploy the binaries onto a real energy-harvesting device. 
+
+%In this section we describe the setup for the experiments presented in Section~\ref{sec:evaluation} and characterize the benchmark applications.
+
+\subsection{Experimental Setup}
+\label{sec:results_hardware_software}
+
+We used two platforms to evaluate \sys: (i) an \emph{intermittently-powered}
+energy-harvesting device (WISP\,5.1~\cite{wisp5,wisp}), and (ii) a \emph{continuously-powered} evaluation
+board (MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad}).
+%
+Every benchmark used in Section~\ref{sec:evaluation} was run repeatedly on
+each platform for a few minutes to ensure capturing a diverse power 
+trace and produce a high number of complete runs of all applications.
+The results were averaged across the duration of the experiment.
+
+WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
+non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
+configured to 1\,MHz clock speed.
+%
+We powered WISP using an RF signal generator emitting a 20\,dBm sinusoidal wave at 915\,MHz.
+The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
+antenna~\cite{atlas2015}.
+%
+The antenna was oriented towards and in parallel with WISP's antenna, and
+no objects obstructed the path.
+%
+We affixed WISP with a paper harness at the edge of a table at a height, from the table suface, of 10\,cm.
+%
+For distance-controlled experiments we positioned WISP at $d=\{15, 30,
+50\}$\,cm from the exciter antenna.
+%
+% We chose relatively shorter distances than in a deployment scenario to reduce
+% charge time and run experiments faster, after having confirmed ourselves a
+% result also reported in prior work~\cite{alpaca} that the amount of energy
+% available in one charge cycle---the sum of stored energy and incoming energy
+% during execution---is the same at distances beyond 50\,cm where incoming energy
+% becomes negligible.
+%
+To obtain execution time, the software toggled GPIO pins at sections of the code
+under profile, and the Saleae~\cite{saleae} logic analyzer measured
+intervals between edges in the signal. For continous power experiments, the 
+execution time was measured using the clock features in TI Code Composer Studio IDE version 7.1.
+%
+\subsection{Software Benchmarks}
+\label{sec:software_benchmarks}
+
+\begin{table}%
+\caption{Simulation Configuration}
+\label{tab:one}
+\begin{minipage}{\columnwidth}
+\begin{center}
+\begin{tabular}{llll}
+  \toprule
+		App.&Tasks&SLOC&Description\\
+		\hline
+        \emph{ar} &10 &428 & activity recognition using a KNN\\ % with a deterministic input from a randomly-generated sequence of accelerometer data\\
+        \emph{bc} &10 &371 & several bitcount algorithms\\
+        % \textbf{bc} &10 &371 & Counts bits in bytes sequences
+% using several algorithms and check for correctness\\
+        \emph{cuckoo} &14 &426 & Cuckoo Filter with pseudo-random values\\
+        \emph{dijkstra} &5 &198 & Dijkstra shortest path algorithm \\
+        \emph{fft} &8 &449 & Fast Fourier Transform\\ % on three pre-generated 128 sample vectors\\
+		\emph{sort} &4 &167 & selection sort algorithm\\
+  \bottomrule
+\end{tabular}
+\end{center}
+\end{minipage}
+\caption{Characteristics of benchmarks used for evaluation.}
+\label{table:benchmark_table}
+\end{table}%
+
+%\begin{table}
+%	\centering
+%	\footnotesize
+%	\begin{tabular}{| r|r|r | p{0.54\columnwidth} |}
+%		\hline
+%		App.&Tasks&SLOC&Description\\
+%		\hline\hline
+%        \emph{ar} &10 &428 & activity recognition using a KNN\\ % with a deterministic input from a randomly-generated sequence of accelerometer data\\
+%		\hline
+%        \emph{bc} &10 &371 & several bitcount algorithms\\
+%        % \textbf{bc} &10 &371 & Counts bits in bytes sequences
+%% using several algorithms and check for correctness\\
+%		\hline
+%        \emph{cuckoo} &14 &426 & Cuckoo Filter with pseudo-random values\\
+%		\hline
+%        \emph{dijkstra} &5 &198 & Dijkstra shortest path algorithm \\
+%		\hline
+%        \emph{fft} &8 &449 & Fast Fourier Transform\\ % on three pre-generated 128 sample vectors\\
+%		\hline
+%		\emph{sort} &4 &167 & selection sort algorithm\\
+%		\hline
+%	\end{tabular}
+%\caption{Characteristics of benchmarks used for evaluation.}
+%\label{table:benchmark_table}
+%\end{table}
+
+We evaluated \sys using six benchmarks that are often used in embedded systems (summarized in Table~\ref{table:benchmark_table}). All applications were compiled using MSP430 GCC~\cite{ti-gcc} version 6.4.0 with \texttt{-O1} as optimization flag. The source code for all benchmarks will be released at \cite{coala_website}.
+
+\paragraph{Comparison with Alpaca using the GCC compiler.}
+
+We compare \sys against Alpaca~\cite{alpaca}, the state-of-the-art task-based system for intermittent computing. For a fair comparison the task decomposition of the benchmarks are ensured to be the same for both systems.
+%
+Since Alpaca's compiler pass is implemented only for LLVM, we could not use that implementation to instrument the benchmarks and compile them with GCC. Instead, we \emph{manually} performed the instrumentation done by the compiler pass. The instrumentation consists of identifying WAR dependencies  and adding code and memory allocations to make a private copy of the affected variables.
+% For array variables, instrumentation also includes adding code for dynamically tracking the array access. 
+%
+%Manual instrumentation of Alpaca code is not a general approach, but only served as a practical alternative to porting the compiler pass from LLVM to GCC.
+%
+%Our experiments show that manually-instrumented Alpaca code compiled with GCC is about 30\%-40\% faster than Alpaca code instrumented automatically by the Alpaca LLVM compiler pass and compiled with LLVM. This performance difference is due to the early experimental state of the MSP430 backend for LLVM~\cite{baghsorkhi_cgo_2018}.
+%
+By compiling both systems with the same compiler (GCC), we ensure that our comparison in Section~\ref{sec:evaluation} is fair.

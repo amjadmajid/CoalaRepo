@@ -1,0 +1,160 @@
+We implemented \sys's programming and execution model as a runtime library and API that a programmer can use to make a plain C program intermittency-safe.
+%
+\subsection{Application Programming Interface}
+\label{sec:coala_api}
+%
+Coala's API adds only a few syntactic constructs to a C-based language, summarized
+in Table~\ref{table:coala_api}.
+%
+\begin{table}%
+\caption{Simulation Configuration}
+\label{tab:one}
+\begin{minipage}{\columnwidth}
+\begin{center}
+\begin{tabular}{ll}
+  \toprule
+	{Method} & {Arguments} \\
+	\hline
+	\texttt{INIT}($t$) & $t \in \mathbf{T}$: scheduled task on first boot \\
+	\texttt{RUN}() & --- \\
+	\texttt{TASK}($t$, $w_t$) & $t \in \mathbf{T}$: task name, $w_t$: weight of task $t$ \\
+	\texttt{NEXT\_TASK}($t$) & $t \in \mathbf{T}$ : task to be run next \\
+	\texttt{PV}($p$, $v$ [, $s$]) & $p$: type, $v \in \mathbf{V}$: name, $s$: array size \\
+	$u$ := \texttt{RP}($v$) & $v \in \mathbf{V}$: protected variable to read, $u$: dest.\ operand \\
+	\texttt{WP}($v$) := $u$ &  $v \in \mathbf{V}$: protected variable to write, $u$: source operand \\
+	\texttt{SM}($p$, $m$ [, $s$]) & $p$: type, $m$: name, $s$: array size \\
+	\texttt{DISABLE\_PC}() & --- \\
+	\texttt{ENABLE\_PC}() & --- \\
+  \bottomrule
+\end{tabular}
+\caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
+\label{table:coala_api}
+\end{center}
+\end{minipage}
+\end{table}%
+%%
+%\begin{table}
+%\footnotesize
+%\centering
+%\begin{tabular}{| r | p{0.7\columnwidth} |}
+%	\hline
+%	{Method} & {Arguments} \\
+%	\hline\hline
+%	\texttt{INIT}($t$) & $t \in \mathbf{T}$: scheduled task on first boot \\
+%	\hline
+%	\texttt{RUN}() & --- \\
+%	\hline
+%	\texttt{TASK}($t$, $w_t$) & $t \in \mathbf{T}$: task name, $w_t$: weight of task $t$ \\
+%	\hline
+%	\texttt{NEXT\_TASK}($t$) & $t \in \mathbf{T}$ : task to be run next \\
+%	\hline
+%	\texttt{PV}($p$, $v$ [, $s$]) & $p$: type, $v \in \mathbf{V}$: name, $s$: array size \\
+%	\hline
+%	$u$ := \texttt{RP}($v$) & $v \in \mathbf{V}$: protected variable to read, $u$: dest.\ operand \\
+%	\hline	
+%	\texttt{WP}($v$) := $u$ &  $v \in \mathbf{V}$: protected variable to write, $u$: source operand \\
+%	\hline
+%	\texttt{SM}($p$, $m$ [, $s$]) & $p$: type, $m$: name, $s$: array size \\
+%	\hline
+%	\texttt{DISABLE\_PC}() & --- \\
+%	\hline
+%	\texttt{ENABLE\_PC}() & --- \\
+%	\hline
+%\end{tabular}
+%\caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
+%\label{table:coala_api}
+%\end{table}
+
+\noindent\textit{New Tasks.} The \texttt{TASK} annotation on a function
+declaration statically allocates a non-volatile constant variable holding a
+task's weight and declares that the function is a task.
+
+\noindent\textit{Task Transitions.} \texttt{NEXT\_TASK} marks the task to be executed at the 
+end of the current one task and it can be invoked along
+any control path to dynamically determine the next task.
+
+\noindent\textit{Protected Variables.} The \texttt{PV} annotation on a
+variable statically allocates a protected non-volatile variable. The
+variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at
+run-time to ensure correct operation.
+
+\noindent\textit{Initialization.} The behavior of the API method
+\texttt{INIT} is very similar to \texttt{NEXT\_TASK}, with the
+addition of performing preliminary kernel initializations, including hardware setup.
+
+\noindent\textit{Execution.} The programmer passes control to \sys's task scheduler 
+by calling \texttt{RUN} after device initialization. 
+
+First the scheduler updates the coalescing target using the coalescing
+strategy.  Second, the scheduler resumes a commit, if one is in progress. Third,
+the scheduler clears the list of dirty shadow pages. The scheduler then 
+sets the program counter to the next task to run, which \sys tracks in  
+non-volatile memory.  
+%
+Before executing the task, \sys checks whether there is a partially committed
+task to resume, which requires \sys to restore volatile state, including the program
+counter.  
+%
+If there is no in-progress, partially committed task, \sys starts executing and
+coalescing tasks. 
+
+%
+\subsection{Task Coalescing}
+%
+% The coalescing algorithm starts with a random guess about the size of the coalescing task, in our implementation the target is initialized to four. It then refines its guess based on the number of the static-tasks being successfully executed.
+%
+\paragraph{Parameters.}
+Equations (\ref{eq:eo}) and (\ref{eq:eg}) parametrize the behavior of the coalescing strategies in terms of $x$, $\rho$ and $\gamma$.
+We experimented with a range of values, and then used the ones that yielded the best performance: $x = 1$ (for EO) and $\rho = \gamma = 1$ (for EG and WEG).
+
+\paragraph{Weights for WEG.}
+The effectiveness of the WEG hinges on correctly identifying the weight of each task, which WEG assumes is {\em statically} available. Profiling the time and energy cost of tasks in a program is a difficult, orthogonal problem~\cite{cleancut_2018,baghsorkhi_cgo_2018}. WEG could use the result of an arbitrarily sophisticated profiling procedure. To produce a concrete result in this paper, we give WEG access to a simple profile of task run time (collected offline) using a single fixed input. WEG stores the profile in a lookup table that maps a task's identifier to its weight, making the information available to \sys's scheduler at run time.
+
+%
+\subsection{Task Downscaling}
+%
+% \sys's task downscaling preserves forward progress by partially committing an
+% ongoing, non-terminating task. 
+%
+\paragraph{Timer Strategy.}
+After identifying a task as likely non-terminating, \sys must decide when during the task's execution to partially commit the task's state. \sys sets a timer at the start of the likely non-terminating task, initializing it to a very large value (e.g., an estimate of the maximum execution time using the device's energy buffer). If the timer expires before power fails, \sys partially commits, retaining  the timer value to use for future partial commits. If the timer does not expire before power fails, \sys halves the timer and tries again. The exponential decrease of the timer value converges rapidly to a usable one.
+%
+%Partial commit relies on the existence of a hardware timer, which is a very common feature in a typical MCU and consumes very little energy (i.e., $\approx$3\,$\mu$A/MHz~\cite{msp430datasheet}).  
+
+ \paragraph{Partial Commit and Task Atomicity.}
+ Some applications may prevent
+downscaling a task because of a need for task atomicity.  For example, sampling
+an analog signal requires consecutive samples at a known interval, or the
+digitally sampled signal is meaningless.  In such a case, the programmer can
+disable partial commit for a task or a span of code, marking  the code with a
+pair of \texttt{DISABLE\_PC} and \texttt{ENABLE\_PC} annotations.
+These annotations respectively halt and resume the partial commit timer.
+
+\subsection{Paging}
+\label{sec:impl:paging}
+
+
+\paragraph{Efficiency.}
+\sys uses address-based page tagging to make finding a variable efficient.  The
+upper bits of a variable's memory address identify its page, and the lower bits
+denote the variable's offset in its page. The total number of pages in memory,
+$P$, determines the number of tag bits, which is $\log_2 P$.
+%
+Furthermore, the VMM moves pages of data efficiently using hardware-accelerated DMA support.
+
+\paragraph{Alignment.}
+Page tagging imposes a data alignment requirement.
+The page size $S$ must be a power of two. 
+%
+Pages must be aligned to an $S$-byte boundary for efficient memory access. 
+%
+To preserve alignment, when typedef'ing a C structure for protected variables, the programmer has to use the API method \texttt{SM} on all members of the structure (only when defining the structure).
+%
+We experimented with 32-, 64-, 128- and 256\,B pages, an 8\,KB non-volatile \texttt{\underline{shadow}} buffer and
+an 8\,KB non-volatile \texttt{\underline{private}} buffer, and a \texttt{working} buffer
+of 1\,KB.
+
+\paragraph{Page Eviction.}
+When a page in \texttt{working} has to be swapped out to make room for a newly requested one, an eviction policy has to be chosen.
+While we opted for the simplicity of FIFO, any other replacement policy, such as Least Recently Used, could work in its place.
+

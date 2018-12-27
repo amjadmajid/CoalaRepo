@@ -1,0 +1,287 @@
+\documentclass[format=acmsmall, review=false, screen=true]{acmart}
+
+% \newcommand{\asplossubmissionnumber}{336}
+
+\usepackage[normalem]{ulem}
+\usepackage{xcolor}
+\usepackage{booktabs}   % For formal tables: http://ctan.org/pkg/booktabs
+\usepackage{subcaption} % For complex figures with subfigures/subcaptions http://ctan.org/pkg/subcaption
+\usepackage{soul}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{algorithm} % environment for the algorithm code (like figure and table)
+\usepackage{algorithmicx} % write the pseudo code
+\usepackage[noend]{algpseudocode} % layout of the pseudo code
+\usepackage{tikz} % needed for: tikz pics
+\usepackage{xspace}
+\usepackage{listings}
+\usepackage{hyphenat}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{capt-of}
+\usepackage{siunitx}
+\usepackage{flushend}
+
+\hypersetup{colorlinks=false,linkcolor=blue,urlcolor=blue}
+
+%\usepackage[normalem]{ulem}
+%\usepackage{float}
+%
+%\usepackage{titlesec} %P{rzemek: ommented, has conflict https://tex.stackexchange.com/questions/321999/conflict-between-makeuppercase-in-title-formatting-and-usepackagexcolor
+%
+%\titlespacing{\section}{0pt}{0.5\baselineskip}{\parskip}
+%\titlespacing{\subsection}{0pt}{0.5\baselineskip}{\parskip}
+%\titlespacing{\subsubsection}{0pt}{0.5\baselineskip}{\parskip}
+%\titlespacing{\section}{2pt}{0.8\baselineskip}{\parskip}
+%\titlespacing{\subsection}{2pt}{0.6\baselineskip}{\parskip}
+%\titlespacing{\subsubsection}{2pt}{0.6\baselineskip}{\parskip}
+%
+%\setlength{\textfloatsep}{5pt}% Remove \textfloatsep
+%
+%\usepackage[keeplastbox]{flushend} %Brandon: this broke the build for me
+%Added for sub-float package from jpaper.cls - will check later
+%\RequirePackage[font={normalsize,sf,bf}]{caption}
+%\RequirePackage[position=bottom]{subfig}
+%\captionsetup[table]{aboveskip=0.5em, belowskip=0.5em}
+%\captionsetup[figure]{aboveskip=0.5em, belowskip=0em}
+%\captionsetup[subfloat]{font={small,sf}}
+%
+\newlength{\sectionbelowskip}
+\newlength{\sectionaboveskip}
+\newlength{\subsectionbelowskip}
+\newlength{\subsectionaboveskip}
+\newlength{\paragraphaboveskip}
+%
+% Defaults in sigplanconf (note that horizontal space after \paragraph heading will be different):
+%\setlength{\sectionbelowskip}{4pt}
+%\setlength{\sectionaboveskip}{10pt plus 3pt minus 2pt}
+%\setlength{\subsectionbelowskip}{4pt}
+%\setlength{\subsectionaboveskip}{8pt plus 2pt minus 2pt}
+%\setlength{\paragraphaboveskip}{6pt plus 2pt minus 2pt}
+%
+% Slightly tighter than defaults:
+% \setlength{\sectionbelowskip}{3pt}
+% \setlength{\sectionaboveskip}{6pt plus 2pt minus 2pt}
+% \setlength{\subsectionbelowskip}{2pt}
+% \setlength{\subsectionaboveskip}{4pt plus 1pt minus 1pt}
+% \setlength{\paragraphaboveskip}{2pt plus 1pt minus 1pt}
+%
+\algnewcommand{\LeftComment}[2][.5\linewidth]{%
+  \leavevmode\makebox[#1][l]{$\triangleright$~#2}\hfill}
+
+% Tighter than defaults:
+%\setlength{\sectionbelowskip}{1pt}
+\setlength{\sectionbelowskip}{4pt}
+\setlength{\sectionaboveskip}{5pt plus 1.5pt minus 1.5pt}
+\setlength{\subsectionbelowskip}{1pt}
+\setlength{\subsectionaboveskip}{3pt plus 1pt minus 1pt}
+\setlength{\paragraphaboveskip}{1pt plus 1pt minus 1pt}
+%
+\newcommand{\TODO}[1]{{\bf \em \textcolor{red}{TODO: #1}\xspace}}
+\newcommand{\todo}[2]{\textcolor{red}{$\bullet$ \textbf{Task:} #1; \textbf{Responsible:} #2}}
+\newcommand{\note}[1]{\textcolor{red}{[#1]}}
+\newcommand{\add}[1]{\textcolor{blue}{#1}}
+\newcommand{\remove}[1]{\textcolor{red}{\st{#1}}}
+\newcommand{\replace}[2]{\remove{#1} \add{#2}}
+\newcommand{\transition}{{\tt coala\_next\_task}\xspace}
+\newcommand{\sys}{Coala\xspace}
+
+\newcommand{\sysfull}{Dynamic Task-Based Intermittent Execution for Energy-Harvesting Devices}
+% \newcommand{\sysmed}{\sys: Adaptive Task-Based Intermittent Execution}
+% \newcommand{\sysfull}{\sys: Adaptive Task-Based Intermittent Execution}
+%\newcommand{\sysmed}{\sys: Adaptive Intermittent Execution Model$\ldots$}
+% \newcommand{\sysmed}{\sys: Adaptive Task-Based Intermittent Execution Model for Energy-harvesting Devices}
+%\newcommand{\sysmed}{\sys: Adaptive Task Coalescing for Intermittent Computing $\ldots$}
+%\newcommand{\sysfull}{\sys: Adaptive Task Coalescing for Intermittent Computing on Energy-harvesting Devices}
+%newcommand{\sysfull}{\sys: Efficient Task-based Intermittent Computing with Adaptive Task Coalescing and Memory Virtualization} %Old title
+
+\begin{document}
+
+%
+%% when present, will be used in
+%% header instead of Full Title.
+%\titlenote{}             %% \titlenote is optional;
+%% can be repeated if necessary;
+%% contents suppressed with 'anonymous'
+%\subtitle{}                     %% \subtitle is optional
+%\subtitlenote{}       %% \subtitlenote is optional;
+%% can be repeated if necessary;
+%% contents suppressed with 'anonymous'
+%
+%Note: order of authors placed randomly
+%
+\author{Amjad Yousef Majid}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{a.y.majid@tudelft.nl}
+
+\author{Carlo Delle Donne}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{c.delledonne@student.tudelft.nl}
+
+\author{Kiwan Maeng}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Carnegie Mellon University}
+	\streetaddress{4720 Forbes Avenue}
+   \city{Pittsburgh} 
+	\state{PA} 
+	\postcode{15213}
+}
+\email{kmaeng@andrew.cmu.edu}
+
+\author{Alexei Colin}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Carnegie Mellon University}
+	\streetaddress{4720 Forbes Avenue}
+	\city{Pittsburgh} 
+	\state{PA} 
+	\postcode{15213}
+}
+\email{acolin@andrew.cmu.edu}
+
+\author{Kas{\i}m Sinan Y{\i}ld{\i}r{\i}m}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{k.s.yildirim@tudelft.nl}
+
+\author{Brandon Lucia}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Carnegie Mellon University}
+	\streetaddress{4720 Forbes Avenue}
+	\city{Pittsburgh} 
+	\state{PA} 
+	\postcode{15213}
+}
+\email{blucia@andrew.cmu.edu}
+
+\author{Przemys{\l}aw Pawe{\l}czak}
+% \authornote{}
+% \orcid{}
+\affiliation{%
+	\institution{Delft University of Technology}
+	\streetaddress{Van Mourik Broekmanweg 6}
+	\city{Delft, The Netherlands} 
+	\state{Zuid Holland} 
+	\postcode{2628\,XE}
+}
+\email{p.pawelczak@tudelft.nl}
+
+\renewcommand{\shortauthors}{A. Y. Majid et al.}
+
+
+\title{\sysfull}         %% [Short Title] is optional;
+% \date{}
+
+
+
+\begin{abstract}	
+\input{abstract}
+\end{abstract}
+
+
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10011007.10010940.10010971.10010564</concept_id>
+<concept_desc>Software and its engineering~Embedded software</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Software and its engineering~Embedded software}
+
+\keywords{Energy harvesting devices, intermittent Computing}
+
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+\input{intro}
+
+% \clearpage % hack to get rid of rophan
+\section{Intermittent Computing: Background}
+\label{sec:background}
+
+\input{background}
+
+\section{System Overview}
+\label{sec:systemdescription}
+
+\input{systemdescription}
+
+\section{Task Adaptation}
+\label{sec:task_adaptation}
+
+\input{coalescing}
+\input{partialcommit}
+
+\section{Memory Management}
+\label{sec:memory_virtulaization}
+
+\input{paging}
+
+\section{Implementation}
+\label{sec:implementation}
+
+\input{implementation}
+
+%\section{Discussion}
+%\label{sec:discussion}
+
+%\input{discussion}
+
+\section{Methodology}
+\label{sec:methodology}
+
+\input{hwswsetup}
+
+\section{Evaluation}
+\label{sec:evaluation}
+
+\input{evaluation}
+
+\section{Related Work}
+\label{sec:related_work}
+
+\input{relatedwork}
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+\input{conclusions}
+
+\bibliographystyle{plain}
+\bibliography{bib}
+
+\end{document}

@@ -1,0 +1,45 @@
+\subsection {Motivating the Design of \sys's Execution Model.} The challenge of \emph{efficiently} executing a program under frequent power failures, lies in the fact that the program needs to be energy aware. This challenge becomes even bigger when \emph{generality} is a design requirement, and consequently, the system must not require a specific hardware circuitry to offer its efficiency. \emph{Flexibility} is a key for wide adaptation, therefore, \sys's execution model should not limit the programmer to a subset of the functionality of the underlying software technology. \emph{\sys champions an efficient, general, and flexible intermittent execution.}
+
+\sys execution model operates on task-based programming model, but It progresses on a dynamic, virtual task granularity. A virtual task can be either multiple static tasks \emph{coalesced} together, when the energy permits, or a sub-task, when it is necessary to preserve forward progress.
+
+\sys execution model decouples the process of coalescing task from the process to downsizing the virtual task size. This separation is necessary to prevent the system from suffering from repeated power failures when energy becomes scares after it was abandoned or when the energy required to finish a static task increases significantly as compared to the previous static tasks.
+ 
+\textcolor{red}{Not very clear. Here with downsizing you are referring to the target, but, based on the previous sentence, the reader might mistake it with the task splitting feature. The reader might not know yet the re-execution penalty problem, so it might be hard to get what you mean with decoupling the two processes.}
+
+For example, if \sys uses a linear adaptation strategy and it was progressing on 20 static task per a virtual task, then the system has to default back to a single static task per a virtual task it may need to reboot 20 times before preserving the progress of a single static task!
+
+\textcolor{red}{
+Here you are already suggesting (and disproving) a coalescing strategy, but the reader should be exposed to the challenges before doing this, in my opinion. Here instead I would mention why coalescing up is needed (to reduce the number of commits), and why coalescing down is necessary (to reduce the re-execution penalty), using something like this figure https://goo.gl/GiJgEz}
+
+
+This adaptive execution model estimates the energy - using a pure-software technique - to tune the size of the virtual task. Therefore, its virtual task upscaling and downscaling processes are independent and, in case it is needed due to scarce energy, it only takes two reboots to shrink the virtual task size to a single static task. \emph{The adaptive execution model of \sys is efficient because it is energy aware.}
+
+Coala's execution model is neither limited by a static task size to progress, nor by the commit size, i.e. the amount of data that needs to be saved to the non-volatile memory to preserve execution progress. Coala can partition compile-time tasks, if it fails on a single static task more than once, or merge them, if saving the state to non-volatile memory is redundant because a power failure is not expected soon. This unique technique makes the commit size proportional to the number of state-less instructions executed. In other words, if energy allows executing only a small chunk of code, the amount of data to be committed shrinks accordingly.
+
+
+
+%% Coalescing motivation
+Finding an optimal task size, given random energy conditions is an open question. Obviously, a static approach does not have the potential to answer it. Therefore, \sys champions runtime-based methods to approximate the ideal task size under random energy shots arrival. Furthermore, \sys advocates making intermittently powered software energy-aware is the key for \emph{efficient code execution and probability}. 
+%However, given the extremely limited recourses any optimization technique must adhere to the principle of simplicity, otherwise it introduces a non-tolerable overhead. 
+
+% %% address the challenge and define the optimal task
+\textbf{Trade-off between Speed and Wasted Effort.} \sys advances its execution in a state-less (or virtual) manner, and then it frequently saves its forward progress. The longer \sys virtually progresses, the less committing (saving data to non-volatile memory) overhead it introduces. However, long state-less execution results in a considerable re-execution penalty---all the tasks that have been virtually executed must be re-executed after a power interrupt. As such, an optimal task is a task that occupies with a single commit an entire power cycle, which is therefore necessarily of a varying length.  
+
+% \textbf{Trade-off between Speed and Wasted Effort.} \sys can coalesce an
+% arbitrary number of consecutive tasks. However, as more tasks coalesce, their
+% collective commit overhead amortizes better, but the risk of wasting work also
+% increases. If power fails during a long sequence of coalesced tasks, execution
+% will restart from the last commit, i.e. the first task in the sequence, losing
+% the progress made by any of the coalesced tasks.  The challenge to coalescing
+% tasks is determining how many tasks to coalesce before committing.
+
+\textbf{Task Coalescing.} 
+The need for \emph{adaptiveness}, that is coalescing static tasks, can be fulfilled by a naive strategy that adapts the target (coalesced task size) by a constant value. However, due to the linear behavior of the target adaptation, this approach is slow in reacting to the changes in energy conditions. Actually, even if a coalescing algorithm alters its target exponentially, We still can consider it as a slow algorithm. The reason for describing these algorithms as slow ones is that their targets enlarging and shrinking processes require the same number of steps to change from one target to another. For example, if a coalescing algorithm starts with a target size one and then double its target size after each successful commit, it requires five commits to reach the target 16. However, if this algorithm needs to shrink its target to one to preserve the forward progress it requires the system to fail five times!
+
+To This end, we can conclude that a good coalescing algorithm has to separate its adaptation processes. In particular, a coalescing strategy should prevent repeated power failures that result from inadequate target estimation. In order for a coalescing strategy to do an educated guess, it has to be energy-aware. For that, it can rely on hardware support or on the history of execution. 
+% We need to justify our choice of using the history of execution in the Coala sections. (generality of the software approach, and avoiding additional circuitry ...)
+
+\textcolor{red}{explain the idea behind the need for task splitting and how it must be done such that it is not limited by the commit size itself}
+
+
+
