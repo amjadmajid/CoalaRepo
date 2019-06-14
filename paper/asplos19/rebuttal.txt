@@ -1,0 +1,325 @@
+ASPLOS '19 Paper #336 Reviews and Comments
+===========================================================================
+Paper #336 Dynamic Task-Based Intermittent Execution for Energy-Harvesting
+Devices
+
+
+Review #336A
+===========================================================================
+
+Overall merit
+-------------
+3. Weak accept
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Reviewer confidence
+-------------------
+3. High
+
+Paper summary
+-------------
+This paper proposes Coala, a task-based runtime system for intermittent computation on energy-harvesting systems.  To reduce checkpointing overhead and ensure forward progress, they propose mechanisms to do task coalescing and task splitting.  They propose a virtual memory manager to ensure consistency of updates to non-volatile memory.
+
+Strengths
+---------
++ Shows runtime improvements and in particular overcame limitation of recent prior art that some applications might be non-terminating due to tasks that exceed the available energy budet.  
++ Ran on real hardware so believable results. 
++ Good fit for ASPLOS
+
+Weaknesses
+----------
+- Reading through the paper, I had some concerns about introducing the overhead of virtual memory management to solve this problem.  Those overhead do not seem to be a problem for 4 out of the 6 benchmarks (Figure 10).  It would have been nice to have more benchmarks to increase some confidence in the results.
+
+Comments for author
+-------------------
+Programmer effort in the implementation is unclear.  The programmer has to specifically mark protected variables and use some other APIs.  Its unclear how difficult this might be or how error prone it might be.  Can this effort be automated by the compiler? 
+
+The weights used for WEG is an aspect of the paper that could have been explored in greater detail.  In particular, it is noted that in some cases WEG is counter-productive.  Is this just due to poor profiling to obtain weights? Would different weight values have been more productive? 
+
+In many cases the performance of EG and WEG is almost identical but this isn't really explored or discussed in the results section.  
+
+What version of Coala does Figure 10 use? Is it EG or WEG?
+
+Minor: Section 7.1 mentions capturing a diverse power trace.  This was unclear to me.  From the results, there seem to be 3 different power setups (based on distance from RF source) is this what is meant by diverse? 
+
+References are parenthetical.  For example, it is incorrect to say "in [1]."
+
+I don't think including the energy oblivious technique is worthwhile -- its only briefly evaluated because the other proposed techniques are better.  Its flaws are fairly obvious and so its not clear it adds anything to the paper.  Not a significant weakness but if you are looking to make space for other material, I think the paper stands fine without any mention of this approach.
+
+Questions for authors’ response
+---------------------------------
+Can you comment on the programmer effort required to use Coala?
+
+
+### Response@ReviewerA
+1)** Programmer effort** Coala requires, in particular, less intellectual involvement as compared to the prior work. Therefore, its compiler would not require anything new in comparison with existing compilers, such as Alpaca's compiler, and hence we did not introduce yet another front-end compiler. 
+
+
+2)** Number of benchmarks**
+We agree with the reviewer that the more benchmarks the better. However, the number of benchmarks that are introduced in this work is not less than what the typical number of benchmarks in related works, for example, Alpaca has 6, Chain 4, and DINO 3 benchmarks.
+
+
+3)** EG vs WEG**
+Coala is about enabling software to understand its energy, charging and discharging, conditions. Task's weight enables Coala's runtime to better reason about the energy cost of a particular task. For example, firing a sensor may require a single line of code, yet from the energy perspective, this task equals 10 other tasks. We highlighted the benefit of using a task's weight in the _fft_ app and show that if tasks are uniformly distributed from the energy perspective then checking task weight will only introduce overhead, and that is why it is an optional strategy.   
+
+Review #336B
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Reviewer expertise
+------------------
+2. Some familiarity
+
+Reviewer confidence
+-------------------
+1. Low
+
+Paper summary
+-------------
+The paper presents Coala, which is a programming system for intermittently powered computing systems.  Coala is based on a task model (like other approaches) but the key difference is that Coala supports coalescing and splitting user-defined tasks.  Coalescing allows tasks to reduce overhead of commiting non-volatile state to volatile memory.  Splitting allows large tasks to make forward progress.
+
+Strengths
+---------
+I like the idea of automating task management (through splitting and coalescing).  The paper does a good job of making the case that the proposed dynamic approach is better than a static approach.
+
+Weaknesses
+----------
+The Cambrian explosion of work in programming intermittent computing systems makes it difficult for those of us who don't work in the area to track when a paper is proposing a major breakthrough versus an incremental improvement.  This paper's presentation left me unsure of where it stands on this continuum.
+
+Comments for author
+-------------------
+The paper does a good job of describing problems with static tasking systems and giving readers the intuition for why a dynamic tasking system would be beneficial.
+
+My score is not higher because after reading the paper I am not confident about where the fundamental contribution of this approach falls in relation to the many other recent works on intermittent computing systems.  To be clear, there is a large list of references and the related work section provides some high-level guidance along these lines, but I found myself wanting much more detail from the presentation.  To try to make this constructive feedback, I will list some of the questions I had and how the presentation might be altered to help me understand these issues better.
+
+First, the paper proposes a user-specified task model that the Coala system will then automatically coalesce or split.  This is a very intriguing idea.  Left unaddressed (to my satisfaction anyway) is that this approach seems to trade more programming burden (not just specifying tasks, but also manually labeling protected variables and manually reading and writing to these protected variables.  That seems like a much larger programmer burden compared to a system like Alpaca, but this burden does not appear to really be addressed by the paper.  How many lines of code change when modifying a C program to use Alpaca vs Coala?  Doesn't this approach make bugs more likely (where a programmer incorrectly labeled something)?  While the evaluation shows performance improvements over Alpaca, my intuition is that this comes at a cost of increased programmer burden, which does not appear to be addressed in the paper.
+
+Second, the intro to the paper makes the claim that Coala supports both coalescing and splitting.  I found this intriguing for several reasons.  First is, perhaps a dumb question but I'll ask anyway: why do you need both?  If the system supports task splitting automatically, why shouldn't I just write one task and let the system split it for me automatically?  That seems like the easiest path for me as a programmer, but there must be a reason not to do that.  I could not figure out the reason from the paper (maybe it is obvious to the people who work on this stuff).  Related, what is this paper's contribution to Ratchet ([70])?  Section 4.2 on downscaling was surprisingly short and left me with the impression that it is just the same approach as [70].  The later Related Work section implies that there are fundamental differences, but I am still not clear on what they are.  The most impressive part of the results to me was getting the FFT to complete with Coala when it failed with Alpaca, but that result is based on downscaling the FFT tasks.  It would have been great to have Ratchet as another point of comparison to help illustrate whether that result is really a fundamental contribution of Coala or an incremental improvement over prior work.  Similarly, the related work section describes just-in-time checkpointing and states some high-level issues with those approaches, but there is no direct comparison.  Those JIT approaches seem like a natural comparison as they are also attack the problem of overhead in intermittent computing systems, same as Coala's coalescing.
+
+Related to the evaluation is my final comment. In these results, it was hard for me to evaluate how much the dynamic aspect is buying versus just comparing to a bad implementation of a program in Alpaca.  I understand that programmers might make a bad choice when statically sizing tasks and that Coala could alleviate that problem (at the cost of much more invasive programming).  However, I would like to know if there are reasons to believe that no static task assignment will be reasonable.  That would be a much stronger argument for the proposed approach.  
+
+In summary, there are some good things about the paper.  My hesitation is that it is very hard for me to put it into the quickly evolving ecosystem of intermittent programming systems.
+
+Questions for authors’ response
+---------------------------------
+I have a number of questions above.  Please answer any of those for which you have the space.
+
+
+### Response@ReviewerB
+1)**Programming burden** 
+Coala's app size is similar to that of Alpaca with similar annotation requirements. Moreover, all the code transformation can be done by a front-end compiler, please see the response@ReviewerA.1. In addition, prior task-based systems require, due to their static nature, accurate reasoning about energy conditions to offer efficient execution, which is a significant intellectual programming effort. Whereas, Coala enables on-demand software adaptation to offer efficient and safe execution. 
+
+2)**Is Coala more prone to Bug?**
+Due to Coala's dynamic nature, it is less prone to bug than the static systems, i.e. static systems suffer from large task problem while Coala does not. 
+**TODO**, mentioned the benefit of using address level protection mechanism as compared to the naming annotation. 
+
+3)**Why splitting  is not default**
+Task splitting requires stack protection (saving the stack in the non-volatile memory) while tasks coalescing does not, so it is more efficient. Moreover, stack growth and task size have a positive correlation. 
+
+4)**Downscaling and Rachet**
+To be answered shortly
+
+5)**Comparing against other systems**
+In contrast to the vast majority of the presented systems, Rachet targets a completely different hardware (ARM Cortex). As consequence, porting it to MSP430FRxxxx (ultra-low energy microcontroller) requires a significant effort. Furthermore, Alpaca, the state-of-the-art, has already demonstrated its superiority to other systems like Chain (task-based), DINO (checkpoint), and mementos (checkpoint). 
+
+6)**Why not static-task**
+Static tasks divisions require intermittent application design and implementation for each hardware configuration; otherwise, they are inefficient. Even worse, a solar-powered intermittent device, for example, indoor has completely different energy harvesting conditions than outdoor, yet the static division can only consider the worst case scenario.  
+
+
+
+
+Review #336C
+===========================================================================
+
+Overall merit
+-------------
+3. Weak accept
+
+Reviewer expertise
+------------------
+2. Some familiarity
+
+Reviewer confidence
+-------------------
+3. High
+
+Paper summary
+-------------
+Energy-harvesting devices (battery-free) exhibit intermittent execution based on unreliable energy sources. The execution can stop any time, so regular checkpointing is necessary. Another issue is memory consistency if some writes are executed to non-volatile memory after checkpoint, and the program execution stops before the next checkpoint, the memory state cannot be rolled back leading to inconsistency. Prior works[12,42]  have proposed task-based programming model were program execution is divided into tasks, and all updates of tasks are committed at the end of the task. 
+
+The paper proposes a dynamic task management scheme: Coala. The key idea is dynamically coalacse tasks to avoid the overhead of numerous commits. Some simple history based policies have been explored to determine how many tasks can be combined before the commit. Also, to ensure atomic commits at the end of the dynamically coalesced task, a  software-only virtual memory technique is proposed. Write to NV memory locations from a task go through a level of indirection, buffered in a shadow memory region and committed to FRAM in a two-phase commit protocol. A timer based approach is used to break tasks which are non-terminating and keep restarting.
+
+Strengths
+---------
+Dynamic task coalaescing can reduce checkpointing overheads
+
+Evaluation on WISP intermittently powered platform,  Coala in its entirety is implemented and evaluated.
+
+Weaknesses
+----------
+Builds upon and improves prior work on task-based intermittent execution
+
+Virtualization causes overheads.  Some workloads show worse performance than static tasks.
+
+Comments for author
+-------------------
+The paper is well-written and easy to read. 
+
+I see that you have started from a task-based execution model, and then made it more adaptive for reducing commit overheads. But I think virtualization is independent of task model and can reduce checkpointing overheads. For instance, the dirty pages can be periodically committed to NV memory based on some heuristics. The period can be thought of as the "checkpointing interval".
+Is there a need for task wrapper?  On that note, if the microcontroller already comes with MMU support, then the overheads can be reduced significantly.
+
+Questions for authors’ response
+---------------------------------
+Can you clarify the need for a two-phase protocol? why is it not sufficient to do just copy from shadow to private?
+
+How are task boundaries exactly determined in prior works?
+
+How difficult is to estimate time before next power-off based on energy buffer?
+
+
+### Response@ReviewerC
+1)**Two phase commit**
+A consistent set of data need to be guaranteed under any execution circumstances, and the two-phase protocol offers this guarantee. Moreover, Coala does not copy the modified content of the buffer twice. It, instead, set flags to exchange buffers' cells rules. 
+
+2)**Task boundaries**
+All prior works require the programmer to reason about the energy availability and set the STATIC task size accordingly. Coala, however, enables the runtime to reason about the energy conditions and adapt the coalesced/split task accordingly.
+
+3)**Next power-off**
+This discharging time (on-time) of an intermittent device depends on the incoming power and discharge rate. It is very complicated to determine in general accurately the next power interrupt. Especially, if the device drive sensors and its execution is environment dependent.
+
+Review #336D
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Reviewer expertise
+------------------
+2. Some familiarity
+
+Reviewer confidence
+-------------------
+2. Medium
+
+Paper summary
+-------------
+This paper presents an approach to handle efficient checkpointing in intermittent computing based on task graphs. In existing task based designs each task is atomically executed on an intermittent computing platform. All the non-volatile state is preserved at the end of the task and a new task may start with a clean architecture state and inter-task data dependencies are communicated through  data stored in a byte addressable NVM.  The challenge in this scenario is to determine the size of a task so that the overhead of committing all the inter-task dependence data into NVM can be minimized. Smaller tasks are worse in this regard. But larger tasks may repeatedly fail to progress leading to deadlocks. So the goal of this work is to combine smaller tasks or break up larger tasks while taking into consideration the amount of battery power that is left.
+
+Strengths
+---------
+The main novelty of the work in my view is that the paper proposes a virtual memory system for NVM that essentially allows task coalescing to occur efficiently. The proposed design essentially remaps the read (or write) NVM address to a location in volatile memory so that all updates within a coalesced set of tasks are directed to the volatile memory, through a paging scheme.  
+
+The second novelty, although I consider it to be a smaller contribution, is an approach to determine how to coalesce (or split) tasks based on energy availability using the historical task completion information.
+
+Weaknesses
+----------
+The weakness of the work is the fact that the the VMM system designed for NVM is a straight forward and simple approach that is limited in novelty. The work applies the notion of shadow and private paging to protect intermediate updates from corrupting NVM. It comes at the cost of keeping two NVM copies always and a third copy in memory (called the working page). Hence, the benefits of byte addressable NVM is mostly lost in the proposed design.
+
+Comments for author
+-------------------
+I enjoyed your full system implementation details and I think the work has some value. But in the current form I would like to see the following concerns addressed:
+
+(1) Do you have any comments on the critique that the proposed design essentially triples memory usage and thereby reduces the size of the programs that can be run on Coala? Did this memory limitation cause significant issues in running any of your workloads (I did not see any reference to this aspect in the experimental section). 
+
+(2) Can you also  please comment on the difficulty of having to re-write each application to use the RD and WR API provided by your system? Is it possible to automate this RD and WR APIs to be handled by the underlying runtime without explicit user annotation? If so what are the pros and cons of such an approach? 
+
+(3) The improvements shown over Alpaca (Fig 10) seem to be highly dependent on the type of task creation a programmer may chose. I understand the argument that task size is a challenge but at least for the purposes of some empirical upper bounds I expect that Alpaca will do much better if the task creation is not completely oblivious to the underlying hardware.
+
+Questions for authors’ response
+---------------------------------
+See my three comments above and please address them in your rebuttal.
+
+
+
+### Response@ReviewerD
+1) On the volatile memory (RAM) data cannot be saved even with normal devices on a power interrupt. The working buffer of Coala, which is much smaller than the other buffers, can be seen as a cache, and thus Coala requires double the size of an application's data. Coala requires that to reach its maximum performance from the energy perspective. We did not encounter any issue with benchmarks memory requirements. Please have a look at  Response@ReviewerC.
+2) Please have a look at Response@ReviewerA.1.
+3) We agree with the reviewer and that is what Coala trying to prove. However, Please have a look at Response@ReviewerC.3 to see why static approach cannot be optimal. 
+
+
+
+Review #336E
+===========================================================================
+
+Overall merit
+-------------
+3. Weak accept
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Reviewer confidence
+-------------------
+3. High
+
+Paper summary
+-------------
+This paper presents an interesting systems support to solve a well-known dilemma in intermittent execution of energy-harvesting systems: the overhead of context savings vs. the cost of aborted execution. Using small tasks incurs high overhead of context savings; using large tasks incurs high cost when a task is aborted (without context saving). The key idea is to have a runtime that decide the size of tasks dynamically based on available energy. The runtime support has two key parts: scheduler and virtual memory manager. The scheduler determines the size of tasks; the virtual memory manager ensures consistency of non-volatile memory.
+
+Strengths
+---------
+A refreshing approach toward a relatively niche/understudied system.
+
+Weaknesses
+----------
+Important details of how the system work are missing so it is difficult to gauge how well it may work in real deployment. Specifically how do you manage the WAR consistency of knowledge needed for VMM and scheduler? How do you determine the granularity of tasks?
+
+The system is ideally coupled with programming support, which is largely missing in the paper.
+
+The evaluation setup is contrived.
+
+Comments for author
+-------------------
+This reviewer found the scheduler part missing a lot of details. For example, your scheduler must have some knowledge about the tasks under question (e.g., an ordered list of tasks to be executed, or more generally a directed graph of tasks). As a task is committed, this knowledge must be updated. Where does it obtain this knowledge? How do you ensure the WAR consistency of this knowledge (i.e., the list or graph)?
+
+The part of the scheduler left much to be desired for the compile time analysis & optimization (Maybe the authors are planning another paper?). For example, the weight for a task must be derived at compile time/static analysis. This paper simply assumes they are given. Neither was the granularity of tasks  discussed, which is likely to be dependent on the system’s configuration and operational environment. 
+
+The virtual memory management design is quite interesting, a clever realization of two-phase commitment using the virtual memory indirection. I hope the authors could discuss the intellectual link to two-phase commitment protocols in their camera ready. Like the scheduler, the VMM also needs some knowledge about the memory usage and this knowledge likely needs to be updated when memory is used. How do you ensure the WAR consistency of this knowledge? 
+
+The evaluation is conducted in a quite contrived environment, especially how energy is delivered to your system. To ask rhetorically, how could you be sure that your manual choice of task granularity is not simply optimized for the cycle of energy delivery to your system?
+
+Please provide some background for the architectural/systems aspect of your intermittent systems. For example, no multitasking? no out of order execution? what is the interrupt model? Would a task be interrupted? If so, how do you deal with the nondeterministic behaviors introduced by interrupts?
+
+Questions for authors’ response
+---------------------------------
+Is there any knowledge for the scheduler or VMM that needs to be updated over the lifetime of an app and saved before power-off? If so, how do you ensure their WAR consistency?
+
+Are you writing another paper about the programming support for dynamic tasks?     
+
+
+
+
+### Response@ReviewerE
+
+1)**Data consistency VMM and scheduler** 
+When the scheduler _unlocks_ a coalesced task for execution, the VMM _locks_ the private buffer for any write access.
+When The VMM _unlocks_ the private buffer to update its data (setting flags instead copying data between the NV-buffers), the scheduler locks task execution. This strategy guarantees the atomicity of data updates and consequently data consistency. 
+
+2)**Tasks granularity**
+Static task sizes are specified by the programmer (or a compiler). Coalesced task size is determinate on-the-fly by Coala's runtime based on the recent execution history.  
+
+3)**Programming support**
+See Response@ReviewerA.1
+
+4)**Scheduler**
+Coala's scheduler is a supervised, by the tasks, round-robin scheduler. It updates a minimalist amount of non-volatile data to latch to the under-execution task until the task execution is finished despite power interrupts. 
+
+5)**Another paper**
+We are targeting a real-life application demonstration. 
+
+6)**Are the task sizes optimized for Coala** 
+The design of our applications is based on the design of the benchmarks that are used Alpaca system (see Coala Table 3 and Alpaca application source code on the owners' repo).
+
+7)**Handling interrupts**
+Permanent data modification happens only across coalesced task boundaries and all task-shared data are protected. Therefore,  
+Coala, in contrast to the other task-based systems, guarantees data consistency even when ISRs are considered.
+However, Coala history tracker does not count the ISR; therefore, small ISRs are required for optimal performance. 
+      

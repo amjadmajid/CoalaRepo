@@ -1,0 +1,25 @@
+EB specification :
+f_reboot(B) 		= B - 1
+f_coal_tsk_maker(B) = B + 1
+f_weight(T_i)		= 1
+
+ETA specification :
+f_reboot(H) 		= floor(H / 2)
+f_coal_tsk_maker(B) = floor(B / 2)
+f_weight(T_i)		= W_i
+
+ON_REBOOT
+B = f_reboot(H)
+H 	= 0
+WHILE true:
+	i = 0
+	WHILE i <= B 
+		execute_task(T_i)
+		W = f_weight(T_i)
+		i  =  i + W
+		H 	= H + W
+	END WHILE
+	commit_to_fram()
+	B = f_coal_tsk_maker(B)
+END WHILE
+

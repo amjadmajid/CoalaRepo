@@ -1,0 +1,55 @@
+We thank the reviewers for their time and the raised points and hope our answers are satisfactory. 
+
+### Response@ReviewerA
+
+[A1]**Programmer effort** Coala requires less programmer effort as compared to other task-based systems for the following reasons: (i) Chain/Alpaca requires WAR-dependent variables identification, a prone to error process, while Coala does not. (ii) Coala does not require a special technique to handle arrays as Alpaca. (iii) Static systems require pre-deployment accurate reasoning about energy conditions for efficiency while Coala optimizes it execution on-demand. (iv) Coala applications have similar lines of code to Alpaca’s applications and LoCs around ⅓ of Chain’s applications (see Table3 Coala and Table4 Alpaca). 
+
+[A2]**Can a compiler automatically annotate Coala’s applications?** Yes. We did not introduce a compiler in the paper because it would require nothing new or novel compared to the introduced compilers by prior work. Therefore, we considered it as a solved problem.
+
+[A3]**EG/WEG**: From the paper (page 9): "In some cases WEG’s task weighting system is counter-productive. This occurs in task decompositions with energy-uniform tasks, where counting tasks disregarding their energy consumption provides an equal amount of information with a smaller effort. In fft, tasks are not uniform, and accounting for their different weights beneficial”. Additionally, task weights can be extremely important---a task that triggers an I/O operation may consume several times more energy than a non-I/O task.
+
+
+
+### Response@ReviewerB
+[B1]**Where does Coala stands on the continuum of intermittent computing?** Coala is the first intermittent computing system that combines the flexibility of checkpointing with the efficiency of task-based models. 
+
+[B2]**Programming burden** See [A1]
+
+[B3]**Why splitting is not default?**
+Task splitting requires stack protection while tasks coalescing does not; therefore, it is more efficient.
+
+[B4]**Downscaling and Ratchet**
+Ratchet checkpoints the system on each encounter of a WAR-dependency. To reduce the size of the checkpoint, Ratchet operates on non-volatile memory which imposes _at least_ 2x energy consumption as compared to accessing volatile memory. Coala, however, strives to reduce the number of task splits, operates on the energy-efficient volatile memory, and tolerates checkpoint size. This could be made more clear in the paper, to give more focus to Section9.
+
+[B5]**Comparing against other systems**: Alpaca, the state-of-the-art, had already demonstrated its superiority to other systems like Chain (task-based), DINO, and Mementos (checkpoint). Therefore, by comparing to Alpaca we implicitly compared Coala to all aforementioned systems. Ratchet, in constrast to the majority of intermittent systems, considers a completely different microcontroller architecture that makes this comparison out of scope.
+
+[B5]**Why not static-task**: 
+Static tasks require _significant_ code changes to port between devices. Additionally, choosing the approperiate static task size skyrokets the programmer effort.
+
+
+### Response@ReviewerC
+[C1]**Why two-phase commit**:
+A form of two-phase commit is a must to ensure data and system states consistencies. Coala VMM must _protect_ the individual memory pages before they being accessed and _ensure_ the consistency of the states of the buffers.
+
+[C2]**Why task wrapper?** To avoid the need for stack protection and increase the performance.
+
+[C3]**Task boundaries in prior work**: See [A1 point (iii)]
+
+[C4]**Next power-off**: Given the varying nature of harvested energy and the variety in a load power consumption, especially when I/O operations are considered, it is very challenging to accurately determine the next power failure.
+
+### Response@ReviewerD
+[D1] Coala doubles applications NVM requirements to reach its maximum performance and to reduce energy consumption. Additionally, we did not encounter any memory problems.  
+
+[D2] See [A1]
+
+[D3] We have used the exact tasks devision the Alpaca’s owner shared online, and we designed Coala’s applications accordingly.
+ 
+### Response@ReviewerE
+
+[E1]**Scheduler&VMM consistency**:  Coala uses two-phase commit process to ensure the consistency of its states, also see [C1]. 
+
+[E2]**Coala’s scheduler** is a persistent and supervised, by applications tasks, Round-Robin scheduler. It, despite power failures, remembers the address of the under-execution task until it finishes. Additionally, it prohibits the commit process from being interrupted by task-execution or vice versa. However, if a task is split the entire execution context is saved and retrieved to preserve correct execution. 
+
+[E3]**Optimizing task size for Coala**: See [D3]
+
+[E4]**Handling interrupts**: Permanent data modification happens only across coalesced task boundaries and all task-shared data are protected. Therefore, Coala, in contrast to the other task-based systems, guarantees data consistency even when ISRs are considered. However, the history tracker used in EG/WEG does not account for the weight of an ISR, that could fire at any point in time, thus ISRs should be kept small in order for their energy cost to be negligible with respect to one of the tasks they are interrupting.
