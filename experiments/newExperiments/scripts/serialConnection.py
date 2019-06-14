@@ -49,27 +49,27 @@ cp = os.getcwd()
 
 fname =  open( os.path.join(dirPath,fileName) , 'w')
 
-portsName = ["/dev/cu.usbmodem1413","/dev/cu.usbmodem1423","/dev/cu.usbmodem1433" ]
+portsName = ["/dev/cu.usbmodem14103","/dev/cu.usbmodem14203","/dev/cu.usbmodem14303" ]
 baudRate = 115200
 # port=None
 # e=None
 # ser=None
 # while port in portsName:
 # 	try:
-ser = serial.Serial(portsName[0], baudRate, timeout=5)
+ser = serial.Serial(portsName[1], baudRate, timeout=5)
 	# except e:
 	# 		print("Port error: ", str(e) )
 	# 		continue
 
 while Togo:
-		try:
-			np = str(ser.read(lineLen), 'utf-8')
-			print(np, end="")
-			fname.write(np )
-		except e :
-			print("Reception error: ", str(e) )
-			continue
-		Togo -=1
+#		try:
+                np = str(ser.read(lineLen), 'utf-8')
+                print(np, end="")
+                fname.write(np )
+#		except IOEerror e :
+#			print("Reception error: ", str(e) )
+#			continue
+#		Togo -=1
 
 ser.close()
 exit()
