@@ -1,0 +1,129 @@
+\documentclass[10pt]{article}
+\usepackage{amsmath,amsfonts,amssymb,graphicx,color,psfrag}
+\usepackage[utf8]{inputenc}
+
+\usepackage{vmargin}
+\setmarginsrb{2.25cm}{2.25cm}{2.25cm}{2.25cm}
+         {12pt}{20pt}{12pt}{36pt}
+
+\usepackage{soul}
+\usepackage{hyperref}
+
+\newcommand{\referee}[1]{
+	{\item \color{OliveGreen} \emph{{#1}}}
+	\label{R\therefereeCounter:\arabic{enumi}}
+}
+
+\definecolor{OliveGreen}{rgb}{0.1,0.2,0.5}
+
+\newcommand{\response}[1]{{\color{blue} #1}}
+
+\newenvironment{editor}{%
+\textbf{\large Additional changes}
+\begin{enumerate}%
+\renewcommand{\labelenumi}{\textbf{[E:\,\arabic{enumi}]}} %
+}{\pagebreak\end{enumerate}}
+
+\newcounter{refereeCounter}
+
+\newenvironment{responses}{%
+\refstepcounter{refereeCounter}%
+\textbf{\large Comments by Referee \therefereeCounter}
+\begin{enumerate}%
+\renewcommand{\labelenumi}{\textbf{[R\therefereeCounter :\,\arabic{enumi}]}} %
+}{\end{enumerate}}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\pagestyle{myheadings}
+\thispagestyle{empty}
+
+\markright{\footnotesize TOSN-2019-0002: {\sl Coala: Dynamic Task-Based Intermittent Execution for Energy-Harvesting Devices}}
+
+\headsep 0.5cm
+
+\bigskip\bigskip
+
+%\noindent{Marwan Krunz, EIC, and Kevin Almeroth, Associate EIC \\
+%	IEEE Transactions on Mobile Computing
+%}
+
+\bigskip\bigskip
+
+\begin{flushright}
+Amjad Yousef Majid \\
+Embedded and Networked Systems Group \\ 
+Delft University of Technology \\ 
+Mekelweg 4\\
+2628\,CD Delft, The Netherlands \\
+E-mail: a.y.majid@tudelft.nl\\
+Phone: +31 61 695 5224\\
+\end{flushright}
+
+\vspace*{2cm}
+
+\today
+\medskip
+
+
+\textbf{TOSN-2019-0002:} {\sl Coala: Dynamic Task-Based Intermittent Execution for Energy-Harvesting Devices}
+
+\bigskip
+
+Dear Editor,\\
+
+We would like to thank you for handling our submission and providing valuable review results. 
+We are also grateful to the reviewers for their substantial effort spent for evaluating our work. \\
+
+With this letter we address all comments of the reviewers and point to the modified sections of our revised paper. \\
+
+With best regards, \\
+
+in the name of all authors---Amjad Yousef Majid
+
+\pagebreak
+
+\begin{responses}
+	
+\referee{In section 2.3, authors mention "these models do not rely on capturing an expensive checkpoint, they are usually faster than the checkpoint-based solution [12, 42]". I don't fully agree with this. It depends on the underlying checkpointing mechanism. If it copies complete stack every time during the checkpoint then yes it's expensive. But checkpointing mechanism like incremental checkpointing [2] (also see the paper by Faycal Ait Aouda), where you only update modified variables, is much better in terms of energy consumption (even better than the task-based solution in my opinion). Also, [12] and [42] are not checkpoint-based solutions.}
+
+\response{As indicated by the reviewer, [12, 42] are not checkpoint systems. They are task-based systems and their results show that task-based systems are faster than checkpoint-based ones. Therefore, we restated their claim and provided the supporting references, which are [12, 42].\\
+ Coala addresses deficiencies in the \emph{static} task-based systems and provides a more efficient alternative. Therefore, we compared its performance against the performance of the state-of-the-art task-based runtime.}
+
+\referee{In section 7.1, authors mention "produce a high number of complete runs". Please mention the exact number iterations. Also please mention the capacitor size for the WIPS 5.1.}
+
+\response{The number of complete runs and WISP capacitor size are added to Section 7.1.}
+
+\referee{In figure 10, it is not very clear how authors normalized the values for Coala in case of fft for 30cm and 50cm. Also in the text authors state that "This is marked with $\infty$ signs in Fig. 9", its figure 10. }	
+
+\response{We normalized these two special cases on 1 second. This infromation is added to Section 8.2, and the figure reference is corrected. }
+
+\referee{However, I was hoping to see more evaluations to understand the effect of capacitor size. In the introduction, authors state that "Coala is the only system that eliminates restructuring and re-compilation of applications considering device’s energy buffer". However, in the evaluation, I didn't find any graph related to the performance of Coala w.r.t to different capacitor sizes.}
+
+\response{An additional experiment regarding the capacitor size has been conducted and the results are added to Section 8.2.}
+
+\referee{I would have also liked to see a comparison between Coala and Region Formation [2]. Both try to reduce checkpointing overhead.}
+
+\response{As it is indicated in \hyperref[R1:1]{[R1:1]}, Coala addresses deficiencies in the \emph{static} task-based systems and provides a more efficient alternative. Therefore, we compared its performance against the performance of the state-of-the-art task-based runtime.}
+
+\referee{Also, I would suggest incorporating error bars in all the graphs as your "results were averaged across the duration of the experiment"}
+\response{We chose to normalize the results to focus on the speedup (or slowing down) and that is why we omitted the error-bars.}
+
+\referee{In the abstract (and also in the introduction), authors claim that "Coala reduces run time by up to 54\%", however, I didn't see this number again anywhere in the evaluation.}
+\response{This number is highlighted in Section 8.2.}
+
+\referee{typos}
+\response{are corrected}
+
+
+\end{responses}
+
+\begin{editor}
+\referee{}
+\response{Dear editor we added a new figure to the paper, Fig. 5. The figure's sole purpose is to aid explaining the concept of \textit{task coalescing}.
+We hope that this modification is approved by you.}
+\end{editor}
+
+\end{document}

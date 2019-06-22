@@ -11,8 +11,6 @@ However, it must also be  {\em conservative} enough, coalescing only as many tas
 \subsubsection{Generic Design of Task Coalescing Strategies}
 \label{subsec:coalescingGeneral}
 
-% Coalescing has a double benefit. First, coalescing reduces the total number of relatively high-latency, high-energy non-volatile memory accesses because tasks primarily access variables in relatively low-latency, low-energy volatile memory. Second, coalescing eliminates the unnecessary instructions that implement task commit, which constitute a substantial run-time overhead, as our measurements in Section~\ref{sec:evaluation} show.
-
 \begin{algorithm}[t]
 	\caption{Coalescing}
 	\label{algo:genCoalescing}
@@ -38,7 +36,6 @@ However, it must also be  {\em conservative} enough, coalescing only as many tas
 \end{algorithm}
 
 Algorithm~\ref{algo:genCoalescing} shows the general structure of a coalescing strategy. In the algorithm, $C$ (coalescing target) is total number of static tasks that \sys will next attempt to coalesce. $T_\text{i}$ is the $i$th task executed since the last power failure. $H$ (history) is the total number of tasks executed since the last power failure. $W_\text{i}$ is the {\em weight} of a task. A task's weight is an arbitrary quantity associated with the task that represents its cost in time or energy to execute. Different coalescing strategies may apply different weights to a task, e.g., $W_\text{i} = 1\ \forall i$, or $W_\text{i} = \alpha E(T_\text{i})$ where $E(T_\text{i})$ is the average execution time of $T_\text{i}$ and $\alpha$ is a constant.
-% For example, a uniform weighting scheme sets the weight of each task to one, making them all effectively equal in cost to the coalescing algorithm.  A different policy might use a weighting scheme that sets a task's weight equal to its run time relative to the task that executes for the shortest duration, which has unity weight. 
 
 \subsubsection{Example Task Coalescing Strategies}
 \label{subsec:coalescingStrategies}
@@ -70,6 +67,13 @@ EO reacts slowly to the variation in the energy required to execute different ta
     \label{fig:hg-coal}
 \end{figure*}
 
+\begin{figure}
+\centering
+\includegraphics[width=.8\columnwidth]{figures/dif_cap}
+    \caption{\add{Anatomy of \sys coalescing---A snapshot of measured data showing how \sys coalesces static tasks. \sys takes advantage of the guarantee that an energy buffer offers after a reboot: code execution resumes after energy accumulation reaches the operational threshold (a maximum threshold). Thus, \sys starts with a big coalesced task and shrinks it gradually as the risk of a power failure increases.}}
+    \label{fig:coal_anatomy}
+\end{figure}
+
 The \emph{Energy-Guided} (EG) coalescing strategy adapts its coalescing target more quickly, addressing a key limitation of the EO, to adhere to changes in energy conditions. It uses its recent execution history, H, to estimate energy availability and alters its target accordingly. The EG algorithm is characterized by the following functions
 %
 \begin{equation}
@@ -82,7 +86,6 @@ The \emph{Energy-Guided} (EG) coalescing strategy adapts its coalescing target m
 \end{equation}
 %
 where $\rho, \gamma \in [0, 1]$. By relying on the history of execution EG eliminates the problem of frequent power failures on a single coalesced task. In fact, at each reboot, EG will {\em conservatively} try to coalesce only a fraction ($\rho$) of tasks that had successfully completed during the last power cycle.
-% In fact EG can reduce its target to one from any coalesced target in at most two successive power failures. For instance, if the execution is interrupted after finishing a single task the history will be one ($H = 1$) and the target will be set to one also. While a history of $H$ suggests that there is sufficient energy to coalesce and successfully commit $H$ tasks (i.e., to set $C = H$). EG conservatively sets $C$ equal to half of $H$ moderating the risk of a very long coalesced task. We experimented with a range of fraction values, settling on one half as the default for EG, because one half had the highest performance.
 Fig.~\ref{fig:hg-coal} illustrates a snapshot of the operation of EG, with $\rho = \gamma = 0.5$. The figure shows two power cycles following the $i$th, the latter having an execution history $H^{(i)} = 4$. Based on that, $C$ is initially set to two and then decreases to one. Once the value of $C$ reaches one, EG is expecting a power failure, justifying the conservative approach. After the reboot, EG uses the most recent history $H^{(i+1)} = 8$ to set $C = 4$ and continue execution.
 
 \paragraph{Weighted Energy-Guided Coalescing.}
@@ -94,4 +97,7 @@ Instead, WEG associates a non-unity weight with each task in the program, and tr
 % WEG differs from EO and HG by explicitly accounting for the variation in energy cost of a program's tasks, eliminating the assumption that all tasks do the same work, which is a key limitation.
 WEG is characterized the same way as EG (equation (\ref{eq:eg})), except that $f_\text{weight}(T_\text{i}) = W_\text{i}$.
 %
-% The effectiveness of the WEG hinges on correctly identifying the weight of each task, which WEG assumes is {\em statically} available. Profiling the time and energy cost of tasks in a program is a difficult, orthogonal problem~\cite{cleancut_2018,baghsorkhi_cgo_2018}. WEG could use the result of an arbitrarily sophisticated profiling procedure. To produce a concrete result in this paper, we give WEG access to a simple profile of task run time collected offline using a single fixed input. WEG stores the profile in a lookup table that maps a task's identifier to its weight, making the information available to \sys's scheduler at run time.
+
+\add{
+Fig.~\ref{fig:coal_anatomy} shows \sys in action. It shows how \sys coalesces aggressively when the execution is just re-started, taking advantage of the full energy buffer, and how it reduces the coalesced task gradually to minimize the risk of significant progress loss when the device fails. The average measured static task size is $\approx$\,0.28 $ms$ while the commit time (time needed to save the data into the non-volatile memory) averages at  $\approx$\,0.64 $ms$. This highlights the importance of coalescing.
+}

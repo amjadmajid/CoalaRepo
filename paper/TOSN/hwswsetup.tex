@@ -4,28 +4,32 @@ We prototype \sys and use its API to implement a set of benchmark applications r
 
 \subsection{Experimental Setup}
 \label{sec:results_hardware_software}
+\add{
+We used three different setups to evaluate \sys: 
+(i) an RF-powered energy-harvesting device, WISP\,5.1~\cite{wisp5,wisp}, with a fixed capacitor size of 47\,$\mu$f; 
+(ii) an MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad} powered by a BQ25570~\cite{BQ25570EVM-206_website} solar power harvester that is connected to an IXYS SLMD121H04L solar cell~\cite{SLMD121H04L_website} for experimenting with different energy buffers; and
+(iii) an MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad} that is continuously powered.
+} 
 
-We used two platforms to evaluate \sys: (i) an \emph{intermittently-powered}
-energy-harvesting device (WISP\,5.1~\cite{wisp5,wisp}), and (ii) a \emph{continuously-powered} evaluation
-board (MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad}).
-%
+\add{
 Every benchmark used in Section~\ref{sec:evaluation} was run repeatedly on
 each platform for a few minutes to ensure capturing a diverse power 
-trace and produce a high number of complete runs of all applications.
-The results were averaged across the duration of the experiment.
+trace. The exact number of iterations depends on the ambient power intensity and the application itself.
+In our experiments, the number of complete runs ranges from 4 to 125.
+}
 
 WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
 non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
 configured to 1\,MHz clock speed.
 %
 We powered WISP using an RF signal generator emitting a 20\,dBm sinusoidal wave at 915\,MHz.
-The signal generator was connected to the Liard RFMAX S9028PCRJ 8\,dBic
+The signal generator was connected to the Laird RFMAX S9028PCRJ 8\,dBic
 antenna~\cite{atlas2015}.
 %
 The antenna was oriented towards and in parallel with WISP's antenna, and
 no objects obstructed the path.
 %
-We affixed WISP with a paper harness at the edge of a table at a height, from the table suface, of 10\,cm.
+We affixed WISP with a paper harness at the edge of a table at a height, from the table surface, of 10\,cm.
 %
 For distance-controlled experiments we positioned WISP at $d=\{15, 30,
 50\}$\,cm from the exciter antenna.
@@ -39,7 +43,7 @@ For distance-controlled experiments we positioned WISP at $d=\{15, 30,
 %
 To obtain execution time, the software toggled GPIO pins at sections of the code
 under profile, and the Saleae~\cite{saleae} logic analyzer measured
-intervals between edges in the signal. For continous power experiments, the 
+intervals between edges in the signal. For continuous power experiments, the 
 execution time was measured using the clock features in TI Code Composer Studio IDE version 7.1.
 %
 \subsection{Software Benchmarks}
