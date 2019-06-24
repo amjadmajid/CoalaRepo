@@ -1,6 +1,3 @@
-% \end{wrapfigure}
-%
-%Building on top of the existing work, we have selected the most efficient task-based run-time library~\cite{alpaca} and compared \sys against it.
 Our evaluation quantitatively demonstrates that \sys (i) \emph{reduces memory
 protection overhead}, (ii) \emph{improves execution speed} in most cases,
 and (iii) \emph{is able to progress} where static systems suffer from a task non-termination loop. 
@@ -86,7 +83,7 @@ necessary on each protected access is the most critical bottleneck for \sys.
 Fig.~\ref{fig:mem-accesses} breaks down protected memory accesses
 into three categories.
 %
-Each type of protected access incurs a different.
+Each type of protected access incurs a different overhead.
 Accessing the most recently used SRAM page is of the cheapest kind.
 Accessing a different page in SRAM has a slightly higher cost.
 Finally, accessing a page that needs to be swapped in
@@ -109,7 +106,8 @@ program state is protected, the higher the rate of page swaps.
 Having shown in Section~\ref{sec:coala_overhead} that coalescing reduces
 overhead, we now investigate the outcome of this reduction on the total
 execution time. We first investigate different variants of \sys and
-then compare the best variant to Alpaca~\cite{alpaca}.
+then compare the best variant to Alpaca~\cite{alpaca}. Additionally, we compare \sys
+performance running with different energy buffer sizes. 
 
 \paragraph{Speedup with Coalescing.}
 %
@@ -123,9 +121,8 @@ without coalescing (NC).}
 
 \begin{table}[t]%
 
-\caption{\add{Comparison of \sys performance on two different capacitor sizes. We see that \sys optimizes its coalesced task size based on the energy buffer size.
-\textbf{coalesced task} refers to the first coalesced task after a reboot, \textbf{exp. time} shows the experiment duration, and the \textbf{runs} column lists 
-the number of complete runs of the \textit{sort} application during the experiments.}
+\caption{\add{Comparison of \sys performance on two different capacitor sizes using the \textit{sort} application. We see that \sys optimizes its coalesced task size based on the energy buffer size.
+\textbf{Coalesced task} refers to the first coalesced task after a reboot, \textbf{Exp. time} shows the experiment duration, the \textbf{Runs} column lists the number of complete runs of the application during the experiments. \textbf{Run time} is the device collective uptime needed to finish a single iteration of the \textit{sort} application.}
 }
 \label{tab:dif_cap}
 \add{
@@ -133,7 +130,7 @@ the number of complete runs of the \textit{sort} application during the experime
 \begin{center}
 \begin{tabular}{llllll}
   \toprule
-    \textbf{cap. size} ($\mu\text{f}$)& \textbf{exp. time} ($s$)& \textbf{duty cycle} & \textbf{coalesced task} ($ms$)   & \textbf{runs} & \textbf{app run-time} ($ms$) \\
+    \textbf{Cap. size} ($\mu\text{f}$)& \textbf{Exp. time} ($s$)& \textbf{Duty cycle} & \textbf{Coalesced task} ($ms$)   & \textbf{Runs} & \textbf{Run time} ($ms$) \\
         \hline
     47                 &1205             & 12.93\%    & 33                        & 85       & 183      \\
     470                &1205             & 12.79\%    & 88                        & 87       & 177 \\
@@ -165,7 +162,7 @@ This occurs in task decompositions with energy-uniform tasks, where counting
 tasks disregarding their energy consumption provides an equal amount of information
 with a smaller effort.
 %
-In \textit{fft}, tasks are not uniform, and accounting for their different weights
+In \textit{fft}, tasks are not uniform, and accounting for their different weights is
 beneficial. In fact, the lack of task energy awareness is detrimental: with EG
 \textit{fft} runs slower than without any coalescing (NC).
 %
@@ -180,13 +177,6 @@ The speedup is highest for \textit{bc}, \textit{cuckoo}, \textit{dijkstra} and
     \label{fig:runtime}
 \end{figure}
 
-\paragraph{\add{Different Capacitor Sizes}}
-\add{
-Table~\ref{tab:dif_cap} shows how \sys optimizes its Coalescing task size based on the amount of buffered energy.
-We see that \sys scales up its coalesced task size with a bigger energy buffer and vise versa. This allows it to reduce the time-to-completion of the applications. For example, 
-the \textit{sort} run-time is reduced from 183\,$ms$ to 177\,$ms$ when the capacitor is changed from 47\,$\mu$f to 470\,$\mu$f. It should be emphasized that a device with a bigger energy buffer suffers less from power failures (but requires longer charging time). However, as has been measured in Fig.~\ref{fig:overallOverheadBreakdown} and explained in Fig.~\ref{fig:coal_anatomy}, the re-execution penalty for the \textit{sort} application is negligible.  
-}
-
 \paragraph{Benefits of Adaptive Tasks.}
 %
 We now compare \sys's performance to Alpaca~\cite{alpaca}---a
@@ -199,13 +189,20 @@ dependencies throughout their code, particularly involving arrays
 (\textit{dijkstra}, \textit{fft} and \textit{sort}). \sys's VMM
 successfully amortizes the overhead of protecting memory that is accessed in
 such patterns.  In applications without locality among accesses to protected
-variables, including array elements, \sys incurs overhead from memory
+variables \sys incurs overhead from memory
 virtualization that causes its performance to be comparable to (or worse than)
 Alpaca (\textit{ar}, \textit{cuckoo}).
 
 Due to its static progressing behavior, Alpaca was unable to complete the \textit{fft} benchmark on distances larger than 15\,cm\footnote{At distances greater than 15\,cm, energy incoming during
-execution is negligible and stored energy is insufficient to complete some of
+execution is negligible and the stored energy is insufficient to complete some of
 the static tasks.}. This is marked with $\infty$ signs in Fig.~\ref{fig:runtime}. \sys, however, managed to complete \textit{fft} by enabling its task downscaling at 30\,cm and 50\,cm from the energy source.
+
+\paragraph{\add{Different Capacitor Sizes}}
+\add{
+Table~\ref{tab:dif_cap} shows how \sys optimizes its Coalescing task size based on the amount of buffered energy.
+We see that \sys scales up its coalesced task size with a bigger energy buffer and vice versa. This allows it to reduce the time-to-completion of the applications. For example, 
+the \textit{sort} run-time is reduced from 183\,ms to 177\,ms when the capacitor is changed from 47\,$\mu$F to 470\,$\mu$F. It should be emphasized that a device with a bigger energy buffer suffers less from power failures (but requires longer charging time). However, as has been measured in Fig.~\ref{fig:overallOverheadBreakdown} and explained in Fig.~\ref{fig:coal_anatomy}, the re-execution penalty for the \textit{sort} application is negligible.  
+}
  
 Overall, \sys shows better performance than its counterpart, and it is able to overcome the \textit{big task} (i.e. \textit{fft} tasks) problem that the static task-based systems suffer from. 
 

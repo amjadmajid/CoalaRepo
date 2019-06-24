@@ -69,8 +69,7 @@ in Table~\ref{table:coala_api}.
 declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.
 
-\noindent\textit{Task Transitions.} \texttt{NEXT\_TASK} marks the task to be executed at the 
-end of the current one task and it can be invoked along
+\noindent\textit{Task Transitions.} \texttt{NEXT\_TASK} marks the task to be executed after the current one task and it can be invoked along
 any control path to dynamically determine the next task.
 
 \noindent\textit{Protected Variables.} The \texttt{PV} annotation on a
@@ -85,14 +84,14 @@ addition of performing preliminary kernel initializations, including hardware se
 \noindent\textit{Execution.} The programmer passes control to \sys's task scheduler 
 by calling \texttt{RUN} after device initialization. 
 
-First the scheduler updates the coalescing target using the coalescing
+First, the scheduler updates the coalescing target using the coalescing
 strategy.  Second, the scheduler resumes a commit, if one is in progress. Third,
 the scheduler clears the list of dirty shadow pages. The scheduler then 
 sets the program counter to the next task to run, which \sys tracks in  
 non-volatile memory.  
 %
 Before executing the task, \sys checks whether there is a partially committed
-task to resume, which requires \sys to restore volatile state, including the program
+task to resume, which requires \sys to restore the volatile state, including the program
 counter.  
 %
 If there is no in-progress, partially committed task, \sys starts executing and

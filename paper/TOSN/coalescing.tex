@@ -45,7 +45,7 @@ Different coalescing strategies adhere mainly to the template in Algorithm~\ref{
 \paragraph{Energy-Oblivious Coalescing.}
 \label{subsec:energyBlind}
  
-{\em Energy-oblivious} (EO) coalescing strategy treats all tasks as having unity weight and varies the size of the coalescing target linearly. In such a scheme, the number of tasks to coalesce, $C$, increases by a constant $x$ when a coalesced sequence of tasks commits, and decreases by the same constant $x$ when a coalesced sequence of tasks fails to complete, i.e., after a power failure. The characteristic operations of EO are
+{\em Energy-oblivious} (EO) coalescing strategy treats all tasks as having unity weight and varies the size of the coalescing target linearly. In such a scheme, the number of tasks to coalesce, $C$, increases by a constant $x$ when a coalesced sequence of tasks commits and decreases by the same constant $x$ when a coalesced sequence of tasks fails to complete, i.e., after a power failure. The characteristic operations of EO are
 %
 \begin{equation}
 	\begin{split}
@@ -70,7 +70,7 @@ EO reacts slowly to the variation in the energy required to execute different ta
 \begin{figure}
 \centering
 \includegraphics[width=.8\columnwidth]{figures/dif_cap}
-    \caption{\add{Anatomy of \sys coalescing---A snapshot of measured data showing how \sys coalesces static tasks. \sys takes advantage of the guarantee that an energy buffer offers after a reboot: code execution resumes after energy accumulation reaches the operational threshold (a maximum threshold). Thus, \sys starts with a big coalesced task and shrinks it gradually as the risk of a power failure increases.}}
+    \caption{\add{Anatomy of \sys coalescing---A snapshot of measured data showing how \sys coalesces static tasks. \sys takes advantage of the guarantee that an energy buffer offers after a reboot: code execution resumes after energy accumulation reaches the operational threshold (a maximum threshold). Thus, \sys starts with a big coalesced task and shrinks it gradually as the risk of a power failure increases. T stands for task code execution and C for commit or power cut.}}
     \label{fig:coal_anatomy}
 \end{figure}
 
@@ -99,5 +99,5 @@ WEG is characterized the same way as EG (equation (\ref{eq:eg})), except that $f
 %
 
 \add{
-Fig.~\ref{fig:coal_anatomy} shows \sys in action. It shows how \sys coalesces aggressively when the execution is just re-started, taking advantage of the full energy buffer, and how it reduces the coalesced task gradually to minimize the risk of significant progress loss when the device fails. The average measured static task size is $\approx$\,0.28 $ms$ while the commit time (time needed to save the data into the non-volatile memory) averages at  $\approx$\,0.64 $ms$. This highlights the importance of coalescing.
+Fig.~\ref{fig:coal_anatomy} shows a real measurement of \sys coalesced tasks. It shows how \sys coalesces aggressively when the execution is just re-started, taking advantage of the full energy buffer, and how it reduces the coalesced task gradually to minimize the risk of significant progress loss when the device fails. The average measured static task size is $\approx$\,0.28\,ms while the commit time (time needed to save the data into the non-volatile memory) averages at  $\approx$\,0.64\,ms. This highlights the importance of coalescing.
 }
