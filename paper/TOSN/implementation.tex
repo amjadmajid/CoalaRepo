@@ -32,38 +32,6 @@ in Table~\ref{table:coala_api}.
 \end{center}
 \end{minipage}
 \end{table}%
-%%
-%\begin{table}
-%\footnotesize
-%\centering
-%\begin{tabular}{| r | p{0.7\columnwidth} |}
-%	\hline
-%	{Method} & {Arguments} \\
-%	\hline\hline
-%	\texttt{INIT}($t$) & $t \in \mathbf{T}$: scheduled task on first boot \\
-%	\hline
-%	\texttt{RUN}() & --- \\
-%	\hline
-%	\texttt{TASK}($t$, $w_t$) & $t \in \mathbf{T}$: task name, $w_t$: weight of task $t$ \\
-%	\hline
-%	\texttt{NEXT\_TASK}($t$) & $t \in \mathbf{T}$ : task to be run next \\
-%	\hline
-%	\texttt{PV}($p$, $v$ [, $s$]) & $p$: type, $v \in \mathbf{V}$: name, $s$: array size \\
-%	\hline
-%	$u$ := \texttt{RP}($v$) & $v \in \mathbf{V}$: protected variable to read, $u$: dest.\ operand \\
-%	\hline	
-%	\texttt{WP}($v$) := $u$ &  $v \in \mathbf{V}$: protected variable to write, $u$: source operand \\
-%	\hline
-%	\texttt{SM}($p$, $m$ [, $s$]) & $p$: type, $m$: name, $s$: array size \\
-%	\hline
-%	\texttt{DISABLE\_PC}() & --- \\
-%	\hline
-%	\texttt{ENABLE\_PC}() & --- \\
-%	\hline
-%\end{tabular}
-%\caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
-%\label{table:coala_api}
-%\end{table}
 
 \noindent\textit{New Tasks.} The \texttt{TASK} annotation on a function
 declaration statically allocates a non-volatile constant variable holding a
@@ -117,8 +85,6 @@ The effectiveness of the WEG hinges on correctly identifying the weight of each 
 %
 \paragraph{Timer Strategy.}
 After identifying a task as likely non-terminating, \sys must decide when during the task's execution to partially commit the task's state. \sys sets a timer at the start of the likely non-terminating task, initializing it to a very large value (e.g., an estimate of the maximum execution time using the device's energy buffer). If the timer expires before power fails, \sys partially commits, retaining  the timer value to use for future partial commits. If the timer does not expire before power fails, \sys halves the timer and tries again. The exponential decrease of the timer value converges rapidly to a usable one.
-%
-%Partial commit relies on the existence of a hardware timer, which is a very common feature in a typical MCU and consumes very little energy (i.e., $\approx$3\,$\mu$A/MHz~\cite{msp430datasheet}).  
 
  \paragraph{Partial Commit and Task Atomicity.}
  Some applications may prevent

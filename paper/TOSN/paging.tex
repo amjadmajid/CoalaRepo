@@ -16,7 +16,6 @@ It populates the \texttt{working} buffer with the privatized pages from non-vola
 When a coalesced task completes, the VMM ensures that {\em dirty}, i.e., modified, pages are committed to FRAM and visible to subsequent tasks.
 If a power failure interrupts a task, all temporary modifications to pages in \texttt{working} (and \texttt{\underline{shadow}}) occurred after the last commit are discarded in order to keep data consistency.
 On a commit, the VMM atomically copies, through a two-phase commit, all dirty pages back into their location in the non-volatile memory.
-% SRAM has a limited size and there is an extended working memory containing {\em shadow pages} in the larger FRAM. A shadow page stores the data from an updated page that needs to be committed back to non-volatile memory, but that exceeded the size of the volatile working memory.
 
 \begin{figure}
     \centering
@@ -54,7 +53,7 @@ After address translation (Fig.~\ref{figure:mem-man}, Step 6), a task accesses t
 
 When accessing a protected variable with \texttt{RP} or \texttt{WP}, the memory manager first searches the variable's page in the \texttt{working} buffer (Fig.~\ref{figure:mem-man}, Step 1).
 If the page is not found there, a page fault is incurred and a new page needs to be swapped in.
-If the \texttt{working} buffer is full, a page fault on a memory access requires the VMM to swap out one of the pages in the \texttt{working} buffer (a \emph{victim page}) preserving updates made to that page.
+If the \texttt{working} buffer is full, a page fault on memory access requires the VMM to swap out one of the pages in the \texttt{working} buffer (a \emph{victim page}) preserving updates made to that page.
 If a task modified any byte in the victim page (i.e., using \texttt{WP}), then the page is dirty and its changes have to be persisted to non-volatile memory (Fig.~\ref{figure:mem-man}, Step 2). If the accessed page was previously modified and swapped out since the last power failure, the most recent version of the page is in {\tt \underline{shadow}} (Step 3), otherwise it has to be retrieved from {\tt \underline{private}} (Step 4). Finally, the page is copied to the volatile buffer (Step 5).
 
 \subsection{Atomic Two-Phase Commit of Dirty Pages}

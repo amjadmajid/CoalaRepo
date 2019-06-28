@@ -82,9 +82,9 @@ Phone: +31 61 695 5224\\
 Dear Editor,\\
 
 We would like to thank for handling our submission and providing valuable review results. 
-We are also grateful to the reviewers for their substantial effort spent for evaluating our work. \\
+We are also grateful to the reviewers for their substantial effort spent on evaluating our work. \\
 
-With this letter we address all comments of the reviewers and point to the modified sections of our revised paper. \\
+With this letter, we address all comments of the reviewers and point to the modified sections of our revised paper. \\
 
 With best regards, \\
 
@@ -97,7 +97,7 @@ in the name of all authors---Amjad Yousef Majid
 \referee{In section 2.3, authors mention "these models do not rely on capturing an expensive checkpoint, they are usually faster than the checkpoint-based solution [12, 42]". I don't fully agree with this. It depends on the underlying checkpointing mechanism. If it copies complete stack every time during the checkpoint then yes it's expensive. But checkpointing mechanism like incremental checkpointing [2] (also see the paper by Faycal Ait Aouda), where you only update modified variables, is much better in terms of energy consumption (even better than the task-based solution in my opinion). Also, [12] and [42] are not checkpoint-based solutions.}
 
 \response{As indicated by the reviewer, [12, 42] are not checkpoint systems. They are task-based systems and their results show that task-based systems are faster than checkpoint-based ones. Therefore, we restated their claim and provided the supporting references, which are [12, 42].\\
- Coala addresses deficiencies in the \emph{static} task-based systems and provides more efficient alternative. Therefore, we compared its performance against the state-of-the-art task-based runtime.}
+ Coala addresses deficiencies in the \emph{static} task-based systems and provides a more efficient alternative. Therefore, we compared its performance against the state-of-the-art task-based runtime.}
 
 \referee{In section 7.1, authors mention "produce a high number of complete runs". Please mention the exact number iterations. Also please mention the capacitor size for the WIPS 5.1.}
 
@@ -105,7 +105,7 @@ in the name of all authors---Amjad Yousef Majid
 
 \referee{In figure 10, it is not very clear how authors normalized the values for Coala in case of fft for 30cm and 50cm. Also in the text authors state that "This is marked with $\infty$ signs in Fig. 9", its figure 10. }	
 
-\response{We normalized these two special cases on 1 second. This infromation is added to Section 8.2; additionally, the figure reference is corrected. }
+\response{We normalized these two special cases on 1 second. This information is added to Section 8.2; additionally, the figure reference is corrected. }
 
 \referee{However, I was hoping to see more evaluations to understand the effect of capacitor size. In the introduction, authors state that "Coala is the only system that eliminates restructuring and re-compilation of applications considering device’s energy buffer". However, in the evaluation, I didn't find any graph related to the performance of Coala w.r.t to different capacitor sizes.}
 
@@ -145,7 +145,7 @@ In Section 9 we explained the core difference between our timer-based approach a
 
 \begin{editor}
 \referee{}
-\response{We have added a new figure to the paper, i.e. Fig. 5. The figure's sole purpose is to aid explaining the concept of \textit{task coalescing}.
+\response{We have added a new figure to the paper, i.e. Fig. 5. The figure's sole purpose is to aid in explaining the concept of \textit{task coalescing}.
 We hope that this modification further helps in understanding the core contribution of our paper.}
 \end{editor}
 
