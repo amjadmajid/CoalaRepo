@@ -121,11 +121,10 @@ without coalescing (NC).}
 
 \begin{table}[t]%
 
-\caption{\add{Comparison of \sys performance running the \textit{sort} application on two different capacitor sizes. We see that \sys optimizes its coalesced task size based on the energy buffer size.
+\caption{Comparison of \sys performance running the \textit{sort} application on two different capacitor sizes. We see that \sys optimizes its coalesced task size based on the energy buffer size.
 \textbf{Coalesced task} refers to the first coalesced task after a reboot, \textbf{Exp. time} shows the experiment duration, the \textbf{Runs} column lists the number of complete runs of the application during the experiments. \textbf{Run time} is the device collective uptime needed to finish a single iteration of the \textit{sort} application.}
-}
 \label{tab:dif_cap}
-\add{
+
 \begin{minipage}{\columnwidth}
 \begin{center}
 \begin{tabular}{llllll}
@@ -138,7 +137,6 @@ without coalescing (NC).}
 \end{tabular}
 \end{center}
 \end{minipage}  
-}
 \end{table}%
 
 Fig.~\ref{fig:coalescing} shows \sys's run time of two coalescing
@@ -182,9 +180,9 @@ The speedup is highest for \textit{bc}, \textit{cuckoo}, \textit{dijkstra} and
 We now compare \sys's performance to Alpaca~\cite{alpaca}---a
 \emph{non-adaptive} task-based system with tasks fixed at compile-time.
 Fig.~\ref{fig:runtime} shows the average execution time of each
-application for \sys and Alpaca, \add{normalized to the latter or, when not possible, to one second}.
+application for \sys and Alpaca, normalized to the latter or, when not possible, to one second.
 \sys provides a performance benefit compared to Alpaca for most
-applications. \add{For example, it is 54\% faster than Alpaca when executing the \textit{bc} application. In general,}  the speedup is greatest for applications with repeated WAR
+applications. For example, it is 54\% faster than Alpaca when executing the \textit{bc} application. In general, the speedup is greatest for applications with repeated WAR
 dependencies throughout their code, particularly involving arrays
 (\textit{dijkstra}, \textit{fft} and \textit{sort}). \sys's VMM
 successfully amortizes the overhead of protecting memory that is accessed in
@@ -197,12 +195,11 @@ Due to its static progressing behavior, Alpaca was unable to complete the \texti
 execution is negligible and the stored energy is insufficient to complete some of
 the static tasks.}. This is marked with $\infty$ signs in Fig.~\ref{fig:runtime}. \sys, however, managed to complete \textit{fft} by enabling its task downscaling at 30\,cm and 50\,cm from the energy source.
 
-\paragraph{\add{Different Capacitor Sizes}}
-\add{
+\paragraph{Different Capacitor Sizes}
 Table~\ref{tab:dif_cap} shows how \sys optimizes its Coalescing task size based on the amount of buffered energy.
 We see that \sys scales up its coalesced task size with a bigger energy buffer and vice versa. This allows it to reduce the time-to-completion of the applications. For example, 
 the \textit{sort} run-time is reduced from 183\,ms to 177\,ms when the capacitor is changed from 47\,$\mu$F to 470\,$\mu$F. It should be emphasized that a device with a bigger energy buffer suffers less from power failures (but requires longer charging time). However, as has been measured in Fig.~\ref{fig:overallOverheadBreakdown} and explained in Fig.~\ref{fig:coal_anatomy}, the re-execution penalty for the \textit{sort} application is negligible.  
-}
+
  
 Overall, \sys shows better performance than its counterpart, and it is able to overcome the \textit{big task} (i.e. \textit{fft} tasks) problem that the static task-based systems suffer from. 
 

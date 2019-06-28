@@ -4,19 +4,17 @@ We prototype \sys and use its API to implement a set of benchmark applications r
 
 \subsection{Experimental Setup}
 \label{sec:results_hardware_software}
-\add{
+%
 We used three different setups to evaluate \sys: 
 (i) an RF-powered energy-harvesting device, WISP\,5.1~\cite{wisp5,wisp}, with a fixed capacitor size of 47\,$\mu$F; 
 (ii) an MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad} powered by a BQ25570~\cite{BQ25570EVM-206_website} solar power harvester that is connected to an IXYS SLMD121H04L solar cell~\cite{SLMD121H04L_website} for experimenting with different energy buffers; and
 (iii) an MSP-EXP430FR5969 launchpad~\cite{MSP-EXP430FR5969_launchpad} that is continuously powered.
-} 
 
-\add{
 Every benchmark used in Section~\ref{sec:evaluation} was run repeatedly on
 each platform for a few minutes to ensure capturing a diverse power 
 trace. The exact number of iterations depends on the ambient power intensity and the application itself.
 In our experiments, the number of complete runs ranges from 4 to 125.
-}
+
 
 WISP contains the MSP430FR5969~\cite{wolverine} MCU with 64\,kB of
 non-volatile (FRAM) memory and 2\,kB of volatile (SRAM) memory and was
