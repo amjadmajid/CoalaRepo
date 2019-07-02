@@ -38,7 +38,7 @@ However, any gain from a reduced re-execution penalty is canceled out by
 the increased commit overhead that is incurred at the end of each static
 task.
 %
-Across all benchmarks, all coalescing strategies reduce more commit overhead
+Across all benchmarks, will all coalescing strategies \sys reduces more commit overhead
 than the re-execution overhead they add.
 %
 This net overhead reduction is greatest in EG and WEG strategies compared
@@ -129,7 +129,7 @@ without coalescing (NC).}
 \begin{center}
 \begin{tabular}{llllll}
   \toprule
-    \textbf{Cap. size} ($\mu\text{f}$)& \textbf{Exp. time} ($s$)& \textbf{Duty cycle} & \textbf{Coalesced task} ($ms$)   & \textbf{Runs} & \textbf{Run time} ($ms$) \\
+    \textbf{Cap. size} ($\mu\text{f}$)& \textbf{Exp. time} ($s$)& \textbf{on/off cycle} & \textbf{Coalesced task} ($ms$)   & \textbf{Runs} & \textbf{Run time} ($ms$) \\
         \hline
     47                 &1205             & 12.93\%    & 33                        & 85       & 183      \\
     470                &1205             & 12.79\%    & 88                        & 87       & 177 \\
@@ -191,14 +191,20 @@ variables \sys incurs overhead from memory
 virtualization that causes its performance to be comparable to (or worse than)
 Alpaca (\textit{ar}, \textit{cuckoo}).
 
-Due to its static progressing behavior, Alpaca was unable to complete the \textit{fft} benchmark on distances larger than 15\,cm\footnote{At distances greater than 15\,cm, energy incoming during
-execution is negligible and the stored energy is insufficient to complete some of
-the static tasks.}. This is marked with $\infty$ signs in Fig.~\ref{fig:runtime}. \sys, however, managed to complete \textit{fft} by enabling its task downscaling at 30\,cm and 50\,cm from the energy source.
+Due to its static progressing behavior, Alpaca was unable to complete the \textit{fft} benchmark on distances larger than 15\,cm
+% \footnote{At distances greater than 15\,cm, energy incoming during
+% execution is negligible and the stored energy is insufficient to complete some of the static tasks.}. 
+\footnote{At distances less than 15\,cm the total amount of energy available for task execution includes significant amount of harvested-while-executing energy in addition to the stored energy.}.
+
+This is marked with $\infty$ signs in Fig.~\ref{fig:runtime}. \sys, however, managed to complete \textit{fft} by enabling its task downscaling at 30\,cm and 50\,cm from the energy source.
 
 \paragraph{Different Capacitor Sizes}
-Table~\ref{tab:dif_cap} shows how \sys optimizes its Coalescing task size based on the amount of buffered energy.
-We see that \sys scales up its coalesced task size with a bigger energy buffer and vice versa. This allows it to reduce the time-to-completion of the applications. For example, 
-the \textit{sort} run-time is reduced from 183\,ms to 177\,ms when the capacitor is changed from 47\,$\mu$F to 470\,$\mu$F. It should be emphasized that a device with a bigger energy buffer suffers less from power failures (but requires longer charging time). However, as has been measured in Fig.~\ref{fig:overallOverheadBreakdown} and explained in Fig.~\ref{fig:coal_anatomy}, the re-execution penalty for the \textit{sort} application is negligible.  
+Table~\ref{tab:dif_cap} shows how \sys optimizes its Coalescing task size based on the amount of buffered energy at runtime. This means that applications implemented in \sys are portable across devices with different capacitor sizes without recompilation; they are also more resilient to degradation in capacitor size due to temperature and device lifetime. 
+
+We see that \sys scales up its coalesced task size with a bigger energy buffer and vice versa. 
+This allows it to reduce the time-to-completion of the applications. For example, 
+the \textit{sort} run-time is reduced from 183\,ms to 177\,ms when the capacitor is changed from 47\,$\mu$F to 470\,$\mu$F. It should be emphasized that a device with a bigger energy buffer suffers less from power failures (but requires longer charging time). 
+%However, as has been measured in Fig.~\ref{fig:overallOverheadBreakdown} and explained in Fig.~\ref{fig:coal_anatomy}, the re-execution penalty for the \textit{sort} application is negligible.  
 
  
 Overall, \sys shows better performance than its counterpart, and it is able to overcome the \textit{big task} (i.e. \textit{fft} tasks) problem that the static task-based systems suffer from. 

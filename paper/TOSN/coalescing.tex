@@ -20,12 +20,12 @@ However, it must also be  {\em conservative} enough, coalescing only as many tas
         \State $C \leftarrow $ \Call{$f_\text{reboot}$}{$z$} \Comment{Update coalescing target by reboot update function}
         \State $H \gets 0$ \Comment{Initialize history}
         \While{$\texttt{true}$}       
-	        \State $ i \gets 0$
+	        \State $ j \gets 0$
 	        %
-	        \While{$ i <= C$}
-		        \State \Call{execute\_task}{$T_\texttt{i}$}
+	        \While{$ j \leq C$}
+		        \State \Call{execute\_task}{$T_\texttt{i}$} \Comment{$T_\texttt{i}$ is the $i$th task executed since the last power failure}
 		        \State $W \leftarrow $ \Call{$f_\text{weight}$}{$T_\text{i}$} \Comment{Assign new task-dependent weight}
-		        \State $i \gets i + W$
+		        \State $j \gets j + W$
 				\State $H \gets H + W$
 	        \EndWhile
 	        %
@@ -45,7 +45,7 @@ Different coalescing strategies adhere mainly to the template in Algorithm~\ref{
 \paragraph{Energy-Oblivious Coalescing.}
 \label{subsec:energyBlind}
  
-{\em Energy-oblivious} (EO) coalescing strategy treats all tasks as having unity weight and varies the size of the coalescing target linearly. In such a scheme, the number of tasks to coalesce, $C$, increases by a constant $x$ when a coalesced sequence of tasks commits and decreases by the same constant $x$ when a coalesced sequence of tasks fails to complete, i.e., after a power failure. The characteristic operations of EO are
+{\em Energy-Oblivious} (EO) coalescing strategy treats all tasks as having unity weight and varies the size of the coalescing target linearly. In such a scheme, the number of tasks to coalesce, $C$, increases by a constant $x$ when a coalesced sequence of tasks commits and decreases by the same constant $x$ when a coalesced sequence of tasks fails to complete, i.e., after a power failure. The characteristic operations of EO are
 %
 \begin{equation}
 	\begin{split}
@@ -56,7 +56,7 @@ Different coalescing strategies adhere mainly to the template in Algorithm~\ref{
 	\label{eq:eo}
 \end{equation}
 %
-EO reacts slowly to the variation in the energy required to execute different tasks and to the variation in the effective quantum of energy available to the device. With the successful commit of each coalesced task sequence, $C$ increases. Eventually, the target may be too high and only a coalesced task composed of a few units will commit without interruption by a power failure. The strategy then linearly decreases $C$, eventually reaching a value that allows completion. A key limitation of this algorithm lies in the equality of the target decrease in $f_\text{reboot}$ and the increase in $f_\text{commit}$. Let us assume $x=1$. If, after $k$ successful commits, the target must decrease to its original value $C-k$ due to an energy drop, EO requires $k$ successive power failures, before being able to progress.
+EO reacts slowly to the variation in the energy required to execute different tasks and to the variation in the effective quantum of energy available to the device. With the successful commit of each coalesced task sequence, $C$ increases. Eventually, the target may be too high and only a coalesced task composed of a few units will commit without interruption by a power failure. The strategy then linearly decreases $C$, eventually reaching a value that allows completion. A key limitation of this algorithm lies in the equality of the target decrease in $f_\text{reboot}$ and the increase in $f_\text{commit}$. Let us assume $x=1$. If, after $k$ successful commits, the target must decrease to its original value $C-k$ due to an energy drop, EO requires $k$ successive reboots to progress.
 
 \paragraph{Energy-Guided Coalescing.}
 \label{subsec:energyAware}
@@ -74,7 +74,7 @@ EO reacts slowly to the variation in the energy required to execute different ta
     \label{fig:coal_anatomy}
 \end{figure}
 
-The \emph{Energy-Guided} (EG) coalescing strategy adapts its coalescing target more quickly, addressing a key limitation of the EO, to adhere to changes in energy conditions. It uses its recent execution history, H, to estimate energy availability and alters its target accordingly. The EG algorithm is characterized by the following functions
+The \emph{Energy-Guided} (EG) coalescing strategy adapts its coalescing target more quickly, to adhere to changes in energy conditions,  addressing a key limitation of the EO. It uses its recent execution history, H, to estimate energy availability and alters its target accordingly. The EG algorithm is characterized by the following functions
 %
 \begin{equation}
 	\begin{split}

@@ -7,8 +7,7 @@ Coala's API adds only a few syntactic constructs to a C-based language, summariz
 in Table~\ref{table:coala_api}.
 %
 \begin{table}%
-\caption{Simulation Configuration}
-\label{tab:one}
+\caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
 \begin{minipage}{\columnwidth}
 \begin{center}
 \begin{tabular}{ll}
@@ -27,7 +26,6 @@ in Table~\ref{table:coala_api}.
 	\texttt{ENABLE\_PC}() & --- \\
   \bottomrule
 \end{tabular}
-\caption{API summary; $\mathbf{T}$: set of all tasks, $\mathbf{V}$: set of all protected variables, $[, s]$: optional argument.}
 \label{table:coala_api}
 \end{center}
 \end{minipage}
@@ -37,13 +35,12 @@ in Table~\ref{table:coala_api}.
 declaration statically allocates a non-volatile constant variable holding a
 task's weight and declares that the function is a task.
 
-\noindent\textit{Task Transitions.} \texttt{NEXT\_TASK} marks the task to be executed after the current one task and it can be invoked along
+\noindent\textit{Task Transitions.} \texttt{NEXT\_TASK} marks the task to be executed after the current one and it can be invoked along
 any control path to dynamically determine the next task.
 
 \noindent\textit{Protected Variables.} The \texttt{PV} annotation on a
 variable statically allocates a protected non-volatile variable. The
-variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at
-run-time to ensure correct operation.
+variable must then be accessed with the \texttt{RP} and \texttt{WP} API methods at run-time to ensure correct operation. The \texttt{SM} annotation is used to align C structure data type within a page. 
 
 \noindent\textit{Initialization.} The behavior of the API method
 \texttt{INIT} is very similar to \texttt{NEXT\_TASK}, with the
@@ -51,11 +48,14 @@ addition of performing preliminary kernel initializations, including hardware se
 
 \noindent\textit{Execution.} The programmer passes control to \sys's task scheduler 
 by calling \texttt{RUN} after device initialization. 
+\noindent\textit{Partial Commit.} The \texttt{DISABLE\_PC}() and \texttt{ENABLE\_PC}() allow a programmer to disable partial commit around certain code.
 
-First, the scheduler updates the coalescing target using the coalescing
-strategy.  Second, the scheduler resumes a commit, if one is in progress. Third,
-the scheduler clears the list of dirty shadow pages. The scheduler then 
-sets the program counter to the next task to run, which \sys tracks in  
+On a reboot, \sys's scheduler does a number of system level operations before executing a tast. 
+ First, it updates the coalescing target according to the applied coalescing
+strategy. Then, it finishes any interrupted commit and clears the list of dirty shasow pages.
+% Second, the scheduler resumes a commit, if one is in progress. 
+% Third, the scheduler clears the list of dirty shadow pages. 
+After that, the scheduler sets the program counter to the next task to run, which \sys tracks in  
 non-volatile memory.  
 %
 Before executing the task, \sys checks whether there is a partially committed
@@ -115,11 +115,12 @@ Pages must be aligned to an $S$-byte boundary for efficient memory access.
 %
 To preserve alignment, when typedef'ing a C structure for protected variables, the programmer has to use the API method \texttt{SM} on all members of the structure (only when defining the structure).
 %
-We experimented with 32-, 64-, 128- and 256\,B pages, an 8\,KB non-volatile \texttt{\underline{shadow}} buffer and
-an 8\,KB non-volatile \texttt{\underline{private}} buffer, and a \texttt{working} buffer
-of 1\,KB.
 
 \paragraph{Page Eviction.}
 When a page in \texttt{working} has to be swapped out to make room for a newly requested one, an eviction policy has to be chosen.
 While we opted for the simplicity of FIFO, any other replacement policy, such as Least Recently Used, could work in its place.
+
+We experimented with 32-, 64-, 128- and 256\,B pages, an 8\,KB non-volatile \texttt{\underline{shadow}} buffer and an 8\,KB non-volatile \texttt{\underline{private}} buffer, and a \texttt{working} buffer
+of 1\,KB.
+
 

@@ -5,14 +5,16 @@
 	\label{figure:coalescedWar}
 \end{figure}
 
-Resolving WAR (Write-After-Read) dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent when tasks are coalesced. Not handling WAR dependencies on a coalesced task scope introduces a new problem, which we denote as \emph{task coalescing-induced WAR dependency}. This problem is illustrated in Fig.~\ref{figure:coalescedWar}. Therefore, \sys implements novel {\em Virtual Memory Manager} (VMM) which enables task coalescing guaranteeing data integrity, which is at the same time efficient.
+Resolving WAR (Write-After-Read) dependencies by considering static task boundaries is not sufficient to keep non-volatile memory consistent when tasks are coalesced. Not handling WAR dependencies on a coalesced task scope introduces a new problem, which we denote as \emph{task coalescing-induced WAR dependency}. This problem is illustrated in Fig.~\ref{figure:coalescedWar}. Therefore, \sys implements novel {\em Virtual Memory Manager} (VMM) that enables safe task coalescing and ensures efficient data manipulation.
 
 VMM overview is given in Fig.~\ref{figure:mem-man}.
 VMM abstracts the physical address space of the non-volatile memory (FRAM) and divides it into \texttt{\underline{private}} and \texttt{\underline{shadow}} (underlined locations are non-volatile) buffers, and each buffer is divided into pages.
-\texttt{\underline{private}} holds the consistent version of pages after each commit (and on a reboot), while \texttt{\underline{shadow}} serves as support during the execution of coalesced tasks.
+\texttt{\underline{private}} holds the consistent version of pages after each commit (and on a reboot), while \texttt{\underline{shadow}} enables atomic two-phase commit: it allows \sys to ensure a persistent and consistent set of non-volatile pages before copying them to \texttt{\underline{private}} (Section~\ref{sec:two_phase_commit}).
+
 The VMM prohibits applications from directly accessing these buffers.
-Instead, it redirects any request to the \texttt{working} buffer located in the volatile memory (SRAM), which has a lower latency and energy cost to access than FRAM.
-It populates the \texttt{working} buffer with the privatized pages from non-volatile memory requested by tasks.
+Instead, it redirects any request to the \texttt{working} buffer: a relatively small buffer located in the volatile memory (SRAM), which has a lower latency and energy cost to access than FRAM.
+It populates the \texttt{working} buffer with the privatized pages from non-volatile memory requested by tasks. With the help of \texttt{\underline{shadow}}, the \texttt{working} buffer can serve more pages than its own capacity.  
+
 When a coalesced task completes, the VMM ensures that {\em dirty}, i.e., modified, pages are committed to FRAM and visible to subsequent tasks.
 If a power failure interrupts a task, all temporary modifications to pages in \texttt{working} (and \texttt{\underline{shadow}}) occurred after the last commit are discarded in order to keep data consistency.
 On a commit, the VMM atomically copies, through a two-phase commit, all dirty pages back into their location in the non-volatile memory.
@@ -57,6 +59,7 @@ If the \texttt{working} buffer is full, a page fault on memory access requires t
 If a task modified any byte in the victim page (i.e., using \texttt{WP}), then the page is dirty and its changes have to be persisted to non-volatile memory (Fig.~\ref{figure:mem-man}, Step 2). If the accessed page was previously modified and swapped out since the last power failure, the most recent version of the page is in {\tt \underline{shadow}} (Step 3), otherwise it has to be retrieved from {\tt \underline{private}} (Step 4). Finally, the page is copied to the volatile buffer (Step 5).
 
 \subsection{Atomic Two-Phase Commit of Dirty Pages}
+\label{sec:two_phase_commit}
 
 When the last task in a sequence of coalesced tasks completes, \sys must commit \emph{all} dirty pages in \texttt{working} and \texttt{\underline{shadow}}, copying them back to their original locations in \texttt{\underline{private}}. 
 
@@ -66,7 +69,7 @@ phase, the commit process safely resumes on reboot.  The second phase depends on
 \sys's commit is efficient because it maintains an index of dirty pages instead of iterating through all potentially dirty pages to check their state.
 Another source of efficiency lies in the second phase of the commit:
 % \sys's implementation is also efficient because
-the VMM does not copy pages from \texttt{\underline{shadow}} to \texttt{\underline{private}}, instead it swaps pointers in an indirection table that maintains the pages as a double buffer.
+the VMM does not copy page content from \texttt{\underline{shadow}} to \texttt{\underline{private}}, instead it swaps pointers in an indirection table that maintains the pages as a double buffer.
 
 \paragraph{Memory Consistency.}
 \sys's paging mechanism ensures that a task only ever executes using consistent protected data. During task execution, modifications to protected data do not affect the \texttt{\underline{private}} buffer, because a task reads and writes the volatile \texttt{working} buffer only, and modified pages are kept in \texttt{\underline{shadow}} until commit. A power failure erases the contents of the \texttt{working} buffer, preventing a re-executing task from observing updates from a previous execution attempt. Clearing \texttt{\underline{shadowCount}} as part of the second phase commit (Line 14) ensures that all accesses to protected variables in subsequent tasks correctly access their consistent memory locations in \texttt{\underline{private}}. This solves the coalescing-induced WAR dependency problem (see Fig.~\ref{figure:coalescedWar} again).
@@ -76,12 +79,15 @@ the VMM does not copy pages from \texttt{\underline{shadow}} to \texttt{\underli
 	\label{algo:commit}
 	\small
 	\begin{algorithmic}[1]
-        \Procedure{CommitPhase1}{} \Comment{On last coalesced task}
+        \Procedure{CommitPhase1}{} \Comment{On completion of a coalesced task}
             \For {$i \in 0..|\texttt{working}|-1$}
-                \State $t \gets \Call{Tag}{\texttt{working}[i]}$
-                \State $\texttt{\underline{shadow}}[\Call{Tag}{\texttt{working}[i]}] \xleftarrow{\text{DMA}} \texttt{working}[i]$
-                \State $\texttt{\underline{shadowList}}[\texttt{\underline{shadowCount}}] \gets t$
-                \State $\texttt{\underline{shadowCount}} \gets \texttt{\underline{shadowCount}} + 1$
+                \State $f_\text{dirty}, t \gets \Call{TagFlag}{\texttt{working}[i]}$
+                % \State $f_\text{dirty} \gets \Call{DirtyFlag}{t}$
+                \If {$f_\text{dirty}$}   \Comment{Is the page content modified?}
+                    \State $\texttt{\underline{shadow}}[\Call{Tag}{\texttt{working}[i]}] \xleftarrow{\text{DMA}} \texttt{working}[i]$
+                    \State $\texttt{\underline{shadowList}}[\texttt{\underline{shadowCount}}] \gets t$
+                    \State $\texttt{\underline{shadowCount}} \gets \texttt{\underline{shadowCount}} + 1$
+                \EndIf
             \EndFor
             \State \Call{CommitPhase2}{}
         \EndProcedure
@@ -89,7 +95,7 @@ the VMM does not copy pages from \texttt{\underline{shadow}} to \texttt{\underli
             \State $\texttt{\underline{committing}} \gets \textbf{true}$
             \While{\texttt{\underline{commitIndex}} < \texttt{\underline{shadowCount}}}
                 \State $t \gets \texttt{\underline{shadowList}}[\texttt{\underline{commitIndex}}]$
-                \State \Call{commitToPrivate}{\texttt{\underline{shadow}}[t]}
+                \State \Call{commitToPrivate}{\texttt{\underline{shadow}}[t]} \Comment{Copy \texttt{\underline{shadow}} to \texttt{\underline{private}} by swapping their pointers}
                 \State $\texttt{\underline{commitIndex}} \gets \texttt{\underline{commitIndex}} + 1$
             \EndWhile
             \State $\texttt{\underline{shadowCount}} \gets 0$
@@ -99,7 +105,7 @@ the VMM does not copy pages from \texttt{\underline{shadow}} to \texttt{\underli
         \Procedure{OnBoot}{} \Comment{Invoked on every boot}
             \If { \texttt{\underline{committing}} } \Call{CommitPhase2}{}
             \EndIf
-            \State $\texttt{\underline{shadowCount}} \gets 0$, $i_\text{victim} \gets 0$
+            \State $\texttt{\underline{shadowCount}} \gets 0$ %, $i_\text{victim} \gets 0$
         \EndProcedure
 	\end{algorithmic}
 \end{algorithm}
