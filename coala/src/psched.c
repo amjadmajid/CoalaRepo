@@ -1,17 +1,17 @@
 #include <psched.h>
 #include <msp430fr5969.h>
-//#include <mspDebugger.h>
+#include <mspDebugger.h>
 
 // PLEASE SELECT AN ALGORITHIN
-#define NO_COALESCING 1
+#define NO_COALESCING 0
 #define SLO_CHNG_ALGO 0
-#define FST_CHNG_ALGO 0
+#define FST_CHNG_ALGO 1
 #define FST_CHNG_TSK_AWAR_ALGO 0
 
 /***********************************
  *    Common Debugging flags
  **********************************/
-#define COAL_TSK_SIZ_SEND 0
+#define COAL_TSK_SIZ_SEND 1
 #define NUM_PWR_INTR__MEM_DUMP 0
 #define __numbPwrInt (*(uint16_t*)(0x1990))
 #define __PI_overflow (*(uint16_t*)(0x1992))
@@ -324,6 +324,8 @@ void os_scheduler()
     while (1)
     {
 
+//        //For Testing MUST Be removed
+//        __coalTaskCntr = 8;
 
 #if COAL_TSK_SIZ_SEND
         uart_sendHex8(__coalTaskCntr);

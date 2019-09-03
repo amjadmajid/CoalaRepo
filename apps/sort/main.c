@@ -4,8 +4,8 @@
 #include "mspProfiler.h"
 #include "mspDebugger.h"
 
-#define TSK_SIZ 1
-//#define RAISE_PIN 1
+//#define TSK_SIZ 1
+#define RAISE_PIN 1
 //#define PWR_INT_SIM 1
 
 /*
@@ -69,7 +69,6 @@ void task_inner_loop()
 
     if( RP(j) < (arr_len-1) ) os_jump(0);
 
-
     WP( arr[RP(i)] ) = arr_i;
     WP( arr[RP(j)] ) = arr_j;
     WP(j)++;
@@ -107,11 +106,8 @@ void task_finish()
 #endif
 
 #if RAISE_PIN
-    if(protect){
     P3OUT |=BIT5;
     P3OUT &=~BIT5;
-    }
-    protect=0;
 #endif
 
     unsigned cct;
@@ -130,7 +126,7 @@ void task_finish()
 
 //cp_sendRes("\sort_100 \0");
 
-while(1);
+//while(1);
 }
 
 void init()
@@ -139,12 +135,11 @@ void init()
   // Disable the GPIO power-on default high-impedance mode to activate previously configured port settings.
   PM5CTL0 &= ~LOCKLPM5;       // Lock LPM5.
 
-#if RAISE_PIN
   P3OUT &=~BIT5;
   P3DIR |=BIT5;
-#endif
 
-#if 1
+
+#if 0
     CSCTL0_H = CSKEY >> 8;                // Unlock CS registers
     //    CSCTL1 = DCOFSEL_4 |  DCORSEL;                   // Set DCO to 16MHz
     CSCTL1 = DCOFSEL_6;                   // Set DCO to 8MHz
@@ -158,15 +153,15 @@ void init()
     cp_init();
 #endif
 
-//    uart_init();
-
-#ifdef LOG_INFO
     uart_init();
-#endif
 
-#ifdef AUTO_RST
-    mr_auto_rand_reseter(13000); // every 12 msec the MCU will be reseted
-#endif
+//#ifdef LOG_INFO
+//    uart_init();
+//#endif
+
+//#ifdef AUTO_RST
+    mr_auto_rand_reseter(20000); // every 12 msec the MCU will be reseted
+//#endif
 
 
 }
