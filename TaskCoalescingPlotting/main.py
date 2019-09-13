@@ -53,8 +53,8 @@ plt.plot(coalTask_detail_x-base+shift-.245,coalTask_detail_y* .51, lw=2.5, color
 
 plt.annotate("", xytext = (0.0089, .598),  xy=(.01225,.3), 
 	arrowprops={'color':'.4','arrowstyle':"->", 'linewidth':2, "connectionstyle": "arc,angleA=-60,angleB=90,armA=0,armB=20,rad=5"}, )
-plt.annotate('static tasks', 
-             xytext = (0.0034, .56),  # text location
+plt.annotate('static task', 
+             xytext = (0.0033, .56),  # text location
              fontsize = 14,
              xy=(.01,.3),        # arrows points to 
              ha = 'left',    # horizontal alignment 
@@ -64,7 +64,7 @@ plt.annotate('static tasks',
 plt.annotate("", xytext = (0.0157, .598),  xy=(.0195,.4), 
 	arrowprops={'color':'.4', 'arrowstyle':"->", 'linewidth':2, "connectionstyle": "arc,angleA=-10,angleB=96,armA=0,armB=20,rad=5"}, )
 plt.annotate('commit', 
-             xytext = (0.012, .56),  # text location
+             xytext = (0.0116, .56),  # text location
              fontsize = 14,
              xy=(.01,.3),        # arrows points to 
              ha = 'left',    # horizontal alignment 
@@ -75,7 +75,7 @@ plt.annotate('commit',
 plt.annotate("", xytext = (0.027, .598),  xy=(.0306,.488), 
 	arrowprops={'color':'.4', 'arrowstyle':"->", 'linewidth':2, "connectionstyle": "arc,angleA=10,angleB=140,armA=0,armB=20,rad=5"}, )
 plt.annotate('coalesced task', 
-             xytext = (0.02, .56),  # text location
+             xytext = (0.019, .56),  # text location
              fontsize = 14,
              xy=(.01,.3),        # arrows points to 
              ha = 'left',    # horizontal alignment 
@@ -85,7 +85,7 @@ plt.annotate('coalesced task',
 plt.annotate("", xytext = (0.0355, .598),  xy=(.0375,.55), 
 	arrowprops={'color':".4" ,'arrowstyle':"->", 'linewidth':2}, )
 plt.annotate('lost tasks', 
-             xytext = (0.0308, .56),  # text location
+             xytext = (0.0304, .56),  # text location
              fontsize = 14,
              xy=(.01,.3),        # arrows points to 
              ha = 'left',    # horizontal alignment 
