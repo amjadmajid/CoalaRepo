@@ -119,24 +119,20 @@ without coalescing (NC).}
 \label{fig:coalescing}
 \end{figure}
 
-\begin{table}[t]%
-
-\caption{Comparison of \sys performance running the \textit{sort} application on two different capacitor sizes. We see that \sys optimizes its coalesced task size based on the energy buffer size.
-\textbf{Coalesced task} refers to the first coalesced task after a reboot, \textbf{Exp. time} shows the experiment duration, the \textbf{Runs} column lists the number of complete runs of the application during the experiments. \textbf{Run time} is the device collective uptime needed to finish a single iteration of the \textit{sort} application.}
-\label{tab:dif_cap}
-
-\begin{minipage}{\columnwidth}
+\begin{table}
 \begin{center}
-\begin{tabular}{llllll}
+\begin{tabular}{c c c c c c}
   \toprule
-    \textbf{Cap. size} ($\mu\text{f}$)& \textbf{Exp. time} ($s$)& \textbf{on/off cycle} & \textbf{Coalesced task} ($ms$)   & \textbf{Runs} & \textbf{Run time} ($ms$) \\
+    \textbf{Cap. size} ($\mu\text{F}$)& \textbf{Exp. time} ($s$)& \textbf{on/off cycle} & \textbf{Coalesced task} ($ms$)   & \textbf{Runs} & \textbf{Run time} ($ms$) \\
         \hline
     47                 &1205             & 12.93\%    & 33                        & 85       & 183      \\
     470                &1205             & 12.79\%    & 88                        & 87       & 177 \\
   \bottomrule
 \end{tabular}
 \end{center}
-\end{minipage}  
+\caption{Comparison of \sys performance running the \textit{sort} application on two different capacitor sizes. We see that \sys optimizes its coalesced task size based on the energy buffer size.
+	\textbf{Coalesced task} refers to the first coalesced task after a reboot, \textbf{Exp. time} shows the experiment duration, the \textbf{Runs} column lists the number of complete runs of the application during the experiments. \textbf{Run time} is the device collective uptime needed to finish a single iteration of the \textit{sort} application.}
+\label{tab:dif_cap}
 \end{table}%
 
 Fig.~\ref{fig:coalescing} shows \sys's run time of two coalescing
