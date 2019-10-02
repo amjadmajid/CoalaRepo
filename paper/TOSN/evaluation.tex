@@ -187,9 +187,7 @@ variables \sys incurs overhead from memory
 virtualization that causes its performance to be comparable to (or worse than)
 Alpaca (\textit{ar}, \textit{cuckoo}).
 
-Due to its static progressing behavior, Alpaca was unable to complete the \textit{fft} benchmark on distances larger than 15\,cm\footnote{At distances less than 15\,cm the total amount of energy available for task execution includes significant amount of harvested-while-executing energy in addition to the stored energy.}.
-
-This is marked with $\infty$ signs in Fig.~\ref{fig:runtime}. \sys, however, managed to complete \textit{fft} by enabling its task downscaling at 30\,cm and 50\,cm from the energy source.
+Due to its static progressing behavior, Alpaca was unable to complete the \textit{fft} benchmark on distances larger than 15\,cm\footnote{At distances less than 15\,cm the total amount of energy available for task execution includes significant amount of harvested-while-executing energy in addition to the stored energy.}. This is marked with $\infty$ signs in Fig.~\ref{fig:runtime}. \sys, however, managed to complete \textit{fft} by enabling its task downscaling at 30\,cm and 50\,cm from the energy source.
 
 \paragraph{Different Capacitor Sizes}
 Table~\ref{tab:dif_cap} shows how \sys optimizes its Coalescing task size based on the amount of buffered energy at runtime. This means that applications implemented in \sys are portable across devices with different capacitor sizes without recompilation; they are also more resilient to degradation in capacitor size due to temperature and device lifetime. 
